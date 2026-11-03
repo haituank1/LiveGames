@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LiveBridge – Quản trị</title>
+<style>
+  :root{--bg:#16110d;--card:#211913;--line:#3a2d22;--tx:#f3e6d3;--mut:#a8927a;--acc:#e0a63c;--red:#d2342c;--ok:#2e9d55}
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+  header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:8px 16px;background:#1d1510;border-bottom:1px solid var(--line)}
+  header h1{font-size:17px;margin:0;margin-right:auto}
+  header a{color:var(--acc);text-decoration:none;font-size:13px}
+  /* 2 tab lớn: LiveBridge | Game */
+  .tabs{position:sticky;top:0;z-index:6;height:46px;display:flex;align-items:flex-end;gap:6px;padding:0 16px;background:#1a130e;border-bottom:1px solid var(--line)}
+  .tab{background:#2a1f17;border:1px solid var(--line);border-bottom:none;border-radius:10px 10px 0 0;padding:9px 18px;color:var(--mut);font-size:14px}
+  .tab.on{background:var(--card);color:var(--acc);border-color:var(--acc)}
+  .page{padding:14px 16px}
+  /* tab con theo từng game */
+  .subtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .subtab{background:#2a1f17;border:1px solid var(--line);border-radius:8px;padding:6px 14px;color:var(--mut)}
+  .subtab.on{color:var(--acc);border-color:var(--acc)}
+  /* thanh lưu ghim trên cùng của từng game: luôn thấy khi cuộn */
+  .gbar{position:sticky;top:46px;z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:#1d1510f2;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:12px}
+  .ghead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .gname{font-size:16px;color:var(--acc)}
+  .gacts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;align-items:start}
+  .cards > .wide{grid-column:1/-1}
+  /* nhóm config: gập / mở được, xếp lưới cho đầy khung ngang */
+  .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px;align-items:start}
+  .grp{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .grp.wide{grid-column:1/-1}
+  .grp > summary{cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;list-style:none}
+  .grp > summary::-webkit-details-marker{display:none}
+  .grp > summary::before{content:'▾ ';color:var(--mut)}
+  .grp:not([open]) > summary::before{content:'▸ '}
+  .g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px 12px;margin-top:8px}
+  .g2 .full{grid-column:1/-1}
+  .fld label{display:block;font-size:12px;color:var(--mut);margin:0 0 3px}
+  .chk{display:flex;gap:6px;align-items:center;color:var(--tx);font-size:13px}
+  .chks{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 12px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  h2{font-size:14px;margin:0 0 10px;color:var(--acc);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
+  input[type=text],input[type=password],input[type=number],input[type=search]{width:100%;background:#120d0a;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit}
+  input[type=number]{width:100%}
+  textarea{width:100%;background:#120d0a;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;resize:vertical}
+  input[type=checkbox]{accent-color:var(--acc)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  button{background:#3a2a1e;color:var(--tx);border:1px solid #5a4330;border-radius:8px;padding:7px 12px;cursor:pointer;font:inherit}
+  button:hover{border-color:var(--acc)}
+  button.pri{background:var(--red);border-color:#ef6a60}
+  button.sm{padding:3px 9px;font-size:12px}
+  .pill{font-size:12px;padding:3px 10px;border-radius:999px;background:#3a3a3a;white-space:nowrap}
+  .pill.ok{background:var(--ok)}.pill.warn{background:#8a6514}.pill.err{background:#8a1f1f}
+  .muted{color:var(--mut);font-size:12px}
+  .msg{margin-top:8px;font-size:13px;color:#ffb4a8;min-height:1em}
+  .savemsg{font-size:13px;color:var(--ok)}
+  .copy{font:12px ui-monospace,Consolas,monospace;background:#120d0a;border:1px dashed var(--line);border-radius:6px;padding:4px 8px;word-break:break-all}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  td{padding:5px 4px;border-bottom:1px solid #2b2119;vertical-align:middle}
+  .av{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#444;display:inline-grid;place-items:center;font-weight:700;color:#fff;font-size:12px;overflow:hidden;vertical-align:middle}
+  .name{font-weight:600}.uid{color:var(--mut);font-size:12px}
+  .num{text-align:right;white-space:nowrap;color:#e8d6be}
+  tr.blocked td{opacity:.45}
+  .scroll{max-height:420px;overflow:auto}
+  #feed div{padding:3px 0;border-bottom:1px solid #2b2119;font-size:13px;display:flex;gap:8px;align-items:center}
+  #feed .k{font-size:11px;padding:1px 6px;border-radius:6px;background:#3a2a1e;color:var(--mut);flex:none}
+  #feed .gift .k{background:#6b1f3c;color:#fff}#feed .chat .k{background:#1f3c6b;color:#fff}
+  #feed .blk{opacity:.4;text-decoration:line-through}
+  .empty{color:var(--mut);font-size:13px;padding:8px 0}
+  select{background:#120d0a;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;max-width:260px}
+  .mrow{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin:6px 0}
+  .mcell{display:flex;flex-direction:column;gap:2px}
+  .mcell small{color:var(--mut);font-size:11px}
+  .mcell input,.mcell select{width:auto}
+  .mapwrap{display:grid;gap:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎛️ LiveBridge</h1>
+  <span class="pill" id="ws">Đang kết nối…</span>
+  <span class="pill" id="tt">TikTok: –</span>
+  <span class="pill" id="vw">👁 0</span>
+  <a href="simulator.html" target="_blank">Giả lập tặng quà ↗</a>
+</header>
+<nav class="tabs">
+  <button class="tab" id="tabLive">📡 Cấu hình LiveBridge</button>
+  <button class="tab" id="tabGames">🎮 Cấu hình game</button>
+</nav>
+
+<main id="pageLive" class="page" hidden>
+  <div class="cards">
+    <section>
+      <h2>Kết nối TikTok LIVE</h2>
+      <label for="user">Tài khoản đang LIVE (username, ví dụ @tenkenh)</label>
+      <input id="user" type="text" placeholder="@ten_tiktok" autocomplete="off">
+      <label for="key">Sign API key (Euler Stream) – không bắt buộc</label>
+      <input id="key" type="password" placeholder="Để trống nếu không có" autocomplete="off">
+      <div class="muted" id="keyNote"></div>
+      <div class="row">
+        <label style="margin:0;color:var(--tx)"><input type="checkbox" id="auto"> Tự kết nối khi bật LiveBridge</label>
+      </div>
+      <div class="row">
+        <button class="pri" id="connect">Kết nối</button>
+        <button id="disconnect">Ngắt</button>
+      </div>
+      <div class="msg" id="ttMsg"></div>
+      <div class="muted">Chỉ nhận được tương tác khi tài khoản <b>đang phát LIVE</b>. Mất kết nối sẽ tự thử lại sau 15 giây.</div>
+    </section>
+
+    <section>
+      <h2>Đã chặn <span class="muted" id="blockedCount"></span></h2>
+      <div class="row" style="margin-top:0">
+        <input id="blockId" type="text" placeholder="@username cần chặn" style="flex:1">
+        <button id="blockBtn">Chặn</button>
+      </div>
+      <div class="scroll" style="max-height:260px;margin-top:8px"><table><tbody id="blocked"></tbody></table></div>
+      <div class="muted">Người bị chặn: quà, bình luận, tim đều bị bỏ qua, nhân vật của họ rời khỏi game.</div>
+    </section>
+
+    <section class="wide">
+      <h2>Người xem gần đây <input id="q" type="search" placeholder="Tìm tên…" style="max-width:220px"></h2>
+      <div class="scroll"><table><tbody id="viewers"></tbody></table></div>
+      <div class="empty" id="viewersEmpty">Chưa có ai tương tác.</div>
+    </section>
+
+    <section class="wide">
+      <h2>Hoạt động trực tiếp <button class="sm" id="clearFeed">Xoá</button></h2>
+      <div class="scroll" id="feed"></div>
+    </section>
+  </div>
+</main>
+
+<main id="pageGames" class="page" hidden>
+  <div class="subtabs" id="gameTabs"></div>
+  <div id="gamePanels"><div class="empty">Đang tải…</div></div>
+</main>
+
+<script src="livebridge-client.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+let state = null, viewers = [], formLoaded = false;
+
+function avatar(u) {
+  const span = el('span', 'av');
+  let h = 0; for (const ch of String(u.id || '')) h = (h * 31 + ch.codePointAt(0)) % 360;
+  span.style.background = `hsl(${h},50%,45%)`;
+  span.textContent = (Array.from(String(u.nickname || '?'))[0] || '?').toUpperCase();
+  if (u.avatar) {
+    const img = el('img', 'av'); img.referrerPolicy = 'no-referrer'; img.alt = '';
+    img.onload = () => { span.textContent = ''; span.appendChild(img); };
+    img.src = u.avatar;
+  }
+  return span;
+}
+
+/* ---- Hai tab lớn: LiveBridge | Game (nhớ tab lần trước) ---- */
+function showPage(name) {
+  $('pageLive').hidden = name !== 'live'; $('pageGames').hidden = name !== 'games';
+  $('tabLive').classList.toggle('on', name === 'live'); $('tabGames').classList.toggle('on', name === 'games');
+  try { localStorage.setItem('lb.page', name); } catch (_) { /* trình duyệt chặn lưu: bỏ qua */ }
+}
+$('tabLive').onclick = () => showPage('live');
+$('tabGames').onclick = () => showPage('games');
+showPage((() => { try { return localStorage.getItem('lb.page') || 'live'; } catch (_) { return 'live'; } })());
+
+const bridge = new LiveBridgeClient({ url: `ws://${location.host}`, role: 'admin' })
+  .on('open', () => { $('ws').textContent = 'LiveBridge ✓'; $('ws').className = 'pill ok'; bridge.send({ type: 'admin.state' }); })
+  .on('close', () => { $('ws').textContent = 'Mất kết nối LiveBridge'; $('ws').className = 'pill err'; })
+  .on('state', s => { state = s; viewers = s.viewers; render(); })
+  .on('status', s => { if (state) { state.tiktok.status = s.tiktok; state.room = s.room || state.room; renderStatus(); } })
+  .on('room', r => { if (state) { state.room = r.room; renderStatus(); } })
+  .on('viewers', v => { viewers = v.list; renderViewers(); })
+  .on('raw', m => addFeed(m.event, m.blocked))
+  .on('game.saved', m => finishPart(m.game, 'cfg', m.error, m.ignored, m.asDefault))
+  .on('mapping.saved', m => finishPart(m.game, 'map', m.error))
+  .connect();
+
+/* ---- Lưu: một nút "Lưu config" gửi cả cấu hình game và gói quà; báo gộp khi cả hai đã trả lời ---- */
+const FIELD_NAMES = { cushions: 'vị trí 10 đệm', burner: 'miệng lư hương', incense: 'chỗ quỳ thắp nhang', safeSide: 'chừa hai bên', walkSpeed: 'tốc độ đi', actSpeed: 'tốc độ lạy' };
+const saveMsg = {}, saveTimer = {}, pending = {};
+function paintSaveMsg() {
+  for (const s of document.querySelectorAll('.savemsg')) {
+    const m = saveMsg[s.dataset.game];
+    s.textContent = m ? m.text : '';
+    s.style.color = m && m.err ? '#ffb4a8' : 'var(--ok)';
+  }
+}
+function setSaveMsg(game, text, err) {
+  saveMsg[game] = text ? { text, err } : null;
+  paintSaveMsg();
+}
+function beginSave(game, parts, asDefault) {
+  clearTimeout(saveTimer[game]);
+  pending[game] = { parts: new Set(parts), errors: [], asDefault };
+  setSaveMsg(game, asDefault ? 'Đang lưu làm mặc định…' : 'Đang lưu…');
+  saveTimer[game] = setTimeout(() => {
+    pending[game] = null;
+    setSaveMsg(game, '⚠ LiveBridge không xác nhận đã lưu – có thể đang chạy bản cũ. Tắt cửa sổ đen, bấm đúp start-livebridge.bat rồi lưu lại.', true);
+  }, 3000);
+}
+function finishPart(game, part, error, ignored, asDefault) {
+  const p = pending[game];
+  if (!p || !p.parts.has(part)) return;
+  p.parts.delete(part);
+  if (error) p.errors.push(error);
+  if (ignored && ignored.length) p.errors.push('LiveBridge chưa hiểu: ' + ignored.map(k => FIELD_NAMES[k] || k).join(', '));
+  if (p.parts.size) return;
+  pending[game] = null;
+  clearTimeout(saveTimer[game]);
+  if (p.errors.length) { setSaveMsg(game, '⚠ ' + p.errors.join(' · ') + '. Nếu vẫn lỗi, khởi động lại start-livebridge.bat.', true); return; }
+  setSaveMsg(game, (p.asDefault ? 'Đã lưu làm mặc định ✓' : 'Đã lưu ✓') + ' (có hiệu lực ngay)');
+  saveTimer[game] = setTimeout(() => setSaveMsg(game, ''), 5000);
+}
+
+function render() {
+  if (!formLoaded) {
+    $('user').value = state.tiktok.username ? '@' + state.tiktok.username : '';
+    $('auto').checked = state.tiktok.autoConnect;
+    formLoaded = true;
+  }
+  $('keyNote').textContent = state.tiktok.hasSignKey ? 'Đã lưu key (nhập key mới để thay).' : '';
+  renderGames();
+  renderStatus(); renderViewers(); renderBlocked();
+}
+
+function renderStatus() {
+  const s = state.tiktok.status || {};
+  const label = { idle: 'chưa kết nối', connecting: 'đang kết nối…', connected: 'đang LIVE', disconnected: 'mất kết nối', ended: 'LIVE đã kết thúc', error: 'lỗi' }[s.state] || s.state;
+  $('tt').textContent = `TikTok: ${label}${s.username ? ' @' + s.username : ''}`;
+  $('tt').className = 'pill ' + (s.state === 'connected' ? 'ok' : s.state === 'error' ? 'err' : s.state === 'idle' ? '' : 'warn');
+  $('ttMsg').textContent = s.message || '';
+  $('vw').textContent = '👁 ' + ((state.room && state.room.viewers) || 0);
+}
+
+/* ---- Tab game: mỗi game một tab con, dựng lại chỉ khi danh sách game / ảnh nền đổi (không xoá chữ đang gõ) ---- */
+let gameKey = null, activeGame = null;
+const connText = g => `${g.connected} màn hình đang mở` + (g.hasMapping ? '' : ' · chưa có file mapping');
+function renderGames() {
+  const key = state.games.map(g => g.id + '|' + (g.backgrounds || []).join(',') + '|' + (g.hasMapping ? 1 : 0)).join(';');
+  if (key === gameKey) {
+    for (const g of state.games) { const n = document.querySelector(`[data-conn="${CSS.escape(g.id)}"]`); if (n) n.textContent = connText(g); }
+    return;
+  }
+  gameKey = key;
+  const tabs = $('gameTabs'), panels = $('gamePanels');
+  tabs.textContent = ''; panels.textContent = '';
+  if (!state.games.length) { panels.append(el('div', 'empty', 'Chưa có game trong thư mục Games')); return; }
+  if (!state.games.some(g => g.id === activeGame)) activeGame = state.games[0].id;
+  for (const g of state.games) {
+    const t = el('button', 'subtab', g.id); t.dataset.game = g.id;
+    t.onclick = () => showGame(g.id);
+    tabs.append(t);
+    panels.append(buildGame(g));
+  }
+  showGame(activeGame);
+}
+function showGame(id) {
+  activeGame = id;
+  for (const t of $('gameTabs').children) t.classList.toggle('on', t.dataset.game === id);
+  for (const p of $('gamePanels').children) p.hidden = p.dataset.game !== id;
+}
+
+/* ---- Ô nhập dùng chung ---- */
+const numIn = (v, min, max, step) => { const i = el('input'); i.type = 'number'; i.min = min; if (max != null) i.max = max; if (step) i.step = step; i.value = v == null ? '' : v; return i; };
+const txtIn = (v, ph) => { const i = el('input'); i.type = 'text'; i.value = v || ''; if (ph) i.placeholder = ph; return i; };
+const areaIn = (v, rows, ph) => { const t = el('textarea'); t.rows = rows; t.value = (v || []).join('\n'); t.placeholder = ph || 'Mỗi dòng một câu. Để trống = dùng câu mặc định'; return t; };
+const chkIn = (v, text) => { const l = el('label', 'chk'); const c = el('input'); c.type = 'checkbox'; c.checked = v; l.append(c, ' ' + text); return { el: l, input: c }; };
+const sliderIn = v => { const r = el('input'); r.type = 'range'; r.min = 0; r.max = 100; r.value = v; return r; };
+const linesOf = t => t.value.split('\n');
+
+/* nhóm config: khung gập/mở được, bên trong là lưới 2 cột (ô "full" chiếm cả hàng) */
+function grp(title, wide) {
+  const d = el('details', 'grp' + (wide ? ' wide' : '')); d.open = true;
+  const s = el('summary'); s.textContent = title; d.append(s);
+  const body = el('div', 'g2'); d.append(body);
+  return {
+    box: d,
+    field(label, input, full, hint) {
+      const w = el('div', 'fld' + (full ? ' full' : ''));
+      w.append(el('label', null, label), input);
+      if (hint) w.append(el('div', 'muted', hint));
+      body.append(w); return input;
+    },
+    node(n, full = true) { if (full) n.classList.add('full'); body.append(n); return n; },
+    note(text) { body.append(el('div', 'muted full', text)); },
+  };
+}
+
+/* ---- Một game: thanh lưu ghim + các nhóm config ---- */
+function buildGame(g) {
+  const c = g.config, A = g.rules ? g.rules.actions : {};
+  const panel = el('div', 'gpanel'); panel.dataset.game = g.id; panel.hidden = true;
+
+  /* thanh ghim trên cùng: tên game, nút lưu (đi theo game), liên kết */
+  const bar = el('div', 'gbar');
+  const head = el('div', 'ghead');
+  head.append(el('span', 'gname', g.id), el('span', 'muted', g.description || ''));
+  const conn = el('span', 'muted'); conn.dataset.conn = g.id; conn.textContent = connText(g); head.append(conn);
+  const acts = el('div', 'gacts');
+  const save = el('button', 'pri', '💾 Lưu config'); save.title = 'Lưu toàn bộ cấu hình của game này (cả gói quà)';
+  const saveDef = el('button', 'sm', '★ Làm mặc định'); saveDef.title = 'Lưu như trên, và đặt làm cấu hình mặc định của game';
+  const reset = el('button', 'sm', 'Reset điểm');
+  reset.onclick = () => confirm('Xoá toàn bộ điểm công đức và bảng xếp hạng của game ' + g.id + '?') && bridge.send({ type: 'game.reset-scores', game: g.id });
+  const url = `${location.origin}/Games/${encodeURIComponent(g.id)}/`;
+  const open = el('a', null, 'Mở game ↗'); open.href = url; open.target = '_blank'; open.style.color = 'var(--acc)';
+  const sim = el('a', null, 'Giả lập ↗'); sim.href = `simulator.html?game=${encodeURIComponent(g.id)}`; sim.target = '_blank'; sim.style.color = 'var(--acc)';
+  const copy = el('button', 'sm', 'Copy link OBS');
+  copy.onclick = () => navigator.clipboard.writeText(url).then(() => { copy.textContent = 'Đã copy ✓'; setTimeout(() => copy.textContent = 'Copy link OBS', 1500); });
+  const sm = el('span', 'savemsg'); sm.dataset.game = g.id;
+  acts.append(save, saveDef, reset, open, sim, copy, sm);
+  bar.append(head, acts);
+  panel.append(bar);
+
+  const I = {};   // ô nhập → đọc lại khi lưu
+  const body = el('div', 'groups');
+  panel.append(body);
+  const add = (title, wide) => { const x = grp(title, wide); body.append(x.box); return x; };
+
+  /* 1. nhân vật & vào chùa */
+  let G = add('Nhân vật & vào chùa');
+  I.npc = G.field('Nhân vật ảo ngồi sẵn', numIn(c.npc, 0, 600));
+  I.max = G.field('Tối đa nhân vật', numIn(c.max, 10, 600));
+  I.leaveMin = G.field('Vắng quá (phút) thì rời chùa (0 = không)', numIn(c.leaveMin != null ? c.leaveMin : 10, 0, 1440));
+  I.seatLikes = G.field('Thả bao nhiêu tim thì được vào ngồi', numIn(c.seatLikes != null ? c.seatLikes : 30, 1, 100000));
+  I.joinSeat = chkIn(c.joinSeat === true, 'Vào phòng là có nhân vật (không cần tương tác)'); G.node(I.joinSeat.el, false);
+  I.showChat = chkIn(c.showChat !== false, 'Hiện bình luận trong game (khung góc dưới)'); G.node(I.showChat.el, false);
+  G.note('Bình luận, quà, follow, share luôn được vào ngồi. Tim cộng dồn theo từng người. {tim} trong câu chữ tự hiện đúng số tim.');
+
+  /* 2. điểm công đức */
+  G = add('Điểm công đức (xếp hạng top 10)');
+  I.tickSec = G.field('Mỗi bao nhiêu giây', numIn(c.tickSec, 1, null));
+  I.pointsPerTick = G.field('Ở trong live được + điểm', numIn(c.pointsPerTick, 0));
+  I.pointsPerChat = G.field('Bình luận + điểm', numIn(c.pointsPerChat, 0));
+  I.pointsPerDiamond = G.field('Mỗi 1 xu quà + điểm', numIn(c.pointsPerDiamond, 0));
+  I.pointsPerFollow = G.field('Follow + điểm (1 lần)', numIn(c.pointsPerFollow != null ? c.pointsPerFollow : 100, 0));
+  I.rulesLines = G.node(areaIn(c.rulesLines, 5, 'Mỗi dòng một câu. Để trống = mặc định'));
+  G.note('Khung luật: {giay} {diem} {binhluan} {xu} {follow} {tim} tự thay bằng số đang dùng; dòng có số 0 thì ẩn.');
+
+  /* 3. mốc điểm → hiệu ứng (theo bội số) */
+  G = add('Mốc điểm → hiệu ứng (mỗi X điểm)', true);
+  G.note('Mỗi khi điểm vượt qua một bội số: điểm cá nhân mỗi 100 → người đó được hiệu ứng; tổng điểm cả chùa mỗi 1000 → cả chùa được hiệu ứng.');
+  const mapEvery = { every: 100, action: '', value: 1 };
+  const eveCols = [{ key: 'every', kind: 'num', cap: 'Mỗi (điểm)', w: 110 }, { key: 'action', kind: 'act', cap: 'Hiệu ứng / hành động' }, { key: 'value', kind: 'num', cap: 'Độ dày', w: 80 }];
+  const personalL = ruleList('Điểm từng người', 'Người nào vượt bội số thì chính người đó làm hiệu ứng (vd. mỗi 100 → hoa rơi).', eveCols, c.personalEvery, A, mapEvery);
+  const globalL = ruleList('Tổng điểm cả chùa', 'Tổng điểm mọi người vượt bội số thì cả chùa làm hiệu ứng (vd. mỗi 1000 → sen rơi + ánh vàng; tối đa 60 người cùng lúc).',
+    eveCols, c.globalEvery, A, { every: 1000, action: '', value: 1 });
+  G.node(personalL.el); G.node(globalL.el);
+
+  /* 4. định kỳ theo thời gian */
+  G = add('Định kỳ theo thời gian', true);
+  const timedL = ruleList('Cứ mỗi vài giây thì làm gì', 'Số người ngẫu nhiên trong chùa làm hành động (chỉ khi đang LIVE).',
+    [{ key: 'sec', kind: 'num', cap: 'Mỗi (giây)', w: 100 }, { key: 'action', kind: 'act', cap: 'Hành động' },
+      { key: 'value', kind: 'num', cap: 'Độ dày', w: 80 }, { key: 'count', kind: 'num', cap: 'Số người', w: 90 }],
+    c.timedRules, A, { sec: 60, action: '', value: 1, count: 5 });
+  G.node(timedL.el);
+
+  /* 5. đổi nền theo người xem */
+  G = add('Đổi nền theo số người xem', true);
+  const bgOpts = (g.backgrounds || []).map(f => [f, f]);
+  const bgL = ruleList('Mốc người xem → ảnh nền', 'Dùng mốc cao nhất đang đạt; chưa đạt mốc nào thì về bg.webp. Ảnh lấy từ mọi file bg*.webp trong Games/' + g.id + '.',
+    [{ key: 'views', kind: 'num', cap: 'Khi đạt (người xem)', w: 140 }, { key: 'bg', kind: 'opt', cap: 'Ảnh nền', options: bgOpts }],
+    c.bgRules, null, { views: 100, bg: bgOpts.length ? bgOpts[0][0] : '' });
+  G.node(bgL.el);
+  if (!g.backgrounds) G.note('⚠ LiveBridge đang chạy bản cũ nên chưa gửi danh sách ảnh nền. Khởi động lại start-livebridge.bat.');
+  else if (!bgOpts.length) G.note('Chưa thấy file bg*.webp nào trong Games/' + g.id + '.');
+
+  /* 6. gói quà & hành động (lưu chung với nút Lưu config) */
+  G = add('Gói quà & hành động', true);
+  let mapRead = null;
+  if (g.rules) { const m = buildMapGroup(g); G.node(m.node); mapRead = m.read; }
+  else G.note('Game này chưa có file mapping trong LiveBridge/config/mappings.');
+
+  /* 7. hướng dẫn tặng quà & thầy */
+  G = add('Hướng dẫn tặng quà');
+  I.guideOn = chkIn(c.guideOn !== false, 'Hiện dòng "Tặng gì – được gì" (mỗi 4 giây đổi một dòng)'); G.node(I.guideOn.el, true);
+  I.guideLines = G.node(areaIn(c.guideLines, 7, 'Mỗi dòng một câu. Để trống = mặc định'));
+  G.note('Viết đúng tên quà người xem thấy trong app TikTok (vd. "Hoa hồng") và việc nhân vật sẽ làm.');
+
+  G = add('Thầy (nói chuyện trong chùa)');
+  I.monkOn = chkIn(c.monkOn !== false, 'Thầy hiện lên nói'); G.node(I.monkOn.el, true);
+  I.monkMinSec = G.field('Cách nhau từ (giây)', numIn(c.monkMinSec != null ? c.monkMinSec : 120, 15, null, 5));
+  I.monkMaxSec = G.field('đến (giây)', numIn(c.monkMaxSec != null ? c.monkMaxSec : 240, 15, null, 5));
+  I.monkGreetGap = G.field('Chào người mới cách nhau (giây)', numIn(c.monkGreetGap != null ? c.monkGreetGap : 20, 0));
+  I.monkFollow = G.field('Câu nhắc follow (để trống = không nhắc)', txtIn(c.monkFollow, 'Để trống = không nhắc follow'), true);
+  I.monkLines = G.field('Các câu thầy nói (mỗi dòng một câu)', areaIn(c.monkLines, 8), true);
+  I.monkGreet = G.field('Câu chào người mới ({ten})', areaIn(c.monkGreet, 4), true);
+  I.monkThank = G.field('Câu cảm ơn khi tặng quà ({ten})', areaIn(c.monkThank, 4), true);
+  I.monkFollowThanks = G.field('Câu khi follow – đặt pháp danh ({ten}, {phapdanh})', areaIn(c.monkFollowThanks, 3), true);
+
+  /* 8. âm thanh */
+  G = add('Âm thanh');
+  I.musicOn = chkIn(c.musicOn !== false, 'Nhạc nền'); G.node(I.musicOn.el, false);
+  I.musicShuffle = chkIn(c.musicShuffle === true, 'Phát ngẫu nhiên'); G.node(I.musicShuffle.el, false);
+  I.sfxOn = chkIn(c.sfxOn !== false, 'Chuông, mõ'); G.node(I.sfxOn.el, false);
+  I.chantOn = chkIn(c.chantOn !== false, 'Tiếng niệm khi tặng quà'); G.node(I.chantOn.el, false);
+  I.musicVolume = G.field('Âm lượng nhạc nền', sliderIn(c.musicVolume));
+  I.sfxVolume = G.field('Âm lượng chuông / niệm', sliderIn(c.sfxVolume));
+  I.chantMinDiamonds = G.field('Niệm khi quà từ (xu)', numIn(c.chantMinDiamonds, 0));
+  I.chantGap = G.field('Niệm cách nhau (giây)', numIn(c.chantGap, 0));
+  I.duckPercent = G.field('Nhạc nền lúc niệm còn (%)', numIn(c.duckPercent, 0));
+  const media = g.media || { music: [], sfx: {} };
+  G.note(media.music.length ? `🎵 Nhạc nền (${media.music.length} bài): ${media.music.join(' · ')}` : '🎵 Chưa có bài nhạc trong audio – đang dùng nhạc tự tạo.');
+  const sfxNames = { chant: 'niem', bell: 'chuong', bigbell: 'chuong-lon', mo: 'mo' };
+  G.note('🔔 Hiệu ứng: ' + Object.entries(sfxNames).map(([k, n]) => media.sfx[k] ? `${media.sfx[k]} ✓` : `${n}.* (âm tự tạo)`).join(' · '));
+
+  /* 9. màn hình trên điện thoại */
+  G = add('Màn hình trên điện thoại');
+  I.safeTop = G.field('Chừa phía trên cho TikTok (%)', numIn(c.safeTop != null ? c.safeTop : 13, 0));
+  I.safeSide = G.field('Chừa hai bên (%)', numIn(c.safeSide != null ? c.safeSide : 9, 0));
+  I.uiScale = G.field('Cỡ chữ (%)', numIn(c.uiScale != null ? c.uiScale : 120, 60, null, 5));
+  I.nameScale = G.field('Cỡ tên dưới nhân vật (%)', numIn(c.nameScale != null ? c.nameScale : 100, 50, null, 5));
+  I.walkSpeed = G.field('Tốc độ đi lại (%)', numIn(c.walkSpeed != null ? c.walkSpeed : 160, 30, null, 10));
+  I.actSpeed = G.field('Tốc độ lạy, đứng, quỳ (%)', numIn(c.actSpeed != null ? c.actSpeed : 130, 30, null, 10));
+  G.note('Trên điện thoại TikTok đè avatar chủ kênh và nút Follow lên phần trên (≈13%), cắt hai mép (≈9%). 100% tốc độ = chậm rãi như bản cũ.');
+
+  /* 10. vị trí đệm & lư hương (chỉ game có "cushions" trong mapping) */
+  const hasLayout = Array.isArray(c.cushions);
+  let layoutErr = () => '';
+  if (hasLayout) {
+    G = add('Vị trí đệm & lư hương (% khung game)');
+    I.cushions = G.node(areaIn((c.cushions || []).map(p => p.join(', ')), 10, 'Đúng 10 dòng "x, y" theo thứ tự hạng 1 → 10. Để trống = mặc định'));
+    I.burner = G.field('Miệng lư hương "x, y" (bấm đúng vào cái lư)', txtIn((c.burner || []).join(', '), 'x, y – để trống = mặc định'));
+    I.incense = G.field('Chỗ quỳ thắp nhang "x, y" (trên sàn)', txtIn((c.incense || []).join(', '), 'x, y – để trống = mặc định'));
+    const pick = el('a', null, 'Mở chế độ lấy toạ độ ↗'); pick.href = `${location.origin}/Games/${encodeURIComponent(g.id)}/?pick=1`; pick.target = '_blank'; pick.style.color = 'var(--acc)';
+    G.node(pick, false);
+    G.note('Số 1–10 là đệm, 🔥 là miệng lư hương, 🙏 là chỗ quỳ thắp nhang khi bấm trong chế độ lấy toạ độ; bấm vào đâu thì copy sẵn "x, y".');
+    const pointOk = s => { const a = String(s).split(/[,;\s]+/).filter(Boolean).map(Number); return a.length === 2 && a.every(n => Number.isFinite(n) && n >= 0 && n <= 100); };
+    layoutErr = () => {
+      const cs = linesOf(I.cushions).filter(l => l.trim());
+      if (cs.length && (cs.length !== 10 || !cs.every(pointOk))) return 'Ô 10 đệm cần đúng 10 dòng, mỗi dòng "x, y" (số từ 0 đến 100). Đang có ' + cs.length + ' dòng.';
+      if (I.burner.value.trim() && !pointOk(I.burner.value)) return 'Ô miệng lư hương cần dạng "x, y" (số từ 0 đến 100).';
+      if (I.incense.value.trim() && !pointOk(I.incense.value)) return 'Ô chỗ quỳ thắp nhang cần dạng "x, y" (số từ 0 đến 100).';
+      return '';
+    };
+  }
+
+  /* 11. hiện / ẩn thông báo (mỗi loại một ô) */
+  G = add('Hiện / ẩn thông báo', true);
+  const show = c.show || {};
+  const SHOW = [['feedChat', 'Khung bình luận: bình luận'], ['feedGift', 'Khung bình luận: tặng quà'], ['feedJoin', 'Khung bình luận: vào chùa'],
+    ['feedFollow', 'Khung bình luận: follow'], ['feedLike', 'Khung bình luận: thả tim'], ['feedShare', 'Khung bình luận: chia sẻ'],
+    ['bubbleChat', 'Bong bóng bình luận trên đầu'], ['floatPoints', '"+điểm" bay lên'], ['nameTags', 'Tên + avatar dưới chân'],
+    ['rulesBox', 'Khung luật điểm'], ['boardTop10', 'Bảng Top 10'], ['toastTop', 'Thông báo "lên đệm Top N"'], ['liveLabel', 'Nhãn ● LIVE'],
+    ['monkGreet', 'Thầy chào người mới'], ['monkThank', 'Thầy cảm ơn quà'], ['monkFollow', 'Thầy cảm ơn follow']];
+  const chks = el('div', 'chks'); chks.style.gridColumn = '1 / -1';
+  const showBox = {};
+  for (const [k, text] of SHOW) { const x = chkIn(show[k] !== false, text); showBox[k] = x.input; chks.append(x.el); }
+  G.node(chks);
+
+  /* đọc lại toàn bộ cấu hình để lưu */
+  const readCfg = () => ({
+    npc: +I.npc.value, max: +I.max.value, leaveMin: +I.leaveMin.value, seatLikes: +I.seatLikes.value,
+    joinSeat: I.joinSeat.input.checked, showChat: I.showChat.input.checked,
+    tickSec: +I.tickSec.value, pointsPerTick: +I.pointsPerTick.value, pointsPerChat: +I.pointsPerChat.value,
+    pointsPerDiamond: +I.pointsPerDiamond.value, pointsPerFollow: +I.pointsPerFollow.value, rulesLines: linesOf(I.rulesLines),
+    personalEvery: personalL.read(), globalEvery: globalL.read(), timedRules: timedL.read(), bgRules: bgL.read(),
+    guideOn: I.guideOn.input.checked, guideLines: linesOf(I.guideLines),
+    monkOn: I.monkOn.input.checked, monkMinSec: +I.monkMinSec.value, monkMaxSec: +I.monkMaxSec.value, monkGreetGap: +I.monkGreetGap.value,
+    monkFollow: I.monkFollow.value, monkLines: linesOf(I.monkLines), monkGreet: linesOf(I.monkGreet),
+    monkThank: linesOf(I.monkThank), monkFollowThanks: linesOf(I.monkFollowThanks),
+    musicOn: I.musicOn.input.checked, musicShuffle: I.musicShuffle.input.checked, sfxOn: I.sfxOn.input.checked, chantOn: I.chantOn.input.checked,
+    musicVolume: +I.musicVolume.value, sfxVolume: +I.sfxVolume.value,
+    chantMinDiamonds: +I.chantMinDiamonds.value, chantGap: +I.chantGap.value, duckPercent: +I.duckPercent.value,
+    safeTop: +I.safeTop.value, safeSide: +I.safeSide.value, uiScale: +I.uiScale.value, nameScale: +I.nameScale.value,
+    walkSpeed: +I.walkSpeed.value, actSpeed: +I.actSpeed.value,
+    show: Object.fromEntries(Object.entries(showBox).map(([k, x]) => [k, x.checked])),
+    ...(hasLayout ? { cushions: linesOf(I.cushions).filter(l => l.trim()), burner: I.burner.value, incense: I.incense.value } : {}),
+  });
+  const doSave = asDefault => {
+    const err = layoutErr();
+    if (err) { alert(err); return; }
+    beginSave(g.id, mapRead ? ['cfg', 'map'] : ['cfg'], asDefault);
+    bridge.send({ type: 'game.config', game: g.id, config: readCfg(), asDefault: !!asDefault });
+    if (mapRead) bridge.send({ type: 'mapping.save', game: g.id, rules: mapRead() });
+  };
+  save.onclick = () => doSave(false);
+  saveDef.onclick = () => doSave(true);
+
+  /* chỉnh âm thanh: game đổi ngay, không cần bấm lưu */
+  const sendSound = () => bridge.send({ type: 'game.config', game: g.id, config: {
+    musicOn: I.musicOn.input.checked, musicShuffle: I.musicShuffle.input.checked, sfxOn: I.sfxOn.input.checked, chantOn: I.chantOn.input.checked,
+    musicVolume: +I.musicVolume.value, sfxVolume: +I.sfxVolume.value, chantMinDiamonds: +I.chantMinDiamonds.value, chantGap: +I.chantGap.value, duckPercent: +I.duckPercent.value,
+  } });
+  for (const x of [I.musicOn.input, I.musicShuffle.input, I.sfxOn.input, I.chantOn.input, I.musicVolume, I.sfxVolume, I.chantMinDiamonds, I.chantGap, I.duckPercent]) x.onchange = sendSound;
+
+  return panel;
+}
+
+/* ---- Luật lặp lại: thêm / xoá dòng ---- */
+function actSelect(actions, value) {
+  const s = el('select');
+  s.append(new Option('(không làm gì)', ''));
+  for (const [k, text] of Object.entries(actions)) s.append(new Option(`${k} – ${text}`, k));
+  s.value = value || '';
+  return s;
+}
+function optSelect(options, value) {
+  const s = el('select');
+  for (const [v, text] of options) s.append(new Option(text, v));
+  s.value = value || '';
+  return s;
+}
+function ruleRow(cols, obj, actions, onDel) {
+  const row = el('div', 'mrow'), readers = {};
+  for (const c of cols) {
+    const input = c.kind === 'act' ? actSelect(actions, obj[c.key])
+      : c.kind === 'opt' ? optSelect(c.options, obj[c.key])
+      : c.kind === 'num' ? numCell(obj[c.key], c.w || 70)
+      : textCell(obj[c.key], c.w || 140, c.ph);
+    const cell = el('div', 'mcell');
+    cell.append(el('small', null, c.cap), input);
+    row.append(cell);
+    readers[c.key] = c.kind === 'num' ? () => (input.value === '' ? null : Number(input.value)) : () => input.value.trim();
+  }
+  if (onDel) { const x = el('button', 'sm', '✕'); x.title = 'Xoá dòng này'; x.onclick = onDel; row.append(x); }
+  return { row, read: () => Object.fromEntries(Object.entries(readers).map(([k, f]) => [k, f()])) };
+}
+function numCell(v, w) { const i = el('input'); i.type = 'number'; i.min = 0; i.value = v == null ? '' : v; i.style.width = w + 'px'; return i; }
+function textCell(v, w, ph) { const i = el('input'); i.type = 'text'; i.value = v || ''; i.style.width = w + 'px'; if (ph) i.placeholder = ph; return i; }
+function ruleList(title, hint, cols, items, actions, blank) {
+  const wrap = el('div'), list = el('div'), rows = [];
+  const add = obj => {
+    const r = ruleRow(cols, obj, actions, () => { rows.splice(rows.indexOf(r), 1); r.row.remove(); });
+    rows.push(r); list.append(r.row);
+  };
+  (items || []).forEach(add);
+  const plus = el('button', 'sm', '+ Thêm dòng'); plus.onclick = () => add({ ...blank });
+  const bar = el('div', 'row'); bar.append(plus);
+  wrap.append(el('label', null, title), el('div', 'muted', hint), list, bar);
+  return { el: wrap, read: () => rows.map(r => r.read()) };
+}
+
+/* ---- Gói quà & hành động: không có nút riêng, đọc khi bấm "Lưu config" ---- */
+function buildMapGroup(g) {
+  const R = g.rules, A = R.actions;
+  const fixed = [{ key: 'action', kind: 'act', cap: 'Hành động' }, { key: 'value', kind: 'num', cap: 'Số lần / độ dày', w: 110 },
+    { key: 'label', kind: 'text', cap: 'Nhãn (hiện ở giả lập)', w: 150 }];
+  const wrap = el('div', 'mapwrap');
+  const one = (title, hint, obj, cols) => {
+    const x = ruleRow(cols, obj, A, null), w = el('div');
+    w.append(el('label', null, title)); if (hint) w.append(el('div', 'muted', hint)); w.append(x.row);
+    wrap.append(w); return x;
+  };
+  const join = one('Vào phòng (live)', '', R.join, fixed);
+  const follow = one('Follow', '', R.follow, fixed);
+  const share = one('Chia sẻ', '', R.share, fixed);
+  const like = one('Thả tim', 'Cứ đủ "Mỗi" tim thì làm 1 lần hành động (0 = tắt).', R.like,
+    [{ key: 'every', kind: 'num', cap: 'Mỗi (tim)', w: 90 }, ...fixed]);
+  const cool = numCell(R.chat.cooldownSec, 90);
+  const coolW = el('div', 'mrow'), coolCell = el('div', 'mcell');
+  coolCell.append(el('small', null, 'Chống spam: cùng một người cách nhau (giây)'), cool); coolW.append(coolCell);
+  const chat = ruleList('Bình luận khớp câu', 'Khớp theo regex, không phân biệt hoa thường; khớp dòng nào trước thì làm dòng đó.',
+    [{ key: 'match', kind: 'text', cap: 'Câu khớp (regex)', w: 200 }, ...fixed], R.chat.rules, A, { match: '', action: '', value: 1, label: '' });
+  wrap.append(coolW, chat.el);
+  const gifts = ruleList('Quà theo tên', 'Tên quà đúng như hiện trong app TikTok. Quà khớp tên thì ưu tiên hơn mốc theo số xu.',
+    [{ key: 'name', kind: 'text', cap: 'Tên quà', w: 140 }, { key: 'diamonds', kind: 'num', cap: 'Số xu', w: 70 }, ...fixed,
+      { key: 'combo', kind: 'num', cap: 'Combo (giả lập)', w: 100 }],
+    R.gifts, A, { name: '', diamonds: 1, action: '', value: 1, label: '', combo: 1 });
+  const tiers = ruleList('Quà theo số xu', 'Quà từ X xu trở lên thì làm hành động này (mốc lớn nhất khớp trước). Combo = số lượng mỗi lần bấm thử trên giả lập.',
+    [{ key: 'minDiamonds', kind: 'num', cap: 'Từ (xu) trở lên', w: 110 }, ...fixed, { key: 'combo', kind: 'num', cap: 'Combo (giả lập)', w: 100 }],
+    R.giftTiers, A, { minDiamonds: 1, action: '', value: 1, label: '', combo: 1 });
+  wrap.append(gifts.el, tiers.el);
+  return {
+    node: wrap,
+    read: () => ({
+      join: join.read(), follow: follow.read(), share: share.read(), like: like.read(),
+      chat: { cooldownSec: cool.value === '' ? 0 : +cool.value, rules: chat.read() },
+      gifts: gifts.read(), giftTiers: tiers.read(),
+    }),
+  };
+}
+
+function renderViewers() {
+  const tb = $('viewers'); tb.textContent = '';
+  const q = $('q').value.trim().toLowerCase();
+  const list = viewers.filter(v => !q || (v.user.nickname + ' ' + v.user.uniqueId).toLowerCase().includes(q));
+  $('viewersEmpty').style.display = list.length ? 'none' : '';
+  for (const v of list) {
+    const tr = el('tr'); if (v.blocked) tr.className = 'blocked';
+    const who = el('td'); const n = el('div', 'name', v.user.nickname); const u = el('div', 'uid', v.user.uniqueId ? '@' + v.user.uniqueId : '');
+    const wrap = el('div'); wrap.style.display = 'flex'; wrap.style.gap = '8px'; wrap.style.alignItems = 'center';
+    const txt = el('div'); txt.append(n, u); wrap.append(avatar(v.user), txt); who.append(wrap);
+    const btn = el('button', 'sm', v.blocked ? 'Bỏ chặn' : 'Chặn');
+    btn.onclick = () => v.blocked ? bridge.send({ type: 'unblock', key: v.user.id, uniqueId: v.user.uniqueId })
+      : confirm(`Chặn ${v.user.nickname}?`) && bridge.send({ type: 'block', user: v.user });
+    const act = el('td'); act.style.textAlign = 'right'; act.append(btn);
+    tr.append(who, el('td', 'num', v.diamonds + ' 💎'), el('td', 'num', v.comments + ' 💬'), el('td', 'num', v.likes + ' ❤'), act);
+    tb.appendChild(tr);
+  }
+}
+$('q').oninput = renderViewers;
+
+function renderBlocked() {
+  const tb = $('blocked'); tb.textContent = '';
+  $('blockedCount').textContent = state.blocked.length ? `(${state.blocked.length})` : '';
+  for (const b of state.blocked) {
+    const tr = el('tr');
+    const td = el('td'); td.append(el('span', 'name', b.nickname || b.uniqueId), el('span', 'uid', b.uniqueId ? '  @' + b.uniqueId : ''));
+    const btn = el('button', 'sm', 'Bỏ chặn'); btn.onclick = () => bridge.send({ type: 'unblock', key: b.id || b.uniqueId });
+    const act = el('td'); act.style.textAlign = 'right'; act.append(btn);
+    tr.append(td, act); tb.appendChild(tr);
+  }
+}
+$('blockBtn').onclick = () => {
+  const id = $('blockId').value.trim().replace(/^@/, '');
+  if (!id) return;
+  bridge.send({ type: 'block', user: { uniqueId: id, nickname: id } });
+  $('blockId').value = '';
+};
+
+$('connect').onclick = () => {
+  const username = $('user').value.trim().replace(/^@/, '');
+  if (!username) { $('ttMsg').textContent = 'Nhập username tài khoản đang LIVE'; return; }
+  bridge.send({ type: 'tiktok.connect', username, autoConnect: $('auto').checked, signApiKey: $('key').value.trim() || undefined });
+  $('key').value = '';
+};
+$('disconnect').onclick = () => bridge.send({ type: 'tiktok.disconnect' });
+$('auto').onchange = () => bridge.send({ type: 'tiktok.settings', autoConnect: $('auto').checked });
+
+function addFeed(e, blocked) {
+  const d = el('div', e.kind);
+  const k = { gift: 'Quà', chat: 'Bình luận', like: 'Tim', join: 'Vào', follow: 'Follow', share: 'Share' }[e.kind] || e.kind;
+  const body = el('span', blocked ? 'blk' : null);
+  const name = el('b', null, e.user.nickname + ' ');
+  const what = e.kind === 'gift' ? `${e.giftName || 'quà'} x${e.count} (${(e.diamonds || 0) * (e.count || 1)}💎)`
+    : e.kind === 'chat' ? e.text : e.kind === 'like' ? `x${e.count}` : '';
+  body.append(name, what);
+  d.append(el('span', 'k', k + (e.simulated ? ' · giả' : '')), avatar(e.user), body);
+  const f = $('feed'); f.prepend(d);
+  while (f.childNodes.length > 200) f.lastChild.remove();
+}
+$('clearFeed').onclick = () => { $('feed').textContent = ''; };
+</script>
+</body>
+</html>

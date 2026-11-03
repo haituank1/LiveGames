@@ -1,0 +1,11 @@
+{
+  "host": "127.0.0.1",
+  "port": 8787,
+  "logEvents": true,
+  "tiktok": {
+    "autoReconnect": true,
+    "reconnectDelaySec": 15,
+    "debugRaw": true,
+    "connectionOptions": {}
+  }
+}

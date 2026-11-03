@@ -1,0 +1,19 @@
+GAME CHÙA 3D – TƯƠNG TÁC TIKTOK LIVE
+=====================================
+
+Không cần cài gì thêm (đã kèm sẵn Node.js trong thư mục runtime). Máy cần Windows 10/11 và có mạng.
+
+1. Giải nén cả thư mục TestGameAI ra chỗ nào cũng được (ví dụ Desktop). Đừng chạy thẳng trong file .zip.
+2. Bấm đúp start-livebridge.bat
+   - Nếu Windows hiện "Windows protected your PC": bấm "More info" → "Run anyway".
+   - Nếu Windows hỏi cho Node.js qua tường lửa: bấm Allow.
+   - Cửa sổ đen phải để mở suốt buổi LIVE. Đóng cửa sổ đen là tắt.
+3. Trang quản trị tự mở (http://localhost:8787/). Nhập username TikTok của bạn (tài khoản ĐANG LIVE), bấm Kết nối.
+4. Thêm game vào buổi LIVE:
+   - OBS / TikTok LIVE Studio: thêm nguồn Browser / Link
+       http://localhost:8787/Games/chua-3d/
+     kích thước 1080 x 1920.
+5. Thử trước khi LIVE (không cần TikTok): mở http://localhost:8787/Games/chua-3d/?demo=1
+
+Nhạc nền: thả file nhạc (mp3, m4a...) vào Games\chua-3d\audio. Nên dùng nhạc miễn phí bản quyền.
+Chi tiết hơn: xem README.md.

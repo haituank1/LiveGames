@@ -1,0 +1,173 @@
+{
+  "games": {
+    "chua-3d": {
+      "npc": 2,
+      "max": 600,
+      "showChat": true,
+      "pointsPerTick": 1,
+      "tickSec": 5,
+      "pointsPerDiamond": 50,
+      "pointsPerChat": 5,
+      "musicOn": true,
+      "sfxVolume": 11,
+      "musicVolume": 37,
+      "musicShuffle": true,
+      "sfxOn": true,
+      "chantOn": true,
+      "chantMinDiamonds": 1,
+      "chantGap": 6,
+      "duckPercent": 90,
+      "monkOn": true,
+      "monkMinSec": 20,
+      "monkMaxSec": 25,
+      "monkGreetOn": true,
+      "monkGreetGap": 10,
+      "pointsPerFollow": 100,
+      "guideOn": true,
+      "safeTop": 9,
+      "safeSide": 2,
+      "uiScale": 120,
+      "nameScale": 100,
+      "walkSpeed": 500,
+      "actSpeed": 400,
+      "monkFollow": "Follow thầy để thầy đặt pháp danh cho con nhé 🙏",
+      "monkLines": [
+        "A Di Đà Phật, chúc quý Phật tử một ngày an lạc 🙏",
+        "Tâm an thì cảnh an. Thở chậm lại một chút nhé con.",
+        "Mỗi câu niệm Phật là một hạt giống lành gieo vào tâm.",
+        "Thắp một nén nhang, cầu cho gia đình bình an.",
+        "Tích đức không cần lớn, một lời nói tử tế cũng là công đức.",
+        "Buông bỏ được phiền não thì lòng nhẹ như mây.",
+        "Hôm nay con đã niệm Phật chưa? Cùng niệm với thầy nhé.",
+        "Sống chậm lại, thương người nhiều hơn, đó là tu.",
+        "Gieo nhân lành thì gặt quả lành. A Di Đà Phật.",
+        "Ai mới vào chùa thì gõ \"Nam mô A Di Đà Phật\" để cùng lễ Phật nhé.",
+        "Cảm ơn các con đã ghé chùa, chúc các con mạnh khoẻ, bình an."
+      ],
+      "monkGreet": [
+        "Chào con {ten} đã ghé chùa 🙏",
+        "A Di Đà Phật, chào {ten}! Vào thắp nén nhang cùng thầy nhé.",
+        "{ten} ơi, gõ \"Nam mô A Di Đà Phật\" để cùng lễ Phật nha.",
+        "Chào {ten}, tặng một bông hồng là con được lên thắp nhang đó."
+      ],
+      "monkThank": [
+        "A Di Đà Phật, thầy cảm ơn con {ten} 🙏",
+        "Công đức của con {ten} thầy ghi nhận rồi nhé 🙏",
+        "Cảm ơn {ten}, chúc con một ngày an lạc.",
+        "Con {ten} có tâm quá, thầy cảm ơn con 🙏"
+      ],
+      "monkFollowThanks": [
+        "Con {ten} vừa follow thầy. Thầy đặt pháp danh cho con là {phapdanh} 🙏",
+        "Chào {phapdanh}! Từ nay {ten} là Phật tử của chùa mình rồi 🙏",
+        "Cảm ơn {ten} đã follow. Pháp danh của con là {phapdanh} nhé 🙏"
+      ],
+      "guideLines": [
+        "🙏 Bình luận hoặc thả 10 tim → vào chùa ngồi",
+        "➕ Follow → được thầy đặt pháp danh",
+        "❤️ Thả 10 tim → lạy Phật 3 lạy",
+        "💬 Gõ \"Nam mô A Di Đà Phật\" → lạy Phật",
+        "💬 Gõ \"hoa rơi\" → Hoa sen sẽ rơi"
+      ],
+      "cushions": [
+        [
+          50,
+          43.5
+        ],
+        [
+          38.8,
+          43.5
+        ],
+        [
+          61.2,
+          43.5
+        ],
+        [
+          27.4,
+          43.5
+        ],
+        [
+          72.6,
+          43.5
+        ],
+        [
+          50,
+          47.3
+        ],
+        [
+          36.1,
+          47.3
+        ],
+        [
+          63.9,
+          47.3
+        ],
+        [
+          22.7,
+          47.3
+        ],
+        [
+          77.5,
+          47.3
+        ]
+      ],
+      "burner": [
+        50,
+        35
+      ],
+      "incense": [
+        50,
+        42.1
+      ],
+      "show": {
+        "feedChat": false,
+        "feedGift": false,
+        "feedJoin": false,
+        "feedFollow": false,
+        "feedLike": false,
+        "feedShare": false,
+        "bubbleChat": true,
+        "floatPoints": true,
+        "nameTags": true,
+        "rulesBox": true,
+        "boardTop10": true,
+        "toastTop": true,
+        "liveLabel": true,
+        "monkGreet": true,
+        "monkThank": true,
+        "monkFollow": true
+      },
+      "leaveMin": 20,
+      "rulesLines": [
+        "🙏 Bình luận / 10 tim → vào chùa ngồi",
+        "⏱ Mỗi {giay} giây: +{diem} công đức",
+        "💬 Bình luận: +{binhluan} công đức",
+        "➕ Follow: +{follow} công đức",
+        "🏆 Top 10 được lên đệm"
+      ],
+      "joinSeat": true,
+      "seatLikes": 10,
+      "timedRules": [
+        {
+          "sec": 20,
+          "action": "bow",
+          "value": 3,
+          "count": 10
+        }
+      ],
+      "personalRules": [
+        {
+          "points": 20,
+          "action": "lotus",
+          "value": 1
+        }
+      ],
+      "globalRules": [
+        {
+          "points": 100,
+          "action": "golden",
+          "value": 1
+        }
+      ]
+    }
+  }
+}

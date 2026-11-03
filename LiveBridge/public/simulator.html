@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LiveBridge – Giả lập</title>
+<style>
+  :root{--bg:#16110d;--card:#231b15;--line:#3b2e24;--tx:#f3e6d3;--mut:#b29c84;--acc:#e0a63c;--red:#c4312b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+  main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:820px){main{grid-template-columns:1fr}}
+  h1{font-size:18px;margin:0;grid-column:1/-1;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  h2{font-size:14px;margin:0 0 8px;color:var(--acc)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+  input,select{background:#120d0a;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit}
+  input[type=number]{width:70px}
+  button{background:#3a2a1e;color:var(--tx);border:1px solid #5a4330;border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit}
+  button:hover{border-color:var(--acc)}
+  button.gift{background:#4a1e1b;border-color:#7a2f29}
+  button.pri{background:var(--red);border-color:#e05a4f}
+  .pill{font-size:12px;padding:2px 10px;border-radius:999px;background:#333}
+  .ok{background:#1f5f35}.warn{background:#7a5a12}.err{background:#7a1f1f}
+  #log{grid-column:1/-1;height:280px;overflow:auto;font:12px/1.5 ui-monospace,Consolas,monospace;background:#0e0a08}
+  #log div{border-bottom:1px solid #1f1812;padding:2px 0}
+  .ev{color:#9fe0a8}.raw{color:var(--mut)}
+  small{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+  <h1>🎁 LiveBridge – Giả lập tương tác
+    <span class="pill" id="wsSt">WS: …</span>
+    <span class="pill" id="ttSt">TikTok: …</span>
+  </h1>
+
+  <section>
+    <h2>Kết nối</h2>
+    <div class="row">Game:
+      <select id="game"></select>
+      <a id="openGame" target="_blank" style="color:var(--acc)">Mở game ↗</a>
+    </div>
+    <div class="row">TikTok LIVE:
+      <input id="ttUser" placeholder="@ten_tiktok">
+      <button id="ttOn">Kết nối</button>
+      <button id="ttOff">Ngắt</button>
+    </div>
+    <small>Sự kiện giả đi qua đúng bộ quy đổi như quà thật, nên dùng được để test file mapping.</small>
+  </section>
+
+  <section>
+    <h2>Người xem</h2>
+    <div class="row">
+      <select id="who"></select>
+      <input id="customName" placeholder="hoặc gõ tên mới">
+    </div>
+    <div class="row">
+      <button id="join">👋 Vào phòng</button>
+      <button id="join50">👥 50 người vào</button>
+      <button id="follow">➕ Follow</button>
+      <button id="share">↗ Share</button>
+    </div>
+    <div class="row">
+      <button id="like">❤️ Thả tim</button> x <input id="likeN" type="number" value="30" min="1">
+    </div>
+    <div class="row">
+      <input id="chatText" placeholder="Bình luận…" style="flex:1">
+      <button id="chat">💬 Gửi</button>
+    </div>
+    <div class="row" id="chatChips"></div>
+  </section>
+
+  <section>
+    <h2>Tặng quà</h2>
+    <small>Số lượng (combo) của từng quà chỉnh ở trang quản trị → Gói quà & hành động.</small>
+    <div class="row" id="tiers"></div>
+    <div class="row" id="named"></div>
+  </section>
+
+  <section>
+    <h2>Tự động</h2>
+    <div class="row"><label><input type="checkbox" id="auto"> Gửi ngẫu nhiên liên tục</label></div>
+    <div class="row">Mỗi <input id="autoMs" type="number" value="600" min="50"> ms</div>
+    <div class="row"><button id="clear">Xoá log</button></div>
+  </section>
+
+  <section id="log"></section>
+</main>
+
+<script src="livebridge-client.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const q = new URLSearchParams(location.search);
+const NAMES = ['Xuân Maii', 'Nguyễn Hà Vy', 'Lê Minh Nhựt', 'hieuhocxay', 'Bắp Bắp', 'Kiệt báo', 'Hạnh Nhi', 'Kim Hân', 'fw ry',
+  'Trường', 'Bánh Ú', 'Xấu ngủ', 'Tâm An', 'Diệu Hiền', 'Ngọc Lan', 'Bảo Ngọc', 'Thiện Tâm', 'Như Ý', 'Quang Huy', 'An Nhiên',
+  'Gia Hân', 'Khang', 'Ti Na', 'Mít', 'Lan Anh', 'Hoàng', 'Tuấn', 'Vân', 'Phúc', 'Thảo'];
+const users = NAMES.map((n, i) => ({ id: 'sim_' + i, uniqueId: 'sim_' + i, nickname: n, avatar: '' }));
+let extra = 0, mapping = null, bridge = null;
+
+for (const u of [{ id: '', nickname: '🎲 Ngẫu nhiên' }, ...users]) {
+  const o = document.createElement('option'); o.value = u.id; o.textContent = u.nickname; $('who').appendChild(o);
+}
+function pickUser() {
+  const name = $('customName').value.trim();
+  if (name) return { id: 'sim_' + name, uniqueId: name, nickname: name, avatar: '' };
+  const id = $('who').value;
+  return users.find(u => u.id === id) || users[Math.floor(Math.random() * users.length)];
+}
+
+function log(cls, text) {
+  const d = document.createElement('div'); d.className = cls; d.textContent = new Date().toLocaleTimeString() + '  ' + text;
+  const L = $('log'); L.prepend(d);
+  while (L.childNodes.length > 300) L.lastChild.remove();
+}
+
+function sim(ev) { if (!bridge || !bridge.simulate(ev)) log('raw', '⚠ Chưa kết nối LiveBridge'); }
+
+function renderMapping() {
+  $('tiers').innerHTML = ''; $('named').innerHTML = ''; $('chatChips').innerHTML = '';
+  if (!mapping) { $('tiers').textContent = 'Game này chưa có file mapping trong LiveBridge/config/mappings'; return; }
+  for (const t of mapping.giftTiers || []) {
+    const b = document.createElement('button'); b.className = 'gift';
+    b.textContent = `${t.minDiamonds} xu → ${t.label || t.action}${t.combo > 1 ? ' (x' + t.combo + ')' : ''}`;
+    b.onclick = () => sim({ kind: 'gift', user: pickUser(), giftName: `Quà ${t.minDiamonds} xu`, diamonds: t.minDiamonds, count: t.combo || 1 });
+    $('tiers').appendChild(b);
+  }
+  for (const g of mapping.gifts || []) {
+    const b = document.createElement('button'); b.className = 'gift';
+    b.textContent = `${g.name} → ${g.label || g.action}${g.combo > 1 ? ' (x' + g.combo + ')' : ''}`;
+    b.onclick = () => sim({ kind: 'gift', user: pickUser(), giftId: g.id, giftName: g.name, diamonds: g.diamonds || 1, count: g.combo || 1 });
+    $('named').appendChild(b);
+  }
+  for (const w of ['nam mô a di đà phật', 'thắp nhang', 'đi', 'hello']) {
+    const b = document.createElement('button'); b.textContent = w;
+    b.onclick = () => sim({ kind: 'chat', user: pickUser(), text: w });
+    $('chatChips').appendChild(b);
+  }
+}
+
+function connect(game) {
+  if (bridge) bridge.close();
+  bridge = new LiveBridgeClient({ url: `ws://${location.host}`, game, role: 'monitor' })
+    .on('open', () => { $('wsSt').textContent = 'WS: đã kết nối'; $('wsSt').className = 'pill ok'; })
+    .on('close', () => { $('wsSt').textContent = 'WS: mất kết nối'; $('wsSt').className = 'pill err'; })
+    .on('hello', h => { mapping = h.mapping; renderMapping(); })
+    .on('mapping', m => { mapping = m.mapping; renderMapping(); })   // trang quản trị vừa lưu gói quà
+    .on('status', s => {
+      const t = s.tiktok || {};
+      $('ttSt').textContent = `TikTok: ${t.state}${t.username ? ' @' + t.username : ''}${t.message ? ' – ' + t.message : ''}`;
+      $('ttSt').className = 'pill ' + (t.state === 'connected' ? 'ok' : t.state === 'error' ? 'err' : t.state === 'idle' ? '' : 'warn');
+    })
+    .on('raw', m => { const e = m.event; log('raw', `raw ${e.kind} – ${e.user.nickname}${e.giftName ? ' ' + e.giftName + ' x' + e.count : ''}${e.text ? ': ' + e.text : ''}`); })
+    .on('event', e => log('ev', `→ ${e.action} value=${e.value} count=${e.count}${e.label ? ' (' + e.label + ')' : ''} – ${e.user.nickname}`))
+    .on('error', e => log('raw', '⚠ ' + e.message))
+    .connect();
+  $('openGame').href = `/Games/${encodeURIComponent(game)}/`;
+}
+
+fetch('/api/games').then(r => r.json()).then(list => {
+  for (const g of list) { const o = document.createElement('option'); o.value = g.game; o.textContent = g.game; $('game').appendChild(o); }
+  if (q.get('game')) $('game').value = q.get('game');
+  if ($('game').value) connect($('game').value);
+});
+$('game').onchange = () => connect($('game').value);
+
+$('ttOn').onclick = () => bridge && bridge.send({ type: 'tiktok.connect', username: $('ttUser').value });
+$('ttOff').onclick = () => bridge && bridge.send({ type: 'tiktok.disconnect' });
+$('join').onclick = () => sim({ kind: 'join', user: pickUser() });
+$('join50').onclick = () => { for (let i = 0; i < 50; i++) { const n = 'Khách ' + (++extra); sim({ kind: 'join', user: { id: 'sim_k' + extra, nickname: n } }); } };
+$('follow').onclick = () => sim({ kind: 'follow', user: pickUser() });
+$('share').onclick = () => sim({ kind: 'share', user: pickUser() });
+$('like').onclick = () => sim({ kind: 'like', user: pickUser(), count: +$('likeN').value || 1 });
+$('chat').onclick = () => { const t = $('chatText').value.trim(); if (t) sim({ kind: 'chat', user: pickUser(), text: t }); };
+$('clear').onclick = () => { $('log').innerHTML = ''; };
+
+let autoTimer = null;
+function autoTick() {
+  const u = users[Math.floor(Math.random() * users.length)];
+  const r = Math.random();
+  const tiers = (mapping && mapping.giftTiers) || [{ minDiamonds: 1 }];
+  if (r < 0.15) sim({ kind: 'join', user: u });
+  else if (r < 0.35) sim({ kind: 'like', user: u, count: 10 + Math.floor(Math.random() * 30) });
+  else if (r < 0.5) sim({ kind: 'chat', user: u, text: ['nam mô a di đà phật', 'thắp nhang', 'đi', 'hi'][Math.floor(Math.random() * 4)] });
+  else {
+    const t = tiers[Math.floor(Math.random() * tiers.length)];
+    sim({ kind: 'gift', user: u, giftName: `Quà ${t.minDiamonds} xu`, diamonds: t.minDiamonds, count: 1 + Math.floor(Math.random() * 3) });
+  }
+  autoTimer = setTimeout(autoTick, Math.max(50, +$('autoMs').value || 600));
+}
+$('auto').onchange = e => { clearTimeout(autoTimer); if (e.target.checked) autoTick(); };
+</script>
+</body>
+</html>

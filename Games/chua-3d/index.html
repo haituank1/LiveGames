@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chùa 3D</title>
+<style>
+  /* --u0 = 1% bề ngang khung (ui.js đặt). Chữ/khung phủ trên game dùng --u = --u0 × --k (cỡ chữ chỉnh ở trang quản trị).
+     --safe = phần trên cùng chừa cho giao diện TikTok (avatar chủ kênh, nút Follow, hàng "bảng xếp hạng hằng ngày") để không bị che;
+     --side = phần hai bên bị cắt trên điện thoại (màn hình dài hơn 9:16 nên TikTok phóng cho đầy chiều cao rồi cắt bớt hai mép) */
+  :root{--u0:4px;--k:1;--u:var(--u0);--safe:0px;--side:0px}
+  #left,#side,#monk{--u:calc(var(--u0)*var(--k))}
+  html,body{margin:0;height:100%;overflow:hidden;background:#120804;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:url(bg.webp) 0 0/100% auto no-repeat;overflow:hidden}
+  #stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #bgfade{position:absolute;inset:0;background-repeat:no-repeat;opacity:0;transition:opacity 1.5s ease-in-out;pointer-events:none}
+
+  /* góc trên trái: khung luật điểm, dòng "tặng gì – được gì"; luôn ngang hàng bảng Top 10 bên phải */
+  #left{position:absolute;top:calc(var(--safe) + var(--u)*2);left:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*1);
+    max-width:calc(100% - var(--side)*2 - var(--u)*40)}
+  /* nhãn LIVE nhỏ ở giữa mép trên, không đẩy khung luật xuống */
+  #status{position:absolute;top:calc(var(--u0)*.6);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:calc(var(--u0)*2.2);color:#fff;
+    background:rgba(0,0,0,.5);padding:calc(var(--u0)*.4) calc(var(--u0)*1.6);border-radius:999px;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+  #status.ok{background:rgba(220,30,60,.85)} #status.err{background:rgba(140,20,20,.85)} #status.demo{background:rgba(90,60,160,.85)}
+  /* ẩn hẳn nhãn "● LIVE @tên kênh": TikTok thấy chữ LIVE + tên kênh trong hình dễ tưởng phát lại / copy live cũ.
+     Lỗi kết nối vẫn xem được bằng ?debug=1 (lớp err), DEMO vẫn hiện khi ?demo=1 */
+  #status.ok{display:none!important}
+
+  #banner{position:absolute;top:calc(var(--u)*62);left:50%;transform:translate(-50%,-30px);opacity:0;transition:.35s;
+    background:linear-gradient(90deg,#c2185b,#e53935);color:#fff;font-size:calc(var(--u)*3.4);white-space:nowrap;
+    padding:calc(var(--u)*1.2) calc(var(--u)*3.5);border-radius:999px;box-shadow:0 4px 18px rgba(0,0,0,.4);max-width:92%;overflow:hidden;text-overflow:ellipsis}
+  #banner.on{opacity:1;transform:translate(-50%,0)}
+
+  #side{position:absolute;top:calc(var(--safe) + var(--u)*2);right:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1)}
+  #board{background:rgba(40,15,5,.6);color:#ffe3a3;
+    border:1px solid rgba(255,200,100,.35);border-radius:calc(var(--u)*2);padding:calc(var(--u)*1) calc(var(--u)*2);font-size:calc(var(--u)*2.2);
+    min-width:calc(var(--u)*26)}
+  #rules{background:rgba(120,20,30,.55);color:#fff3d6;border:1px solid rgba(255,200,100,.3);border-radius:calc(var(--u)*1.6);
+    padding:calc(var(--u)*.8) calc(var(--u)*1.8);font-size:calc(var(--u)*2);line-height:1.45;text-shadow:0 1px 2px #0008}
+  /* "tặng gì – được gì": một dòng vàng xoay vòng dưới khung luật */
+  #guide{background:linear-gradient(100deg,rgba(150,80,0,.92),rgba(220,150,20,.9));color:#fff;border:1px solid rgba(255,230,140,.9);
+    border-radius:calc(var(--u)*1.6);padding:calc(var(--u)*.8) calc(var(--u)*1.8);font-size:calc(var(--u)*2.6);font-weight:700;line-height:1.3;
+    text-shadow:0 1px 3px #0009;box-shadow:0 0 calc(var(--u)*1.6) rgba(255,200,60,.6);transition:opacity .35s,transform .35s}
+  #guide.out{opacity:0;transform:translateY(calc(var(--u)*-1))}
+  #guide:empty{display:none}
+  #board h4{margin:0 0 calc(var(--u)*.5);font-size:calc(var(--u)*2.6)}
+  #board ol{margin:0;padding-left:calc(var(--u)*3.5)}
+  #board li{display:flex;justify-content:space-between;gap:calc(var(--u)*2)}
+  #board li span{max-width:calc(var(--u)*18);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #board em{font-style:normal;color:#fff}
+
+  /* thông báo (tặng quà, lên đệm top) nằm ngay dưới bảng Top 10, khoảng trống bên phải tượng Phật.
+     Trượt vào từ phải, viền sáng nhấp nháy, có vệt sáng lướt qua. gift = hồng tím, vip = vàng */
+  #toasts{display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1);width:calc(var(--u)*34)}
+  .toast{position:relative;overflow:hidden;display:flex;align-items:center;gap:calc(var(--u)*1.2);width:100%;box-sizing:border-box;
+    background:linear-gradient(100deg,rgba(120,30,140,.92),rgba(200,50,120,.85));border:1px solid rgba(255,170,220,.7);
+    color:#fff;border-radius:calc(var(--u)*3);padding:calc(var(--u)*.6) calc(var(--u)*1.2) calc(var(--u)*.6) calc(var(--u)*.6);
+    box-shadow:0 0 calc(var(--u)*1.6) rgba(255,120,200,.55);animation:tin .45s cubic-bezier(.2,.9,.3,1.2),glowp 1.6s ease-in-out infinite;
+    transition:opacity .35s,transform .35s}
+  .toast.vip{background:linear-gradient(100deg,rgba(150,80,0,.92),rgba(230,160,20,.88));border-color:rgba(255,230,140,.9);
+    box-shadow:0 0 calc(var(--u)*1.8) rgba(255,200,60,.7);animation:tin .45s cubic-bezier(.2,.9,.3,1.2),glowv 1.6s ease-in-out infinite}
+  .toast::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;pointer-events:none;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:shine 2.2s ease-in-out .3s infinite}
+  .toast.out{opacity:0;transform:translateX(30px)}
+  .toast.bump .x{animation:bump .25s}
+  .toast .tx{display:flex;flex-direction:column;line-height:1.2;min-width:0;flex:1}
+  .toast b{font-size:calc(var(--u)*2.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px #0008}
+  .toast span{font-size:calc(var(--u)*2.1);opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .toast .x{font-size:calc(var(--u)*4.6);font-weight:800;font-style:italic;color:#fff;text-shadow:0 2px 6px #0008;flex:none}
+  .toast .x:empty{display:none}
+  .toast .av{width:calc(var(--u)*6);height:calc(var(--u)*6);font-size:calc(var(--u)*2.6);box-shadow:0 0 0 2px rgba(255,255,255,.8)}
+  @keyframes shine{0%{left:-60%}60%,100%{left:130%}}
+  @keyframes glowp{50%{box-shadow:0 0 calc(var(--u)*3) rgba(255,120,200,.9)}}
+  @keyframes glowv{50%{box-shadow:0 0 calc(var(--u)*3.4) rgba(255,215,90,1)}}
+  .av{flex:none;width:calc(var(--u)*7.5);height:calc(var(--u)*7.5);border-radius:50%;overflow:hidden;display:grid;place-items:center;
+    color:#fff;font-weight:700;font-size:calc(var(--u)*3.2)}
+  .av img{width:100%;height:100%;object-fit:cover}
+  @keyframes tin{from{opacity:0;transform:translateX(calc(var(--u)*30)) scale(.9)}}
+  @keyframes bump{50%{transform:scale(1.4)}}
+
+  /* khung bình luận kiểu TikTok: góc dưới trái, dòng cũ mờ dần lên trên */
+  #chat{position:absolute;left:calc(var(--u)*2);bottom:calc(var(--u)*2);width:72%;display:flex;flex-direction:column;gap:calc(var(--u)*.8);
+    -webkit-mask-image:linear-gradient(to top,#000 70%,transparent);mask-image:linear-gradient(to top,#000 70%,transparent)}
+  #chat .ln{display:flex;align-items:flex-start;gap:calc(var(--u)*1.2);background:rgba(0,0,0,.32);border-radius:calc(var(--u)*2.4);
+    padding:calc(var(--u)*.6) calc(var(--u)*1.8) calc(var(--u)*.6) calc(var(--u)*.6);align-self:flex-start;max-width:100%;animation:cin .25s ease-out}
+  #chat .av{width:calc(var(--u)*5);height:calc(var(--u)*5);font-size:calc(var(--u)*2.4)}
+  #chat .bd{font-size:calc(var(--u)*2.6);line-height:1.3;color:#fff;text-shadow:0 1px 2px #000a;overflow-wrap:anywhere;padding-top:calc(var(--u)*.4)}
+  #chat .bd b{color:#cfe3ff;font-weight:600;margin-right:calc(var(--u)*1)}
+  #chat .gift .bd span{color:#ffd27a}
+  #chat .sys .bd span{color:#e6e6e6;opacity:.85}
+  @keyframes cin{from{opacity:0;transform:translateY(8px)}}
+
+  #flash{position:absolute;inset:0;pointer-events:none;opacity:0;
+    background:radial-gradient(circle at 50% 30%,rgba(255,215,120,.75),rgba(255,180,60,.25) 45%,rgba(255,160,40,0) 75%)}
+  #flash.on{animation:flash 2.2s ease-out}
+  @keyframes flash{10%{opacity:1}100%{opacity:0}}
+
+  /* thầy hiện lên ngay dưới khung luật điểm (cột trái) nói vài câu (ảnh thay.png nếu có, không thì hình vẽ sẵn).
+     Xếp dọc: bong bóng lời nói ở trên, hình thầy ở dưới; gọn trong cột trái để không đè thông báo lên đệm dưới bảng top 10.
+     top được ui.js đặt theo chiều cao khung bên trái */
+  #monk{position:absolute;left:calc(var(--side) + var(--u)*1);top:calc(var(--u)*20);display:flex;flex-direction:column-reverse;align-items:flex-start;
+    gap:calc(var(--u)*1.6);max-width:calc(100% - var(--side)*2 - var(--u)*40);
+    opacity:0;transform:translateX(-110%);transition:transform .7s cubic-bezier(.2,.9,.3,1.1),opacity .5s;pointer-events:none}
+  #monk.on{opacity:1;transform:none}
+  #monk .pic{flex:none;width:calc(var(--u)*13);height:calc(var(--u)*15.6);filter:drop-shadow(0 4px 10px #000a)}
+  #monk .pic img,#monk .pic svg{width:100%;height:100%;object-fit:contain}
+  #monk .say{position:relative;background:rgba(255,248,232,.96);color:#4a2306;
+    border:2px solid #e0a040;border-radius:calc(var(--u)*2.4);padding:calc(var(--u)*1) calc(var(--u)*1.8);
+    font-size:calc(var(--u)*2.8);font-weight:600;line-height:1.3;box-shadow:0 4px 14px #0007}
+  #monk .say b{display:block;font-size:calc(var(--u)*2.2);color:#b0620c;margin-bottom:calc(var(--u)*.3)}
+  /* đuôi bong bóng chỉ xuống hình thầy */
+  #monk .say::before{content:'';position:absolute;left:calc(var(--u)*5);bottom:calc(var(--u)*-2.2);border:calc(var(--u)*1) solid transparent;
+    border-top:calc(var(--u)*1.2) solid #e0a040}
+
+  #sound{position:absolute;right:calc(var(--u)*2);bottom:calc(var(--u)*2);font:inherit;font-size:calc(var(--u)*2.6);color:#fff;cursor:pointer;
+    background:rgba(150,30,30,.85);border:1px solid rgba(255,210,120,.5);border-radius:999px;padding:calc(var(--u)*1) calc(var(--u)*2.4);animation:pulse 1.6s infinite}
+  @keyframes pulse{50%{transform:scale(1.06)}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <!-- lớp nền dùng khi chuyển cảnh (đổi nền theo số người xem): mờ dần lên rồi thay nền chính -->
+  <div id="bgfade"></div>
+  <!-- tên nằm DƯỚI lớp nhân vật 3D: người ngồi đè lên tên thì che mất đoạn đó (ưu tiên thấy người);
+       bong bóng chat, "+điểm" ở lớp fx trên cùng -->
+  <canvas id="tags"></canvas>
+  <canvas id="gl"></canvas>
+  <canvas id="fx"></canvas>
+  <div id="flash"></div>
+  <div id="status"></div>
+  <div id="left">
+    <div id="rules"></div>
+    <div id="guide"></div>
+  </div>
+  <div id="banner"></div>
+  <div id="side">
+    <div id="board" style="display:none"><h4>🏆 Công đức · Top 10</h4><ol></ol></div>
+    <div id="toasts"></div>
+  </div>
+  <div id="chat" style="display:none"></div>
+  <div id="monk">
+    <div class="pic">
+      <!-- hình thầy vẽ sẵn: đầu cạo, mắt nhắm, áo nâu vàng, chắp tay -->
+      <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="mk-skin" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#ffe2c4"/><stop offset="1" stop-color="#e6b48a"/></radialGradient>
+          <linearGradient id="mk-robe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0a030"/><stop offset="1" stop-color="#c46a12"/></linearGradient>
+          <radialGradient id="mk-halo"><stop offset="0" stop-color="#ffe9a0" stop-opacity=".9"/><stop offset="1" stop-color="#ffd060" stop-opacity="0"/></radialGradient>
+        </defs>
+        <circle cx="50" cy="38" r="34" fill="url(#mk-halo)"/>
+        <path d="M12 120 C14 86 30 72 50 72 C70 72 86 86 88 120 Z" fill="url(#mk-robe)"/>
+        <path d="M50 72 C40 84 36 100 34 120 L46 120 C46 100 50 86 60 74 Z" fill="#a8550c" opacity=".55"/>
+        <rect x="43" y="60" width="14" height="14" rx="5" fill="#e6b48a"/>
+        <ellipse cx="22" cy="40" rx="5" ry="7" fill="#e6b48a"/><ellipse cx="78" cy="40" rx="5" ry="7" fill="#e6b48a"/>
+        <circle cx="50" cy="38" r="27" fill="url(#mk-skin)"/>
+        <path d="M37 39 q5 4 10 0 M53 39 q5 4 10 0" stroke="#5a3418" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <path d="M43 51 q7 6 14 0" stroke="#a5523a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <circle cx="36" cy="47" r="3.5" fill="#ffaa99" opacity=".45"/><circle cx="64" cy="47" r="3.5" fill="#ffaa99" opacity=".45"/>
+        <path d="M44 120 L50 88 L56 120 Z" fill="#ffe2c4" stroke="#d9a070" stroke-width="1"/>
+        <path d="M50 88 L50 120" stroke="#d9a070" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="say"><b>Thầy</b><span></span></div>
+  </div>
+  <button id="sound" style="display:none">🔈 Bấm để bật âm thanh</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="../../LiveBridge/public/livebridge-client.js"></script>
+<script src="js/crowd.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+{
+  "game": "chua-3d",
+  "description": "Chùa 3D – người xem quỳ lễ Phật, dâng hương, rải hoa sen",
+  "actions": {
+    "join": "Tạo nhân vật cho người xem, đi vào chùa và quỳ xuống",
+    "walk": "Đứng dậy đi dạo",
+    "bow": "Lạy Phật (value = số lạy)",
+    "incense": "Đi lên lư hương thắp nhang, lạy 3 lạy rồi về chỗ",
+    "lotus": "Mưa hoa sen (value = độ dày)",
+    "golden": "Hào quang vàng quanh nhân vật + mưa hoa lớn"
+  },
+  "defaults": {
+    "cushions": [
+      [
+        50,
+        43.5
+      ],
+      [
+        38.8,
+        43.5
+      ],
+      [
+        61.2,
+        43.5
+      ],
+      [
+        27.4,
+        43.5
+      ],
+      [
+        72.6,
+        43.5
+      ],
+      [
+        50,
+        47.3
+      ],
+      [
+        36.1,
+        47.3
+      ],
+      [
+        63.9,
+        47.3
+      ],
+      [
+        22.7,
+        47.3
+      ],
+      [
+        77.5,
+        47.3
+      ]
+    ],
+    "burner": [
+      50,
+      35
+    ],
+    "incense": [
+      50,
+      42.1
+    ],
+    "monkFollow": "Follow thầy để thầy đặt pháp danh cho con nhé 🙏",
+    "monkLines": [
+      "A Di Đà Phật, chúc quý Phật tử một ngày an lạc 🙏",
+      "Tâm an thì cảnh an. Thở chậm lại một chút nhé con.",
+      "Mỗi câu niệm Phật là một hạt giống lành gieo vào tâm.",
+      "Thắp một nén nhang, cầu cho gia đình bình an.",
+      "Tích đức không cần lớn, một lời nói tử tế cũng là công đức.",
+      "Buông bỏ được phiền não thì lòng nhẹ như mây.",
+      "Hôm nay con đã niệm Phật chưa? Cùng niệm với thầy nhé.",
+      "Sống chậm lại, thương người nhiều hơn, đó là tu.",
+      "Gieo nhân lành thì gặt quả lành. A Di Đà Phật.",
+      "Ai mới vào chùa thì gõ \"Nam mô A Di Đà Phật\" để cùng lễ Phật nhé.",
+      "Cảm ơn các con đã ghé chùa, chúc các con mạnh khoẻ, bình an."
+    ],
+    "monkGreet": [
+      "Chào con {ten} đã ghé chùa 🙏",
+      "A Di Đà Phật, chào {ten}! Vào thắp nén nhang cùng thầy nhé.",
+      "{ten} ơi, gõ \"Nam mô A Di Đà Phật\" để cùng lễ Phật nha.",
+      "Chào {ten}, tặng một bông hồng là con được lên thắp nhang đó."
+    ],
+    "monkThank": [
+      "A Di Đà Phật, thầy cảm ơn con {ten} 🙏",
+      "Công đức của con {ten} thầy ghi nhận rồi nhé 🙏",
+      "Cảm ơn {ten}, chúc con một ngày an lạc.",
+      "Con {ten} có tâm quá, thầy cảm ơn con 🙏"
+    ],
+    "monkFollowThanks": [
+      "Con {ten} vừa follow thầy. Thầy đặt pháp danh cho con là {phapdanh} 🙏",
+      "Chào {phapdanh}! Từ nay {ten} là Phật tử của chùa mình rồi 🙏",
+      "Cảm ơn {ten} đã follow. Pháp danh của con là {phapdanh} nhé 🙏"
+    ],
+    "guideLines": [
+      "🙏 Bình luận hoặc thả {tim} tim → vào chùa ngồi",
+      "🌹 Tặng Hoa hồng (1 xu) → lên thắp nhang",
+      "🎁 Quà từ 5 xu → lên lạy Phật 3 lạy",
+      "🪷 Quà từ 10 xu → mưa hoa sen khắp chùa",
+      "✨ Quà từ 99 xu → hào quang vàng rực rỡ",
+      "➕ Follow → được thầy đặt pháp danh",
+      "❤️ Thả 30 tim → lạy Phật 1 lạy",
+      "💬 Gõ \"Nam mô A Di Đà Phật\" → lạy Phật"
+    ],
+    "rulesLines": [
+      "🙏 Bình luận / {tim} tim → vào chùa ngồi",
+      "⏱ Mỗi {giay} giây: +{diem} công đức",
+      "💬 Bình luận: +{binhluan} công đức",
+      "🎁 1 xu: +{xu} công đức",
+      "➕ Follow: +{follow} công đức",
+      "🏆 Top 10 được lên đệm"
+    ]
+  },
+  "join": {
+    "action": "join",
+    "value": 1
+  },
+  "follow": {
+    "action": "bow",
+    "value": 3,
+    "label": "Theo dõi"
+  },
+  "share": {
+    "action": "lotus",
+    "value": 3,
+    "label": "Chia sẻ"
+  },
+  "like": {
+    "every": 10,
+    "action": "bow",
+    "value": 3,
+    "label": "Thả tim"
+  },
+  "chat": {
+    "cooldownSec": 5,
+    "rules": [
+      {
+        "match": "lạy|nam m[oô]|a di đà|adida|lay",
+        "action": "bow",
+        "value": 3
+      },
+      {
+        "match": "nhang|thắp hương|dâng hương|thap huong|dang huong",
+        "action": "incense",
+        "value": 1
+      },
+      {
+        "match": "^\\s*(đi|di|walk)\\s*$",
+        "action": "walk",
+        "value": 1
+      },
+      {
+        "match": "hoa rơi|Hoa rơi|hoa",
+        "action": "lotus",
+        "value": 2
+      }
+    ]
+  },
+  "gifts": [
+    {
+      "name": "Rose",
+      "diamonds": 1,
+      "action": "incense",
+      "value": 1,
+      "label": "Dâng hương",
+      "combo": 1
+    },
+    {
+      "name": "Doughnut",
+      "diamonds": 1,
+      "action": "lotus",
+      "value": 2,
+      "label": "Hoa sen",
+      "combo": 1
+    }
+  ],
+  "giftTiers": [
+    {
+      "minDiamonds": 99,
+      "action": "golden",
+      "value": 1,
+      "label": "Thắp sáng",
+      "combo": 1
+    },
+    {
+      "minDiamonds": 10,
+      "action": "lotus",
+      "value": 1,
+      "label": "Hoa sen",
+      "combo": 1
+    },
+    {
+      "minDiamonds": 5,
+      "action": "bow",
+      "value": 3,
+      "label": "Lễ Phật",
+      "combo": 1
+    },
+    {
+      "minDiamonds": 1,
+      "action": "incense",
+      "value": 1,
+      "label": "Dâng hương",
+      "combo": 1
+    }
+  ]
+}
