@@ -56,6 +56,26 @@ function rain(n, kind, colors, sizeMul = 1) {
 }
 E.petals = (n = 40) => rain(n, 'petal', PETALS);
 E.confetti = (n = 50) => rain(n, 'confetti', CONFETTI);
+/* Mưa phong bì đỏ mừng cưới (kèm đồng tiền vàng) — quà càng lớn càng nhiều */
+E.envelopes = function (n = 40) {
+  for (let i = 0; i < n; i++) {
+    add({ kind: 'env', x: rand(0, w), y: rand(-h * 0.3, -12), vx: rand(-12, 12), vy: rand(30, 66),
+      life: 0, max: rand(6, 10), size: rand(13, 20), rot: rand(-0.5, 0.5), vr: rand(-1.2, 1.2),
+      color: '#d81b3a', grav: 0, drag: 0, sway: rand(0, 6.3) });
+  }
+};
+/* Hai khẩu pháo giấy ở hai góc dưới bắn chéo lên — dùng cho khoảnh khắc đại lễ */
+E.cannon = function () {
+  for (const fromLeft of [true, false]) {
+    for (let i = 0; i < 70; i++) {
+      add({ kind: 'confetti', x: fromLeft ? rand(0, w * 0.06) : rand(w * 0.94, w), y: h + rand(0, 14),
+        vx: (fromLeft ? 1 : -1) * rand(60, 300), vy: -rand(330, 620),
+        life: 0, max: rand(1.6, 2.8), size: rand(5, 10), rot: rand(0, 6.3), vr: rand(-6, 6),
+        color: CONFETTI[Math.floor(Math.random() * CONFETTI.length)], grav: 300, drag: 0.7 });
+    }
+  }
+  if (W.audio) W.audio.sparkle();
+};
 E.hearts = function (n = 10, x, y) {
   for (let i = 0; i < n; i++) {
     add({ kind: 'heart', x: (x != null ? x * w : rand(w * 0.3, w * 0.7)) + rand(-30, 30),
@@ -137,6 +157,17 @@ function loop(t) {
     } else if (p.kind === 'confetti') {
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot || 0); ctx.globalAlpha = Math.max(0, fade);
       ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2); ctx.restore();
+    } else if (p.kind === 'env') {
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot || 0); ctx.globalAlpha = Math.max(0, fade);
+      const ew = p.size, eh = p.size * 1.45;
+      ctx.fillStyle = '#c8102e';
+      ctx.beginPath(); ctx.roundRect(-ew / 2, -eh / 2, ew, eh, 2.5); ctx.fill();
+      ctx.fillStyle = '#e8334d'; ctx.fillRect(-ew / 2, -eh / 2, ew, eh * 0.3);
+      ctx.fillStyle = '#ffd76a';
+      ctx.beginPath(); ctx.arc(0, eh * 0.12, ew * 0.3, 0, 6.3); ctx.fill();
+      ctx.fillStyle = '#c8102e';
+      ctx.beginPath(); ctx.arc(0, eh * 0.12, ew * 0.17, 0, 6.3); ctx.fill();
+      ctx.restore();
     } else if (p.kind === 'heart') {
       drawHeart(p.x, p.y, p.size, p.color, Math.max(0, fade));
     }
