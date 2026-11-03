@@ -108,30 +108,24 @@ E.billAt = function (x, y) {   // một tờ tiền bay phất phới tại đi�
     life: 0, max: rand(1.6, 2.4), size: rand(6, 10), rot: rand(0, 6.3), vr: rand(-3, 3),
     color: ['#8be28b', '#b8f26d', '#ffd76a'][Math.floor(rand(0, 3))], grav: 26, drag: 0, sway: rand(0, 6.3) });
 };
-E.ambient = function (cls, x, y) {   // hào quang sống quanh dancer, khác nhau theo lớp
+/* fx = "bộ hiệu ứng" của nhân vật (dancers.js: charOf(p).fx) — mỗi nhân vật 1 chữ ký hạt riêng */
+const AMBIENT = {
+  gold:    (x, y, head) => { E.ring(x, y, '#ffd76a'); E.twinkleAt(x, head, '#ffd76a', 2); if (Math.random() < 0.55) E.billAt(x, head); },
+  idol:    (x, y, head) => { E.hearts(1, x, head); E.twinkleAt(x, head, '#ff7ed6', 2); },
+  dj:      (x, y, head) => { E.ring(x, y, '#7ed6ff'); E.note(x, head); },
+  orange:  (x, y, head) => { E.burstAt(x, y - 0.05, '#ff9d5c', 4); E.twinkleAt(x, head, '#ff9d5c', 1); },
+  mascot:  (x, y, head) => { E.bubbleFx(x, head); E.bubbleFx(x, head); if (Math.random() < 0.35) E.feather(x, head); },
+  green:   (x, y, head) => { E.twinkleAt(x, head, '#9be15d', 2); },
+  sword:   (x, y, head) => { E.ring(x, y, '#8be9ff'); E.twinkleAt(x, head, '#8be9ff', 2); },
+  phoenix: (x, y, head) => { E.burstAt(x, y - 0.05, '#ff9d2e', 3); E.twinkleAt(x, head, '#ffb35c', 2); if (Math.random() < 0.3) E.feather(x, head); },
+  boss:    (x, y, head) => { E.ring(x, y, '#ff5c3c'); E.twinkleAt(x, head, '#ff8a5c', 2); },
+  funny:   (x, y, head) => { E.twinkleAt(x, head, '#ffe14d', 2); if (Math.random() < 0.4) E.burstAt(x, y - 0.05, '#ffe14d', 3); },
+  queen:   (x, y, head) => { E.ring(x, y, '#9be8ff'); E.twinkleAt(x, head, '#cfeeff', 2); },
+};
+E.ambient = function (fx, x, y) {   // hào quang sống quanh dancer, khác nhau theo nhân vật
   if (x == null || y == null) return;
   const head = Math.max(0.03, y - 0.115);
-  switch (cls) {
-    case 'dai-gia':   // vòng vàng xoay (CSS) + tia xu + tiền phất phới
-      E.ring(x, y, '#ffd76a'); E.twinkleAt(x, head, '#ffd76a', 2);
-      if (Math.random() < 0.55) E.billAt(x, head);
-      break;
-    case 'idol':      // tim + sao hồng bay lên
-      E.hearts(1, x, head); E.twinkleAt(x, head, '#ff7ed6', 2);
-      break;
-    case 'dj':        // vòng sóng nhạc + nốt nhạc
-      E.ring(x, y, '#7ed6ff'); E.note(x, head);
-      break;
-    case 'quay-hai':  // pháo giấy mini + tia cam nhanh
-      E.burstAt(x, y - 0.05, '#ff9d5c', 4); E.twinkleAt(x, head, '#ff9d5c', 1);
-      break;
-    case 'mascot':    // bong bóng xà phòng + thỉnh thoảng lông vũ
-      E.bubbleFx(x, head); E.bubbleFx(x, head);
-      if (Math.random() < 0.35) E.feather(x, head);
-      break;
-    default:          // tan-binh: sao xanh lấp lánh
-      E.twinkleAt(x, head, '#9be15d', 2);
-  }
+  (AMBIENT[fx] || AMBIENT.green)(x, y, head);
 };
 
 /* ---------- Vẽ ---------- */
