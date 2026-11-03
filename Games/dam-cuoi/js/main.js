@@ -28,13 +28,13 @@ const TIERS = [
   { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-3.webp', royal: 1 },
   { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-3.webp', royal: 2 },
 ];
-const FILE_ANCHOR = { 'bg.webp': 46.5, 'bg-3.webp': 49 };
+const FILE_ANCHOR = { 'bg.webp': 49.5, 'bg-3.webp': 52 };
 /* Bố cục từng nền: vị trí các bàn tiệc (ghế sẽ xếp quanh bàn) + điểm thảm đỏ chạm sân khấu */
 const FILE_LAYOUT = {
-  'bg.webp': { carpetTop: 48, tables: [
+  'bg.webp': { carpetTop: 51, tables: [
     { x: 22, y: 47 }, { x: 13, y: 59 }, { x: 22, y: 71 }, { x: 16, y: 86 },
     { x: 78, y: 47 }, { x: 87, y: 59 }, { x: 78, y: 71 }, { x: 84, y: 86 } ] },
-  'bg-3.webp': { carpetTop: 51, tables: [
+  'bg-3.webp': { carpetTop: 54, tables: [
     { x: 24, y: 51 }, { x: 12, y: 63 }, { x: 28, y: 73 }, { x: 16, y: 87 },
     { x: 76, y: 51 }, { x: 88, y: 63 }, { x: 72, y: 73 }, { x: 84, y: 87 } ] },
 };

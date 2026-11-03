@@ -264,9 +264,11 @@ P.spawn = function (user) {
 
 /* ================= Ghép đôi & sân khấu ================= */
 const CHIBI = { bride: 'img/bride.png', groom: 'img/groom.png', girl: 'img/guest-girl.png', boy: 'img/guest-boy.png' };
+const BRIDES = ['img/bride.png', 'img/bride2.png', 'img/bride3.png'];   // 3 kiểu cô dâu: váy trắng / áo dài đỏ / váy hồng
+const GROOMS = ['img/groom.png', 'img/groom2.png', 'img/groom3.png'];   // 3 kiểu chú rể: vest đen / vest kem / vest xanh kính cận
 function figHTML(p) {
   const seed = hash(p.user.id || p.user.nickname);
-  const file = p.outfit === 'bride' ? CHIBI.bride : p.outfit === 'groom' ? CHIBI.groom
+  const file = p.outfit === 'bride' ? BRIDES[seed % BRIDES.length] : p.outfit === 'groom' ? GROOMS[seed % GROOMS.length]
     : (seed % 2 ? CHIBI.girl : CHIBI.boy);
   return `<img class="chibi" src="${file}" alt="">`;
 }
