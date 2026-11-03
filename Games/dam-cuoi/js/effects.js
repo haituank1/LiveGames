@@ -22,6 +22,7 @@ E.resize = function (W2, H2, dpr) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 };
 E.setTier = t => { tier = t; };
+E.fireworks = function (n = 3) { E.fireworksShow(n); };
 
 function add(p) { if (P.length < 1400) P.push(p); }
 

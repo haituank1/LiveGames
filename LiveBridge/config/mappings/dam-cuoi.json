@@ -31,24 +31,24 @@
   "defaults": {
     "bgRules": [
       {
-        "bg": "bg-1.webp",
-        "views": 100
+        "viewers": 500,
+        "file": "bg-1.webp"
       },
       {
-        "bg": "bg-2.webp",
-        "views": 300
+        "viewers": 2000,
+        "file": "bg-2.webp"
       },
       {
-        "bg": "bg-3.webp",
-        "views": 500
+        "viewers": 5000,
+        "file": "bg-3.webp"
       },
       {
-        "bg": "bg-3.webp",
-        "views": 1000
+        "viewers": 10000,
+        "file": "bg-3.webp"
       },
       {
-        "bg": "bg-3.webp",
-        "views": 2000
+        "viewers": 20000,
+        "file": "bg-3.webp"
       }
     ],
     "coupleSec": 22,
@@ -107,13 +107,19 @@
     "rulesLines": [
       "💌 Tag @tên người thương → cùng lên sân khấu",
       "🎁 Quà càng lớn, pháo hoa càng to",
-      "👁 Đông mắt xem → sảnh cưới nâng cấp"
+      "👁 Tổng lượt xem càng cao → sảnh cưới càng xịn"
     ],
     "safeSide": 2,
     "safeTop": 5,
     "sfxOn": true,
     "sfxVolume": 55,
-    "uiScale": 120
+    "uiScale": 120,
+    "guideLines": [
+      "💌 Gõ \"@tên người thương\" → 2 bạn lên sân khấu",
+      "🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm",
+      "👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện",
+      "👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view"
+    ]
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {

@@ -5,70 +5,77 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Đám Cưới Online</title>
 <style>
-  /* --u0 = 1% bề ngang khung (main.js đặt); --k cỡ chữ; --safe/--side phần chừa cho giao diện TikTok trên điện thoại */
   :root{--u0:4px;--k:1.2;--u:var(--u0);--safe:0px;--side:0px}
   #left,#side,#mc,#queue{--u:calc(var(--u0)*var(--k))}
   html,body{margin:0;height:100%;overflow:hidden;background:#2a0a18;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#f7e3ea}
   #stage .bgimg{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat}
   #bgfade{opacity:0;transition:opacity 1.5s ease-in-out}
-  /* tia sáng sân khấu khi đạt mốc 1.000+ mắt xem */
   #beams{position:absolute;inset:-20% -10%;opacity:0;transition:opacity 2s;pointer-events:none;
     background:conic-gradient(from 180deg at 50% -10%,transparent 0deg,rgba(255,230,150,.20) 12deg,transparent 26deg,rgba(255,200,220,.16) 44deg,transparent 60deg,rgba(255,230,150,.20) 84deg,transparent 100deg,rgba(255,200,220,.16) 128deg,transparent 146deg,rgba(255,230,150,.20) 172deg,transparent 190deg,rgba(255,200,220,.16) 214deg,transparent 232deg,rgba(255,230,150,.20) 258deg,transparent 276deg,rgba(255,200,220,.16) 300deg,transparent 318deg,rgba(255,230,150,.2) 342deg,transparent 360deg);
     animation:beams 26s linear infinite}
   #beams.on{opacity:1}
   @keyframes beams{to{transform:rotate(360deg)}}
   #royalglow{position:absolute;inset:0;opacity:0;transition:opacity 2s;pointer-events:none;
-    background:radial-gradient(circle at 50% 34%,rgba(255,225,140,.34),rgba(255,190,90,0) 55%)}
+    background:radial-gradient(circle at 50% 30%,rgba(255,225,140,.34),rgba(255,190,90,0) 55%)}
   #royalglow.on{opacity:1;animation:pulseGlow 3.2s ease-in-out infinite}
   @keyframes pulseGlow{50%{opacity:.55}}
-  #couples{position:absolute;inset:0}
-  #fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-  #flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 30%,rgba(255,215,150,.8),rgba(255,170,80,0) 70%)}
+  #people{position:absolute;inset:0}
+  #fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1500}
+  #flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 30%,rgba(255,215,150,.8),rgba(255,170,80,0) 70%);z-index:1600}
   #flash.on{animation:flash 1.6s ease-out}
   @keyframes flash{10%{opacity:1}100%{opacity:0}}
 
-  /* ---------- Cặp đôi ---------- */
-  .couple{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;
-    transition:left 1.8s cubic-bezier(.3,.8,.3,1),top 1.8s cubic-bezier(.3,.8,.3,1),transform .8s;will-change:left,top}
-  .couple .pair{display:flex;align-items:flex-end;filter:drop-shadow(0 6px 10px rgba(90,10,40,.35))}
-  .couple .fig{animation:bob 2.6s ease-in-out infinite}
-  .couple .fig.f2{animation-delay:-1.3s}
-  @keyframes bob{50%{transform:translateY(-1.6%)}}
-  .couple.dance .fig{animation:dance .62s ease-in-out infinite}
-  .couple.dance .fig.f2{animation-delay:-.31s}
-  @keyframes dance{25%{transform:translateY(-4%) rotate(-2.5deg)}75%{transform:translateY(-1%) rotate(2.5deg)}}
-  .couple .heartlink{font-size:calc(var(--fh)*.34);margin:0 -6px calc(var(--fh)*.34);animation:heartbeat 1.1s ease-in-out infinite;z-index:2}
-  @keyframes heartbeat{30%{transform:scale(1.3)}}
-  .couple .names{display:flex;gap:4px;margin-top:5px;max-width:calc(var(--fh)*3.4)}
-  .chip{display:flex;align-items:center;gap:4px;background:rgba(60,8,30,.62);border:1px solid rgba(255,205,225,.55);
-    border-radius:999px;padding:2px 8px 2px 2px;color:#fff;font-size:calc(var(--fh)*.148);font-weight:600;white-space:nowrap;
-    overflow:hidden;text-overflow:ellipsis;max-width:calc(var(--fh)*1.85)}
-  .chip.gold{border-color:#ffd76a;background:rgba(110,60,0,.72)}
-  .chip .av{flex:none;width:calc(var(--fh)*.21);height:calc(var(--fh)*.21);border-radius:50%;overflow:hidden;display:grid;place-items:center;
-    color:#fff;font-weight:700;font-size:calc(var(--fh)*.12)}
-  .chip .av img{width:100%;height:100%;object-fit:cover}
-  .couple .crown{font-size:calc(var(--fh)*.3);line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
-  .couple.guest{opacity:.96}
-  .couple.leaving{opacity:0;transition:left 1.6s,top 1.6s,opacity 1.2s}
+  /* ---------- Nhân vật ---------- */
+  .person{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;will-change:transform}
+  .person .figwrap{filter:drop-shadow(0 5px 6px rgba(90,10,40,.35));animation:bob 2.8s ease-in-out infinite}
+  .person .figwrap svg{height:var(--fh,120px);display:block}
+  .person.flip .figwrap{transform:scaleX(-1);animation:bobFlip 2.8s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-1.8%)}}
+  @keyframes bobFlip{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-1.8%)}}
+  .person.walking .figwrap{animation:walkBob .34s ease-in-out infinite}
+  .person.flip.walking .figwrap{animation:walkBobFlip .34s ease-in-out infinite}
+  @keyframes walkBob{50%{transform:translateY(-3.2%)}}
+  @keyframes walkBobFlip{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-3.2%)}}
+  .person .leg,.person .arm{transform-box:fill-box;transform-origin:50% 6%}
+  .person.walking .legL{animation:swing .34s ease-in-out infinite alternate}
+  .person.walking .legR{animation:swing .34s ease-in-out infinite alternate-reverse}
+  .person.walking .armL{animation:swingArm .34s ease-in-out infinite alternate-reverse}
+  .person.walking .armR{animation:swingArm .34s ease-in-out infinite alternate}
+  @keyframes swing{from{transform:rotate(13deg)}to{transform:rotate(-13deg)}}
+  @keyframes swingArm{from{transform:rotate(10deg)}to{transform:rotate(-10deg)}}
+  .person.dance .figwrap{animation:danceA .5s ease-in-out infinite}
+  @keyframes danceA{25%{transform:translateY(-5%) rotate(-3deg)}75%{transform:translateY(-1%) rotate(3deg)}}
+  .person.flip.dance .figwrap{animation:danceAF .5s ease-in-out infinite}
+  @keyframes danceAF{25%{transform:scaleX(-1) translateY(-5%) rotate(3deg)}75%{transform:scaleX(-1) translateY(-1%) rotate(-3deg)}}
+  .person .chip{display:flex;align-items:center;gap:3px;background:rgba(60,8,30,.6);border:1px solid rgba(255,205,225,.5);
+    border-radius:999px;padding:1.5px 7px 1.5px 1.5px;color:#fff;font-weight:600;white-space:nowrap;margin-top:1px;
+    font-size:calc(var(--fh,120px)*.105);max-width:calc(var(--fh,120px)*1.5);overflow:hidden}
+  .person.wedding .chip{border-color:#ffd76a;background:rgba(110,60,0,.72)}
+  .person .chip .nm{overflow:hidden;text-overflow:ellipsis}
+  .person .chip .av{flex:none;width:calc(var(--fh,120px)*.17);height:calc(var(--fh,120px)*.17);border-radius:50%;overflow:hidden;
+    display:grid;place-items:center;color:#fff;font-weight:700;font-size:calc(var(--fh,120px)*.1)}
+  .person .chip .av img{width:100%;height:100%;object-fit:cover}
+  .person .crown{position:absolute;top:calc(var(--fh,120px)*-.16);font-size:calc(var(--fh,120px)*.26);z-index:3;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));animation:bob 2.2s ease-in-out infinite}
 
   /* ---------- Khung trên ---------- */
-  #left{position:absolute;top:calc(var(--safe) + var(--u)*2);left:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*1);max-width:calc(100% - var(--side)*2 - var(--u)*42)}
+  #left{position:absolute;top:calc(var(--safe) + var(--u)*2);left:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*1);max-width:calc(100% - var(--side)*2 - var(--u)*42);z-index:2000}
   #rules{background:rgba(140,20,70,.55);color:#ffeef6;border:1px solid rgba(255,190,215,.4);border-radius:calc(var(--u)*1.6);
     padding:calc(var(--u)*.8) calc(var(--u)*1.8);font-size:calc(var(--u)*2);line-height:1.45;text-shadow:0 1px 2px #0008}
+  #rules:empty{display:none}
   #guide{background:linear-gradient(100deg,rgba(170,30,90,.92),rgba(230,80,140,.9));color:#fff;border:1px solid rgba(255,210,230,.9);
     border-radius:calc(var(--u)*1.6);padding:calc(var(--u)*.8) calc(var(--u)*1.8);font-size:calc(var(--u)*2.5);font-weight:700;line-height:1.3;
     text-shadow:0 1px 3px #0009;box-shadow:0 0 calc(var(--u)*1.6) rgba(255,120,180,.6);transition:opacity .35s,transform .35s}
   #guide.out{opacity:0;transform:translateY(calc(var(--u)*-1))}
   #guide:empty{display:none}
-  /* thanh tiến trình mốc mắt xem */
   #goal{background:rgba(50,8,26,.66);border:1px solid rgba(255,205,110,.65);border-radius:calc(var(--u)*1.6);
     padding:calc(var(--u)*.9) calc(var(--u)*1.8);color:#ffe9b8;font-size:calc(var(--u)*2.1);font-weight:600;min-width:calc(var(--u)*34)}
   #goal .bar{height:calc(var(--u)*1.5);background:rgba(255,255,255,.18);border-radius:999px;margin-top:calc(var(--u)*.7);overflow:hidden}
   #goal .bar i{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#ff7eb0,#ffc93c);transition:width 1.2s ease}
   #goal .tiername{color:#ffd76a}
 
-  #side{position:absolute;top:calc(var(--safe) + var(--u)*2);right:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1)}
+  #side{position:absolute;top:calc(var(--safe) + var(--u)*2);right:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1);z-index:2000}
   #board{background:rgba(60,10,32,.62);color:#ffe3ef;border:1px solid rgba(255,180,210,.4);border-radius:calc(var(--u)*2);
     padding:calc(var(--u)*1) calc(var(--u)*2);font-size:calc(var(--u)*2.1);min-width:calc(var(--u)*27)}
   #board h4{margin:0 0 calc(var(--u)*.5);font-size:calc(var(--u)*2.5);color:#ffd9e8}
@@ -85,8 +92,7 @@
   .toast.out{opacity:0;transform:translateX(30px)}
   @keyframes tin{from{opacity:0;transform:translateX(calc(var(--u)*30)) scale(.9)}}
 
-  /* hàng chờ lên sân khấu: góc dưới trái */
-  #queue{position:absolute;left:calc(var(--side) + var(--u)*1);bottom:calc(var(--u)*2);background:rgba(45,6,22,.6);
+  #queue{position:absolute;left:calc(var(--side) + var(--u)*1);bottom:calc(var(--u)*2);background:rgba(45,6,22,.6);z-index:2000;
     border:1px solid rgba(255,190,215,.35);border-radius:calc(var(--u)*1.8);padding:calc(var(--u)*.9) calc(var(--u)*1.6);
     color:#ffe9f2;font-size:calc(var(--u)*2);line-height:1.5;max-width:calc(var(--u)*38)}
   #queue b{color:#ffd76a}
@@ -95,7 +101,7 @@
 
   /* ---------- MC ---------- */
   #mc{position:absolute;left:calc(var(--side) + var(--u)*1);top:calc(var(--u)*30);display:flex;flex-direction:column-reverse;align-items:flex-start;
-    gap:calc(var(--u)*1.4);max-width:calc(100% - var(--side)*2 - var(--u)*42);z-index:30;
+    gap:calc(var(--u)*1.4);max-width:calc(100% - var(--side)*2 - var(--u)*42);z-index:2100;
     opacity:0;transform:translateX(-110%);transition:transform .7s cubic-bezier(.2,.9,.3,1.1),opacity .5s;pointer-events:none}
   #mc.on{opacity:1;transform:none}
   #mc .pic{flex:none;width:calc(var(--u)*12.5);height:calc(var(--u)*15);filter:drop-shadow(0 4px 10px #000a)}
@@ -105,12 +111,11 @@
   #mc .say b{display:block;font-size:calc(var(--u)*2.1);color:#c2185b;margin-bottom:calc(var(--u)*.3)}
   #mc .say::before{content:'';position:absolute;left:calc(var(--u)*5);bottom:calc(var(--u)*-2.2);border:calc(var(--u)*1) solid transparent;border-top:calc(var(--u)*1.2) solid #e75480}
 
-  #status{position:absolute;top:calc(var(--u0)*.6);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:calc(var(--u0)*2.2);color:#fff;
-    background:rgba(0,0,0,.5);padding:calc(var(--u0)*.4) calc(var(--u0)*1.6);border-radius:999px;max-width:90%;overflow:hidden;text-overflow:ellipsis;z-index:40}
+  #status{position:absolute;top:calc(var(--u0)*.6);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:calc(var(--u0)*2.2);color:#fff;z-index:2200;
+    background:rgba(0,0,0,.5);padding:calc(var(--u0)*.4) calc(var(--u0)*1.6);border-radius:999px;max-width:90%;overflow:hidden;text-overflow:ellipsis}
   #status.err{background:rgba(140,20,20,.85)} #status.demo{background:rgba(150,30,90,.85)}
-  /* ẩn nhãn LIVE trên sóng như game chùa (TikTok dễ tưởng phát lại) */
   #status.ok{display:none!important}
-  #sound{position:absolute;right:calc(var(--u)*2);bottom:calc(var(--u)*2);font:inherit;font-size:calc(var(--u)*2.6);color:#fff;cursor:pointer;z-index:40;
+  #sound{position:absolute;right:calc(var(--u)*2);bottom:calc(var(--u)*2);font:inherit;font-size:calc(var(--u)*2.6);color:#fff;cursor:pointer;z-index:2200;
     background:rgba(170,30,90,.88);border:1px solid rgba(255,210,230,.6);border-radius:999px;padding:calc(var(--u)*1) calc(var(--u)*2.4);animation:pulse 1.6s infinite}
   @keyframes pulse{50%{transform:scale(1.06)}}
 </style>
@@ -121,7 +126,7 @@
   <div class="bgimg" id="bgfade"></div>
   <div id="beams"></div>
   <div id="royalglow"></div>
-  <div id="couples"></div>
+  <div id="people"></div>
   <canvas id="fx"></canvas>
   <div id="flash"></div>
   <div id="status"></div>
@@ -137,7 +142,6 @@
   <div id="queue"></div>
   <div id="mc">
     <div class="pic">
-      <!-- MC vẽ sẵn: vest lịch lãm, cầm mic, nơ bướm đỏ -->
       <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="mc-skin" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#ffe2c4"/><stop offset="1" stop-color="#e8b48c"/></radialGradient>
@@ -167,7 +171,7 @@
 <script src="../../LiveBridge/public/livebridge-client.js"></script>
 <script src="js/effects.js"></script>
 <script src="js/audio.js"></script>
-<script src="js/stage.js"></script>
+<script src="js/people.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

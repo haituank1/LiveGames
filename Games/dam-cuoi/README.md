@@ -10,55 +10,56 @@ Game thứ hai của dự án, dùng chung **LiveBridge** với game chùa (khô
 
 Đưa lên OBS / TikTok LIVE Studio: thêm nguồn Browser với URL trên, kích thước **1080×1920** (khung dọc 9:16).
 
-## Cách chơi
+## Cách chơi (v2)
 
+- **Ai vào phòng cũng có mặt ở khuôn viên:** mỗi người xem xuất hiện thành một nhân vật ở khuôn viên
+  tiệc (nửa dưới khung hình), tự đi dạo qua lại. Khi chưa kết duyên, nhân vật mặc đồ đời thường
+  hài hước ngẫu nhiên: áo thun quần đùi, pijama chấm bi, áo Hawaii đeo kính râm, ba lỗ đội mũ ngược,
+  váy hoa ở nhà, đồ thể thao cầm trà sữa...
 - **Tag là cưới:** người xem bình luận `@tên người thương` → người bình luận và người được tag
-  cùng xuất hiện trên sân khấu thành một cặp đôi (người được tag không cần đang xem live).
-  Mỗi cặp đứng trên sân khấu ~22 giây (chỉnh `coupleSec` trong file mapping), tối đa 3 cặp cùng lúc,
-  các cặp sau xếp hàng chờ (hiện ở góc dưới trái). Hết giờ cặp đôi xuống ngồi bàn tiệc phía dưới.
-- **MC** (giống cơ chế "thầy" ở game chùa): hiện lên nói câu vui vẻ / ý nghĩa / hài hước sau mỗi 18–26 giây,
-  giới thiệu từng cặp đôi lên sân khấu, cảm ơn người tặng quà và follow, thông báo khi sảnh nâng cấp.
-  Hàng chờ ưu tiên: nâng cấp sảnh > follow > cảm ơn quà > giới thiệu cặp đôi > chào khách mới.
-- **Quà tặng:** hoa rơi theo mốc xu; từ 10 xu thêm mưa giấy màu, từ 30 xu có pháo hoa, từ 99 xu pháo hoa lớn.
-  Bình luận `pháo hoa` → bắn pháo hoa, `hoa rơi` → mưa hoa hồng, thả đủ 50 tim → cặp đôi trên sân khấu nhảy.
-- **Điểm hạnh phúc:** cặp đôi đang ở vị trí tâm điểm (giữa sân khấu) nhận +50 điểm cho mỗi 1 xu quà tặng
-  trong lúc họ đứng đó (+30 điểm khi lên sân khấu). Bảng **💞 Cặp đôi được yêu thích** ở góc phải;
-  cặp dẫn đầu được đội vương miện 👑. Điểm lưu trong trình duyệt chạy game như game chùa.
+  (không cần đang xem) **"lên đồ" ngay tại chỗ**: một người thành chú rể veston lịch lãm, một người
+  thành cô dâu váy cưới lộng lẫy, rồi nắm tay nhau đi lên sân khấu. Sân khấu có 3 vị trí (giữa là
+  tâm điểm), cặp sau xếp hàng chờ (bảng dưới-trái). Hết giờ trên sân khấu, cặp đôi nắm tay nhau
+  quay xuống khuôn viên đi dạo tiếp — từ đó hai người luôn đi cùng nhau.
+- **MC Anh Tú:** dẫn chương trình như MC đám cưới thật: giới thiệu cặp đôi lên sân khấu, cảm ơn quà,
+  chào khách mới, chúc mừng khi sảnh nâng cấp, xen kẽ câu ý nghĩa và câu hài. Câu chữ sửa trong
+  `LiveBridge/config/mappings/dam-cuoi.json` mục `defaults` (mcLines, mcFunny, mcCouple...).
+- **Điểm hạnh phúc & vương miện:** cặp đôi lên sân khấu được +30 điểm; khi đang ở trên sân khấu,
+  quà khán giả tặng cộng **+50 điểm mỗi xu** cho cặp tâm điểm (hoặc cặp của chính người tặng nếu họ
+  đã có đôi). Top 5 hiện ở bảng "💞 Cặp đôi được yêu thích", cặp dẫn đầu **cả hai cùng đội 👑**.
+  Điểm lưu trong trình duyệt.
+- **Follow** → MC se duyên: người follow được ghép đôi ngẫu nhiên với một khách đang độc thân.
+- **Đủ 50 tim** (like) → tất cả nhân vật trong khuôn viên nhảy mừng.
+- **Quà càng lớn, hiệu ứng càng to:** mưa hoa theo mốc xu, thêm giấy màu từ 10 xu, pháo hoa từ 30 xu,
+  pháo hoa lớn + lóe sáng từ 99 xu. Gõ "pháo hoa" / "hoa rơi" trong bình luận cũng có hiệu ứng.
+- **Nhạc nền:** game tự tạo nhạc lãng mạn + chuông cưới bằng WebAudio. Muốn dùng nhạc thật: thả file
+  nhạc (mp3/ogg/wav/m4a) vào thư mục `audio/` của game, game tự phát thay nhạc tự tạo.
 
-## Nâng cấp sảnh theo mắt xem
+## Sảnh nâng cấp theo TỔNG LƯỢT VIEW tích lũy
 
-Số mắt xem lấy từ TikTok khi đang LIVE thật; chưa LIVE thì đếm người đã tương tác trong 5 phút gần nhất.
-Thanh tiến trình ở góc trên trái luôn cho biết còn bao nhiêu mắt nữa thì lên mốc tiếp theo.
+Không tính mắt xem cùng lúc (khó đạt) — game đếm **tổng lượt view**: mỗi người xem mới (vào phòng,
+bình luận, tặng quà, follow...) tính 1 lượt, **cộng dồn qua mọi phiên live** và lưu trong trình
+duyệt (localStorage). Sân khấu chiếm nửa trên khung hình, khuôn viên rộng ở nửa dưới.
 
-| Mắt xem | Cấp sảnh | Thay đổi |
+| Tổng lượt view | Mốc | Khác biệt |
 |---|---|---|
-| 0 | Lễ Ấm Áp | `bg.webp` – cổng hoa hồng pastel |
-| 100 | Hoa Khai | `bg-1.webp` – thêm đèn chùm, hoa hai bên sân khấu |
-| 300 | Kim Tuyến | `bg-2.webp` – tường kim tuyến vàng, 2 đèn chùm lớn |
-| 500 | Lung Linh | `bg-3.webp` – sảnh hoàng gia cẩm thạch vàng |
-| 1.000 | Đại Tiệc Vàng | nền 500 + tia sáng sân khấu xoay + mật độ lấp lánh tăng |
-| 2.000 | Đám Cưới Hoàng Gia | thêm hào quang vàng nhấp nháy + pháo hoa chúc mừng định kỳ từ hiệu ứng mốc |
+| 0 | Lễ Ấm Áp | Nền `bg.webp` |
+| 500 | Hoa Khai | Nền `bg-1.webp` |
+| 2.000 | Kim Tuyến | Nền `bg-2.webp` |
+| 5.000 | Lung Linh | Nền `bg-3.webp` |
+| 10.000 | Đại Tiệc Vàng | Nền `bg-3.webp` + tia sáng sân khấu xoay |
+| 20.000 | Đám Cưới Hoàng Gia | Thêm hào quang vàng + pháo hoa chúc mừng định kỳ |
 
-Mỗi nền có điểm đặt chân sân khấu riêng (`FILE_ANCHOR` trong `js/main.js`) để cặp đôi luôn đứng đúng sàn
-dù mỗi ảnh vẽ sân khấu ở độ cao khác nhau. Đổi file nền theo mốc cũng chỉnh được ở trang quản trị (bgRules)
-hoặc trong `defaults` của `LiveBridge/config/mappings/dam-cuoi.json`.
+Thanh tiến trình góc trên-trái luôn hiện tổng lượt view và còn bao nhiêu lượt nữa lên mốc tiếp theo.
+Muốn đặt lại từ đầu: xóa localStorage khóa `damcuoi.totalviews` trong trình duyệt (hoặc mở game
+bằng trình duyệt khác).
 
-## Âm thanh
+## Ghi chú kỹ thuật
 
-- Chưa có file nhạc: game tự tạo nhạc nền lãng mạn (vòng hợp âm C–Am–F–G) + chuông cưới, tiếng pháo hoa,
-  hợp âm chúc mừng khi cặp đôi lên sân khấu — tất cả bằng WebAudio, không cần file.
-- Muốn nhạc thật: thả file vào `Games/dam-cuoi/audio/` (xem `audio/README.txt`), tải lại trang game.
-
-## Sửa câu MC / luật chơi
-
-Sửa trong `defaults` của `LiveBridge/config/mappings/dam-cuoi.json` rồi tải lại trang game:
-`mcLines` (câu ý nghĩa), `mcFunny` (câu hài), `mcCouple` (`{a}` `{b}` = tên 2 người),
-`mcThank` / `mcGreet` / `mcFollowLines` (`{ten}` = tên người xem), `mcMilestone` (`{moc}` = tên mốc),
-`mcName`, `mcMinSec`/`mcMaxSec`, `coupleSec` (số giây một cặp đứng trên sân khấu), `guideLines`, `rulesLines`.
-Gói quà → hành động sửa ở trang quản trị như game chùa (file mapping `dam-cuoi`).
-
-## Trạng thái
-
-- Đã có bản demo chạy không cần TikTok (`?demo=1`): tự sinh cặp đôi, quà, follow và mắt xem tăng dần
-  để xem đủ các cấp sảnh.
-- Chưa kiểm chứng với quà TikTok thật (kế thừa cùng LiveBridge với game chùa).
+- Nhân vật là SVG vẽ trong `js/people.js` (vẽ 1 lần, hoạt ảnh chân tay bằng CSS, di chuyển bằng rAF),
+  tối đa 110 nhân vật trên sân cùng lúc.
+- Điểm neo sàn sân khấu của từng nền nằm trong `FILE_ANCHOR` (js/main.js); nền `bg-2.webp` có đài
+  phun nước ở giữa khuôn viên nên nhân vật tự tránh vùng đó (`FILE_AVOID`).
+- Trạng thái kiểm chứng: đã test bản demo bằng môi trường giả lập + chụp ảnh thật từ trình duyệt
+  headless (khách đi dạo, cặp đôi lên sân khấu, các mốc sảnh). Quà TikTok thật vẫn cần kiểm chứng
+  khi live thật (LiveBridge chưa từng nhận quà thật — giống game chùa).
