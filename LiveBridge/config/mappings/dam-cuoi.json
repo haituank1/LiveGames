@@ -1,0 +1,195 @@
+{
+  "actions": {
+    "confetti": "Mưa giấy màu + hoa",
+    "couple": "Đưa người tương tác + người được tag (hoặc một người xem ngẫu nhiên) lên sân khấu làm cặp đôi",
+    "dance": "Các cặp đôi trên sân khấu nhảy chúc mừng + tim bay",
+    "fireworks": "Bắn pháo hoa",
+    "join": "Người xem vào phòng (MC chào, chưa lên sân khấu)",
+    "petals": "Mưa cánh hoa hồng",
+    "spotlight": "Đưa người tương tác lên sân khấu cùng một bạn đồng hành ngẫu nhiên"
+  },
+  "chat": {
+    "cooldownSec": 5,
+    "rules": [
+      {
+        "action": "fireworks",
+        "match": "pháo hoa|phao hoa",
+        "value": 2
+      },
+      {
+        "action": "petals",
+        "match": "hoa rơi|mưa hoa|hoa roi",
+        "value": 2
+      },
+      {
+        "action": "couple",
+        "match": "cưới|kết hôn|cuoi|yêu|yeu",
+        "value": 1
+      }
+    ]
+  },
+  "defaults": {
+    "bgRules": [
+      {
+        "bg": "bg-1.webp",
+        "views": 100
+      },
+      {
+        "bg": "bg-2.webp",
+        "views": 300
+      },
+      {
+        "bg": "bg-3.webp",
+        "views": 500
+      },
+      {
+        "bg": "bg-3.webp",
+        "views": 1000
+      },
+      {
+        "bg": "bg-3.webp",
+        "views": 2000
+      }
+    ],
+    "coupleSec": 22,
+    "mcCouple": [
+      "Xin giới thiệu cặp đôi {a} ❤ {b}! Mời hai bạn lên sân khấu ra mắt bà con hai họ... online!",
+      "Một tràng pháo tay cho {a} và {b}! Trai tài gái sắc, đúng là trời sinh một cặp!",
+      "{a} ơi, {b} ơi — hai bạn chính thức là cặp đôi của sảnh cưới lúc này!",
+      "MC xin được se duyên cho {a} ❤ {b}. Chúc hai bạn trăm năm hạnh phúc, đầu bạc răng long!"
+    ],
+    "mcFollowLines": [
+      "Cảm ơn {ten} đã follow! Từ nay bạn là khách VIP của sảnh cưới này nhé!"
+    ],
+    "mcFunny": [
+      "MC xin thông báo: ai còn độc thân thì cứ tag crush vào đây, MC gả luôn, khỏi cần mai mối!",
+      "Cưới online tiện lắm: không cần phong bì, chỉ cần phong... tim thôi ạ!",
+      "Cô dâu chú rể hôm nay đẹp quá, MC đứng cạnh cũng thấy mình... cần đi spa gấp.",
+      "Ai tag người yêu cũ vào đây là MC tính phí gấp đôi nhé, vì tội làm sảnh cưới thêm phần kịch tính!",
+      "Xin nhắc nhẹ: thả tim là miễn phí, còn bỏ lỡ người thương là mất phí cả đời đấy!",
+      "Hôm nay ai lên sân khấu cũng auto đẹp — vì sảnh này có filter hạnh phúc sẵn rồi!"
+    ],
+    "mcGreet": [
+      "Chào {ten} đã ghé sảnh cưới! Tìm chỗ ngồi đẹp, chuẩn bị tag người thương nhé!",
+      "Hoan nghênh {ten}! Đám cưới đang vui, bạn vào là vui gấp đôi!"
+    ],
+    "mcGuide": [
+      "💌 Gõ \"@tên người thương\" → 2 bạn lên sân khấu",
+      "🎁 Tặng quà → pháo hoa + mưa hoa",
+      "💬 Gõ \"pháo hoa\" → bắn pháo hoa",
+      "💬 Gõ \"hoa rơi\" → mưa hoa hồng",
+      "❤️ Thả tim → cặp đôi nhảy chúc mừng"
+    ],
+    "mcLines": [
+      "Chúc mừng hạnh phúc! Hôm nay sảnh cưới online của chúng ta lại thêm một cặp đôi đẹp nữa rồi!",
+      "Tình yêu là thứ duy nhất càng chia sẻ càng nhiều thêm. Cảm ơn mọi người đã tới chung vui!",
+      "Trăm năm tình viên mãn, bạc đầu nghĩa phu thê — chúc các cặp đôi của chúng ta mãi bền chặt!",
+      "Một like của bạn là một lời chúc phúc. Một follow là một phong bao lì xì tinh thần đấy!",
+      "Sảnh cưới đang nóng dần lên! Mọi người tag người thương vào để cùng lên sân khấu nào!",
+      "Đám cưới vui nhất là đám cưới đông khách. Mời bà con cô bác thả tim cho rộn ràng nào!"
+    ],
+    "mcMaxSec": 26,
+    "mcMilestone": [
+      "🎉 Sảnh cưới vừa nâng cấp lên {moc}! Càng đông càng đẹp — cảm ơn cả nhà đã tới chung vui!",
+      "Không khí quá tuyệt vời! Chúng ta đã chạm mốc {moc} rồi mọi người ơi!"
+    ],
+    "mcMinSec": 18,
+    "mcName": "MC Anh Tú",
+    "mcOn": true,
+    "mcThank": [
+      "Cảm ơn {ten} đã tặng quà mừng cưới! Phong bao này MC ghi sổ vàng luôn nhé!",
+      "{ten} chơi lớn quá! Cặp đôi trên sân khấu thay mặt hai họ cảm ơn bạn!",
+      "Quà của {ten} vừa tới là pháo hoa nổ tung trời luôn. Quá đã!"
+    ],
+    "musicOn": true,
+    "musicShuffle": true,
+    "musicVolume": 35,
+    "rulesLines": [
+      "💌 Tag @tên người thương → cùng lên sân khấu",
+      "🎁 Quà càng lớn, pháo hoa càng to",
+      "👁 Đông mắt xem → sảnh cưới nâng cấp"
+    ],
+    "safeSide": 2,
+    "safeTop": 5,
+    "sfxOn": true,
+    "sfxVolume": 55,
+    "uiScale": 120
+  },
+  "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
+  "follow": {
+    "action": "spotlight",
+    "label": "Theo dõi",
+    "value": 1
+  },
+  "game": "dam-cuoi",
+  "giftTiers": [
+    {
+      "action": "fireworks",
+      "combo": 1,
+      "label": "Pháo hoa lớn",
+      "minDiamonds": 99,
+      "value": 3
+    },
+    {
+      "action": "fireworks",
+      "combo": 1,
+      "label": "Pháo hoa",
+      "minDiamonds": 30,
+      "value": 2
+    },
+    {
+      "action": "confetti",
+      "combo": 1,
+      "label": "Mưa giấy màu",
+      "minDiamonds": 10,
+      "value": 2
+    },
+    {
+      "action": "petals",
+      "combo": 1,
+      "label": "Mưa hoa",
+      "minDiamonds": 5,
+      "value": 2
+    },
+    {
+      "action": "petals",
+      "combo": 1,
+      "label": "Hoa rơi",
+      "minDiamonds": 1,
+      "value": 1
+    }
+  ],
+  "gifts": [
+    {
+      "action": "petals",
+      "combo": 1,
+      "diamonds": 1,
+      "label": "Hoa hồng",
+      "name": "Rose",
+      "value": 1
+    },
+    {
+      "action": "confetti",
+      "combo": 1,
+      "diamonds": 1,
+      "label": "Bánh vòng",
+      "name": "Doughnut",
+      "value": 1
+    }
+  ],
+  "join": {
+    "action": "join",
+    "value": 1
+  },
+  "like": {
+    "action": "dance",
+    "every": 50,
+    "label": "Thả tim",
+    "value": 1
+  },
+  "share": {
+    "action": "confetti",
+    "label": "Chia sẻ",
+    "value": 1
+  }
+}

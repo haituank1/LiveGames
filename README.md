@@ -321,3 +321,10 @@ Game có thể gửi lên `{ "type": "simulate", "event": { "kind": "gift", "use
   rồi đặt vào `config/default.json` → `tiktok.connectionOptions`.
 - Chỉ nhận sự kiện khi tài khoản **đang LIVE**.
 - LiveBridge mặc định chỉ nghe trên `127.0.0.1`. Muốn máy khác trong mạng LAN truy cập thì đổi `host` thành `0.0.0.0`.
+
+## Game đám cưới online (Games/dam-cuoi)
+
+Game thứ hai, dùng chung LiveBridge: người xem bình luận `@tên người thương` thì cả hai cùng lên
+sân khấu làm cặp đôi, MC dẫn chương trình, quà tặng bắn pháo hoa / mưa hoa, và sảnh cưới **nâng cấp
+theo mốc mắt xem** (100 / 300 / 500 / 1.000 / 2.000). Chạy thử: mở
+http://localhost:8787/Games/dam-cuoi/?demo=1 — chi tiết trong `Games/dam-cuoi/README.md`.
