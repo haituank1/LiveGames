@@ -520,7 +520,7 @@ function applyConfig(c) {
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
   MC.milestone = cfg.mcMilestone || [];
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
-  P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa });
+  P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
   A.setConfig(cfg);
   renderRules(); startGuide(); renderBoard(); refreshBg(false);
@@ -617,7 +617,7 @@ if (isDemo) {
     mcName: 'MC Anh Tú',
     coupleSec: 25,
     phongToGoiTen: 1.32, coCapGiua: 1.18, coCapBen: 0.95, soCapToiDa: 3,
-    zoomGoiTen: 1.18, zoomBamTheo: 1.08,
+    zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
       { viewers: 500, file: 'bg-full.webp' }, { viewers: 2000, file: 'bg-full.webp' },

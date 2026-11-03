@@ -32,8 +32,8 @@ const stageSlots = [null, null, null];
 const STAGE_FRAME = {
   zoneX: [34, 66],        // khoảng x được phép đứng trên bục
   zoneDropMax: 1.6,       // đứng thấp hơn đường lễ tối đa (vẫn trên mặt bục)
-  spots: [50, 37, 63],    // tâm 3 vị trí cặp: giữa + 2 bên CÁCH XA nhau cho thoáng
-  pairOff: [2.2, 2.0, 2.0],   // nửa khoảng cách 2 người trong cặp: XÍCH GẦN nhau, âu yếm
+  spots: [50, 42, 58],    // tâm 3 vị trí cặp: giữa + 2 bên (khoảng trống giữa các cặp đã thu hẹp ~50%)
+  pairOff: [1.8, 1.7, 1.7],   // nửa khoảng cách 2 người trong cặp: đứng SÁT nhau, âu yếm
   sideDrop: 0.55,         // cặp 2 bên đứng thấp hơn cặp giữa một chút
   groomDrop: 0.5,         // chú rể đứng hơi thấp hơn (trước) cô dâu
 };
@@ -340,8 +340,8 @@ function promoteStage() {
     // Kẹp điểm đứng cuối vào đúng vùng an toàn trên bục (khung cố định)
     const clampX = v => Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], v));
     const yMax = stageY + STAGE_FRAME.zoneDropMax;
-    walkPath(leftP, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: clampX(SPOTS[i].x - off), y: Math.min(yMax, yL) }], 'toStage');
-    walkPath(rightP, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: clampX(SPOTS[i].x + off), y: Math.min(yMax, yR) }], 'toStage', () => arriveStage(c));
+    walkPath(leftP, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: clampX(STAGE_FRAME.spots[i] - off), y: Math.min(yMax, yL) }], 'toStage');
+    walkPath(rightP, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: clampX(STAGE_FRAME.spots[i] + off), y: Math.min(yMax, yR) }], 'toStage', () => arriveStage(c));
     if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
   }
 }
@@ -391,6 +391,11 @@ P.setTune = function (t) {
     const v = Number(t[k]);
     if (isFinite(v) && v > 0) P.tune[k] = v;
   }
+  // Khoảng cách đội hình trên bục cũng chỉnh được từ config
+  const offC = Number(t.pairOffC), offS = Number(t.pairOffS), side = Number(t.spotSide);
+  if (isFinite(offC) && offC > 0) STAGE_FRAME.pairOff[0] = offC;
+  if (isFinite(offS) && offS > 0) { STAGE_FRAME.pairOff[1] = offS; STAGE_FRAME.pairOff[2] = offS; }
+  if (isFinite(side) && side > 20 && side < 50) { STAGE_FRAME.spots[1] = side; STAGE_FRAME.spots[2] = 100 - side; }
 };
 P.coupleOf = function (uid) { const p = people.get(uid); return p ? p.couple : null; };
 P.danceAll = function (sec = 5) {

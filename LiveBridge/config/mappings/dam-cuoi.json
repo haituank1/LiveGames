@@ -125,7 +125,10 @@
     "coCapBen": 0.95,
     "soCapToiDa": 3,
     "zoomGoiTen": 1.18,
-    "zoomBamTheo": 1.08
+    "zoomBamTheo": 1.08,
+    "lechCapGiua": 1.8,
+    "lechCapBen": 1.7,
+    "tamCapBen": 42
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {
