@@ -25,11 +25,11 @@ function pickClass() {
   return 'tan-binh';
 }
 
-/* Ô sàn: 5 hàng so le, hàng dưới to hơn (phối cảnh) */
-const ROWS = [52, 60, 68, 76, 84];
+/* Ô sàn: 6 hàng so le, hàng dưới to hơn (phối cảnh) */
+const ROWS = [53, 60, 67, 74, 81, 87];
 const slots = [];
 ROWS.forEach((y, ri) => {
-  for (let i = 0; i < 9; i++) slots.push({ x: 8 + i * 10.5 + (ri % 2 ? 3 : 0), y, by: null });
+  for (let i = 0; i < 8; i++) slots.push({ x: 10 + i * 11.4 + (ri % 2 ? 2.5 : 0), y, by: null });
 });
 
 let box = null, Wpx = 400, Hpx = 700;
@@ -50,8 +50,8 @@ function makeEl(p) {
   return el;
 }
 function scaleFor(p) {
-  if (p.onPodium) return Hpx * 0.30;
-  return Hpx * 0.155 * (0.74 + Math.max(0, (p.y - ROWS[0])) / (ROWS[ROWS.length - 1] - ROWS[0]) * 0.36) * (p.leader ? 1.13 : 1);
+  if (p.onPodium) return Hpx * 0.27;
+  return Hpx * 0.14 * (0.74 + Math.max(0, (p.y - ROWS[0])) / (ROWS[ROWS.length - 1] - ROWS[0]) * 0.34) * (p.leader ? 1.13 : 1);
 }
 function render(p) {
   p.el.style.setProperty('--fh', scaleFor(p) + 'px');
@@ -97,7 +97,10 @@ P.spawn = function (user) {
   render(p);
   const s = nearestFreeSlot(50 + rand(-20, 20), 84, p);
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    if (s) { takeSlot(p, s); render(p); }
+    if (p.onPodium) { render(p); return; }   // vừa vào đã được lên bục (quà lớn): đừng kéo xuống ô sàn
+    if (s && !s.by) takeSlot(p, s);
+    else if (!p.slot) { p.x = rand(12, 88); p.y = rand(58, 85); }   // sàn đầy ô: đứng tự do trong sàn
+    render(p);
     if (W.effects) W.effects.burstAt(p.x / 100, (p.y - 8) / 100, classById(p.cls).color, 14);
   }));
   return p;
@@ -112,7 +115,7 @@ P.setClass = function (p, clsId) {
 P.toPodium = function (p) {
   if (!p || p.onPodium) return;
   freeSlot(p);
-  p.onPodium = true; p.x = 50; p.y = 40;
+  p.onPodium = true; p.x = 50; p.y = 39.5;
   p.el.classList.add('onpodium');
   render(p);
 };
@@ -122,6 +125,7 @@ P.offPodium = function (p) {
   p.el.classList.remove('onpodium', 'grand');
   const s = nearestFreeSlot(p.x + rand(-14, 14), 76, p);
   if (s) takeSlot(p, s);
+  else { p.x = rand(12, 88); p.y = rand(58, 85); }
   render(p);
 };
 P.setLeader = function (id) {

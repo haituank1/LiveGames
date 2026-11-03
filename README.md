@@ -328,3 +328,13 @@ Game thứ hai, dùng chung LiveBridge: người xem bình luận `@tên ngườ
 sân khấu làm cặp đôi, MC dẫn chương trình, quà tặng bắn pháo hoa / mưa hoa, và sảnh cưới **nâng cấp
 theo mốc mắt xem** (100 / 300 / 500 / 1.000 / 2.000). Chạy thử: mở
 http://localhost:8787/Games/dam-cuoi/?demo=1 — chi tiết trong `Games/dam-cuoi/README.md`.
+
+## Game sàn nhảy (Games/san-nhay)
+
+Game thứ ba, dùng chung LiveBridge: mọi người xem thành một dancer chibi trên sàn nhảy, chia
+**6 lớp nhân vật** (Đại Gia, Idol, DJ, Dân Quẩy, Mascot Vịt, Tân Binh — mỗi lớp một hình, một điệu
+nhảy, một màu hiệu ứng), dancer lên bục giữa **nhảy solo kiểu Audition** (phím ←↑↓→, chấm
+PERFECT/GREAT/COOL/MISS + combo), thanh **Party Energy** đầy thì cả sàn quẩy Party Max, quà vừa
+**nổ hũ vàng**, quà từ 99 xu **đổ bộ lên bục có cánh + hào quang**, bảng vàng tuần phong
+Chủ Tịch Sàn / Phó Chủ Tịch / Thư Ký. Chạy thử: mở
+http://localhost:8787/Games/san-nhay/?demo=1 — chi tiết trong `Games/san-nhay/README.md`.

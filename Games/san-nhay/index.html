@@ -16,14 +16,14 @@
     radial-gradient(ellipse 70% 30% at 84% 16%,rgba(150,60,255,.26),transparent 70%),
     linear-gradient(180deg,#120826 0%,#1d0b42 34%,#2a1152 46%,#180a38 47%,#241055 100%)}
   #stage[data-venue="beach"] #scene{background:
-    radial-gradient(circle 12% at 82% 10%,rgba(255,240,170,.95),rgba(255,240,170,0) 70%),
+    radial-gradient(circle 52px at 82% 10%,rgba(255,240,170,.95),rgba(255,240,170,0) 70%),
     radial-gradient(ellipse 90% 34% at 50% 44%,rgba(255,150,60,.30),transparent 70%),
     linear-gradient(180deg,#57b8f0 0%,#9fdcf7 30%,#ffe9a8 46%,#c98d4e 47%,#a06a35 100%)}
   #stage[data-venue="snow"] #scene{background:
     radial-gradient(ellipse 90% 34% at 50% 44%,rgba(140,200,255,.30),transparent 70%),
-    radial-gradient(circle 1.2% at 12% 12%,#fff,transparent),radial-gradient(circle 1% at 30% 22%,#fff,transparent),
-    radial-gradient(circle 1.3% at 55% 8%,#fff,transparent),radial-gradient(circle 1% at 72% 20%,#fff,transparent),
-    radial-gradient(circle 1.2% at 88% 30%,#fff,transparent),radial-gradient(circle 1% at 42% 30%,#fff,transparent),
+    radial-gradient(circle 4px at 12% 12%,#fff 98%,transparent),radial-gradient(circle 3px at 30% 22%,#fff 98%,transparent),
+    radial-gradient(circle 4px at 55% 8%,#fff 98%,transparent),radial-gradient(circle 3px at 72% 20%,#fff 98%,transparent),
+    radial-gradient(circle 4px at 88% 30%,#fff 98%,transparent),radial-gradient(circle 3px at 42% 30%,#fff 98%,transparent),
     linear-gradient(180deg,#16264f 0%,#274a86 34%,#3a66ab 46%,#dfeaf7 47%,#b9cfe8 100%)}
   /* sàn nhảy: lưới neon phát sáng ở nửa dưới */
   #floorgrid{position:absolute;left:-10%;right:-10%;top:47%;bottom:0;opacity:.5;pointer-events:none;
@@ -49,7 +49,7 @@
     animation:beams 18s linear infinite}
   #beams.on{opacity:1}
   @keyframes beams{to{transform:rotate(360deg)}}
-  #podium{position:absolute;left:50%;top:40.5%;transform:translate(-50%,-50%);width:38%;height:calc(var(--u0)*5);pointer-events:none;
+  #podium{position:absolute;left:50%;top:39%;transform:translate(-50%,-50%);width:38%;height:calc(var(--u0)*5);pointer-events:none;
     border-radius:50%;background:radial-gradient(ellipse at 50% 38%,#ffe9ff,#c86bff 55%,#5e2a9e 100%);
     box-shadow:0 0 26px rgba(230,130,255,.9),0 0 60px rgba(160,60,255,.45)}
   #podium::after{content:'BỤC SOLO';position:absolute;left:50%;top:108%;transform:translateX(-50%);white-space:nowrap;
@@ -99,6 +99,9 @@
   .dancer .chip .av{flex:none;width:calc(var(--fh,120px)*.17);height:calc(var(--fh,120px)*.17);border-radius:50%;overflow:hidden;
     display:grid;place-items:center;color:#fff;font-weight:700;font-size:calc(var(--fh,120px)*.1)}
   .dancer .chip .av img{width:100%;height:100%;object-fit:cover}
+  .dancer.onpodium .chip{font-size:calc(var(--u0)*2.7);max-width:calc(var(--u0)*36)}
+  .dancer.onpodium .chip .av{width:calc(var(--u0)*4.2);height:calc(var(--u0)*4.2);font-size:calc(var(--u0)*2.4)}
+  .dancer.onpodium .bubble{font-size:calc(var(--u0)*2.7);max-width:calc(var(--u0)*38)}
   .dancer .crown{position:absolute;top:calc(var(--fh,120px)*-.15);font-size:calc(var(--fh,120px)*.27);z-index:3;
     filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));animation:crownBob 2.2s ease-in-out infinite}
   @keyframes crownBob{50%{transform:translateY(-6%)}}
@@ -124,7 +127,7 @@
   @keyframes flapR{to{transform:rotate(17deg)}}
 
   /* ---------- Khung trên ---------- */
-  #left{position:absolute;top:calc(var(--safe) + var(--u)*1.6);left:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*.9);z-index:2000;max-width:calc(var(--u)*40)}
+  #left{position:absolute;top:calc(var(--safe) + var(--u)*4.4);left:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*.9);z-index:2000;max-width:calc(var(--u)*40)}
   #energy{background:rgba(20,6,44,.66);border:1px solid rgba(255,150,230,.55);border-radius:calc(var(--u)*1.5);
     padding:calc(var(--u)*.7) calc(var(--u)*1.4);color:#ffe3fb;font-size:calc(var(--u)*1.95);font-weight:700;min-width:calc(var(--u)*33)}
   #energy .bar{height:calc(var(--u)*1.25);background:rgba(255,255,255,.16);border-radius:999px;margin-top:calc(var(--u)*.5);overflow:hidden}
@@ -137,7 +140,7 @@
   #guide:empty{display:none}
   #venue{color:#e9d8ff;font-size:calc(var(--u)*1.85);font-weight:600;background:rgba(20,6,44,.55);
     border:1px solid rgba(190,160,255,.4);border-radius:999px;padding:calc(var(--u)*.45) calc(var(--u)*1.3)}
-  #side{position:absolute;top:calc(var(--safe) + var(--u)*1.6);right:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.9);z-index:2000}
+  #side{position:absolute;top:calc(var(--safe) + var(--u)*4.4);right:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*.9);z-index:2000}
   #board{background:rgba(24,8,50,.62);color:#f3e8ff;border:1px solid rgba(200,160,255,.42);border-radius:calc(var(--u)*1.5);
     padding:calc(var(--u)*.7) calc(var(--u)*1.4);font-size:calc(var(--u)*1.8);min-width:calc(var(--u)*27)}
   #board h4{margin:0 0 calc(var(--u)*.35);font-size:calc(var(--u)*2.05);color:#ffd76a}
