@@ -10,6 +10,7 @@ const P = (W.people = {});
 P.coupleSec = 25;
 const MAX_PEOPLE = 110;
 const COURT = { x1: 5, x2: 95, y1: 55, y2: 96 };       // vùng khuôn viên (% khung)
+let courtY1 = 55;                                        // mép trên khuôn viên, chỉnh theo từng nền
 const SPOTS = [{ x: 50 }, { x: 24 }, { x: 76 }];        // 3 vị trí cặp đôi trên sân khấu
 let box = null, Wpx = 400, Hpx = 700, stageAnchor = 54;
 let avoid = null;                                        // vùng cấm đứng theo nền (vd. đài phun nước)
@@ -145,15 +146,15 @@ function makePersonEl(p) {
 }
 function courtPoint() {
   for (let i = 0; i < 8; i++) {
-    const x = rand(COURT.x1, COURT.x2), y = rand(COURT.y1, COURT.y2);
+    const x = rand(COURT.x1, COURT.x2), y = rand(courtY1, COURT.y2);
     if (avoid && x > avoid.x1 && x < avoid.x2 && y > avoid.y1 && y < avoid.y2) continue;
     return { x, y };
   }
-  return { x: rand(COURT.x1, COURT.x2), y: rand(COURT.y1 + 22, COURT.y2) };
+  return { x: rand(COURT.x1, COURT.x2), y: rand(courtY1 + 22, COURT.y2) };
 }
 function scaleFor(p) {
   if (p.state === 'stage' || p.state === 'toStage') return 0.92;
-  return 0.55 + Math.max(0, (p.y - COURT.y1)) / (COURT.y2 - COURT.y1) * 0.45;
+  return 0.55 + Math.max(0, (p.y - courtY1)) / (COURT.y2 - courtY1) * 0.45;
 }
 function render(p) {
   const s = scaleFor(p), fh = Hpx * 0.155 * s;
@@ -215,6 +216,7 @@ P.init = function (container) { box = container; requestAnimationFrame(loop); };
 P.resize = function (w, h) { Wpx = w; Hpx = h; };
 P.setAnchor = function (y) { stageAnchor = y; };
 P.setAvoid = function (rect) { avoid = rect; };
+P.setCourtY1 = function (y) { courtY1 = y; };
 P.get = id => people.get(id);
 P.count = () => people.size;
 

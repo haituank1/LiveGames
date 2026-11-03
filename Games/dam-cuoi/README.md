@@ -58,8 +58,10 @@ bằng trình duyệt khác).
 
 - Nhân vật là SVG vẽ trong `js/people.js` (vẽ 1 lần, hoạt ảnh chân tay bằng CSS, di chuyển bằng rAF),
   tối đa 110 nhân vật trên sân cùng lúc.
-- Điểm neo sàn sân khấu của từng nền nằm trong `FILE_ANCHOR` (js/main.js); nền `bg-2.webp` có đài
-  phun nước ở giữa khuôn viên nên nhân vật tự tránh vùng đó (`FILE_AVOID`).
+- Điểm neo sàn sân khấu của từng nền nằm trong `FILE_ANCHOR` (js/main.js), mép trên của khuôn viên
+  trong `FILE_COURT` — mỗi nền vẽ sàn sân khấu ở độ cao khác nhau nên phải chỉnh riêng từng nền.
+- Cả 4 nền dùng chung một phong cách minh họa truyện tranh (đồng bộ với nhân vật hoạt hình),
+  cùng bố cục: sân khấu nửa trên, khuôn viên rộng nửa dưới, độ lộng lẫy tăng dần theo mốc.
 - Trạng thái kiểm chứng: đã test bản demo bằng môi trường giả lập + chụp ảnh thật từ trình duyệt
   headless (khách đi dạo, cặp đôi lên sân khấu, các mốc sảnh). Quà TikTok thật vẫn cần kiểm chứng
   khi live thật (LiveBridge chưa từng nhận quà thật — giống game chùa).

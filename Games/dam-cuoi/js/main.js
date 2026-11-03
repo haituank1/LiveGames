@@ -28,8 +28,9 @@ const TIERS = [
   { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-3.webp', royal: 1 },
   { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-3.webp', royal: 2 },
 ];
-const FILE_ANCHOR = { 'bg.webp': 54.5, 'bg-1.webp': 50, 'bg-2.webp': 41, 'bg-3.webp': 57 };
-const FILE_AVOID = { 'bg-2.webp': { x1: 31, x2: 69, y1: 50, y2: 79 } };
+const FILE_ANCHOR = { 'bg.webp': 49, 'bg-1.webp': 58, 'bg-2.webp': 54, 'bg-3.webp': 57 };
+const FILE_AVOID = {};
+const FILE_COURT = { 'bg.webp': 52, 'bg-1.webp': 63, 'bg-2.webp': 57, 'bg-3.webp': 60 };
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
@@ -174,6 +175,7 @@ let bgToken = 0;
 function setBackground(file) {
   P.setAnchor(FILE_ANCHOR[file] || 50);
   P.setAvoid(FILE_AVOID[file] || null);
+  P.setCourtY1(FILE_COURT[file] || 55);
   const tk = ++bgToken;
   const img = new Image();
   img.onload = () => {
