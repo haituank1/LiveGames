@@ -21,15 +21,15 @@ const say = (html, cls) => { statusEl.className = cls || ''; statusEl.innerHTML 
 
 /* ============ Mốc sảnh theo TỔNG lượt view tích lũy ============ */
 const TIERS = [
-  { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg.webp',  royal: 0 },
-  { at: 500,   name: 'Hoa Khai',            file: 'bg.webp',  royal: 0 },
-  { at: 2000,  name: 'Kim Tuyến',           file: 'bg.webp',  royal: 0 },
-  { at: 5000,  name: 'Lung Linh',           file: 'bg-3.webp', royal: 0 },
-  { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-3.webp', royal: 1 },
-  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-3.webp', royal: 2 },
+  { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg-wide.webp', royal: 0 },
+  { at: 500,   name: 'Hoa Khai',            file: 'bg-wide.webp', royal: 0 },
+  { at: 2000,  name: 'Kim Tuyến',           file: 'bg-wide.webp', royal: 0 },
+  { at: 5000,  name: 'Lung Linh',           file: 'bg-wide.webp', royal: 0 },
+  { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-wide.webp', royal: 1 },
+  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-wide.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
-const STAGE_Y = { 'bg.webp': 17.3, 'bg-3.webp': 18.2 };
+const STAGE_Y = { 'bg-wide.webp': 20.6 };
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
@@ -174,12 +174,12 @@ function applyTierFx(tier) {
 }
 let bgToken = 0;
 function setBackground(file) {
-  P.setStageY(STAGE_Y[file] || 17.3);
+  P.setStageY(STAGE_Y[file] || 20.6);
   const tk = ++bgToken;
   const img = new Image();
   img.onload = () => {
     if (tk !== bgToken) return;   // đã có nền mới hơn đang tải — bỏ qua ảnh cũ về muộn
-    for (const id of ['panelC', 'wingL', 'wingR']) $(id).style.backgroundImage = `url("${file}")`;
+    $('backdrop').style.backgroundImage = `url("${file}")`;
   };
   img.src = file;
 }
@@ -198,15 +198,21 @@ const Cam = {
     const mx = (SW / 2) / this.z / WW * 100 + 7, my = (SH / 2) / this.z / WH * 100 + 7;
     P.cull(this.cx - mx, this.cy - my, this.cx + mx, this.cy + my);
   },
-  panTo(cx, cy, z) {
-    this.z = z;
+  clampPos() {
     // Kẹp tâm camera để khung hình không lia ra ngoài phòng (tránh dải đen)
-    const halfW = (SW / 2) / z / WW * 100, halfH = (SH / 2) / z / WH * 100;
+    const halfW = (SW / 2) / this.z / WW * 100, halfH = (SH / 2) / this.z / WH * 100;
     const mX = Math.min(halfW, 49), mY = Math.min(halfH, 49);
-    this.cx = Math.max(mX, Math.min(100 - mX, cx));
-    this.cy = Math.max(mY, Math.min(100 - mY, cy));
+    this.cx = Math.max(mX, Math.min(100 - mX, this.cx));
+    this.cy = Math.max(mY, Math.min(100 - mY, this.cy));
+  },
+  panTo(cx, cy, z) {
+    this.z = z; this.cx = cx; this.cy = cy;
+    this.clampPos();
     this.apply(true);
   },
+  followC: null,
+  follow(couple) { this.followC = couple; this.busyUntil = 0; },
+  unfollow() { this.followC = null; },
   home() { this.panTo(50, 36, 0.63); },
   stage() { this.panTo(50, 15.5, 1.04); },
   toScreen(x, y) {
@@ -214,9 +220,28 @@ const Cam = {
   },
 };
 P.onPairFocus = function (c) {
+  Cam.unfollow();
   Cam.busyUntil = Date.now() + 11000;
   Cam.panTo((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2 - 2, 1.18);
 };
+P.onPairWalk = function (c) { Cam.follow(c); };       // bám theo lúc đi thảm đỏ lên sân khấu
+P.onPairReturn = function (c) { Cam.follow(c); };     // bám theo lúc đi về chỗ
+P.onPairHome = function (c) {                          // về tới nơi: nhả camera, quay về toàn cảnh
+  if (Cam.followC === c) { Cam.unfollow(); Cam.home(); }
+};
+/* Vòng bám camera: nội suy mềm về giữa 2 người đang di chuyển */
+setInterval(() => {
+  const c = Cam.followC;
+  if (!c || !c.a || !c.b) return;
+  const tx = (c.a.x + c.b.x) / 2, ty = (c.a.y + c.b.y) / 2 - 2.5;
+  const dist = Math.hypot(tx - Cam.cx, ty - Cam.cy);
+  const k = Math.min(0.38, 0.13 + dist * 0.012);   // xa thì bắt kịp nhanh, gần thì bám mượt
+  Cam.cx += (tx - Cam.cx) * k;
+  Cam.cy += (ty - Cam.cy) * k;
+  Cam.z += (1.07 - Cam.z) * 0.08;
+  Cam.clampPos();
+  Cam.apply(false);
+}, 50);
 P.onPairReveal = function (c) {
   const mid = Cam.toScreen((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2);
   if (FX.ringHearts) FX.ringHearts(mid.fx, mid.fy - 0.05);
@@ -226,7 +251,7 @@ P.onPairReveal = function (c) {
 };
 function bgFileFor(total) {
   const rules = Array.isArray(cfg.bgRules) ? cfg.bgRules.filter(r => r && r.file).slice().sort((a, b) => a.viewers - b.viewers) : [];
-  let file = 'bg.webp';
+  let file = 'bg-wide.webp';
   for (const r of rules) if (total >= r.viewers) file = r.file;
   return file;
 }
@@ -330,6 +355,7 @@ function requestCouple(a, b, viaTag) {
 }
 P.onCoupleStage = function (c) {
   coupleScore(c, 30);
+  Cam.unfollow();
   Cam.busyUntil = Date.now() + 9000;
   Cam.stage();
   showBanner(`💍 LỄ THÀNH HÔN · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
@@ -507,7 +533,7 @@ Cam.home();
 refreshBg(false);
 /* Rảnh rỗi lâu thì camera tự lia đi ngắm khách một vòng rồi về sân khấu */
 setInterval(() => {
-  if (Date.now() < Cam.busyUntil || P.featured()) return;
+  if (Date.now() < Cam.busyUntil || P.featured() || Cam.followC) return;
   const t = P.tourTarget && P.tourTarget();
   if (t && Math.random() < 0.75) {
     Cam.busyUntil = Date.now() + 13000;
@@ -524,8 +550,8 @@ if (isDemo) {
     coupleSec: 25,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
-      { viewers: 500, file: 'bg.webp' }, { viewers: 2000, file: 'bg.webp' },
-      { viewers: 5000, file: 'bg-3.webp' }, { viewers: 10000, file: 'bg-3.webp' }, { viewers: 20000, file: 'bg-3.webp' },
+      { viewers: 500, file: 'bg-wide.webp' }, { viewers: 2000, file: 'bg-wide.webp' },
+      { viewers: 5000, file: 'bg-wide.webp' }, { viewers: 10000, file: 'bg-wide.webp' }, { viewers: 20000, file: 'bg-wide.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
     guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],

@@ -286,6 +286,7 @@ function promoteStage() {
     const yA = c.a === c.groom ? yG : yB, yB2 = c.b === c.groom ? yG : yB;
     walkPath(c.a, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: SPOTS[i].x - off, y: yA }], 'toStage');
     walkPath(c.b, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: SPOTS[i].x + off, y: yB2 }], 'toStage', () => arriveStage(c));
+    if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
   }
 }
 function arriveStage(c) {
@@ -304,10 +305,12 @@ function leaveStage(c) {
   const mover = c.b, anchor = c.a;
   const near = positions.find(q => !q.taken && q !== mover.home && Math.abs(q.x - anchor.home.x) < 4.6 && Math.abs(q.y - anchor.home.y) < 3.4);
   if (near) { freePosition(mover.home); near.taken = mover; mover.home = near; }
+  let back = 0;
   for (const p of [c.a, c.b]) {
     p.el.classList.remove('pairfx');
-    walkPath(p, [{ x: p.home.x < 50 ? 47 : 53, y: 90 }, { x: p.home.x, y: p.home.y }], 'walk', () => { p.state = 'home'; });
+    walkPath(p, [{ x: p.home.x < 50 ? 47 : 53, y: 90 }, { x: p.home.x, y: p.home.y }], 'walk', () => { p.state = 'home'; if (++back === 2 && P.onPairHome) P.onPairHome(c); });
   }
+  if (P.onPairReturn) P.onPairReturn(c);   // camera bám theo khi đi về chỗ
   promoteStage();
 }
 function dissolveCouple(c, leaving) {
