@@ -85,42 +85,60 @@ function setOutfit(p, outfit) {
 /* ---------- Vị trí trong phòng: ghế quanh bàn + điểm đứng ---------- */
 const positions = [];            // {x, y, kind, taken}
 let freePool = [];
-/* Bàn tiệc ĐÃ VẼ SẴN trong ảnh toàn cảnh bg-full.webp — tọa độ % đo theo ảnh,
-   ghế xếp quanh đúng các bàn đó để khách đứng khớp tranh */
+/* ================= KHUNG BÀN CỐ ĐỊNH (chuẩn cho mọi bg sau này) =================
+   Bàn tiệc ĐÃ VẼ SẴN trong ảnh toàn cảnh. Mỗi bàn = 1 ellipse (tâm x/y + bán kính
+   rx/ry theo % ảnh, lớn dần về cuối phòng theo phối cảnh) — xem BG-LAYOUT.md.
+   QUY TẮC CỨNG: nhân vật CHỈ đứng NGOÀI ellipse mặt bàn (ghế quanh bàn đặt chân
+   ngoài mép bàn + lề an toàn; lưới điểm đứng cũng né ellipse phồng to) —
+   TUYỆT ĐỐI không để chân nhân vật rơi lên mặt bàn. */
+const TABLE_ROWS = [
+  { y: 45, rx: 2.8, ry: 1.6, xs: [17, 24, 30, 36, 64, 70, 77, 84] },
+  { y: 50, rx: 3.3, ry: 1.9, xs: [14, 22, 29, 36, 64, 71, 78, 86] },
+  { y: 56, rx: 3.8, ry: 2.2, xs: [11, 20, 29, 37, 63, 71, 80, 89] },
+  { y: 63, rx: 4.3, ry: 2.5, xs: [8, 18, 28, 38, 62, 72, 82, 92] },
+  { y: 71, rx: 4.8, ry: 2.8, xs: [6, 16, 27, 38, 62, 73, 84, 94] },
+  { y: 80, rx: 5.5, ry: 3.2, xs: [4, 14, 26, 38, 62, 74, 86, 96] },
+  { y: 90, rx: 6.3, ry: 3.7, xs: [10, 24, 38, 62, 76, 90] },
+];
 const PAINTED_TABLES = [];
-for (const row of [
-  { y: 45, xs: [17, 24, 30, 36, 64, 70, 77, 84] },
-  { y: 50, xs: [14, 22, 29, 36, 64, 71, 78, 86] },
-  { y: 56, xs: [11, 20, 29, 37, 63, 71, 80, 89] },
-  { y: 63, xs: [8, 18, 28, 38, 62, 72, 82, 92] },
-  { y: 71, xs: [6, 16, 27, 38, 62, 73, 84, 94] },
-  { y: 80, xs: [4, 14, 26, 38, 62, 74, 86, 96] },
-  { y: 90, xs: [10, 24, 38, 62, 76, 90] },
-]) for (const x of row.xs) PAINTED_TABLES.push({ x, y: row.y });
+for (const r of TABLE_ROWS) for (const x of r.xs) PAINTED_TABLES.push({ x, y: r.y, rx: r.rx, ry: r.ry });
+/* Điểm (x,y) có rơi vào ellipse của bàn nào không (phồng thêm mx/my %)? self = bàn được bỏ qua */
+function inTable(x, y, mx, my, self) {
+  for (const t of PAINTED_TABLES) {
+    if (t === self) continue;
+    const dx = (x - t.x) / (t.rx + mx), dy = (y - t.y) / (t.ry + my);
+    if (dx * dx + dy * dy < 1) return true;
+  }
+  return false;
+}
 
 function buildPositions() {
   positions.length = 0;
   const tables = PAINTED_TABLES;
   for (const t of tables) {
-    const s = 0.72 + Math.max(0, (t.y - 45)) / 55 * 0.55;   // bàn gần thì to hơn (phối cảnh)
     for (let k = 0; k < 6; k++) {
       const a = k / 6 * Math.PI * 2 + 0.26;
-      positions.push({ x: t.x + Math.cos(a) * 3.7 * s, y: Math.max(43.5, t.y + Math.sin(a) * 2.6 * s), kind: 'seat', taken: null });
+      // Ghế: chân đứng NGOÀI mép bàn + lề an toàn (1.7% ngang, 1.3% dọc)
+      const sx = t.x + Math.cos(a) * (t.rx + 1.7);
+      const sy = Math.max(43.5, t.y + Math.sin(a) * (t.ry + 1.3));
+      if (inTable(sx, sy, 0.9, 0.7, t)) continue;   // ghế này lại chui vào bàn bên cạnh -> bỏ
+      positions.push({ x: sx, y: sy, kind: 'seat', taken: null });
     }
   }
   for (let gx = 3.6; gx <= 96.5; gx += 2.35)
     for (let gy = FLOOR_Y + 2.4; gy <= 98.4; gy += 1.95) {
       const x = gx + rand(-0.7, 0.7), y = gy + rand(-0.5, 0.5);
-      if (tables.some(t => Math.abs(x - t.x) < 3.6 && Math.abs(y - t.y) < 2.6)) continue;
+      if (inTable(x, y, 1.8, 1.4, null)) continue;   // điểm đứng cũng né mặt bàn + lề
       positions.push({ x, y, kind: 'stand', taken: null });
     }
-  // Ưu tiên lấp vị trí từ gần sân khấu ra xa (vẫn ngẫu nhiên) để phòng ít người trông vẫn đông vui
-  freePool = positions.slice().sort((p1, p2) =>
-    (Math.hypot(p1.x - 50, (p1.y - 52) * 1.35) + rand(0, 30)) - (Math.hypot(p2.x - 50, (p2.y - 52) * 1.35) + rand(0, 30)));
+  // Ưu tiên: GHẾ QUANH BÀN trước (đúng chất tiệc cưới), từ gần sân khấu ra xa;
+  // điểm đứng tự do chỉ dùng khi hết ghế — tránh khách dồn cục giữa thảm đỏ
+  const fillKey = p => (p.kind === 'seat' ? 0 : 1000) + Math.hypot(p.x - 50, (p.y - 52) * 1.35) + rand(0, 14);
+  freePool = positions.slice().sort((p1, p2) => fillKey(p1) - fillKey(p2));
   return tables;
 }
 function takePosition() {
-  while (freePool.length) { const pos = freePool.pop(); if (!pos.taken) return pos; }
+  while (freePool.length) { const pos = freePool.shift(); if (!pos.taken) return pos; }   // lấy từ GẦN sân khấu trước (đầu mảng đã sắp xếp)
   return null;
 }
 function freePosition(pos) { if (pos && pos.taken) { pos.taken = null; freePool.push(pos); } }
