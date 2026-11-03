@@ -8,9 +8,37 @@
   :root{--u0:4px;--k:1.2;--u:var(--u0);--safe:0px;--side:0px}
   #left,#side,#mc,#queue{--u:calc(var(--u0)*var(--k))}
   html,body{margin:0;height:100%;overflow:hidden;background:#2a0a18;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#f7e3ea}
-  #stage .bgimg{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat}
-  #bgfade{opacity:0;transition:opacity 1.5s ease-in-out}
+  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#2a0a18}
+  /* ---------- Phòng cưới rộng + camera lia ---------- */
+  #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;background:#430b18}
+  #floor{position:absolute;left:0;right:0;top:29%;bottom:0;background:
+    radial-gradient(ellipse 90% 34% at 50% 0%,rgba(255,190,120,.20),transparent 70%),
+    repeating-linear-gradient(90deg,rgba(255,215,150,.045) 0 3px,transparent 3px 90px),
+    linear-gradient(180deg,#93273d,#701227 34%,#560e20 72%,#400917)}
+  .panel{position:absolute;top:0;height:34.9%;background-size:100% 100%;background-repeat:no-repeat;z-index:1}
+  #panelC{left:36%;width:28%}
+  #wingL{left:8%;width:28%;transform:scaleX(-1);filter:brightness(.8) saturate(.92)}
+  #wingR{left:64%;width:28%;transform:scaleX(-1);filter:brightness(.8) saturate(.92)}
+  .carpet{position:absolute;top:32.5%;bottom:0;width:3.6%;z-index:1;
+    background:linear-gradient(180deg,#c01722,#9c1120 60%,#7d0d1b);border-left:3px solid rgba(255,205,110,.75);border-right:3px solid rgba(255,205,110,.75)}
+  #tables{position:absolute;inset:0;z-index:2}
+  .wtable{position:absolute;width:5.9%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);
+    background:radial-gradient(circle at 42% 36%,#fffaf0,#f3e2cd 55%,#dec096);border:3px solid #c9a86a;
+    box-shadow:0 10px 22px rgba(0,0,0,.4),inset 0 0 0 6px rgba(255,255,255,.35)}
+  .wtable::after{content:'';position:absolute;left:50%;top:50%;width:26%;height:26%;transform:translate(-50%,-50%);border-radius:50%;
+    background:radial-gradient(circle,#ff8fb8,#e75480 70%,#c2437f)}
+  #people{position:absolute;inset:0;z-index:3}
+  #spot{position:absolute;left:50%;top:1%;width:31%;height:33%;transform:translateX(-50%);pointer-events:none;z-index:2;
+    background:radial-gradient(ellipse at 50% 88%,rgba(255,225,150,.5),rgba(255,225,150,.14) 55%,transparent 75%);
+    opacity:0;transition:opacity .8s}
+  #spot.on{opacity:1;animation:spotPulse 2.6s ease-in-out infinite}
+  @keyframes spotPulse{0%,100%{opacity:.75}50%{opacity:1}}
+  .person.pairfx .figwrap{filter:drop-shadow(0 0 18px rgba(255,120,180,.95)) drop-shadow(0 0 42px rgba(255,190,90,.8))}
+  .person.pairfx::before{content:'';position:absolute;left:50%;bottom:-4%;width:150%;aspect-ratio:1;transform:translateX(-50%);
+    border-radius:50%;border:3px solid rgba(255,150,200,.85);animation:pairRing 1.15s ease-out infinite;pointer-events:none}
+  @keyframes pairRing{from{transform:translateX(-50%) scale(.45);opacity:1}to{transform:translateX(-50%) scale(1.15);opacity:0}}
+  .person.far .figwrap{animation-play-state:paused!important}
+  .person.far .figwrap img.chibi{animation-play-state:paused!important}
   #beams{position:absolute;inset:-20% -10%;opacity:0;transition:opacity 2s;pointer-events:none;
     background:conic-gradient(from 180deg at 50% -10%,transparent 0deg,rgba(255,230,150,.20) 12deg,transparent 26deg,rgba(255,200,220,.16) 44deg,transparent 60deg,rgba(255,230,150,.20) 84deg,transparent 100deg,rgba(255,200,220,.16) 128deg,transparent 146deg,rgba(255,230,150,.20) 172deg,transparent 190deg,rgba(255,200,220,.16) 214deg,transparent 232deg,rgba(255,230,150,.20) 258deg,transparent 276deg,rgba(255,200,220,.16) 300deg,transparent 318deg,rgba(255,230,150,.2) 342deg,transparent 360deg);
     animation:beams 26s linear infinite}
@@ -20,7 +48,6 @@
     background:radial-gradient(circle at 50% 30%,rgba(255,225,140,.34),rgba(255,190,90,0) 55%)}
   #royalglow.on{opacity:1;animation:pulseGlow 3.2s ease-in-out infinite}
   @keyframes pulseGlow{50%{opacity:.55}}
-  #people{position:absolute;inset:0}
   #banner{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) scale(.8);z-index:1700;pointer-events:none;
     background:linear-gradient(100deg,#a5123f,#d81b60 55%,#a5123f);color:#fff;font-weight:800;letter-spacing:.4px;
     font-size:calc(var(--u0)*3.1);padding:calc(var(--u0)*1.1) calc(var(--u0)*3.4);border-radius:999px;white-space:nowrap;
@@ -28,11 +55,6 @@
     opacity:0;transition:opacity .35s,transform .35s}
   #banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
   #fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1500}
-  #spot{position:absolute;left:50%;top:22%;width:64%;height:31%;transform:translateX(-50%);pointer-events:none;z-index:2;
-    background:radial-gradient(ellipse at 50% 88%,rgba(255,225,150,.5),rgba(255,225,150,.14) 55%,transparent 75%);
-    opacity:0;transition:opacity .8s}
-  #spot.on{opacity:1;animation:spotPulse 2.6s ease-in-out infinite}
-  @keyframes spotPulse{0%,100%{opacity:.75}50%{opacity:1}}
   #flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 30%,rgba(255,215,150,.8),rgba(255,170,80,0) 70%);z-index:1600}
   #flash.on{animation:flash 1.6s ease-out}
   @keyframes flash{10%{opacity:1}100%{opacity:0}}
@@ -133,12 +155,20 @@
 </head>
 <body>
 <div id="stage">
-  <div class="bgimg" id="bgmain"></div>
-  <div class="bgimg" id="bgfade"></div>
+  <div id="world">
+    <div id="floor"></div>
+    <div class="panel" id="wingL"></div>
+    <div class="panel" id="panelC"></div>
+    <div class="panel" id="wingR"></div>
+    <div class="carpet" style="left:20.2%"></div>
+    <div class="carpet" style="left:48.2%"></div>
+    <div class="carpet" style="left:76.2%"></div>
+    <div id="tables"></div>
+    <div id="spot"></div>
+    <div id="people"></div>
+  </div>
   <div id="beams"></div>
   <div id="royalglow"></div>
-  <div id="spot"></div>
-  <div id="people"></div>
   <canvas id="fx"></canvas>
   <div id="banner"></div>
   <div id="flash"></div>

@@ -1,278 +1,48 @@
-/* Khuôn viên đám cưới: MỌI người xem đều có nhân vật đứng/đi lại ở khuôn viên (nửa dưới khung hình).
-   - Chưa kết duyên: mặc đồ đời thường hài hước (áo thun quần đùi, pijama, Hawaii, ba lỗ, đồ bộ...), tự đi dạo qua lại.
-   - Được tag ghép đôi: cả hai "lên đồ" — chú rể veston lịch lãm / cô dâu váy cưới lộng lẫy — nắm tay nhau
-     đi lên sân khấu (hàng chờ nếu sân khấu đầy), hết giờ thì nắm tay nhau quay xuống khuôn viên đi dạo tiếp.
-   Nhân vật là SVG vẽ chi tiết, chân tay có hoạt ảnh bước đi (CSS), di chuyển bằng vòng lặp rAF chung. */
-(function () {
+/* ============================================================
+   Đám Cưới Online — nhân vật trong KHÔNG GIAN PHÒNG RỘNG (people.js)
+   - Phòng cưới lớn hơn màn hình: mỗi người vào phòng nhận 1 vị trí
+     trống NGẪU NHIÊN (ghế quanh bàn tiệc hoặc điểm đứng) và ở cố định đó.
+   - Giới hạn 2000 nhân vật.
+   - Ghép đôi: (main lia camera tới) → đổi trang phục cưới tại chỗ +
+     phóng to + vòng sáng quanh 2 người → đi thảm đỏ lên sân khấu →
+     hết giờ quay về vị trí của mình (ngồi cạnh nhau nếu còn chỗ).
+   - Vai cô dâu/chú rể phân theo giới tính đoán từ TÊN tiếng Việt.
+   ============================================================ */
 'use strict';
-const W = (window.Wedding = window.Wedding || {});
-const P = (W.people = {});
-P.coupleSec = 25;
-const MAX_PEOPLE = 110;
-const COURT = { x1: 5, x2: 95, y1: 55, y2: 96 };       // vùng khuôn viên (% khung)
-let courtY1 = 55;                                        // mép trên khuôn viên, chỉnh theo từng nền
-const SPOTS = [{ x: 50 }, { x: 16 }, { x: 84 }];        // 3 vị trí cặp đôi trên sân khấu
-let box = null, Wpx = 400, Hpx = 700, stageAnchor = 54;
-let avoid = null;                                        // vùng cấm đứng theo nền (vd. đài phun nước)
-const people = new Map();                                // user.id -> person
-const couples = [];                                      // mọi cặp đôi đã ghép
-const stageSlots = [null, null, null];
+const P = {};
+(window.Wedding = window.Wedding || {}).people = P;
+window.Wedding.peopleApi = P;
+
+const MAX_PEOPLE = 2000;
+const FLOOR_Y = 33;              // sàn tiệc bắt đầu từ đây (% chiều cao phòng)
+let Ww = 2700, Hw = 3840;        // kích thước phòng (px) — main cập nhật qua P.resize
+let FH = 192;                    // chiều cao nhân vật gốc (px trong phòng)
+let box = null, tablesBox = null;
+let stageY = 17.3;               // điểm đứng trên sân khấu (% chiều cao phòng)
+
+const people = new Map();        // id -> person
+const couples = [];
 const stageQueue = [];
-P.onCoupleStage = null;                                  // main.js: MC giới thiệu + cộng điểm
-P.onQueueChange = null;
+const stageSlots = [null, null, null];
+const SPOTS = [{ x: 50 }, { x: 39 }, { x: 61 }];   // 3 vị trí cặp trên sân khấu (% chiều rộng phòng)
+const CARPETS = [22, 50, 78];    // 3 thảm đỏ (% chiều rộng phòng)
 
-const rand = (a, b) => a + Math.random() * (b - a);
-const hash = s => { let x = 0; for (const ch of String(s)) x = (x * 31 + ch.codePointAt(0)) >>> 0; return x; };
-const SKINS = ['#ffe3c2', '#f7d3a5', '#f0c08e', '#e8b184', '#ffd9b8'];
-const HAIRS = ['#2a1a10', '#3d2417', '#17100b', '#542f1a', '#6b4423'];
+function rand(a, b) { return a + Math.random() * (b - a); }
+function hash(s) { let h = 0; s = String(s || ''); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+function avatarColor(id) { const hues = [340, 262, 200, 158, 24, 288, 96, 0, 210, 45]; return `hsl(${hues[hash(id) % hues.length]} 65% 45%)`; }
+function initials(name) { const w = String(name || '?').trim().split(/\s+/); return ((w[0] || '?')[0] + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase(); }
+function esc(s) { return String(s || '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
 
-/* ================= Vẽ nhân vật ================= */
-function face(seed, bride) {
-  const skin = SKINS[seed % SKINS.length], hair = HAIRS[Math.floor(seed / 5) % HAIRS.length];
-  const style = seed % 5;
-  let hairSvg = '', hairBack = '';
-  if (bride) {
-    hairBack = `<rect x="14.5" y="24" width="11" height="40" rx="5.5" fill="${hair}"/><rect x="54.5" y="24" width="11" height="40" rx="5.5" fill="${hair}"/>`;
-    hairSvg = `<path d="M22 31 a18 16 0 0 1 36 0 l0 -4 a18 14 0 0 0 -36 0Z" fill="${hair}"/>
-      <path d="M31 12 l3 -6 3 6 3 -7 3 7 3 -6 3 6 q-9 3 -18 0Z" fill="#f5c542" stroke="#d9a41c" stroke-width="1"/>
-      <circle cx="40" cy="9" r="2.2" fill="#ff5c8a"/><circle cx="33" cy="10.5" r="1.7" fill="#7ed6ff"/><circle cx="47" cy="10.5" r="1.7" fill="#7ed6ff"/>`;
-  } else if (style === 0) {         // tóc ngắn gọn gàng
-    hairSvg = `<path d="M22 31 a18 16 0 0 1 36 0 l0 -4 a18 14 0 0 0 -36 0Z" fill="${hair}"/>`;
-  } else if (style === 1) {         // búi tóc
-    hairSvg = `<path d="M22 31 a18 16 0 0 1 36 0 l0 -4 a18 14 0 0 0 -36 0Z" fill="${hair}"/><circle cx="40" cy="12" r="6.5" fill="${hair}"/>`;
-  } else if (style === 2) {         // tóc dài
-    hairSvg = `<path d="M20 34 a20 18 0 0 1 40 0 l2 22 q-5 3 -8 0 l-2 -18 a16 14 0 0 0 -24 0 l-2 18 q-3 3 -8 0Z" fill="${hair}"/><path d="M22 31 a18 16 0 0 1 36 0 q-18 -12 -36 0Z" fill="${hair}"/>`;
-  } else if (style === 3) {         // đầu trọc hài hước
-    hairSvg = `<ellipse cx="33" cy="17" rx="4.5" ry="2.6" fill="#ffffff" opacity=".5" transform="rotate(-18 33 17)"/>`;
-  } else {                          // tóc dựng
-    hairSvg = `<path d="M24 26 l3 -10 4 7 3 -11 4 8 3 -10 4 7 3 -8 2 17 a18 15 0 0 0 -36 0Z" fill="${hair}"/>`;
-  }
-  const lashes = bride ? `<path d="M27 30 l-3 -2 M53 30 l3 -2" stroke="#333" stroke-width="1.6" stroke-linecap="round"/>` : '';
-  return `
-    <rect x="35" y="42" width="10" height="10" rx="4" fill="${skin}"/>
-    <ellipse cx="21.5" cy="31" rx="3.4" ry="4.6" fill="${skin}"/>
-    <ellipse cx="58.5" cy="31" rx="3.4" ry="4.6" fill="${skin}"/>
-    ${hairBack}
-    <circle cx="40" cy="30" r="17.5" fill="${skin}"/>
-    ${hairSvg}
-    ${lashes}
-    <ellipse cx="31.5" cy="30.5" rx="3.4" ry="4.4" fill="#fff"/>
-    <ellipse cx="48.5" cy="30.5" rx="3.4" ry="4.4" fill="#fff"/>
-    <circle cx="32" cy="31.5" r="2.3" fill="#2b1a12"/><circle cx="48" cy="31.5" r="2.3" fill="#2b1a12"/>
-    <circle cx="32.8" cy="30.6" r="0.85" fill="#fff"/><circle cx="48.8" cy="30.6" r="0.85" fill="#fff"/>
-    <path d="M28 24.5 q4 -2.6 8 -1 M44 23.5 q4 -1.6 8 1" stroke="#5a3a22" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-    <path d="M40 34 q-1.6 3 0.6 4.4" stroke="#d89a68" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    <path d="M33 42.5 q7 6 14 0" stroke="#b03a5b" stroke-width="2.1" fill="none" stroke-linecap="round"/>
-    <path d="M34.5 43.8 q5.5 3.4 11 0" stroke="#e88ca0" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-    <circle cx="26.5" cy="38" r="3.4" fill="#ff9db4" opacity=".65"/>
-    <circle cx="53.5" cy="38" r="3.4" fill="#ff9db4" opacity=".65"/>`;
-}
-function arms(color, skin, opts = {}) {
-  const aL = opts.holdR ? 'rotate(38 27 56)' : '', aR = opts.holdL ? 'rotate(-38 53 56)' : '';
-  return `<g class="arm armL" ${aL ? `transform="${aL}"` : ''}><rect x="21.5" y="54" width="8.6" height="27" rx="4.3" fill="${color}"/><circle cx="25.8" cy="82" r="4.4" fill="${skin}"/></g>
-    <g class="arm armR" ${aR ? `transform="${aR}"` : ''}><rect x="49.9" y="54" width="8.6" height="27" rx="4.3" fill="${color}"/><circle cx="54.2" cy="82" r="4.4" fill="${skin}"/></g>`;
-}
-function legsPants(pants, shoes, skin, shorts) {
-  const len = shorts ? 15 : 30;
-  const skinPart = shorts ? `<rect x="29.5" y="${88 + len}" width="7.6" height="13" rx="3.4" fill="${skin}"/><rect x="42.9" y="${88 + len}" width="7.6" height="13" rx="3.4" fill="${skin}"/>` : '';
-  return `<g class="leg legL"><rect x="29" y="86" width="8.6" height="${len}" rx="3.6" fill="${pants}"/>${shorts ? '' : ''}<ellipse cx="33" cy="${88 + len + (shorts ? 14 : 2)}" rx="5.6" ry="3.2" fill="${shoes}"/></g>
-    <g class="leg legR"><rect x="42.4" y="86" width="8.6" height="${len}" rx="3.6" fill="${pants}"/><ellipse cx="47" cy="${88 + len + (shorts ? 14 : 2)}" rx="5.6" ry="3.2" fill="${shoes}"/></g>
-    ${skinPart}`;
-}
-/* Đồ đời thường hài hước cho khách chưa kết duyên */
-const CASUAL = [
-  (s, skin) => ({ torso: `<path d="M24 54 q16 -7 32 0 l3 36 q-19 6 -38 0Z" fill="${['#ff8a5c', '#5cc8ff', '#ffd93c', '#9be15d', '#ff7eb0'][s % 5]}"/><path d="M24 54 q16 -7 32 0 l1 9 q-17 -6 -34 0Z" fill="#ffffff" opacity=".35"/>`, legs: legsPants('#3a6ea8', '#8a5a2b', skin, true), armC: ['#ff8a5c', '#5cc8ff', '#ffd93c', '#9be15d', '#ff7eb0'][s % 5] }),   // áo thun + quần đùi + dép
-  (s, skin) => ({ torso: `<path d="M24 54 q16 -7 32 0 l3 38 q-19 6 -38 0Z" fill="#a8c8ff"/><circle cx="33" cy="66" r="2.6" fill="#fff"/><circle cx="46" cy="74" r="2.6" fill="#fff"/><circle cx="36" cy="82" r="2.6" fill="#fff"/><circle cx="48" cy="60" r="2.2" fill="#fff"/>`, legs: legsPants('#a8c8ff', '#ffb7cd', skin, false), armC: '#a8c8ff' }),   // pijama chấm bi
-  (s, skin) => ({ torso: `<path d="M24 54 q16 -7 32 0 l3 36 q-19 6 -38 0Z" fill="#2fb37c"/><circle cx="33" cy="68" r="3.6" fill="#ff7eb0"/><circle cx="46" cy="78" r="3.2" fill="#ffd93c"/><circle cx="44" cy="62" r="2.6" fill="#ff8a5c"/><circle cx="32" cy="80" r="2.6" fill="#fff"/>`, legs: legsPants('#f2f2f2', '#8a5a2b', skin, true), armC: '#2fb37c', extra: `<g><rect x="24" y="26" width="13" height="7.5" rx="3.4" fill="#222"/><rect x="43" y="26" width="13" height="7.5" rx="3.4" fill="#222"/><rect x="36" y="28.5" width="8" height="2.4" fill="#222"/></g>` }),   // Hawaii + kính râm
-  (s, skin) => ({ torso: `<path d="M27 54 q13 -6 26 0 l2 34 q-15 5 -30 0Z" fill="#f5f5f5"/><rect x="27" y="54" width="26" height="7" fill="#e8e8e8"/>`, legs: legsPants('#4a4a55', '#333', skin, false), armC: skin, extra: `<path d="M23 22 a17 13 0 0 1 34 0 l-4 0 a13 9 0 0 0 -26 0Z" fill="#e53935" transform="rotate(180 40 22)"/><rect x="20" y="20.5" width="40" height="4" rx="2" fill="#e53935"/>` }),   // ba lỗ + mũ ngược
-  (s, skin) => ({ torso: `<path d="M24 54 q16 -7 32 0 l9 52 q-25 7 -50 0Z" fill="${['#ff9db4', '#c3a6ff', '#ffb35c'][s % 3]}"/><circle cx="34" cy="70" r="2.8" fill="#fff" opacity=".8"/><circle cx="46" cy="84" r="2.8" fill="#fff" opacity=".8"/><circle cx="38" cy="96" r="2.8" fill="#fff" opacity=".8"/>`, legs: `<ellipse class="leg legL" cx="33" cy="118" rx="5.6" ry="3.2" fill="#c2185b"/><ellipse class="leg legR" cx="47" cy="118" rx="5.6" ry="3.2" fill="#c2185b"/>`, armC: ['#ff9db4', '#c3a6ff', '#ffb35c'][s % 3] }),   // váy hoa ở nhà
-  (s, skin) => ({ torso: `<path d="M24 54 q16 -7 32 0 l3 36 q-19 6 -38 0Z" fill="#37474f"/><rect x="38.6" y="56" width="2.8" height="32" fill="#ffd93c"/>`, legs: legsPants('#263238', '#ffffff', skin, false), armC: '#37474f', extra: `<g><rect x="52" y="66" width="9" height="13" rx="2.5" fill="#fff" stroke="#d8a24a" stroke-width="1.6"/><rect x="55.5" y="60" width="2.2" height="7" rx="1" fill="#8a5a2b"/><circle cx="56.5" cy="72" r="3" fill="#b5772f"/></g>` }),   // đồ thể thao + trà sữa
-];
-function figureSVG(p) {
-  const seed = hash(p.user.id || p.user.nickname);
-  const skin = SKINS[seed % SKINS.length];
-  if (p.outfit === 'groom') {
-    return `<svg viewBox="0 0 80 122">
-      ${arms('#23263d', skin)}
-      ${legsPants('#23263d', '#14100c', skin, false)}
-      <path d="M23 53 q17 -8 34 0 l3 38 q-20 7 -40 0Z" fill="#23263d"/>
-      <path d="M40 55 L31 92 L40 96 L49 92Z" fill="#fbf8f2"/>
-      <path d="M31 55 L40 68 L29 78 Z M49 55 L40 68 L51 78 Z" fill="#31365a"/>
-      <path d="M35 63 l5 4 5 -4 -1.6 6 h-6.8Z" fill="#c2185b"/>
-      <circle cx="50.5" cy="72" r="3.1" fill="#ff5c8a"/><circle cx="50.5" cy="72" r="1.3" fill="#ffd93c"/>
-      ${face(seed, false)}
-    </svg>`;
-  }
-  if (p.outfit === 'bride') {
-    return `<svg viewBox="0 0 80 122">
-      <path d="M14 26 a26 30 0 0 1 52 0 l4 44 q-30 10 -60 0Z" fill="#ffffff" opacity=".45"/>
-      ${arms('#ffffff', skin)}
-      <path d="M40 50 C28 74 16 96 10 118 q30 8 60 0 C64 96 52 74 40 50Z" fill="#fffdfd"/>
-      <path d="M40 56 C31 76 23 96 18 114 q22 6 44 0 C57 96 49 76 40 56Z" fill="#ffffff"/>
-      <path d="M40 64 C34 80 29 96 26 110 q14 4 28 0 C51 96 46 80 40 64Z" fill="#fdf3f6"/>
-      <path d="M13 112 q4 -5 8 0 q4 -5 8 0 q4 -5 8 0 q4 -5 8 0 q4 -5 8 0 q4 -5 8 0" stroke="#f3c6d8" stroke-width="2" fill="none"/>
-      <circle cx="30" cy="88" r="1.7" fill="#ffd76a"/><circle cx="47" cy="98" r="1.7" fill="#ffd76a"/><circle cx="40" cy="80" r="1.7" fill="#ffd76a"/><circle cx="52" cy="86" r="1.5" fill="#ffd76a"/>
-      <path d="M28 50 q12 -6 24 0 l2 13 q-14 5 -28 0Z" fill="#ffffff"/>
-      <path d="M28 50 q12 -6 24 0 q-12 7 -24 0Z" fill="#fdeef4"/>
-      <path d="M36 47 q4 3 8 0 l-1 5 h-6Z" fill="#ffd76a"/>
-      <g transform="translate(58 84)"><circle r="6.4" fill="#ff5c8a"/><circle cx="-6" cy="3.4" r="5" fill="#ffb7cd"/><circle cx="6" cy="3.4" r="5" fill="#e75480"/><circle cy="-4.6" r="4.8" fill="#ffd6e3"/><path d="M-2 6 q-4 8 -8 10 M3 7 q1 9 -2 13" stroke="#3e9e4f" stroke-width="2.2" fill="none"/></g>
-      <ellipse class="leg legL" cx="33" cy="119" rx="5.4" ry="3" fill="#e8b4c8"/>
-      <ellipse class="leg legR" cx="47" cy="119" rx="5.4" ry="3" fill="#e8b4c8"/>
-      ${face(seed, true)}
-    </svg>`;
-  }
-  const c = CASUAL[seed % CASUAL.length](seed, skin);
-  return `<svg viewBox="0 0 80 122">
-    ${arms(c.armC, skin)}
-    ${c.legs}
-    ${c.torso}
-    ${face(seed, false)}
-    ${c.extra || ''}
-  </svg>`;
-}
+/* ---------- Ảnh chibi: nhiều mẫu cô dâu / chú rể / khách ---------- */
+const BRIDES = ['img/bride.png', 'img/bride2.png', 'img/bride3.png', 'img/bride4.png'];
+const GROOMS = ['img/groom.png', 'img/groom2.png', 'img/groom3.png', 'img/groom4.png'];
+const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png'];
+const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png'];
+[...BRIDES, ...GROOMS, ...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; });
 
-/* ================= Nhân vật, ghế ngồi & di chuyển ================= */
-function esc(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
-function makePersonEl(p) {
-  const el = document.createElement('div');
-  el.className = 'person';
-  const hue = hash(p.user.id) % 360;
-  const av = p.user.avatar
-    ? `<span class="av"><img src="${esc(p.user.avatar)}" referrerpolicy="no-referrer" alt=""></span>`
-    : `<span class="av" style="background:hsl(${hue},55%,48%)">${esc((Array.from(String(p.user.nickname || '?').trim())[0] || '?').toUpperCase())}</span>`;
-  el.innerHTML = `<div class="figwrap"></div><div class="chip">${av}<span class="nm">${esc(p.user.nickname)}</span></div>`;
-  el.querySelector('.figwrap').innerHTML = figHTML(p);
-  return el;
-}
-
-/* Ghế quanh bàn tiệc: khách vào phòng được xếp ghế, ngồi/đứng tại bàn của mình.
-   Cặp đôi rời ghế, đi dọc thảm đỏ lên sân khấu, xong quay về hai ghế cạnh nhau. */
-let seats = [];                 // {x, y, by}
-let carpetTop = 44;             // % y nơi thảm đỏ chạm sân khấu
-const SEAT_OFFS = [[-8.5, 2.5], [8.5, 2.5], [-6.5, 7.5], [6.5, 7.5], [0, 9.5], [-11, 6], [11, 6]];
-function buildSeats(tables) {
-  seats = [];
-  for (const t of tables || []) for (const [dx, dy] of SEAT_OFFS) {
-    seats.push({ x: Math.max(3, Math.min(97, t.x + dx)), y: Math.max(42, Math.min(97.5, t.y + dy)), by: null });
-  }
-  // ghế của người đang ngồi giữ nguyên theo chỉ số gần nhất khi đổi nền: gán lại theo vị trí
-  for (const p of people.values()) {
-    if (p.seat) {
-      let best = null, bd = 1e9;
-      for (const s of seats) { if (s.by) continue; const d = Math.hypot(s.x - p.x, s.y - p.y); if (d < bd) { bd = d; best = s; } }
-      if (best) { best.by = p; p.seat = best; }
-    }
-  }
-}
-function freeSeat(p) { if (p && p.seat) { p.seat.by = null; p.seat = null; } }
-function takeSeat(p, seat) { freeSeat(p); seat.by = p; p.seat = seat; }
-function nearestFreeSeat(x, y, excl) {
-  let best = null, bd = 1e9;
-  for (const s of seats) { if (s.by && s.by !== excl) continue; const d = Math.hypot(s.x - x, s.y - y); if (d < bd) { bd = d; best = s; } }
-  return best;
-}
-function scaleFor(p) {
-  if (p.state === 'stage' || p.state === 'toStage') return p.spotScale || 1.12;
-  return 0.5 + Math.max(0, (p.y - 42)) / (97 - 42) * 0.52;
-}
-function render(p) {
-  const s = scaleFor(p), fh = Hpx * 0.15 * s;
-  p.el.style.setProperty('--fh', fh + 'px');
-  p.el.style.transform = `translate(${p.x / 100 * Wpx}px, ${p.y / 100 * Hpx}px) translate(-50%,-100%)`;
-  p.el.style.zIndex = String(p.state === 'stage' ? 600 + Math.round(p.y) : Math.round(p.y * 10));
-  p.el.classList.toggle('walking', !!p.target);
-  p.el.classList.toggle('flip', p.faceLeft);
-}
-function walkTo(p, target, state, done) {
-  p.path = [target]; p.state = state || 'walk'; p.done = done || null;
-  p.target = p.path[0];
-  p.faceLeft = target.x < p.x;
-}
-function walkPath(p, points, state, done) {
-  p.path = points.slice(); p.state = state || 'walk'; p.done = done || null;
-  p.target = p.path[0];
-  if (p.target) p.faceLeft = p.target.x < p.x;
-}
-function stepPerson(p, dt) {
-  if (!p.target) return;
-  const dx = p.target.x - p.x, dy = p.target.y - p.y;
-  const dist = Math.hypot(dx, dy);
-  const speed = 10.5;
-  if (dist < 0.5) {
-    p.x = p.target.x; p.y = p.target.y;
-    p.path.shift();
-    if (p.path.length) { p.target = p.path[0]; return; }
-    p.target = null;
-    const done = p.done; p.done = null;
-    if (p.state !== 'stage') { p.state = p.seat ? 'seat' : 'idle'; }
-    p.idleFor = rand(4, 11);
-    if (done) done();
-    return;
-  }
-  const step = Math.min(dist, speed * dt);
-  p.x += dx / dist * step; p.y += dy / dist * step;
-  p.faceLeft = dx < -0.2 ? true : dx > 0.2 ? false : p.faceLeft;
-}
-let lastT = 0;
-function loop(t) {
-  requestAnimationFrame(loop);
-  const dt = Math.min(0.05, lastT ? (t - lastT) / 1000 : 0.016); lastT = t;
-  for (const p of people.values()) {
-    if (p.target) stepPerson(p, dt);
-    else if (p.state === 'seat') {
-      p.idleFor -= dt;
-      if (p.idleFor <= 0) {
-        p.idleFor = rand(5, 13);
-        // thỉnh thoảng đổi ghế / ra đứng gần thảm đỏ ngắm sân khấu cho sinh động
-        if (!p.couple && Math.random() < 0.16) {
-          const s = nearestFreeSeat(p.x + rand(-18, 18), p.y + rand(-8, 8), p);
-          if (s && s !== p.seat) { takeSeat(p, s); walkTo(p, { x: s.x, y: s.y }, 'walk'); }
-        }
-      }
-    }
-    render(p);
-  }
-}
-
-P.init = function (container) { box = container; requestAnimationFrame(loop); };
-P.resize = function (w, h) { Wpx = w; Hpx = h; };
-P.setAnchor = function (y) { stageAnchor = y; };
-P.setLayout = function (layout) {
-  if (!layout) return;
-  if (layout.tables) buildSeats(layout.tables);
-  if (layout.carpetTop) carpetTop = layout.carpetTop;
-};
-P.get = id => people.get(id);
-P.count = () => people.size;
-
-P.spawn = function (user) {
-  if (!user || !user.id) return null;
-  let p = people.get(user.id);
-  if (p) { p.user = { ...p.user, ...user, avatar: user.avatar || p.user.avatar }; return p; }
-  if (people.size >= MAX_PEOPLE) return null;
-  const seed = hash(user.id || user.nickname);
-  p = { user, outfit: 'casual', x: 50 + rand(-3, 3), y: 101,
-    state: 'idle', target: null, path: [], done: null, idleFor: rand(3, 9), faceLeft: false, couple: null, seat: null, el: null };
-  p.el = makePersonEl(p);
-  box.appendChild(p.el);
-  render(p);
-  const s = nearestFreeSeat(50, 95, p) || nearestFreeSeat(p.x, p.y, p);
-  if (s) { takeSeat(p, s); walkTo(p, { x: s.x, y: s.y }, 'walk'); }
-  people.set(user.id, p);
-  return p;
-};
-
-/* ================= Ghép đôi & sân khấu ================= */
-const CHIBI = { bride: 'img/bride.png', groom: 'img/groom.png', girl: 'img/guest-girl.png', boy: 'img/guest-boy.png' };
-const BRIDES = ['img/bride.png', 'img/bride2.png', 'img/bride3.png', 'img/bride4.png'];   // 4 kiểu cô dâu: váy trắng / áo dài đỏ / váy hồng / váy vàng
-const GROOMS = ['img/groom.png', 'img/groom2.png', 'img/groom3.png', 'img/groom4.png'];   // 4 kiểu chú rể: vest đen / vest kem / vest xanh kính / áo dài gấm
-const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png'];   // khách nữ: pijama trà sữa / hoodie gậy selfie
-const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png'];      // khách nam: Hawaii kính râm / shipper ôm mũ bảo hiểm
-[...BRIDES, ...GROOMS, ...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; }); // nạp trước ảnh cho nhân vật hiện lên không bị chớp
-
-/* ---------- Đoán giới tính theo tên tiếng Việt (để chọn nhân vật nam/nữ cho hợp) ----------
-   Điểm > 0: nữ · < 0: nam · = 0: không rõ. Dấu hiệu mạnh nhất: tên đệm Thị (nữ) / Văn (nam),
-   sau đó là tên chính (từ cuối) tra trong danh sách tên nam/nữ phổ biến. */
+/* ---------- Đoán giới tính theo tên tiếng Việt ----------
+   Điểm > 0: nữ · < 0: nam · = 0: không rõ. Tên đệm Thị (nữ) / Văn (nam) mạnh nhất,
+   sau đó là tên chính (từ cuối) trong danh sách tên phổ biến. */
 const FEMALE_GIVEN = new Set(('thao huong hang trang linh phuong ngoc hong lan hoa mai dao cuc truc quynh chi hanh dung nhung tuyet nguyet thu ha hien hue kieu lien lieu ly my nga ngan nhi nhien oanh quyen sen thuy thuong tien tram trinh tuyen uyen van yen dieu diem bich chau gam').split(' '));
 const MALE_GIVEN = new Set(('tuan dung hung cuong manh quan hoang duc hai nam phong son tung kien trung hieu thang vinh long dat tien viet quang huy khoa dang loc phat tai tri khang minh duy trong nghia binh lam vu sang thai thinh toan truong').split(' '));
 function normName(s) {
@@ -284,21 +54,22 @@ function genderScore(name) {
   if (!w.length) return 0;
   const given = w[w.length - 1];
   let s = 0;
-  if (given === 'van') s += 2;                    // tên chính "Vân" → nữ
-  else if (w.includes('van')) s -= 3;             // tên đệm "Văn" → nam
-  if (w.includes('thi')) s += 3;                  // tên đệm "Thị" → nữ
+  if (given === 'van') s += 2;
+  else if (w.includes('van')) s -= 3;
+  if (w.includes('thi')) s += 3;
   if (FEMALE_GIVEN.has(given)) s += 2;
   if (MALE_GIVEN.has(given)) s -= 2;
   return s;
 }
 P.guessGender = name => { const s = genderScore(name); return s > 0 ? 'F' : s < 0 ? 'M' : '?'; };
+
 function figHTML(p) {
   const seed = hash(p.user.id || p.user.nickname);
   let file;
   if (p.outfit === 'bride') file = BRIDES[seed % BRIDES.length];
   else if (p.outfit === 'groom') file = GROOMS[seed % GROOMS.length];
   else {
-    const gs = genderScore(p.user.nickname);   // khách chưa ghép cặp cũng chọn nam/nữ theo tên
+    const gs = genderScore(p.user.nickname);
     const girl = gs > 0 || (gs === 0 && seed % 2 === 1);
     file = girl ? GUEST_GIRLS[(seed >> 4) % GUEST_GIRLS.length] : GUEST_BOYS[(seed >> 4) % GUEST_BOYS.length];
   }
@@ -308,61 +79,170 @@ function setOutfit(p, outfit) {
   p.outfit = outfit;
   p.el.querySelector('.figwrap').innerHTML = figHTML(p);
   p.el.classList.toggle('wedding', outfit !== 'casual');
+  p.dirty = true;
 }
-function notifyQueue() { if (P.onQueueChange) P.onQueueChange(stageQueue.map(c => `${c.a.user.nickname} ❤ ${c.b.user.nickname}`)); }
-function carpetPoints(px, side) {
-  // điểm tập kết ở cuối thảm đỏ rồi đi thẳng lên sân khấu
-  return [{ x: 50 + side * 7.5, y: 90 }, { x: 50 + side * 7.5, y: carpetTop + 6 }];
+
+/* ---------- Vị trí trong phòng: ghế quanh bàn + điểm đứng ---------- */
+const positions = [];            // {x, y, kind, taken}
+let freePool = [];
+function buildPositions() {
+  positions.length = 0;
+  const tables = [];
+  for (let cx = 10; cx <= 90.1; cx += 11.5)
+    for (let cy = 45; cy <= 92.1; cy += 11.8) {
+      if (CARPETS.some(c => Math.abs(cx - c) < 6.4)) continue;   // chừa thảm đỏ
+      tables.push({ x: cx, y: cy });
+    }
+  for (const t of tables) {
+    for (let k = 0; k < 6; k++) {
+      const a = k / 6 * Math.PI * 2 + 0.26;
+      positions.push({ x: t.x + Math.cos(a) * 3.6, y: t.y + Math.sin(a) * 2.5, kind: 'seat', taken: null });
+    }
+  }
+  for (let gx = 3.6; gx <= 96.5; gx += 2.35)
+    for (let gy = FLOOR_Y + 2.4; gy <= 98.4; gy += 1.95) {
+      const x = gx + rand(-0.7, 0.7), y = gy + rand(-0.5, 0.5);
+      if (tables.some(t => Math.abs(x - t.x) < 3.4 && Math.abs(y - t.y) < 2.4)) continue;
+      positions.push({ x, y, kind: 'stand', taken: null });
+    }
+  // Ưu tiên lấp vị trí từ gần sân khấu ra xa (vẫn ngẫu nhiên) để phòng ít người trông vẫn đông vui
+  freePool = positions.slice().sort((p1, p2) =>
+    (Math.hypot(p1.x - 50, (p1.y - 52) * 1.35) + rand(0, 30)) - (Math.hypot(p2.x - 50, (p2.y - 52) * 1.35) + rand(0, 30)));
+  return tables;
 }
-function promoteStage() {
-  for (let i = 0; i < SPOTS.length && stageQueue.length; i++) {
-    if (stageSlots[i]) continue;
-    const c = stageQueue.shift();
-    c.state = 'toStage'; c.spot = i;
-    stageSlots[i] = c;
-    c.a.spotScale = c.b.spotScale = i === 0 ? 1.12 : 0.82;   // cặp hai bên nhỏ hơn để không chen cặp tâm điểm
-    const y = stageAnchor + (i ? 1.4 : 0);
-    const off = i === 0 ? 10.5 : 8.5;   // ảnh chibi bè ngang — phải đứng cách xa nhau kẻo che mất nhau
-    // chú rể đứng hơi thấp hơn (phía trước) để không bị váy cô dâu che khuất
-    const yA = y + (c.a.outfit === 'groom' ? 1.3 : 0);
-    const yB = y + (c.b.outfit === 'groom' ? 1.3 : 0);
-    walkPath(c.a, [...carpetPoints(c.a.x, -1), { x: SPOTS[i].x - off, y: yA }], 'toStage');
-    walkPath(c.b, [...carpetPoints(c.b.x, 1), { x: SPOTS[i].x + off, y: yB }], 'toStage', () => arriveStage(c));
-    notifyQueue();
+function takePosition() {
+  while (freePool.length) { const pos = freePool.pop(); if (!pos.taken) return pos; }
+  return null;
+}
+function freePosition(pos) { if (pos && pos.taken) { pos.taken = null; freePool.push(pos); } }
+
+/* ---------- Di chuyển (tính theo px trong phòng, tốc độ theo quãng đường) ---------- */
+function walkPath(p, points, state, done) {
+  p.path = points.slice(); p.state = state || 'walk'; p.done = done || null;
+  p.target = p.path[0] || null;
+  let total = 0, px = p.x, py = p.y;
+  for (const q of points) { total += Math.hypot((q.x - px) / 100 * Ww, (q.y - py) / 100 * Hw); px = q.x; py = q.y; }
+  p.speedPx = Math.max(170, Math.min(780, total / 4.2));
+  if (p.target) p.faceLeft = p.target.x < p.x;
+  p.dirty = true;
+}
+function walkTo(p, pt, state, done) { walkPath(p, [pt], state, done); }
+function stepPerson(p, dt) {
+  if (!p.target) return;
+  const dxPx = (p.target.x - p.x) / 100 * Ww, dyPx = (p.target.y - p.y) / 100 * Hw;
+  const dist = Math.hypot(dxPx, dyPx);
+  if (dist < 6) {
+    p.x = p.target.x; p.y = p.target.y;
+    p.path.shift();
+    if (p.path.length) { p.target = p.path[0]; p.dirty = true; return; }
+    p.target = null;
+    const done = p.done; p.done = null;
+    if (p.state !== 'stage') p.state = p.couple ? p.state : 'home';
+    p.idleFor = rand(5, 14);
+    p.dirty = true;
+    if (done) done();
+    return;
+  }
+  const step = Math.min(dist, p.speedPx * dt);
+  p.x += dxPx / dist * step / Ww * 100;
+  p.y += dyPx / dist * step / Hw * 100;
+  p.faceLeft = dxPx < -4 ? true : dxPx > 4 ? false : p.faceLeft;
+  p.dirty = true;
+}
+
+function render(p) {
+  const X = p.x / 100 * Ww, Y = p.y / 100 * Hw;
+  const depth = 0.8 + Math.max(0, Math.min(1, (p.y - FLOOR_Y) / 62)) * 0.38;
+  const stMul = (p.state === 'stage' || p.state === 'toStage') ? (p.spotScale || 1.18) : 1;
+  const fh = FH * depth * stMul * (p.boost || 1);
+  p.el.style.transform = `translate(${X.toFixed(1)}px,${Y.toFixed(1)}px) translate(-50%,-100%)`;
+  p.el.style.zIndex = Math.round(Y) + (p.boost > 1 ? 6000 : 0);
+  p.el.style.setProperty('--fh', fh.toFixed(0) + 'px');
+  p.el.classList.toggle('flip', !!p.faceLeft);
+  p.el.classList.toggle('walking', !!p.target);
+  p.dirty = false;
+}
+
+/* ---------- Vòng lặp chính ---------- */
+let lastT = 0;
+function loop(t) {
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, lastT ? (t - lastT) / 1000 : 0.016); lastT = t;
+  for (const p of people.values()) {
+    if (p.target) stepPerson(p, dt);
+    else if (p.state === 'home' && !p.couple) {
+      p.idleFor -= dt;
+      if (p.idleFor <= 0) {
+        p.idleFor = rand(6, 15);
+        if (Math.random() < 0.13) {           // thỉnh thoảng đổi sang vị trí trống gần đó
+          const np = positions.find(q => !q.taken && Math.abs(q.x - p.x) < 11 && Math.abs(q.y - p.y) < 7 && q !== p.home);
+          if (np) { freePosition(p.home); np.taken = p; p.home = np; walkTo(p, { x: np.x, y: np.y }, 'walk'); }
+        }
+      }
+    }
+    if (p.dirty || p.target) render(p);
+  }
+  for (const c of couples) {
+    if (c.state === 'stage') {
+      c.timer -= dt;
+      if (c.timer <= 0) leaveStage(c);
+    }
   }
 }
-function arriveStage(c) {
-  if (c.state !== 'toStage') return;
-  c.state = 'stage';
-  c.a.state = 'stage'; c.b.state = 'stage';
-  c.a.el.classList.add('paired'); c.b.el.classList.add('paired');
-  if (W.effects) W.effects.hearts(12, SPOTS[c.spot].x / 100, 0.42);
-  if (W.audio) W.audio.cheer();
-  if (P.onCoupleStage) P.onCoupleStage(c);
-  c.timer = setTimeout(() => leaveStage(c), P.coupleSec * 1000);
-  c.heartTimer = setInterval(() => {
-    if (W.effects && c.state === 'stage') W.effects.hearts(3, SPOTS[c.spot].x / 100, 0.4);
-  }, 4000);
+
+/* ---------- Sinh nhân vật ---------- */
+function makeEl(user) {
+  const el = document.createElement('div');
+  el.className = 'person';
+  const av = user.avatar
+    ? `<span class="av"><img src="${esc(user.avatar)}" alt="" onerror="this.remove()"></span>`
+    : `<span class="av" style="background:${avatarColor(user.id)}">${esc(initials(user.nickname))}</span>`;
+  el.innerHTML = `<div class="figwrap"></div><div class="chip">${av}<span class="nm">${esc(user.nickname)}</span></div>`;
+  return el;
 }
-function leaveStage(c) {
-  clearTimeout(c.timer); clearInterval(c.heartTimer);
-  if (c.spot >= 0 && stageSlots[c.spot] === c) stageSlots[c.spot] = null;
-  c.spot = -1; c.state = 'court';
-  c.a.spotScale = c.b.spotScale = null;
-  c.a.el.classList.remove('paired'); c.b.el.classList.remove('paired');
-  // về hai ghế cạnh nhau (cùng một bàn nếu còn trống)
-  let sa = nearestFreeSeat(30, 80, c.a), sb = null;
-  if (sa) sb = nearestFreeSeat(sa.x, sa.y, c.b);
-  if (!sb) sb = nearestFreeSeat(70, 80, c.b);
-  const goBack = (p, s, side) => {
-    if (s) takeSeat(p, s);
-    const pts = [{ x: 50 + side * 7.5, y: 90 }];
-    if (s) pts.push({ x: s.x, y: s.y });
-    walkPath(p, pts, 'walk');
+P.spawn = function (user) {
+  if (!user || !user.id) return null;
+  const old = people.get(user.id);
+  if (old) return old;
+  if (people.size >= MAX_PEOPLE) return null;
+  const home = takePosition();
+  if (!home) return null;
+  const p = {
+    user, el: makeEl(user), x: home.x, y: 99.4, home, outfit: 'casual',
+    state: 'walk', target: null, path: [], done: null, faceLeft: false,
+    couple: null, idleFor: rand(2, 9), boost: 1, spotScale: 1, dirty: true, speedPx: 200,
   };
-  goBack(c.a, sa, -1);
-  goBack(c.b, sb, 1);
-  promoteStage();
+  home.taken = p;
+  people.set(user.id, p);
+  p.el.querySelector('.figwrap').innerHTML = figHTML(p);
+  box.appendChild(p.el);
+  render(p);
+  walkTo(p, { x: home.x, y: home.y }, 'walk', () => { p.state = 'home'; });
+  return p;
+};
+P.removeUser = function (id) {
+  const p = people.get(id);
+  if (!p) return;
+  if (p.couple) dissolveCouple(p.couple, p);
+  freePosition(p.home);
+  p.el.remove();
+  people.delete(id);
+};
+P.count = () => people.size;
+P.get = id => people.get(id) || null;
+P.tourTarget = function () {
+  const arr = [...people.values()].filter(p => !p.couple && p.state === 'home');
+  if (!arr.length) return null;
+  const p = arr[Math.floor(Math.random() * arr.length)];
+  return { x: p.x, y: p.y };
+};
+
+/* ---------- Ghép đôi: lia cam → đổi đồ cưới → lên sân khấu ---------- */
+function notifyQueue() { if (P.onQueueChange) P.onQueueChange(stageQueue.map(c => `${c.a.user.nickname} ❤ ${c.b.user.nickname}`)); }
+function rolesFor(a, b) {
+  const sa = genderScore(a.user.nickname), sb = genderScore(b.user.nickname);
+  const bride = sa > sb ? a : b;
+  return { bride, groom: bride === a ? b : a };
 }
 P.makeCouple = function (userA, userB) {
   const a = P.spawn(userA), b = P.spawn(userB);
@@ -370,24 +250,78 @@ P.makeCouple = function (userA, userB) {
   if (a.couple && a.couple !== b.couple) return null;
   if (b.couple && b.couple !== a.couple) return null;
   if (a.couple) return a.couple;
-  freeSeat(a); freeSeat(b);
-  // Phân vai theo TÊN: ai "nữ" hơn thì làm cô dâu, ai "nam" hơn làm chú rể; hòa điểm thì người được tag làm cô dâu
-  const sa = genderScore(a.user.nickname), sb = genderScore(b.user.nickname);
-  const bride = sa > sb ? a : b;
-  const groom = bride === a ? b : a;
-  setOutfit(groom, 'groom');
-  setOutfit(bride, 'bride');
-  const c = { key: [a.user.id, b.user.id].sort().join('|'), a, b, state: 'queue', spot: -1, timer: 0, heartTimer: 0 };
+  const { bride, groom } = rolesFor(a, b);
+  const c = { key: [a.user.id, b.user.id].sort().join('|'), a, b, bride, groom, state: 'focus', spot: -1, timer: 0 };
   a.couple = c; b.couple = c;
   couples.push(c);
-  // hai người ra cuối thảm đỏ gặp nhau trước
-  walkPath(a, [{ x: 42, y: 90 }], 'walk');
-  walkPath(b, [{ x: 58, y: 90 }], 'walk');
-  stageQueue.push(c);
-  notifyQueue();
-  setTimeout(promoteStage, 1400);
+  for (const p of [a, b]) { p.target = null; p.path = []; p.done = null; p.state = 'focus'; p.dirty = true; }  // đứng yên tại chỗ cho camera lia tới
+  if (P.onPairFocus) P.onPairFocus(c);                    // main lia camera tới vị trí 2 người
+  setTimeout(() => {                                      // camera tới nơi: đổi đồ cưới + phóng to + vòng sáng
+    if (!couples.includes(c)) return;
+    setOutfit(groom, 'groom'); setOutfit(bride, 'bride');
+    a.boost = b.boost = 1.32; a.dirty = b.dirty = true;
+    a.el.classList.add('pairfx'); b.el.classList.add('pairfx');
+    if (P.onPairReveal) P.onPairReveal(c);
+  }, 1500);
+  setTimeout(() => {                                      // rồi nắm tay nhau ra thảm đỏ lên sân khấu
+    if (!couples.includes(c)) return;
+    a.boost = b.boost = 1; a.dirty = b.dirty = true;
+    c.state = 'queue';
+    stageQueue.push(c); notifyQueue();
+    promoteStage();
+  }, 3600);
   return c;
 };
+
+function promoteStage() {
+  for (let i = 0; i < 3; i++) {
+    if (stageSlots[i] || !stageQueue.length) continue;
+    const c = stageQueue.shift(); notifyQueue();
+    c.state = 'toStage'; c.spot = i;
+    stageSlots[i] = c;
+    c.a.spotScale = c.b.spotScale = i === 0 ? 1.18 : 0.95;
+    const y = stageY + (i ? 0.55 : 0);
+    const off = i === 0 ? 3.1 : 2.7;
+    const yG = y + (c.groom === c.a ? 0.5 : 0), yB = y + (c.bride === c.a ? 0.5 : 0);
+    const yA = c.a === c.groom ? yG : yB, yB2 = c.b === c.groom ? yG : yB;
+    walkPath(c.a, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: SPOTS[i].x - off, y: yA }], 'toStage');
+    walkPath(c.b, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: SPOTS[i].x + off, y: yB2 }], 'toStage', () => arriveStage(c));
+  }
+}
+function arriveStage(c) {
+  if (c.state !== 'toStage') return;
+  c.state = 'stage';
+  c.timer = P.coupleSec || 25;
+  c.a.state = 'stage'; c.b.state = 'stage';
+  c.a.el.classList.remove('pairfx'); c.b.el.classList.remove('pairfx');
+  if (P.onCoupleStage) P.onCoupleStage(c);
+}
+function leaveStage(c) {
+  if (c.spot >= 0) stageSlots[c.spot] = null;
+  c.spot = -1; c.state = 'court';
+  c.a.spotScale = c.b.spotScale = 1;
+  // người về sau: nếu còn vị trí trống sát cạnh vị trí của bạn đời thì chuyển sang ngồi cạnh
+  const mover = c.b, anchor = c.a;
+  const near = positions.find(q => !q.taken && q !== mover.home && Math.abs(q.x - anchor.home.x) < 4.6 && Math.abs(q.y - anchor.home.y) < 3.4);
+  if (near) { freePosition(mover.home); near.taken = mover; mover.home = near; }
+  for (const p of [c.a, c.b]) {
+    p.el.classList.remove('pairfx');
+    walkPath(p, [{ x: p.home.x < 50 ? 47 : 53, y: 90 }, { x: p.home.x, y: p.home.y }], 'walk', () => { p.state = 'home'; });
+  }
+  promoteStage();
+}
+function dissolveCouple(c, leaving) {
+  const i = couples.indexOf(c); if (i >= 0) couples.splice(i, 1);
+  const qi = stageQueue.indexOf(c); if (qi >= 0) { stageQueue.splice(qi, 1); notifyQueue(); }
+  if (c.spot >= 0) { stageSlots[c.spot] = null; promoteStage(); }
+  const other = leaving === c.a ? c.b : c.a;
+  if (other && people.get(other.user.id) === other) {
+    other.couple = null; other.boost = 1;
+    other.el.classList.remove('pairfx');
+    setOutfit(other, 'casual');
+    walkTo(other, { x: other.home.x, y: other.home.y }, 'walk', () => { other.state = 'home'; });
+  }
+}
 P.featured = () => stageSlots[0];
 P.coupleOf = function (uid) { const p = people.get(uid); return p ? p.couple : null; };
 P.danceAll = function (sec = 5) {
@@ -397,25 +331,35 @@ P.setCrown = function (couple) {
   document.querySelectorAll('.person .crown').forEach(e => e.remove());
   if (!couple) return;
   for (const p of [couple.a, couple.b]) {
-    const crown = document.createElement('div');
-    crown.className = 'crown'; crown.textContent = '👑';
-    p.el.prepend(crown);
+    if (!p || !p.el) continue;
+    const s = document.createElement('span');
+    s.className = 'crown'; s.textContent = '👑';
+    p.el.appendChild(s);
   }
 };
-P.removeUser = function (uid) {
-  const p = people.get(uid);
-  if (!p) return;
-  freeSeat(p);
-  if (p.couple) {
-    const c = p.couple;
-    if (c.state === 'stage' || c.state === 'toStage') leaveStage(c);
-    const i = stageQueue.indexOf(c); if (i >= 0) stageQueue.splice(i, 1);
-    const other = c.a === p ? c.b : c.a;
-    if (other) { other.couple = null; setOutfit(other, 'casual'); }
-    const ci = couples.indexOf(c); if (ci >= 0) couples.splice(ci, 1);
-    notifyQueue();
+/* Tắt hoạt ảnh nhân vật ngoài khung camera cho nhẹ máy */
+P.cull = function (x0, y0, x1, y1) {
+  for (const p of people.values()) {
+    const inside = p.x > x0 && p.x < x1 && p.y > y0 && p.y < y1;
+    if (inside !== p.inside) { p.inside = inside; p.el.classList.toggle('far', !inside); }
   }
-  p.el.remove();
-  people.delete(uid);
 };
-})();
+
+/* ---------- Khởi tạo ---------- */
+P.init = function (container, tablesEl) {
+  box = container; tablesBox = tablesEl || null;
+  const tables = buildPositions();
+  if (tablesBox) {
+    tablesBox.innerHTML = '';
+    for (const t of tables) {
+      const d = document.createElement('div');
+      d.className = 'wtable';
+      d.style.left = t.x + '%'; d.style.top = t.y + '%';
+      tablesBox.appendChild(d);
+    }
+  }
+  requestAnimationFrame(loop);
+};
+P.resize = function (w, h) { Ww = w; Hw = h; FH = h * 0.05; for (const p of people.values()) p.dirty = true; };
+P.setStageY = function (y) { stageY = y; };
+P.coupleSec = 25;

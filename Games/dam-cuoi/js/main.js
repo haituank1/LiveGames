@@ -28,16 +28,8 @@ const TIERS = [
   { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-3.webp', royal: 1 },
   { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-3.webp', royal: 2 },
 ];
-const FILE_ANCHOR = { 'bg.webp': 49.5, 'bg-3.webp': 52 };
-/* Bố cục từng nền: vị trí các bàn tiệc (ghế sẽ xếp quanh bàn) + điểm thảm đỏ chạm sân khấu */
-const FILE_LAYOUT = {
-  'bg.webp': { carpetTop: 51, tables: [
-    { x: 22, y: 47 }, { x: 13, y: 59 }, { x: 22, y: 71 }, { x: 16, y: 86 },
-    { x: 78, y: 47 }, { x: 87, y: 59 }, { x: 78, y: 71 }, { x: 84, y: 86 } ] },
-  'bg-3.webp': { carpetTop: 54, tables: [
-    { x: 24, y: 51 }, { x: 12, y: 63 }, { x: 28, y: 73 }, { x: 16, y: 87 },
-    { x: 76, y: 51 }, { x: 88, y: 63 }, { x: 72, y: 73 }, { x: 84, y: 87 } ] },
-};
+/* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
+const STAGE_Y = { 'bg.webp': 17.3, 'bg-3.webp': 18.2 };
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
@@ -182,21 +174,56 @@ function applyTierFx(tier) {
 }
 let bgToken = 0;
 function setBackground(file) {
-  P.setAnchor(FILE_ANCHOR[file] || 42);
-  P.setLayout(FILE_LAYOUT[file]);
+  P.setStageY(STAGE_Y[file] || 17.3);
   const tk = ++bgToken;
   const img = new Image();
   img.onload = () => {
     if (tk !== bgToken) return;   // đã có nền mới hơn đang tải — bỏ qua ảnh cũ về muộn
-
-    const fadeEl = $('bgfade'), mainEl = $('bgmain');
-    fadeEl.style.backgroundImage = mainEl.style.backgroundImage;
-    fadeEl.style.opacity = '1';
-    mainEl.style.backgroundImage = `url("${file}")`;
-    requestAnimationFrame(() => requestAnimationFrame(() => { fadeEl.style.opacity = '0'; }));
+    for (const id of ['panelC', 'wingL', 'wingR']) $(id).style.backgroundImage = `url("${file}")`;
   };
   img.src = file;
 }
+
+/* ============ Camera lia trong phòng rộng ============ */
+let SW = 0, SH = 0, WW = 0, WH = 0;
+const Cam = {
+  cx: 50, cy: 39, z: 0.64, busyUntil: 0,
+  apply(anim = true) {
+    const world = $('world');
+    if (!world || !WW) return;
+    const tx = SW / 2 - (this.cx / 100 * WW) * this.z;
+    const ty = SH / 2 - (this.cy / 100 * WH) * this.z;
+    world.style.transition = anim ? 'transform 1.25s cubic-bezier(.35,.7,.25,1)' : 'none';
+    world.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${this.z})`;
+    const mx = (SW / 2) / this.z / WW * 100 + 7, my = (SH / 2) / this.z / WH * 100 + 7;
+    P.cull(this.cx - mx, this.cy - my, this.cx + mx, this.cy + my);
+  },
+  panTo(cx, cy, z) {
+    this.z = z;
+    // Kẹp tâm camera để khung hình không lia ra ngoài phòng (tránh dải đen)
+    const halfW = (SW / 2) / z / WW * 100, halfH = (SH / 2) / z / WH * 100;
+    const mX = Math.min(halfW, 49), mY = Math.min(halfH, 49);
+    this.cx = Math.max(mX, Math.min(100 - mX, cx));
+    this.cy = Math.max(mY, Math.min(100 - mY, cy));
+    this.apply(true);
+  },
+  home() { this.panTo(50, 36, 0.63); },
+  stage() { this.panTo(50, 15.5, 1.04); },
+  toScreen(x, y) {
+    return { fx: 0.5 + (x - this.cx) / 100 * WW * this.z / SW, fy: 0.5 + (y - this.cy) / 100 * WH * this.z / SH };
+  },
+};
+P.onPairFocus = function (c) {
+  Cam.busyUntil = Date.now() + 11000;
+  Cam.panTo((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2 - 2, 1.18);
+};
+P.onPairReveal = function (c) {
+  const mid = Cam.toScreen((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2);
+  if (FX.ringHearts) FX.ringHearts(mid.fx, mid.fy - 0.05);
+  if (FX.petalBurst) FX.petalBurst(mid.fx, mid.fy);
+  FX.hearts(12, mid.fx, mid.fy);
+  mcReact(2.5, MC.couple, { a: c.a.user.nickname, b: c.b.user.nickname });
+};
 function bgFileFor(total) {
   const rules = Array.isArray(cfg.bgRules) ? cfg.bgRules.filter(r => r && r.file).slice().sort((a, b) => a.viewers - b.viewers) : [];
   let file = 'bg.webp';
@@ -303,13 +330,14 @@ function requestCouple(a, b, viaTag) {
 }
 P.onCoupleStage = function (c) {
   coupleScore(c, 30);
+  Cam.busyUntil = Date.now() + 9000;
+  Cam.stage();
   showBanner(`💍 LỄ THÀNH HÔN · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
-  mcReact(2.5, MC.couple, { a: c.a.user.nickname, b: c.b.user.nickname });
-  const ay = (FILE_ANCHOR[BG.file] || 42) / 100;
+  const sp = Cam.toScreen(c.a.x, c.a.y);
   if (FX.cannon) FX.cannon();
   FX.petals(60);
-  if (FX.petalBurst) FX.petalBurst(0.5, ay);
-  if (FX.ringHearts) FX.ringHearts(0.5, ay - 0.09);
+  if (FX.petalBurst) FX.petalBurst(sp.fx, sp.fy);
+  if (FX.ringHearts) FX.ringHearts(sp.fx, sp.fy - 0.09);
   const spot = $('spot'); if (spot) spot.classList.add('on');
 };
 P.onQueueChange = function (names) {
@@ -451,7 +479,11 @@ function resize() {
     root.setProperty('--k', '1.2'); root.setProperty('--safe', '0px'); root.setProperty('--side', '0px');
   }
   FX.resize(sw, sh, Math.min(2, window.devicePixelRatio || 1));
-  P.resize(sw, sh);
+  SW = sw; SH = sh; WW = Math.round(sw * 3.2); WH = Math.round(sh * 2.2);
+  const world = $('world');
+  world.style.width = WW + 'px'; world.style.height = WH + 'px';
+  P.resize(WW, WH);
+  Cam.apply(false);
 }
 addEventListener('resize', resize);
 document.addEventListener('fullscreenchange', () => { lastLayoutKey = ''; resize(); });
@@ -469,9 +501,20 @@ function setupSoundBtn() {
 
 /* ============ Khởi động ============ */
 FX.init($('fx'));
-P.init($('people'));
+P.init($('people'), $('tables'));
 resize();
+Cam.home();
 refreshBg(false);
+/* Rảnh rỗi lâu thì camera tự lia đi ngắm khách một vòng rồi về sân khấu */
+setInterval(() => {
+  if (Date.now() < Cam.busyUntil || P.featured()) return;
+  const t = P.tourTarget && P.tourTarget();
+  if (t && Math.random() < 0.75) {
+    Cam.busyUntil = Date.now() + 13000;
+    Cam.panTo(t.x, t.y - 2, 0.95);
+    setTimeout(() => { if (Date.now() >= Cam.busyUntil - 100) Cam.home(); }, 7000);
+  }
+}, 20000);
 setInterval(() => { if (TIERS[BG.tier] && TIERS[BG.tier].royal === 2) FX.fireworks(2); }, 25000);
 
 if (isDemo) {
