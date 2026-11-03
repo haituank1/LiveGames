@@ -398,6 +398,7 @@ function requestCouple(a, b, viaTag) {
 }
 P.onCoupleStage = function (c) {
   coupleScore(c, 30);
+  if (BG.tier >= 4) P.setCrown(c);   // mốc Hoàng Gia (10.000+): cặp nào lên bục cũng đội vương miện
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 9000;
   Cam.stage();
@@ -616,7 +617,7 @@ if (isDemo) {
   applyConfig({
     mcName: 'MC Anh Tú',
     coupleSec: 25,
-    phongToGoiTen: 1.32, coCapGiua: 1.18, coCapBen: 0.95, soCapToiDa: 3,
+    phongToGoiTen: 1.32, coCapGiua: 1.05, coCapBen: 1.05, soCapToiDa: 3,
     zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
