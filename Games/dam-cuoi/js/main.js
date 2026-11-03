@@ -307,6 +307,7 @@ function refreshBg(announce) {
     const old = BG.tier;
     BG.tier = tier;
     FX.setTier(tier);
+    P.setTierLevel(tier);
     applyTierFx(tier);
     if (announce && old >= 0) {
       showBanner(`🎉 SẢNH CƯỚI NÂNG CẤP · ${TIERS[tier].name}`, 6000);

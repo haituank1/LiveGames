@@ -46,12 +46,39 @@ function avatarColor(id) { const hues = [340, 262, 200, 158, 24, 288, 96, 0, 210
 function initials(name) { const w = String(name || '?').trim().split(/\s+/); return ((w[0] || '?')[0] + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase(); }
 function esc(s) { return String(s || '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
 
-/* ---------- Ảnh chibi: nhiều mẫu cô dâu / chú rể / khách ---------- */
-const BRIDES = ['img/bride.png', 'img/bride2.png', 'img/bride3.png', 'img/bride4.png'];
-const GROOMS = ['img/groom.png', 'img/groom2.png', 'img/groom3.png', 'img/groom4.png'];
+/* ---------- Ảnh chibi: BỘ ĐỒ CƯỚI PHỐI SẴN theo phong cách ----------
+   Cô dâu & chú rể của 1 cặp LUÔN mặc cùng 1 BỘ (cùng phong cách) — không bao
+   giờ lệch kiểu (cổ/truyền thống phải đi với truyền thống, hiện đại với hiện đại).
+   Mỗi khung cảnh (mốc) có 1 danh sách bộ riêng để random, và các cặp đang lên
+   sân khấu cùng lúc sẽ tránh trùng bộ với nhau khi còn bộ khác. */
+const SETS_BASE = [
+  { name: 'Hoàng gia trắng', bride: 'img/bride.png', groom: 'img/groom.png' },
+  { name: 'Truyền thống áo dài', bride: 'img/bride2.png', groom: 'img/groom4.png' },
+  { name: 'Hồng hiện đại', bride: 'img/bride3.png', groom: 'img/groom3.png' },
+  { name: 'Công chúa vàng', bride: 'img/bride4.png', groom: 'img/groom2.png' },
+];
+const SETS_ROYAL = [
+  { name: 'Hoàng gia vàng', bride: 'img/royal-bride1.png', groom: 'img/royal-groom1.png' },
+  { name: 'Hoàng gia phượng', bride: 'img/royal-bride2.png', groom: 'img/royal-groom2.png' },
+];
 const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png'];
 const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png'];
-[...BRIDES, ...GROOMS, ...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; });
+[...SETS_BASE, ...SETS_ROYAL].forEach(s => { for (const src of [s.bride, s.groom]) { const im = new Image(); im.src = src; } });
+[...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; });
+let tierLevel = 0;
+P.setTierLevel = function (n) { tierLevel = n | 0; };
+function setPool() {
+  // Mốc Hoàng Gia (10.000+): chỉ dùng bộ hoàng gia + bộ trắng chủ lực
+  return tierLevel >= 4 ? [...SETS_ROYAL, SETS_BASE[0]] : SETS_BASE;
+}
+function pickSet(c) {
+  const pool = setPool();
+  const used = new Set();
+  for (const o of couples) if (o !== c && o.set) used.add(o.set);
+  const free = pool.filter(s => !used.has(s));
+  const list = free.length ? free : pool;
+  return list[Math.abs(hash(c.key)) % list.length];
+}
 
 /* ---------- Đoán giới tính theo tên tiếng Việt ----------
    Điểm > 0: nữ · < 0: nam · = 0: không rõ. Tên đệm Thị (nữ) / Văn (nam) mạnh nhất,
@@ -79,8 +106,8 @@ P.guessGender = name => { const s = genderScore(name); return s > 0 ? 'F' : s < 
 function figHTML(p) {
   const seed = hash(p.user.id || p.user.nickname);
   let file;
-  if (p.outfit === 'bride') file = BRIDES[seed % BRIDES.length];
-  else if (p.outfit === 'groom') file = GROOMS[seed % GROOMS.length];
+  if (p.outfit === 'bride') file = (p.set || SETS_BASE[seed % SETS_BASE.length]).bride;
+  else if (p.outfit === 'groom') file = (p.set || SETS_BASE[seed % SETS_BASE.length]).groom;
   else {
     const gs = genderScore(p.user.nickname);
     const girl = gs > 0 || (gs === 0 && seed % 2 === 1);
@@ -90,6 +117,7 @@ function figHTML(p) {
 }
 function setOutfit(p, outfit) {
   p.outfit = outfit;
+  if (outfit === 'casual') p.set = null;
   p.el.querySelector('.figwrap').innerHTML = figHTML(p);
   p.el.classList.toggle('wedding', outfit !== 'casual');
   p.dirty = true;
@@ -295,12 +323,14 @@ P.makeCouple = function (userA, userB) {
   if (a.couple) return a.couple;
   const { bride, groom } = rolesFor(a, b);
   const c = { key: [a.user.id, b.user.id].sort().join('|'), a, b, bride, groom, state: 'focus', spot: -1, timer: 0 };
+  c.set = pickSet(c);   // cả cặp mặc CHUNG 1 bộ phối sẵn cùng phong cách
   a.couple = c; b.couple = c;
   couples.push(c);
   for (const p of [a, b]) { p.target = null; p.path = []; p.done = null; p.state = 'focus'; p.dirty = true; }  // đứng yên tại chỗ cho camera lia tới
   if (P.onPairFocus) P.onPairFocus(c);                    // main lia camera tới vị trí 2 người
   setTimeout(() => {                                      // camera tới nơi: đổi đồ cưới + phóng to + vòng sáng
     if (!couples.includes(c)) return;
+    groom.set = c.set; bride.set = c.set;
     setOutfit(groom, 'groom'); setOutfit(bride, 'bride');
     a.boost = b.boost = P.tune.boost; a.dirty = b.dirty = true;
     a.el.classList.add('pairfx'); b.el.classList.add('pairfx');
