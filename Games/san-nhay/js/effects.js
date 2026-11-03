@@ -80,6 +80,60 @@ E.burstAt = function (x, y, color, n = 16) {   // tia màu lớp nhân vật khi
   }
 };
 
+/* ---------- Hiệu ứng ambient theo lớp (v3) ----------
+   Tọa độ vào là phân số của THẾ GIỚI (canvas phủ cả #world): x = ngang, y = chân dancer. */
+E.ring = function (x, y, color) {   // vòng sóng lan ra dưới chân
+  add({ kind: 'ring', x: x * w, y: y * h, vx: 0, vy: 0, life: 0, max: 1.25, size: rand(16, 22) * (h / 800) + 8, color, grav: 0, drag: 0 });
+};
+E.twinkleAt = function (x, y, color, n = 2) {
+  for (let i = 0; i < n; i++) {
+    add({ kind: 'twinkle', x: x * w + rand(-26, 26), y: y * h + rand(-14, 14), vx: rand(-4, 4), vy: rand(-12, -4),
+      life: 0, max: rand(0.9, 1.6), size: rand(1.8, 3.2), color, grav: 0, drag: 0 });
+  }
+};
+E.note = function (x, y, color) {   // nốt nhạc bay lên (lớp DJ)
+  add({ kind: 'note', x: x * w + rand(-16, 16), y: y * h, vx: rand(-8, 8), vy: rand(-52, -34),
+    life: 0, max: rand(1.4, 2), size: rand(11, 16), color: color || '#7ed6ff', grav: -4, drag: 0, sway: rand(0, 6.3) });
+};
+E.bubbleFx = function (x, y) {   // bong bóng xà phòng (lớp Mascot)
+  add({ kind: 'bubble', x: x * w + rand(-20, 20), y: y * h + rand(-6, 6), vx: rand(-6, 6), vy: rand(-44, -26),
+    life: 0, max: rand(1.6, 2.4), size: rand(4, 8.5), color: '#cfeaff', grav: -8, drag: 0, sway: rand(0, 6.3) });
+};
+E.feather = function (x, y) {   // lông vũ rơi lã chã (lớp Mascot)
+  add({ kind: 'feather', x: x * w + rand(-14, 14), y: y * h, vx: rand(-10, 10), vy: rand(14, 26),
+    life: 0, max: rand(1.6, 2.4), size: rand(5, 8), rot: rand(0, 6.3), vr: rand(-1.6, 1.6), color: '#ffffff', grav: 4, drag: 0, sway: rand(0, 6.3) });
+};
+E.billAt = function (x, y) {   // một tờ tiền bay phất phới tại điểm (lớp Đại Gia)
+  add({ kind: 'bill', x: x * w + rand(-18, 18), y: y * h, vx: rand(-16, 16), vy: rand(-30, -12),
+    life: 0, max: rand(1.6, 2.4), size: rand(6, 10), rot: rand(0, 6.3), vr: rand(-3, 3),
+    color: ['#8be28b', '#b8f26d', '#ffd76a'][Math.floor(rand(0, 3))], grav: 26, drag: 0, sway: rand(0, 6.3) });
+};
+E.ambient = function (cls, x, y) {   // hào quang sống quanh dancer, khác nhau theo lớp
+  if (x == null || y == null) return;
+  const head = Math.max(0.03, y - 0.115);
+  switch (cls) {
+    case 'dai-gia':   // vòng vàng xoay (CSS) + tia xu + tiền phất phới
+      E.ring(x, y, '#ffd76a'); E.twinkleAt(x, head, '#ffd76a', 2);
+      if (Math.random() < 0.55) E.billAt(x, head);
+      break;
+    case 'idol':      // tim + sao hồng bay lên
+      E.hearts(1, x, head); E.twinkleAt(x, head, '#ff7ed6', 2);
+      break;
+    case 'dj':        // vòng sóng nhạc + nốt nhạc
+      E.ring(x, y, '#7ed6ff'); E.note(x, head);
+      break;
+    case 'quay-hai':  // pháo giấy mini + tia cam nhanh
+      E.burstAt(x, y - 0.05, '#ff9d5c', 4); E.twinkleAt(x, head, '#ff9d5c', 1);
+      break;
+    case 'mascot':    // bong bóng xà phòng + thỉnh thoảng lông vũ
+      E.bubbleFx(x, head); E.bubbleFx(x, head);
+      if (Math.random() < 0.35) E.feather(x, head);
+      break;
+    default:          // tan-binh: sao xanh lấp lánh
+      E.twinkleAt(x, head, '#9be15d', 2);
+  }
+};
+
 /* ---------- Vẽ ---------- */
 function drawHeart(x, y, s, color, alpha) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s / 10, s / 10); ctx.globalAlpha = alpha;
@@ -140,6 +194,27 @@ function loop(t) {
       ctx.beginPath(); ctx.arc(0, 0, p.size * 0.3, 0, 6.3); ctx.fill(); ctx.restore();
     } else if (p.kind === 'heart') {
       drawHeart(p.x, p.y, p.size, p.color, Math.max(0, fade));
+    } else if (p.kind === 'ring') {
+      const t = p.life / p.max;
+      ctx.save(); ctx.globalAlpha = (1 - t) * 0.85; ctx.strokeStyle = p.color; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y, p.size * (0.5 + t * 1.15), p.size * 0.32 * (0.5 + t * 1.15), 0, 0, 6.3); ctx.stroke();
+      ctx.restore();
+    } else if (p.kind === 'note') {
+      ctx.save(); ctx.globalAlpha = Math.max(0, fade); ctx.fillStyle = p.color;
+      ctx.font = `700 ${p.size * 2}px system-ui,sans-serif`; ctx.textAlign = 'center';
+      ctx.fillText(p.sway > 3.1 ? '♫' : '♪', p.x, p.y); ctx.restore();
+    } else if (p.kind === 'bubble') {
+      ctx.save(); ctx.globalAlpha = Math.max(0, fade) * 0.9;
+      ctx.strokeStyle = 'rgba(200,235,255,.95)'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 6.3); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.35)';
+      ctx.beginPath(); ctx.arc(p.x - p.size * 0.35, p.y - p.size * 0.35, p.size * 0.28, 0, 6.3); ctx.fill();
+      ctx.restore();
+    } else if (p.kind === 'feather') {
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot || 0); ctx.globalAlpha = Math.max(0, fade) * 0.95;
+      ctx.fillStyle = '#fffbe8'; ctx.beginPath(); ctx.ellipse(0, 0, p.size * 0.42, p.size, 0, 0, 6.3); ctx.fill();
+      ctx.strokeStyle = 'rgba(190,170,120,.8)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, -p.size); ctx.lineTo(0, p.size); ctx.stroke(); ctx.restore();
     }
   }
   ctx.globalAlpha = 1;

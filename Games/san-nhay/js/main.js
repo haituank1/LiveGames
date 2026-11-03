@@ -1,14 +1,14 @@
-/* Sàn Nhảy Quẩy Max – cục B (game). Nhận sự kiện từ LiveBridge.
-   Luật chơi v1:
-   - Mọi người xem vào phòng / bình luận / thả tim / tặng quà đều thành một dancer trên sàn,
-     thuộc 1 trong 6 lớp nhân vật (ảnh + điệu nhảy + màu hiệu ứng riêng, xem js/dancers.js).
-   - Lượt SOLO kiểu Audition: dancer lên bục giữa theo vòng, dãy phím mũi tên chạy ở thanh dưới,
-     chấm PERFECT / GREAT / COOL / MISS + COMBO. Khán giả bình luận "trái / lên / xuống / phải"
-     (hoặc emoji ←↑↓→) để giúp dancer ăn điểm.
-   - Thanh PARTY ENERGY đầy 100% -> PARTY MAX 10 giây: cả sàn nhảy nhanh, mưa tiền + pháo giấy.
-   - Quà: nhỏ = pháo giấy / tim tại dancer; vừa = nổ hũ vàng; lớn (>=99 xu) = đổ bộ có cánh + hào quang lên bục.
-   - Bảng vàng tuần (lưu trình duyệt): Chủ Tịch Sàn / Phó Chủ Tịch / Thư Ký theo điểm quà.
-   - Sàn đổi cảnh theo TỔNG LƯỢT VIEW tích lũy: Neon -> Bãi Biển (1.500) -> Tuyết (4.000). */
+/* Sàn Nhảy Quẩy Max v3 – KHÔNG GIAN RỘNG + CAMERA LIA.
+   - Thế giới rộng 210% x 115% khung, 3 khu: A = DJ + TV màn hình lớn | B = sàn chính + sân khấu top 3 | C = VIP bar.
+   - Mỗi người xem = 1 dancer nhận 1 Ô CỐ ĐỊNH random trong 126 ô của 3 khu, nhảy tại ô (js/dancers.js).
+   - CAMERA ảo lia #world (transform translate+scale): toàn cảnh / đóng 1 khu / cận cảnh 1 dancer tại ô của họ.
+     Hàng đợi ưu tiên: VIP đáp (≥299) > đổ bộ (≥99) > solo AU > nhảy đôi > lên cấp > quà nổ hũ > tour tự động.
+   - Lượt SOLO kiểu Audition diễn NGAY TẠI Ô của dancer: camera cận cảnh + spotlight + vòng sáng,
+     hàng xóm cùng khu cổ vũ. Dãy phím + COMBO + bảng tally là overlay cố định ngoài camera.
+   - Nhảy đôi: cặp ra điểm nhảy đôi của khu, camera đóng khung khu đó, xong ai về ô nấy.
+   - TV Khu A: mặc định chiếu DJ + EQ + ticker sự kiện; khi camera cận cảnh ai thì TV chiếu người đó + điểm trực tiếp.
+   - Party Energy đầy -> PARTY MAX: camera về toàn cảnh, cả sàn cùng quẩy, mưa tiền + pháo giấy.
+   - Bảng vàng tuần (localStorage): Chủ Tịch / Phó Chủ Tịch / Thư Ký; top 3 đứng lớn trên sân khấu Khu B. */
 (function () {
 'use strict';
 const W = (window.Party = window.Party || {});
@@ -17,11 +17,12 @@ const q = new URLSearchParams(location.search);
 const isDemo = q.has('demo');
 const $ = id => document.getElementById(id);
 const rand = (a, b) => a + Math.random() * (b - a);
-const stageEl = $('stage'), statusEl = $('status');
+const stageEl = $('stage'), statusEl = $('status'), worldEl = $('world');
 const say = (html, cls) => { statusEl.className = cls || ''; statusEl.innerHTML = html; };
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
 const fmtNum = n => n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(Math.round(n));
 const noAccent = s => String(s || '').toLocaleLowerCase('vi').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 /* ============ Sàn đổi cảnh theo tổng lượt view tích lũy ============ */
 const VENUES = [
@@ -67,7 +68,7 @@ function ensureDancer(user) {
   if (!u) return null;
   countView(u);
   const p = P.spawn(u);
-  if (isNew && p) joinOrder.push(u.id);
+  if (isNew && p) { joinOrder.push(u.id); tvPush(`👋 ${u.nickname} vào sàn (ô ${p.home ? p.home.id : '?'})`); }
   if (p) settleStage(p);
   return p;
 }
@@ -90,8 +91,7 @@ function addScore(user, pts) {
   localStorage.setItem(LS, JSON.stringify(scores));
   renderBoard();
 }
-/* Bảng vàng tuần: 3 ô vàng trên cùng (ảnh lớp + tên + 💎), hạng 4-5 ở dòng nhỏ.
-   Top 3 đồng thời đứng LỚN trên sân khấu nền. */
+/* Bảng vàng tuần: 3 ô vàng trên cùng; top 3 đồng thời đứng LỚN trên sân khấu Khu B */
 let stageIds = [];
 function renderBoard() {
   const top = topScores(5);
@@ -112,20 +112,20 @@ function refreshStage(ids) {
   for (const id of old) {
     if (ids.includes(id)) continue;
     const p = P.get(id);
-    if (p && p.onStage) P.toFloor(p);   // rớt khỏi top 3 -> về sàn
+    if (p && p.onStage) P.toFloor(p);   // rớt khỏi top 3 -> về ô nhà
   }
   ids.forEach((id, i) => {
     const p = P.get(id);
     if (!p) return;
-    if (solo && solo.p === p) return;   // đang solo ở bục thì kệ, hết lượt sẽ tính lại
-    if (p.paired) return;
+    if (solo && solo.p === p) return;   // đang solo tại ô thì kệ, hết lượt sẽ tính lại
+    if (p.paired || p.focused) return;
     P.toStage(p, i);
   });
 }
-/* Dancer rời bục solo / hết nhảy đôi -> nếu thuộc top 3 thì quay lại sân khấu */
+/* Dancer hết solo / hết nhảy đôi -> nếu thuộc top 3 thì quay lại sân khấu Khu B */
 function settleStage(p) {
   const i = stageIds.indexOf(p.user.id);
-  if (i >= 0 && !P.busy(p)) P.toStage(p, i);
+  if (i >= 0 && !P.busy(p) && !p.focused) P.toStage(p, i);
 }
 
 /* ============ Banner / toast / hướng dẫn ============ */
@@ -158,6 +158,122 @@ function startGuide() {
   guideTimer = setInterval(() => { el.classList.add('out'); setTimeout(show, 380); }, 4200);
 }
 
+/* ================================================================
+   CAMERA ẢO – lia #world: toàn cảnh / khu / cận cảnh dancer tại ô
+   ================================================================ */
+const WORLD_W = 2.10, WORLD_H = 1.15;
+let stageW = 0, stageH = 0;
+const camLock = q.get('cam');   // khóa camera để chụp/kiểm chứng: overview|a|b|c|focus
+const Cam = {
+  mode: 'overview', zone: null, p: null, pairSpec: null,
+  until: 0, queue: [], idleStep: 0, spec: { mode: 'overview' },
+  holdUntil: 0,   // Party Max giữ toàn cảnh
+};
+const ZONE_CY = { A: 0.44, B: 0.52, C: 0.50 };
+function camGeom(spec) {
+  const WW = stageW * WORLD_W, WH = stageH * WORLD_H;
+  let S, cx, cy;
+  if (spec.mode === 'zone') { S = 1.32; cx = P.ZONE_CX[spec.zone] / 100 * WW; cy = ZONE_CY[spec.zone] * WH; }
+  else if (spec.mode === 'focus' && spec.p) { S = 2.0; cx = spec.p.x / 100 * WW; cy = (spec.p.y - 6) / 100 * WH; }
+  else if (spec.mode === 'pair' && spec.at) { S = 1.5; cx = spec.at.x / 100 * WW; cy = (spec.at.y - 5) / 100 * WH; }
+  else { S = stageW / WW; return { S, tx: (stageW - WW * S) / 2, ty: (stageH - WH * S) / 2 }; }
+  const tx = clamp(stageW / 2 - cx * S, stageW - WW * S, 0);
+  const ty = clamp(stageH * 0.52 - cy * S, stageH - WH * S, 0);
+  return { S, tx, ty };
+}
+let camtabTimer = 0;
+function showCamtab(text) {
+  const el = $('camtab');
+  el.textContent = text;
+  el.classList.add('on');
+  clearTimeout(camtabTimer);
+  camtabTimer = setTimeout(() => el.classList.remove('on'), 3600);
+}
+function camGo(spec, durSec) {
+  if (!stageW) { Cam.spec = spec; return; }
+  Cam.spec = spec;
+  Cam.mode = spec.mode; Cam.zone = spec.zone || null; Cam.p = spec.p || null; Cam.pairSpec = spec.mode === 'pair' ? spec : null;
+  Cam.until = performance.now() + (durSec || 9) * 1000;
+  const g = camGeom(spec);
+  worldEl.style.transform = `translate(${g.tx}px, ${g.ty}px) scale(${g.S})`;
+  const zone = spec.mode === 'zone' ? spec.zone : spec.mode === 'focus' && spec.p ? P.zoneOf(spec.p) : spec.mode === 'pair' ? spec.zone : '';
+  stageEl.dataset.camzone = zone || '';
+  for (const z of ['A', 'B', 'C']) $('zp-' + z).classList.toggle('on', zone === z);
+  // spotlight bám người được cận cảnh
+  const cone = $('spotcone');
+  if (spec.mode === 'focus' && spec.p) {
+    cone.style.left = spec.p.x + '%';
+    cone.style.top = (spec.p.y - 54) + '%';   // chùm đèn kết thúc đúng chân dancer, luôn nằm trong khung cận cảnh
+    cone.style.background = `linear-gradient(180deg, ${hexA(P.classOf(spec.p).color, 0.75)}, ${hexA(P.classOf(spec.p).color, 0.05)} 85%)`;
+    cone.classList.add('on');
+  } else cone.classList.remove('on');
+  // TV Khu A: có người được chiếu thì chiếu người đó, không thì quay về DJ
+  if (spec.tv) tvShowDancer(spec.tv);
+  else tvShowDJ();
+  if (spec.label) showCamtab(spec.label);
+}
+function hexA(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+function camRequest(spec, durSec) {
+  if (camLock) return;
+  const now = performance.now();
+  if (now < Cam.holdUntil && spec.mode !== 'overview') return;   // Party Max đang giữ toàn cảnh
+  spec._prio = spec.prio || 0; spec._dur = durSec || 9;
+  if (now >= Cam.until || spec._prio >= 85) { camGo(spec, spec._dur); return; }
+  if (Cam.queue.length < 3) {
+    Cam.queue.push(spec);
+    Cam.queue.sort((a, b) => b._prio - a._prio);
+  }
+}
+/* Đạo diễn camera: hết cảnh thì lấy hàng đợi, không có thì tour tự động ~14s/lần */
+setInterval(() => {
+  if (camLock || !stageW) return;
+  const now = performance.now();
+  if (now < Cam.until) return;
+  if (Cam.queue.length) { const s = Cam.queue.shift(); camGo(s, s._dur); return; }
+  const step = Cam.idleStep++ % 3;
+  if (step === 0) { camGo({ mode: 'overview' }, 7); return; }
+  if (step === 1) { const z = ['A', 'B', 'C'][Math.floor(Math.random() * 3)]; camGo({ mode: 'zone', zone: z, label: `📹 CAMERA → KHU ${z}` }, 10); return; }
+  const act = P.all().filter(p => !P.busy(p));
+  if (act.length) {
+    const p = act[Math.floor(Math.random() * act.length)];
+    camGo({ mode: 'focus', p, label: `📹 CAMERA → KHU ${P.zoneOf(p)} · ${p.user.nickname} (ô ${p.home ? p.home.id : '?'})`,
+      tv: { img: P.classOf(p).img, name: p.user.nickname, sub: `Ô ${p.home ? p.home.id : '?'} · ${P.classOf(p).name}` } }, 9);
+  } else camGo({ mode: 'overview' }, 7);
+}, 1000);
+/* Khóa camera theo &cam= (chụp ảnh / kiểm chứng) */
+function applyCamLock() {
+  if (!camLock) return;
+  const v = camLock.toLowerCase();
+  if (v === 'a' || v === 'b' || v === 'c') camGo({ mode: 'zone', zone: v.toUpperCase() }, 1e6);
+  else if (v === 'focus') {
+    const p = P.all().find(x => !P.busy(x));
+    if (p) camGo({ mode: 'focus', p, label: `📹 CAMERA → KHU ${P.zoneOf(p)} · ${p.user.nickname}`,
+      tv: { img: P.classOf(p).img, name: p.user.nickname, sub: `Ô ${p.home ? p.home.id : '?'}` } }, 1e6);
+  } else camGo({ mode: 'overview' }, 1e6);
+}
+
+/* ============ TV màn hình lớn Khu A ============ */
+const tvEvents = ['🎧 DJ đang quẩy nhạc sàn 116 BPM'];
+function tvPush(txt) {
+  tvEvents.unshift(txt);
+  if (tvEvents.length > 6) tvEvents.pop();
+  const t = tvEvents.join('   •   ') + '   •   ';
+  $('tk1').textContent = t; $('tk2').textContent = t;
+}
+let tvFocusName = '';
+function tvShowDJ() { $('tvfocus').classList.remove('on'); tvFocusName = ''; }
+function tvShowDancer(tv) {
+  $('tfImg').src = tv.img;
+  $('tfName').textContent = tv.name;
+  $('tfSub').textContent = tv.sub || '';
+  $('tvfocus').classList.add('on');
+  tvFocusName = tv.name;
+}
+function tvUpdateScore(txt) { if (tvFocusName) $('tfSub').textContent = txt; }
+
 /* ============ Party Energy ============ */
 let energy = 12, partyUntil = 0, partyFxTimer = null;
 function renderEnergy() {
@@ -173,6 +289,9 @@ function addEnergy(n) {
 function partyMax() {
   energy = 100; renderEnergy();
   partyUntil = performance.now() + 10000;
+  Cam.holdUntil = partyUntil;
+  Cam.queue.length = 0;
+  camGo({ mode: 'overview', label: '📹 CAMERA → TOÀN CẢNH · PARTY MAX' }, 10);
   stageEl.classList.add('partymax');
   $('beams').classList.add('on');
   FX.setDisco(true);
@@ -180,6 +299,7 @@ function partyMax() {
   bt.textContent = '🎉 CẢ SÀN CÙNG QUẨY 🎉';
   bt.classList.remove('on'); void bt.offsetWidth; bt.classList.add('on');
   showBanner('⚡ PARTY MAX — CẢ SÀN CÙNG QUẨY! ⚡', 6000);
+  tvPush('⚡ PARTY MAX — cả sàn cùng quẩy!');
   A.cheer();
   FX.moneyRain(170); FX.confetti(130); FX.fireworks(3);
   clearInterval(partyFxTimer);
@@ -193,7 +313,7 @@ function partyMax() {
   }, 10000);
 }
 
-/* Nháy đèn sàn theo phách nhạc (audio.js gọi mỗi phách chẵn), rõ nhất khi Party Max */
+/* Nháy đèn sàn theo phách nhạc (audio.js gọi mỗi phách chẵn) */
 W.onBeat = function () {
   if (performance.now() < partyUntil || solo) {
     stageEl.classList.add('beat');
@@ -212,13 +332,19 @@ function addXP(user, pts) {
     L.lv = nl;
     const p = P.get(user.id);
     showBanner(`⭐ LÊN CẤP ${nl} · ${user.nickname}!`, 3800);
-    if (p) { FX.burstAt(p.x / 100, (p.y - 10) / 100, '#ffd76a', 30); FX.hearts(6, p.x / 100, (p.y - 12) / 100); P.sayBubble(p, `Mình lên cấp ${nl} rồi nè!`); }
+    tvPush(`⭐ ${user.nickname} lên cấp ${nl}`);
+    if (p) {
+      FX.burstAt(p.x / 100, (p.y - 10) / 100, '#ffd76a', 30); FX.hearts(6, p.x / 100, (p.y - 12) / 100);
+      P.sayBubble(p, `Mình lên cấp ${nl} rồi nè!`);
+      camRequest({ mode: 'focus', p, prio: 40, label: `📹 CAMERA → KHU ${P.zoneOf(p)} · ${user.nickname} LÊN CẤP ${nl}`,
+        tv: { img: P.classOf(p).img, name: user.nickname, sub: `⭐ Lên cấp ${nl}` } }, 6);
+    }
     A.fanfare();
   }
   levels.set(user.id, L);
 }
 
-/* ============ Lượt solo AU ============ */
+/* ============ Lượt solo AU – diễn NGAY TẠI Ô của dancer ============ */
 const ARROWS = [
   { s: '←', w: 'trai' }, { s: '↑', w: 'len' }, { s: '↓', w: 'xuong' }, { s: '→', w: 'phai' },
 ];
@@ -228,20 +354,22 @@ function renderTally() {
   $('tally').style.display = solo ? '' : 'none';
   if (solo) for (const j of JUDGES) $('t-' + j).textContent = solo.tally[j] || 0;
 }
-let solo = null, soloTimer = null, nextSoloAt = 0, joinOrder = [], grandUntil = 0;
+let solo = null, soloTimer = null, nextSoloAt = 0, joinOrder = [];
 const soloQueue = [];
 function renderAU() {
   const who = $('auwho'), steps = $('austeps'), combo = $('aucombo');
   if (!solo) {
-    who.textContent = '🎤 Chờ dancer lên bục…';
+    who.textContent = '🎤 Chờ dancer lên sàn…';
     steps.innerHTML = ''; combo.textContent = '';
+    renderTally();
     return;
   }
-  who.textContent = `🎤 SOLO: ${solo.p.user.nickname} · ${P.classOf(solo.p).name}`;
+  who.textContent = `🎤 SOLO: ${solo.p.user.nickname} · ${P.classOf(solo.p).name} · Ô ${solo.p.home ? solo.p.home.id : '?'}`;
   combo.textContent = `COMBO x${solo.combo} · ${fmtNum(solo.score)} đ`;
   steps.innerHTML = solo.seq.map((a, i) =>
     `<span class="step${i === solo.idx ? ' cur' : ''}${solo.marks[i] ? (solo.marks[i] === 'MISS' ? ' missed' : ' ok') : ''}">${ARROWS[a].s}</span>`).join('');
   renderTally();
+  if (tvFocusName === solo.p.user.nickname) tvUpdateScore(`🎤 SOLO · ${fmtNum(solo.score)} đ · Combo x${solo.combo}`);
 }
 function showJudge(res) {
   const el = $('judge');
@@ -278,8 +406,16 @@ function startSolo(p) {
   if (!p || solo || p.paired) return;
   const len = 12;
   solo = { p, seq: Array.from({ length: len }, () => Math.floor(Math.random() * 4)), marks: {}, tally: {}, idx: 0, score: 0, combo: 0, best: 0, judged: false };
-  P.toPodium(p);
+  P.setFocus(p, true);   // vòng sáng + spotlight ngay tại ô, KHÔNG rời ô
   P.sayBubble(p, 'Tới lượt mình quẩy nè!');
+  // hàng xóm cùng khu cổ vũ
+  for (const nb of P.neighbours(p).slice(0, 7)) {
+    FX.hearts(2, nb.x / 100, (nb.y - 10) / 100);
+    if (Math.random() < 0.4) P.sayBubble(nb, ['Cố lên!', 'Quẩy đi bạn ơi!', 'Đỉnh quá!'][Math.floor(Math.random() * 3)]);
+  }
+  camRequest({ mode: 'focus', p, prio: 60, label: `📹 CAMERA → KHU ${P.zoneOf(p)} · ${p.user.nickname} SOLO`,
+    tv: { img: P.classOf(p).img, name: p.user.nickname, sub: '🎤 Đang solo AU' } }, 13);
+  tvPush(`🎤 ${p.user.nickname} solo tại ô ${p.home ? p.home.id : '?'}`);
   renderAU();
   A.cheer();
   const mySolo = solo;
@@ -295,14 +431,15 @@ function endSolo() {
   clearInterval(soloTimer); soloTimer = null;
   const { p, score, best, tally } = solo;
   solo = null;
+  P.setFocus(p, false);
   renderAU();
   const t = j => tally[j] || 0;
   showBanner(`🏁 FINISH · ${p.user.nickname} — ${fmtNum(score)} điểm · Combo x${best} · P${t('PERFECT')} G${t('GREAT')} C${t('COOL')} B${t('BAD')} M${t('MISS')}`, 5600);
   if (score >= 2400) { FX.fireworks(3); A.fanfare(); } else A.cheer();
   addScore(p.user, Math.round(score / 10));
   addXP(p.user, Math.round(score / 15));
-  P.offPodium(p);
   settleStage(p);
+  if (Cam.p === p) camGo({ mode: 'overview' }, 5);
   nextSoloAt = performance.now() + 3200;
 }
 function pickNextSolo() {
@@ -318,7 +455,7 @@ function pickNextSolo() {
   return all[Math.floor(Math.random() * all.length)];
 }
 setInterval(() => {
-  if (!solo && performance.now() >= nextSoloAt && performance.now() >= grandUntil && P.count() >= 1) {
+  if (!solo && performance.now() >= nextSoloAt && P.count() >= 1) {
     const p = pickNextSolo();
     if (p) startSolo(p);
   }
@@ -332,22 +469,50 @@ setInterval(() => {
   P.sayBubble(p, cfg.funnyLines[Math.floor(Math.random() * cfg.funnyLines.length)]);
 }, 4600);
 
+/* ============ Hiệu ứng ambient theo lớp (chỉ dancer nổi bật / trong khu camera đang đóng / mẫu xoay vòng ở toàn cảnh) ============ */
+let ambCursor = 0;
+setInterval(() => {
+  if (!P.count()) return;
+  const emitters = [];
+  const push = p => { if (p && !emitters.includes(p)) emitters.push(p); };
+  if (solo) push(solo.p);
+  for (const id of stageIds) push(P.get(id));
+  if (pair) { push(pair[0]); push(pair[1]); }
+  push(Cam.p);
+  const zone = Cam.mode === 'zone' ? Cam.zone : Cam.p ? P.zoneOf(Cam.p) : null;
+  const inZone = P.all().filter(p => p.home && zone && p.home.zone === zone);
+  for (let i = 0; i < Math.min(6, inZone.length); i++) push(inZone[(ambCursor + i) % inZone.length]);
+  if (Cam.mode === 'overview') {
+    const all = P.all();
+    for (let i = 0; i < 6 && all.length; i++) push(all[(ambCursor + i) % all.length]);
+  }
+  ambCursor += 3;
+  for (const p of emitters) FX.ambient(p.cls, p.x / 100, p.y / 100);
+}, 950);
+
 /* ============ Nhảy đôi ============ */
-let pair = null, pairTimer = null, pairFxTimer = null;
+let pair = null, pairTimer = null, pairFxTimer = null, pairZoneNow = 'B';
 function startPair(pa, pb) {
   if (!pa || !pb || pa === pb || pair) return false;
   if (P.busy(pa) || P.busy(pb)) return false;
   if (solo && (solo.p === pa || solo.p === pb)) return false;
   pair = [pa, pb];
-  P.toPair(pa, 0); P.toPair(pb, 1);
-  $('pairspot').classList.add('on');
+  pairZoneNow = P.zoneOf(pa);
+  P.toPair(pa, pairZoneNow, 0); P.toPair(pb, pairZoneNow, 1);
+  const c = P.pairCenter(pairZoneNow);
+  const glow = $('pairglow');
+  glow.style.left = c.x + '%'; glow.style.top = c.y + '%';
+  glow.classList.add('on');
   showBanner(`💃 NHẢY ĐÔI · ${pa.user.nickname} ❤ ${pb.user.nickname}`, 4200);
   toast(`💞 Cặp nhảy đôi mới: ${pa.user.nickname} + ${pb.user.nickname}`);
+  tvPush(`💞 Nhảy đôi: ${pa.user.nickname} + ${pb.user.nickname} (Khu ${pairZoneNow})`);
   P.sayBubble(pa, 'Nhảy đôi với mình nè!');
   P.sayBubble(pb, 'Quẩy cùng nhau thôi!');
-  FX.hearts(10, 0.5, 0.62);
+  FX.hearts(10, c.x / 100, (c.y - 10) / 100);
+  camRequest({ mode: 'pair', zone: pairZoneNow, at: c, prio: 50, label: `📹 CAMERA → KHU ${pairZoneNow} · NHẢY ĐÔI ${pa.user.nickname} + ${pb.user.nickname}`,
+    tv: { img: P.classOf(pa).img, name: `${pa.user.nickname} ❤ ${pb.user.nickname}`, sub: '💞 Đang nhảy đôi' } }, 12);
   addEnergy(8);
-  pairFxTimer = setInterval(() => FX.hearts(4, rand(0.4, 0.6), rand(0.58, 0.66)), 1400);
+  pairFxTimer = setInterval(() => FX.hearts(4, (c.x + rand(-4, 4)) / 100, (c.y - rand(8, 14)) / 100), 1400);
   const mine = pair;
   pairTimer = setTimeout(() => { if (pair === mine) endPair(); }, (cfg.pairSec || 20) * 1000);
   return true;
@@ -357,8 +522,9 @@ function endPair() {
   clearTimeout(pairTimer); clearInterval(pairFxTimer);
   const [pa, pb] = pair;
   pair = null;
-  $('pairspot').classList.remove('on');
+  $('pairglow').classList.remove('on');
   for (const p of [pa, pb]) { P.offPair(p); settleStage(p); addXP(p.user, 15); }
+  if (Cam.pairSpec) camGo({ mode: 'overview' }, 5);
 }
 function findPartnerFor(p, text) {
   // tag tên người khác trong comment (giống game đám cưới): tìm nickname khớp dài nhất
@@ -381,23 +547,20 @@ function requestPair(user, text) {
 }
 
 /* ============ Hiệu ứng theo quà ============ */
-function grandArrival(user) {
+function grandArrival(user) {   // quà ≥99: đổ bộ NGAY TẠI Ô — nâng Đại Gia, cánh + hào quang, camera cận cảnh
   const p = ensureDancer(user);
   if (!p) return;
-  P.setClass(p, 'dai-gia');            // quà lớn -> nâng lớp Đại Gia
-  if (solo && solo.p !== p) { const cur = solo; clearInterval(soloTimer); soloTimer = null; solo = null; P.offPodium(cur.p); }
-  if (soloTimer) { clearInterval(soloTimer); soloTimer = null; }
-  solo = null;
-  P.toPodium(p);
+  P.setClass(p, 'dai-gia');
   P.grandEntrance(p, 7);
-  grandUntil = performance.now() + 7000;
-  renderAU();
   showBanner(`👑 ${user.nickname} ĐỔ BỘ SÀN NHẢY!`, 5600);
+  tvPush(`👑 ${user.nickname} đổ bộ ô ${p.home ? p.home.id : '?'}!`);
+  camRequest({ mode: 'focus', p, prio: 80, label: `📹 CAMERA → KHU ${P.zoneOf(p)} · ${user.nickname} ĐỔ BỘ`,
+    tv: { img: P.classOf(p).img, name: user.nickname, sub: '👑 Đại Gia đổ bộ!' } }, 8);
   FX.fireworks(4); FX.moneyRain(70); FX.confetti(80);
+  FX.burstAt(p.x / 100, (p.y - 10) / 100, '#ffd76a', 34);
   A.fanfare();
-  setTimeout(() => { if (!solo) { P.offPodium(p); settleStage(p); nextSoloAt = performance.now() + 1200; } }, 7000);
 }
-/* VIP >= 299 xu: trực thăng bay ngang thả VIP xuống bục */
+/* VIP >= 299 xu: trực thăng bay ngang thế giới, camera về toàn cảnh xem trọn, rồi VIP đổ bộ tại ô */
 let vipBusy = false;
 function vipArrival(user) {
   const p = ensureDancer(user);
@@ -405,6 +568,8 @@ function vipArrival(user) {
   vipBusy = true;
   showBanner(`🚁 VIP ${user.nickname} ĐANG ĐÁP XUỐNG SÀN NHẢY!`, 5000);
   toast(`🚁 VIP ${user.nickname} tới bằng trực thăng!`, true);
+  tvPush(`🚁 VIP ${user.nickname} đáp trực thăng xuống sàn!`);
+  camRequest({ mode: 'overview', prio: 85, label: `📹 CAMERA → TOÀN CẢNH · VIP ${user.nickname} ĐÁP TRỰC THĂNG` }, 4);
   const heli = $('heli');
   heli.classList.remove('fly'); void heli.offsetWidth; heli.classList.add('fly');
   A.fanfare();
@@ -416,12 +581,15 @@ function giftFx(user, dia, giftName) {
   addScore(user, dia * 10);
   addXP(user, dia * 2);
   addEnergy(Math.min(30, 4 + dia * 0.5));
+  tvPush(`🎁 ${user ? user.nickname : 'Khách'} tặng ${giftName || 'quà'} (${fmtNum(dia)} xu)`);
   if (dia >= 299) { vipArrival(user); return; }
   if (dia >= 99) { grandArrival(user); return; }
   if (dia >= 10) {
     FX.potBurst(x, y);
     FX.moneyRain(24);
     toast(`💰 ${user ? user.nickname : 'Khách'} làm NỔ HŨ VÀNG!`, true);
+    if (p) camRequest({ mode: 'focus', p, prio: 30, label: `📹 CAMERA → KHU ${P.zoneOf(p)} · ${user.nickname} NỔ HŨ VÀNG`,
+      tv: { img: P.classOf(p).img, name: user.nickname, sub: '💰 Nổ hũ vàng!' } }, 6);
     return;
   }
   if (p) FX.burstAt(x, y, P.classOf(p).color, 18);
@@ -455,7 +623,7 @@ function onChat(m) {
   if (isDemo) {   // demo không qua mapper: tự nhận lệnh chữ
     const norm = noAccent(text);
     if (/phao hoa/.test(norm)) FX.fireworks(3);
-    else if (/mua tien|no hu/.test(norm)) FX.potBurst(0.5, 0.55);
+    else if (/mua tien|no hu/.test(norm)) { const pp = P.get(m.user.id); FX.potBurst(pp ? pp.x / 100 : 0.5, pp ? (pp.y - 10) / 100 : 0.55); }
     else if (/quay/.test(norm)) { FX.confetti(40); addEnergy(6); }
   }
   addEnergy(1.5);
@@ -523,7 +691,7 @@ function applyConfig(c) {
   refreshVenue();
 }
 
-/* ============ Khung hình 9:16 ============ */
+/* ============ Khung hình 9:16 + kích thước thế giới cho dancers/effects/camera ============ */
 let lastLayoutKey = '';
 function resize() {
   const Wpx = innerWidth, Hpx = innerHeight;
@@ -532,6 +700,7 @@ function resize() {
   const key = [Wpx, Hpx, document.fullscreenElement ? 1 : 0].join('|');
   if (key === lastLayoutKey) return;
   lastLayoutKey = key;
+  stageW = sw; stageH = sh;
   const u0 = sw / 100;
   const root = document.documentElement.style;
   root.setProperty('--u0', u0 + 'px');
@@ -545,8 +714,9 @@ function resize() {
   } else {
     root.setProperty('--k', '1.2'); root.setProperty('--safe', '0px'); root.setProperty('--side', '0px');
   }
-  FX.resize(sw, sh, Math.min(2, window.devicePixelRatio || 1));
-  P.resize(sw, sh);
+  FX.resize(sw * WORLD_W, sh * WORLD_H, Math.min(2, window.devicePixelRatio || 1));
+  P.resize(sw * WORLD_W, sh * WORLD_H);
+  camGo(Cam.spec, Math.max(0, (Cam.until - performance.now()) / 1000) || 9);
 }
 addEventListener('resize', resize);
 document.addEventListener('fullscreenchange', () => { lastLayoutKey = ''; resize(); });
@@ -570,17 +740,20 @@ renderBoard();
 refreshVenue();
 renderViewers();
 renderAU();
+tvPush('🎧 DJ đang quẩy nhạc sàn 116 BPM');
+camGo({ mode: 'overview' }, 6);
 
 if (isDemo) {
   say('<span style="color:#ffd76a">● CHẾ ĐỘ DEMO</span> — xem thử, không cần LIVE thật', 'demo');
   applyConfig({
     soloSec: 20, pairSec: 20,
     guideLines: [
-      '👋 Vào phòng là có dancer trên sàn!',
+      '👋 Vào phòng là có 1 ô cố định trên sàn rộng 3 khu!',
+      '📹 Camera tự lia tới dancer được gọi tên',
       '🎤 Gõ trái / lên / xuống / phải giúp dancer solo ăn điểm',
       '💃 Gõ "nhảy đôi" + tag tên bạn nhảy',
-      '🎁 Quà 99 xu+ lên bục · 299 xu+ trực thăng VIP đáp',
-      '👑 Top quà tuần lên sân khấu — Chủ Tịch đứng giữa',
+      '🎁 Quà 99 xu+ đổ bộ tại ô · 299 xu+ trực thăng VIP đáp',
+      '👑 Top quà tuần lên sân khấu Khu B — Chủ Tịch đứng giữa',
     ],
     funnyLines: [
       'Sàn này vui quá trời luôn!', 'Cho xin bài vinahouse đi!', 'Quẩy tới sáng luôn nè!',
@@ -591,6 +764,7 @@ if (isDemo) {
   });
   setupSoundBtn();
   startDemo();
+  if (camLock) { applyCamLock(); setTimeout(applyCamLock, 3500); setTimeout(applyCamLock, 8000); }
 } else {
   const bridgeUrl = q.get('bridge') || undefined;
   new LiveBridgeClient({ url: bridgeUrl, game: 'san-nhay' })
@@ -610,6 +784,7 @@ if (isDemo) {
     .on('seen', m => { if (m.user) { ensureDancer(m.user); addEnergy(0.15 * (m.count || 1)); } })
     .connect();
   setTimeout(setupSoundBtn, 300);
+  if (camLock) { applyCamLock(); setTimeout(applyCamLock, 3500); }
 }
 
 /* ============ Demo ============ */
@@ -671,10 +846,14 @@ function startDemo() {
 
 W.handle = handle; W.chat = onChat;
 W.energy = { add: addEnergy, party: partyMax, get: () => energy };
+W.cam = { go: camGo, request: camRequest, state: () => ({ mode: Cam.mode, zone: Cam.zone, queue: Cam.queue.length }) };
 W.test = {   // móc kiểm chứng / chụp ảnh demo
   pairNow: () => { const f = P.all().filter(p => !P.busy(p)); return f.length >= 2 ? startPair(f[0], f[1]) : false; },
   vip: user => vipArrival(user || P.all()[0].user),
+  party: () => partyMax(),
+  focusRandom: () => { const f = P.all().filter(p => !P.busy(p)); if (!f.length) return false; const p = f[Math.floor(Math.random() * f.length)]; camGo({ mode: 'focus', p, label: `📹 CAMERA → KHU ${P.zoneOf(p)} · ${p.user.nickname}`, tv: { img: P.classOf(p).img, name: p.user.nickname, sub: `Ô ${p.home ? p.home.id : '?'}` } }, 30); return p.user.nickname; },
   top: () => topScores(5),
-  state: () => ({ dancers: P.count(), stage: stageIds, pair: !!pair, solo: !!solo }),
+  state: () => ({ dancers: P.count(), stage: stageIds, pair: !!pair, solo: !!solo, cam: Cam.mode, camZone: Cam.zone }),
 };
 })();
+

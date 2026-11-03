@@ -1,1 +1,149 @@
-{"actions":{"cheer":"Người follow được chào mừng + tim bay + tăng Party Energy","confetti":"Mưa giấy màu","dance":"Cả sàn quẩy mạnh + tăng Party Energy","fireworks":"Bắn pháo hoa","hearts":"Tim bay tại dancer của người tặng","join":"Người xem vào phòng (thành dancer trên sàn)","pot":"Nổ hũ vàng tại dancer của người tặng","solo":"Ưu tiên đưa người tương tác lên bục solo AU","spotlight":"Đổ bộ lớn: lên bục giữa với cánh + hào quang (quà từ 99 xu; từ 299 xu có trực thăng VIP đáp xuống trước)","pair":"Nhảy đôi: người bình luận + bạn nhảy ra giữa sàn nhảy đôi ~20 giây"},"chat":{"cooldownSec":5,"rules":[{"action":"fireworks","match":"pháo hoa|phao hoa","value":2},{"action":"pot","match":"mưa tiền|mua tien|nổ hũ|no hu","value":1},{"action":"solo","match":"solo|nhảy au|nhay au|lên bục|len buc","value":1},{"action":"dance","match":"quẩy|quay lên|quay len","value":1},{"action":"pair","match":"nhảy đôi|nhay doi|chọn bạn nhảy|chon ban nhay","value":1}]},"defaults":{"funnyLines":["Sàn này vui quá trời luôn!","Cho xin bài vinahouse đi!","Quẩy tới sáng luôn nè!","Nhạc hay quá, chân mình tự nhảy!","Ai solo yếu là mình cười đó nha!","Đông quá, chen nhau quẩy luôn!","Chủ tịch sàn ngầu quá đi!","Combo x10 rồi kìa, đỉnh!","Mình nhảy vì đam mê thôi!"],"guideLines":["👋 Vào phòng là có dancer trên sàn!","🎤 Gõ trái / lên / xuống / phải giúp dancer solo ăn điểm","💃 Gõ \"nhảy đôi\" + tag tên bạn nhảy","🎁 Quà 99 xu+ lên bục · 299 xu+ trực thăng VIP đáp","👑 Top quà tuần lên sân khấu — Chủ Tịch đứng giữa"],"musicOn":true,"musicShuffle":true,"musicVolume":40,"sfxOn":true,"sfxVolume":70,"soloSec":20,"pairSec":20},"description":"Sàn Nhảy Quẩy Max v2 – sàn chật 100 dancer, bảng vàng tuần + top 3 lên sân khấu, solo AU có bảng chấm điểm, nhảy đôi, trực thăng VIP, lên cấp","follow":{"action":"cheer","label":"Theo dõi","value":1},"game":"san-nhay","giftTiers":[{"action":"spotlight","combo":1,"label":"Trực thăng VIP đáp sàn","minDiamonds":299,"value":4},{"action":"spotlight","combo":1,"label":"Đổ bộ sàn nhảy","minDiamonds":99,"value":3},{"action":"pot","combo":1,"label":"Nổ hũ vàng","minDiamonds":10,"value":2},{"action":"confetti","combo":1,"label":"Mưa giấy màu","minDiamonds":5,"value":2},{"action":"hearts","combo":1,"label":"Tim bay","minDiamonds":1,"value":1}],"gifts":[{"action":"hearts","combo":1,"diamonds":1,"label":"Hoa hồng","name":"Rose","value":1},{"action":"confetti","combo":1,"diamonds":1,"label":"Bánh vòng","name":"Doughnut","value":1}],"join":{"action":"join","value":1},"like":{"action":"dance","every":50,"label":"Thả tim","value":1},"share":{"action":"confetti","label":"Chia sẻ","value":1}}
+{
+  "actions": {
+    "cheer": "Người follow được chào mừng + tim bay + tăng Party Energy",
+    "confetti": "Mưa giấy màu",
+    "dance": "Cả sàn quẩy mạnh + tăng Party Energy",
+    "fireworks": "Bắn pháo hoa",
+    "hearts": "Tim bay tại dancer của người tặng",
+    "join": "Người xem vào phòng (thành dancer, nhận 1 ô cố định random trong 3 khu)",
+    "pot": "Nổ hũ vàng tại dancer của người tặng",
+    "solo": "Ưu tiên đưa người tương tác lên bục solo AU",
+    "spotlight": "Đổ bộ lớn: nâng Đại Gia + cánh/hào quang ngay tại ô, camera cận cảnh (quà từ 99 xu; từ 299 xu có trực thăng VIP đáp xuống trước)",
+    "pair": "Nhảy đôi: người bình luận + bạn nhảy ra điểm nhảy đôi của khu, camera đóng khung khu đó ~20 giây, xong ai về ô nấy"
+  },
+  "chat": {
+    "cooldownSec": 5,
+    "rules": [
+      {
+        "action": "fireworks",
+        "match": "pháo hoa|phao hoa",
+        "value": 2
+      },
+      {
+        "action": "pot",
+        "match": "mưa tiền|mua tien|nổ hũ|no hu",
+        "value": 1
+      },
+      {
+        "action": "solo",
+        "match": "solo|nhảy au|nhay au|lên bục|len buc",
+        "value": 1
+      },
+      {
+        "action": "dance",
+        "match": "quẩy|quay lên|quay len",
+        "value": 1
+      },
+      {
+        "action": "pair",
+        "match": "nhảy đôi|nhay doi|chọn bạn nhảy|chon ban nhay",
+        "value": 1
+      }
+    ]
+  },
+  "defaults": {
+    "funnyLines": [
+      "Sàn này vui quá trời luôn!",
+      "Cho xin bài vinahouse đi!",
+      "Quẩy tới sáng luôn nè!",
+      "Nhạc hay quá, chân mình tự nhảy!",
+      "Ai solo yếu là mình cười đó nha!",
+      "Đông quá, chen nhau quẩy luôn!",
+      "Chủ tịch sàn ngầu quá đi!",
+      "Combo x10 rồi kìa, đỉnh!",
+      "Mình nhảy vì đam mê thôi!"
+    ],
+    "guideLines": [
+      "👋 Vào phòng là có 1 ô cố định trên sàn rộng 3 khu!",
+      "📹 Camera tự lia tới dancer được gọi tên",
+      "🎤 Gõ trái / lên / xuống / phải giúp dancer solo ăn điểm",
+      "💃 Gõ \"nhảy đôi\" + tag tên bạn nhảy",
+      "🎁 Quà 99 xu+ đổ bộ tại ô · 299 xu+ trực thăng VIP đáp",
+      "👑 Top quà tuần lên sân khấu Khu B — Chủ Tịch đứng giữa"
+    ],
+    "musicOn": true,
+    "musicShuffle": true,
+    "musicVolume": 40,
+    "sfxOn": true,
+    "sfxVolume": 70,
+    "soloSec": 20,
+    "pairSec": 20
+  },
+  "description": "Sàn Nhảy Quẩy Max v3 – không gian rộng 3 khu (A: DJ+TV, B: sàn chính, C: VIP bar), mỗi dancer 1 ô cố định random, camera lia theo người được gọi tên, solo AU tại ô, TV màn hình lớn chiếu DJ/người nổi bật, bảng vàng tuần + top 3 sân khấu Khu B, nhảy đôi, trực thăng VIP, lên cấp",
+  "follow": {
+    "action": "cheer",
+    "label": "Theo dõi",
+    "value": 1
+  },
+  "game": "san-nhay",
+  "giftTiers": [
+    {
+      "action": "spotlight",
+      "combo": 1,
+      "label": "Trực thăng VIP đáp sàn",
+      "minDiamonds": 299,
+      "value": 4
+    },
+    {
+      "action": "spotlight",
+      "combo": 1,
+      "label": "Đổ bộ sàn nhảy",
+      "minDiamonds": 99,
+      "value": 3
+    },
+    {
+      "action": "pot",
+      "combo": 1,
+      "label": "Nổ hũ vàng",
+      "minDiamonds": 10,
+      "value": 2
+    },
+    {
+      "action": "confetti",
+      "combo": 1,
+      "label": "Mưa giấy màu",
+      "minDiamonds": 5,
+      "value": 2
+    },
+    {
+      "action": "hearts",
+      "combo": 1,
+      "label": "Tim bay",
+      "minDiamonds": 1,
+      "value": 1
+    }
+  ],
+  "gifts": [
+    {
+      "action": "hearts",
+      "combo": 1,
+      "diamonds": 1,
+      "label": "Hoa hồng",
+      "name": "Rose",
+      "value": 1
+    },
+    {
+      "action": "confetti",
+      "combo": 1,
+      "diamonds": 1,
+      "label": "Bánh vòng",
+      "name": "Doughnut",
+      "value": 1
+    }
+  ],
+  "join": {
+    "action": "join",
+    "value": 1
+  },
+  "like": {
+    "action": "dance",
+    "every": 50,
+    "label": "Thả tim",
+    "value": 1
+  },
+  "share": {
+    "action": "confetti",
+    "label": "Chia sẻ",
+    "value": 1
+  }
+}

@@ -6,60 +6,114 @@
 <title>Sàn Nhảy Quẩy Max</title>
 <style>
   :root{--u0:4px;--k:1.2;--u:var(--u0);--safe:0px;--side:0px}
-  #left,#side,#au,#goldboard,#guide{--u:calc(var(--u0)*var(--k))}
+  #left,#side,#au,#goldboard,#guide,#zonepills,#camtab{--u:calc(var(--u0)*var(--k))}
   html,body{margin:0;height:100%;overflow:hidden;background:#0b0618;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#150a2e}
-  /* Nền minh họa theo cảnh: sân khấu trên ~45%, sàn nhảy dưới */
-  #scene{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .6s}
-  #stage[data-venue="neon"] #scene{background-image:url('bg.webp'),linear-gradient(180deg,#1d0b42,#241055)}
-  #stage[data-venue="beach"] #scene{background-image:url('bg-beach.webp'),linear-gradient(180deg,#57b8f0,#a06a35)}
-  #stage[data-venue="snow"] #scene{background-image:url('bg-snow.webp'),linear-gradient(180deg,#274a86,#b9cfe8)}
-  /* lưới sàn phát sáng phủ lên phần sàn, nhịp theo beat khi Party Max */
-  #floorgrid{position:absolute;left:-10%;right:-10%;top:58%;bottom:0;opacity:.28;pointer-events:none;transition:filter .12s;
-    background:linear-gradient(90deg,rgba(255,46,170,.35) 2px,transparent 2px) 0 0/12.5% 100%,
-               linear-gradient(180deg,rgba(70,200,255,.30) 2px,transparent 2px) 0 0/100% 14%;
-    transform:perspective(300px) rotateX(38deg);transform-origin:top}
-  #stage.partymax #floorgrid{opacity:.55;animation:floorPulse .5s ease-in-out infinite alternate}
-  #stage.beat #floorgrid{filter:brightness(2)}
-  #stage.beat #podium{filter:brightness(1.35)}
+  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;
+    background:radial-gradient(130% 95% at 50% 38%,#2a1160,#150a2e 55%,#07030f)}
+
+  /* ================= THẾ GIỚI RỘNG (camera lia trên nó) =================
+     #world rộng 210% x cao 115% khung hình, chia 3 khu: A (DJ+TV) | B (sàn chính + sân khấu) | C (VIP bar).
+     Camera chỉ đổi transform của #world; mọi overlay UI nằm NGOÀI #world. */
+  #world{position:absolute;left:0;top:0;width:210%;height:115%;transform-origin:0 0;will-change:transform;
+    transition:transform 1.45s cubic-bezier(.3,.75,.25,1)}
+  #scene{position:absolute;inset:0;background-size:100% 100%;background-position:center;transition:opacity .6s}
+  #stage[data-venue="neon"] #scene{background-image:url('bg-wide.webp'),linear-gradient(180deg,#1d0b42,#241055)}
+  #stage[data-venue="beach"] #scene{background-image:url('bg-beach.webp'),linear-gradient(180deg,#57b8f0,#a06a35);background-size:cover}
+  #stage[data-venue="snow"] #scene{background-image:url('bg-snow.webp'),linear-gradient(180deg,#274a86,#b9cfe8);background-size:cover}
+  /* lưới sàn phát sáng phủ lên phần sàn của panorama (sàn bắt đầu ~66%) */
+  #floorgrid{position:absolute;left:0;right:0;top:65%;bottom:0;opacity:.20;pointer-events:none;transition:filter .12s;z-index:1;
+    background:linear-gradient(90deg,rgba(255,46,170,.35) 2px,transparent 2px) 0 0/6.25% 100%,
+               linear-gradient(180deg,rgba(70,200,255,.30) 2px,transparent 2px) 0 0/100% 14.28%;
+    transform:perspective(500px) rotateX(30deg);transform-origin:top}
+  #stage.partymax #floorgrid{opacity:.5;animation:floorPulse .5s ease-in-out infinite alternate}
+  #stage.beat #floorgrid{filter:brightness(2.1)}
+  #stage.beat #bstage{filter:brightness(1.5)}
   @keyframes floorPulse{to{filter:brightness(1.7)}}
-  #beams{position:absolute;inset:-20% -10%;opacity:0;transition:opacity 1.2s;pointer-events:none;
+  /* ánh sáng rửa theo khu khi camera đóng ở 1 khu */
+  .zonewash{position:absolute;top:0;bottom:0;width:33.4%;z-index:2;opacity:0;transition:opacity .9s;pointer-events:none}
+  #washA{left:0;background:radial-gradient(ellipse at 50% 62%,rgba(80,200,255,.34),transparent 72%)}
+  #washB{left:33.3%;background:radial-gradient(ellipse at 50% 62%,rgba(255,80,220,.32),transparent 72%)}
+  #washC{left:66.6%;background:radial-gradient(ellipse at 50% 62%,rgba(255,200,80,.36),transparent 72%)}
+  #stage[data-camzone="A"] #washA{opacity:1}
+  #stage[data-camzone="B"] #washB{opacity:1}
+  #stage[data-camzone="C"] #washC{opacity:1}
+  /* chùm đèn quét khắp thế giới rộng */
+  #beams{position:absolute;inset:-18% -6%;z-index:6;opacity:0;transition:opacity 1.2s;pointer-events:none;
     background:conic-gradient(from 180deg at 50% -10%,transparent 0deg,rgba(255,80,200,.20) 12deg,transparent 26deg,rgba(80,200,255,.18) 44deg,transparent 60deg,rgba(255,230,120,.2) 84deg,transparent 100deg,rgba(255,80,200,.18) 128deg,transparent 146deg,rgba(80,200,255,.2) 172deg,transparent 190deg,rgba(255,230,120,.18) 214deg,transparent 232deg,rgba(255,80,200,.2) 258deg,transparent 276deg,rgba(80,200,255,.18) 300deg,transparent 318deg,rgba(255,230,120,.2) 342deg,transparent 360deg);
     animation:beams 18s linear infinite}
   #beams.on{opacity:1}
   @keyframes beams{to{transform:rotate(360deg)}}
-  /* hào quang mặt sân khấu (nơi top 3 đứng) + bục solo trước sân khấu */
-  #stageglow{position:absolute;left:50%;top:43.5%;transform:translate(-50%,-50%);width:94%;height:6%;pointer-events:none;
-    background:radial-gradient(ellipse at 50% 50%,rgba(255,230,160,.38),rgba(255,120,220,.14) 55%,transparent 75%)}
-  #podium{position:absolute;left:50%;top:58.5%;transform:translate(-50%,-50%);width:36%;height:calc(var(--u0)*4.6);pointer-events:none;transition:filter .12s;
-    border-radius:50%;background:radial-gradient(ellipse at 50% 38%,#ffe9ff,#c86bff 55%,#5e2a9e 100%);
-    box-shadow:0 0 26px rgba(230,130,255,.9),0 0 60px rgba(160,60,255,.45)}
-  #podium::after{content:'BỤC SOLO';position:absolute;left:50%;top:112%;transform:translateX(-50%);white-space:nowrap;
-    font-size:calc(var(--u0)*1.8);font-weight:800;letter-spacing:2.5px;color:#ffd9fb;text-shadow:0 0 8px #ff2eaa,0 1px 3px #000}
-  #pairspot{position:absolute;left:50%;top:73.5%;transform:translate(-50%,-50%);width:52%;height:calc(var(--u0)*5);pointer-events:none;
-    border-radius:50%;opacity:0;transition:opacity .5s;
+  /* biển khu kiểu LED ở mép sàn (dưới chân hàng sau) */
+  .zonesign{position:absolute;top:62.4%;transform:translateX(-50%);z-index:3;pointer-events:none;white-space:nowrap;
+    font-weight:900;letter-spacing:2px;font-size:calc(var(--u0)*2.6);color:#fff;padding:calc(var(--u0)*.7) calc(var(--u0)*2.6);
+    border-radius:999px;border:2px solid}
+  #signA{left:16.7%;color:#bfe9ff;border-color:#39b9ff;background:rgba(6,40,80,.72);box-shadow:0 0 18px rgba(57,185,255,.75),inset 0 0 12px rgba(57,185,255,.35);text-shadow:0 0 9px #39b9ff}
+  #signB{left:50%;color:#ffd9fb;border-color:#ff2eaa;background:rgba(80,4,60,.72);box-shadow:0 0 18px rgba(255,46,170,.75),inset 0 0 12px rgba(255,46,170,.35);text-shadow:0 0 9px #ff2eaa}
+  #signC{left:83.3%;color:#ffedb5;border-color:#ffc93c;background:rgba(80,52,0,.75);box-shadow:0 0 18px rgba(255,201,60,.8),inset 0 0 12px rgba(255,201,60,.35);text-shadow:0 0 9px #ffc93c}
+  /* sân khấu Khu B (top 3 đứng): quầng sáng trên bục vẽ sẵn của panorama */
+  #bstage{position:absolute;left:50%;top:54.5%;transform:translate(-50%,-50%);width:37%;height:5.5%;z-index:3;pointer-events:none;transition:filter .12s;
+    background:radial-gradient(ellipse at 50% 50%,rgba(255,230,160,.42),rgba(255,120,220,.16) 55%,transparent 75%)}
+  /* ---------- TV màn hình lớn Khu A ---------- */
+  #tv{position:absolute;left:8.2%;top:23.5%;width:17%;height:24%;z-index:4;
+    background:#0a0a14;border:calc(var(--u0)*.9) solid #2c2c44;border-radius:calc(var(--u0)*1.2);
+    box-shadow:0 0 26px rgba(90,140,255,.5),inset 0 0 0 2px #000;overflow:hidden}
+  #tvscreen{position:absolute;inset:0;background:radial-gradient(120% 120% at 50% 0%,#31206b,#12082e 70%);overflow:hidden}
+  #tvDJimg{position:absolute;right:2%;bottom:14%;height:86%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));animation:tvDJ 0.52s ease-in-out infinite}
+  @keyframes tvDJ{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4.5%) rotate(2.4deg)}}
+  #tvEq{position:absolute;left:4%;bottom:16%;display:flex;align-items:flex-end;gap:4%;height:52%;width:52%}
+  #tvEq i{flex:1;background:linear-gradient(180deg,#ff2eaa,#39b9ff);border-radius:2px;animation:eqB 0.9s ease-in-out infinite alternate;min-height:12%}
+  #tvEq i:nth-child(3n){animation-duration:.67s}#tvEq i:nth-child(4n){animation-duration:1.13s}#tvEq i:nth-child(5n){animation-duration:.78s}
+  @keyframes eqB{from{height:14%}to{height:96%}}
+  #tvLive{position:absolute;left:4%;top:4%;z-index:3;background:#e01b1b;color:#fff;font-weight:800;
+    font-size:calc(var(--u0)*1.9);padding:1px 7px;border-radius:5px;letter-spacing:.6px;animation:pulse 1.6s infinite}
+  #tvTitle{position:absolute;left:4%;top:15%;z-index:3;color:#ffe9ff;font-weight:900;font-size:calc(var(--u0)*2.5);
+    text-shadow:0 0 10px #ff2eaa,0 2px 4px #000;letter-spacing:.5px}
+  /* TV chuyển sang chiếu người đang được camera bắt cận cảnh */
+  #tvfocus{position:absolute;inset:0;z-index:4;display:flex;align-items:center;gap:5%;padding:4% 5% 16%;box-sizing:border-box;
+    background:radial-gradient(120% 120% at 50% 0%,#5b1a86,#1c0636 75%);opacity:0;pointer-events:none;transition:opacity .4s}
+  #tvfocus.on{opacity:1}
+  #tvfocus img{height:92%;filter:drop-shadow(0 0 14px rgba(255,215,106,.8))}
+  #tvfocus .tf-info{min-width:0;color:#fff}
+  #tvfocus .tf-name{font-weight:900;font-size:calc(var(--u0)*3.1);line-height:1.15;text-shadow:0 2px 5px #000;word-break:break-word}
+  #tvfocus .tf-sub{font-weight:800;font-size:calc(var(--u0)*2.2);color:#ffd76a;margin-top:4%;text-shadow:0 1px 3px #000}
+  #tvticker{position:absolute;left:0;right:0;bottom:0;height:13.5%;z-index:5;background:rgba(5,2,16,.88);
+    border-top:1px solid rgba(255,150,230,.6);overflow:hidden;display:flex;align-items:center}
+  #tvticker .tk{display:flex;white-space:nowrap;animation:tickMove 26s linear infinite;will-change:transform}
+  #tvticker span{color:#ffe3fb;font-weight:700;font-size:calc(var(--u0)*2.05);padding-right:calc(var(--u0)*3)}
+  @keyframes tickMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  #vipSign{position:absolute;left:84.5%;top:10.5%;transform:translateX(-50%);z-index:4;pointer-events:none;
+    font-weight:900;letter-spacing:3px;font-size:calc(var(--u0)*2.7);color:#ffedb5;text-shadow:0 0 12px #ffc93c,0 0 26px #ff9d2e}
+  /* điểm sáng nhảy đôi theo khu */
+  #pairglow{position:absolute;transform:translate(-50%,-50%);width:21%;height:calc(var(--u0)*5.2);z-index:7;pointer-events:none;
+    border-radius:50%;opacity:0;transition:opacity .5s,left 1s ease,top 1s ease;
     background:radial-gradient(ellipse at 50% 45%,rgba(255,190,230,.85),rgba(255,80,180,.35) 60%,transparent 78%);
     box-shadow:0 0 34px rgba(255,110,200,.55)}
-  #pairspot.on{opacity:1}
-  #people{position:absolute;inset:0}
+  #pairglow.on{opacity:1}
+  /* chùm đèn spotlight + vòng sáng cho dancer đang được camera cận cảnh */
+  #spotcone{position:absolute;top:10%;width:17%;height:54%;z-index:8;pointer-events:none;opacity:0;transition:opacity .6s,left 1.2s ease,top 1.2s ease;
+    transform:translateX(-50%);clip-path:polygon(43% 0,57% 0,100% 100%,0 100%);mix-blend-mode:screen;
+    background:linear-gradient(180deg,rgba(255,240,190,.75),rgba(255,240,190,.06) 85%)}
+  #spotcone.on{opacity:.6}
+  #people{position:absolute;inset:0;z-index:10}
   #fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1500}
-  /* Trực thăng VIP bay ngang trên sân khấu */
-  #heli{position:absolute;top:19.5%;left:110%;width:47%;z-index:1550;pointer-events:none;opacity:0;
+  /* Trực thăng VIP bay ngang phía trên thế giới */
+  #heli{position:absolute;top:7.5%;left:106%;width:23%;z-index:1550;pointer-events:none;opacity:0;
     filter:drop-shadow(0 10px 14px rgba(0,0,0,.4))}
   #heli.fly{opacity:1;animation:heliFly 6.5s ease-in-out forwards}
   @keyframes heliFly{
-    0%{left:108%;transform:translateX(0) translateY(0)}
-    32%{left:50%;transform:translateX(-50%) translateY(0)}
-    45%{left:50%;transform:translateX(-50%) translateY(2.2%)}
-    58%{left:50%;transform:translateX(-50%) translateY(0)}
-    100%{left:-58%;transform:translateX(0) translateY(-1%)}}
+    0%{left:104%;transform:translateY(0)}
+    32%{left:38.5%;transform:translateY(0)}
+    45%{left:38.5%;transform:translateY(4%)}
+    58%{left:38.5%;transform:translateY(0)}
+    100%{left:-32%;transform:translateY(-2%)}}
+
+  /* ================= OVERLAY NGOÀI CAMERA ================= */
   #banner{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%) scale(.8);z-index:1700;pointer-events:none;
     background:linear-gradient(100deg,#6a1bb0,#d81bb0 55%,#6a1bb0);color:#fff;font-weight:800;letter-spacing:.4px;text-align:center;
     font-size:calc(var(--u0)*3);padding:calc(var(--u0)*1.1) calc(var(--u0)*3.2);border-radius:999px;max-width:88%;
     border:2px solid rgba(255,220,150,.9);box-shadow:0 6px 24px rgba(40,0,80,.55),0 0 18px rgba(255,80,220,.5);
     opacity:0;transition:opacity .35s,transform .35s}
   #banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
-  /* Chữ lớn toàn màn hình khi Party Max */
   #bigtext{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:1680;pointer-events:none;text-align:center;
     font-size:calc(var(--u0)*8.6);font-weight:900;letter-spacing:1px;line-height:1.12;color:#ffe14d;opacity:0;white-space:nowrap;
     text-shadow:0 0 8px #ff9d2e,0 0 26px #ff2eaa,0 4px 6px rgba(0,0,0,.6)}
@@ -75,14 +129,27 @@
   #judge.cool{color:#b8f26d;text-shadow:0 0 12px #5cb82e,0 2px 4px #000a}
   #judge.bad{color:#ffb35c;text-shadow:0 0 12px #e07b2e,0 2px 4px #000a}
   #judge.miss{color:#ff8fa5;text-shadow:0 0 12px #e03550,0 2px 4px #000a}
+  /* thanh lower-third kiểu truyền hình khi camera lia */
+  #camtab{position:absolute;left:50%;bottom:calc(var(--u)*20.8);transform:translateX(-50%) translateY(8px);z-index:2050;pointer-events:none;
+    background:linear-gradient(100deg,rgba(10,4,26,.92),rgba(90,20,140,.92));color:#fff;border:1px solid rgba(255,150,230,.75);
+    border-left:calc(var(--u)*1.1) solid #e01b1b;border-radius:calc(var(--u)*1.2);padding:calc(var(--u)*.7) calc(var(--u)*1.8);
+    font-size:calc(var(--u)*2.15);font-weight:800;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;
+    opacity:0;transition:opacity .35s,transform .35s;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+  #camtab.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* pill chỉ khu hiện tại */
+  #zonepills{position:absolute;top:calc(var(--safe) + var(--u)*31.6);left:50%;transform:translateX(-50%);z-index:2000;
+    display:flex;gap:calc(var(--u)*.9)}
+  .zpill{background:rgba(14,4,34,.68);border:1px solid rgba(215,170,255,.5);color:#e9d8ff;border-radius:999px;
+    padding:calc(var(--u)*.4) calc(var(--u)*1.5);font-size:calc(var(--u)*1.9);font-weight:800;letter-spacing:.5px;transition:all .4s}
+  .zpill.on{background:linear-gradient(100deg,#b8860b,#ffc93c);color:#3a2400;border-color:#ffe9a8;box-shadow:0 0 14px rgba(255,201,60,.7)}
 
   /* ---------- Dancer ---------- */
   .dancer{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;will-change:transform;transition:transform .9s ease}
-  .dancer .figwrap{filter:drop-shadow(0 5px 6px rgba(10,0,30,.45))}
+  .dancer .figwrap{position:relative;z-index:1;filter:drop-shadow(0 5px 6px rgba(10,0,30,.45))}
   .dancer .figwrap img.chibi{height:var(--fh,120px);display:block}
-  .dancer.onpodium .figwrap{filter:drop-shadow(0 0 14px rgba(255,215,106,.95)) drop-shadow(0 6px 8px rgba(10,0,30,.4))}
   .dancer.onstage .figwrap{filter:drop-shadow(0 0 12px rgba(255,215,106,.8)) drop-shadow(0 5px 7px rgba(10,0,30,.4))}
   .dancer.paired .figwrap{filter:drop-shadow(0 0 13px rgba(255,110,200,.95)) drop-shadow(0 5px 7px rgba(10,0,30,.4))}
+  .dancer.focused .figwrap{filter:drop-shadow(0 0 16px rgba(255,240,190,.95)) drop-shadow(0 5px 7px rgba(10,0,30,.4))}
   /* 6 điệu nhảy theo lớp */
   .d-dai-gia .figwrap{animation:dgSway 1.7s ease-in-out infinite}
   @keyframes dgSway{0%,100%{transform:translateY(0) rotate(-1.4deg)}50%{transform:translateY(-2.2%) rotate(1.4deg)}}
@@ -98,6 +165,29 @@
   @keyframes tanHop{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-5.5%) rotate(1.6deg)}}
   #stage.partymax .dancer .figwrap{animation-duration:.38s!important}
   #stage.partymax .dancer{filter:brightness(1.12)}
+  /* vòng hào quang dưới chân theo lớp */
+  .dancer .auraring{position:absolute;left:50%;bottom:calc(var(--fh,120px)*.13);transform:translateX(-50%);z-index:0;
+    width:calc(var(--fh,120px)*.98);height:calc(var(--fh,120px)*.17);border-radius:50%;pointer-events:none;display:none}
+  .d-dai-gia .auraring{display:block;border:2px dashed rgba(255,215,106,.9);box-shadow:0 0 12px rgba(255,215,106,.55),inset 0 0 10px rgba(255,215,106,.4);
+    animation:ringSpin 6s linear infinite}
+  @keyframes ringSpin{from{transform:translateX(-50%) rotate(0deg)}to{transform:translateX(-50%) rotate(360deg)}}
+  .d-dj .auraring{display:block;border:2px solid rgba(126,214,255,.85);box-shadow:0 0 12px rgba(126,214,255,.5);
+    animation:ringWave 1.04s ease-out infinite}
+  @keyframes ringWave{0%{transform:translateX(-50%) scale(.82);opacity:1}100%{transform:translateX(-50%) scale(1.3);opacity:.25}}
+  .d-idol .auraring{display:block;background:radial-gradient(ellipse at 50% 50%,rgba(255,126,214,.5),transparent 70%);
+    animation:ringPulse 1.6s ease-in-out infinite}
+  @keyframes ringPulse{50%{transform:translateX(-50%) scale(1.14);opacity:.65}}
+  /* vòng sáng khi được camera cận cảnh / solo tại ô */
+  .dancer .focusring{position:absolute;left:50%;bottom:calc(var(--fh,120px)*.11);transform:translateX(-50%);z-index:0;
+    width:calc(var(--fh,120px)*1.24);height:calc(var(--fh,120px)*.24);border-radius:50%;pointer-events:none;
+    border:3px solid rgba(255,230,150,.95);box-shadow:0 0 22px rgba(255,215,106,.85),inset 0 0 16px rgba(255,215,106,.5);
+    opacity:0;transition:opacity .4s}
+  .dancer.focused .focusring{opacity:1;animation:focusPulse 1s ease-in-out infinite}
+  @keyframes focusPulse{50%{transform:translateX(-50%) scale(1.1)}}
+  /* thẻ ô cố định dưới chân dancer: A07 / B12 / C03 */
+  .dancer .slotmark{position:absolute;top:calc(100% + 1px);left:50%;transform:translateX(-50%);z-index:0;pointer-events:none;
+    font-size:calc(var(--fh,120px)*.082);font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.55);
+    text-shadow:0 1px 3px rgba(0,0,0,.7);white-space:nowrap}
   .dancer .chip{display:flex;align-items:center;gap:2px;background:rgba(16,4,38,.62);border:1px solid rgba(215,170,255,.5);
     border-radius:999px;padding:1px 5px 1px 1px;color:#fff;font-weight:600;white-space:nowrap;margin-top:0;
     font-size:calc(var(--fh,120px)*.098);max-width:calc(var(--fh,120px)*1.45);overflow:hidden}
@@ -106,9 +196,9 @@
   .dancer .chip .av{flex:none;width:calc(var(--fh,120px)*.16);height:calc(var(--fh,120px)*.16);border-radius:50%;overflow:hidden;
     display:grid;place-items:center;color:#fff;font-weight:700;font-size:calc(var(--fh,120px)*.095)}
   .dancer .chip .av img{width:100%;height:100%;object-fit:cover}
-  .dancer.onpodium .chip,.dancer.onstage .chip,.dancer.paired .chip{font-size:calc(var(--u0)*2.6);max-width:calc(var(--u0)*36)}
-  .dancer.onpodium .chip .av,.dancer.onstage .chip .av,.dancer.paired .chip .av{width:calc(var(--u0)*4);height:calc(var(--u0)*4);font-size:calc(var(--u0)*2.3)}
-  .dancer.onpodium .bubble,.dancer.onstage .bubble,.dancer.paired .bubble{font-size:calc(var(--u0)*2.6);max-width:calc(var(--u0)*38)}
+  .dancer.onstage .chip,.dancer.paired .chip,.dancer.focused .chip{font-size:calc(var(--u0)*2.6);max-width:calc(var(--u0)*36)}
+  .dancer.onstage .chip .av,.dancer.paired .chip .av,.dancer.focused .chip .av{width:calc(var(--u0)*4);height:calc(var(--u0)*4);font-size:calc(var(--u0)*2.3)}
+  .dancer.onstage .bubble,.dancer.paired .bubble,.dancer.focused .bubble{font-size:calc(var(--u0)*2.6);max-width:calc(var(--u0)*38)}
   .dancer .crown{position:absolute;top:calc(var(--fh,120px)*-.15);font-size:calc(var(--fh,120px)*.27);z-index:3;
     filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));animation:crownBob 2.2s ease-in-out infinite}
   .dancer .pairheart{position:absolute;top:calc(var(--fh,120px)*-.16);font-size:calc(var(--fh,120px)*.24);z-index:3;
@@ -218,16 +308,35 @@
 </style>
 </head>
 <body>
-<div id="stage" data-venue="neon">
-  <div id="scene"></div>
-  <div id="floorgrid"></div>
-  <div id="beams"></div>
-  <div id="stageglow"></div>
-  <div id="podium"></div>
-  <div id="pairspot"></div>
-  <div id="people"></div>
-  <canvas id="fx"></canvas>
-  <img id="heli" src="img/heli.png" alt="">
+<div id="stage" data-venue="neon" data-camzone="">
+  <div id="world">
+    <div id="scene"></div>
+    <div id="floorgrid"></div>
+    <div class="zonewash" id="washA"></div>
+    <div class="zonewash" id="washB"></div>
+    <div class="zonewash" id="washC"></div>
+    <div id="tv">
+      <div id="tvscreen">
+        <div id="tvLive">🔴 LIVE</div>
+        <div id="tvTitle">DJ SÀN NHẢY</div>
+        <div id="tvEq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <img id="tvDJimg" src="img/dj.png" alt="">
+        <div id="tvfocus"><img id="tfImg" src="img/dj.png" alt=""><div class="tf-info"><div class="tf-name" id="tfName"></div><div class="tf-sub" id="tfSub"></div></div></div>
+        <div id="tvticker"><div class="tk"><span id="tk1"></span><span id="tk2"></span></div></div>
+      </div>
+    </div>
+    <div id="vipSign">✦ VIP LOUNGE ✦</div>
+    <div id="bstage"></div>
+    <div class="zonesign" id="signA">KHU A · DJ &amp; TV</div>
+    <div class="zonesign" id="signB">KHU B · SÀN CHÍNH</div>
+    <div class="zonesign" id="signC">KHU C · VIP BAR</div>
+    <div id="beams"></div>
+    <div id="pairglow"></div>
+    <div id="spotcone"></div>
+    <div id="people"></div>
+    <canvas id="fx"></canvas>
+    <img id="heli" src="img/heli.png" alt="">
+  </div>
   <div id="judge"></div>
   <div id="bigtext"></div>
   <div id="banner"></div>
@@ -241,6 +350,9 @@
     <div id="energy"><span>⚡ PARTY ENERGY <b id="energypct">10%</b></span><div class="bar"><i id="energybar"></i></div></div>
     <div id="venue">🌃 Sàn Neon · 👁 <span id="viewers">0</span></div>
   </div>
+  <div id="zonepills">
+    <span class="zpill" id="zp-A">KHU A</span><span class="zpill" id="zp-B">KHU B</span><span class="zpill" id="zp-C">KHU C</span>
+  </div>
   <div id="side">
     <div id="toasts"></div>
   </div>
@@ -252,9 +364,10 @@
     <div class="trow bad"><span>BAD</span><b id="t-BAD">0</b></div>
     <div class="trow miss"><span>MISS</span><b id="t-MISS">0</b></div>
   </div>
+  <div id="camtab"></div>
   <div id="guide"></div>
   <div id="au">
-    <div class="row1"><span class="who" id="auwho">🎤 Chờ dancer lên bục…</span><span class="combo" id="aucombo"></span></div>
+    <div class="row1"><span class="who" id="auwho">🎤 Chờ dancer lên sàn…</span><span class="combo" id="aucombo"></span></div>
     <div class="steps" id="austeps"></div>
   </div>
   <button id="sound" style="display:none">🔈 Bấm để bật âm thanh</button>

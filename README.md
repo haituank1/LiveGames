@@ -331,12 +331,16 @@ http://localhost:8787/Games/dam-cuoi/?demo=1 — chi tiết trong `Games/dam-cuo
 
 ## Game sàn nhảy (Games/san-nhay)
 
-Game thứ ba, dùng chung LiveBridge: mọi người xem thành một dancer chibi trên **sàn chật ~100 người**, chia
-**6 lớp nhân vật** (Đại Gia, Idol, DJ, Dân Quẩy, Mascot Vịt, Tân Binh — mỗi lớp một hình, một điệu
-nhảy, một màu hiệu ứng), dancer lên bục giữa **nhảy solo kiểu Audition** (phím ←↑↓→, chấm
-PERFECT/GREAT/COOL/BAD/MISS + combo + bảng tally bên phải), **nhảy đôi** khi gõ "nhảy đôi", thanh
-**Party Energy** đầy thì cả sàn quẩy Party Max với chữ lớn "CẢ SÀN CÙNG QUẨY", quà vừa
-**nổ hũ vàng**, quà từ 99 xu **đổ bộ lên bục có cánh + hào quang**, quà từ 299 xu có **trực thăng VIP**
-đáp xuống, dancer **lên cấp** theo XP. **Bảng vàng tuần** là thanh vàng ngang trên cùng và
-**top 3 đứng lớn trên sân khấu nền**; 3 cảnh sàn là nền minh họa vẽ riêng (neon / bãi biển / tuyết Giáng Sinh).
+Game thứ ba, dùng chung LiveBridge: **không gian sàn RỘNG 3 khu** (A = DJ + TV màn hình lớn,
+B = sàn chính + sân khấu, C = VIP bar) với **camera ảo lia cảnh** — mỗi người xem là một dancer chibi
+nhận **1 ô cố định random** trong 126 ô của 3 khu, chia **6 lớp nhân vật** (Đại Gia, Idol, DJ, Dân Quẩy,
+Mascot Vịt, Tân Binh — mỗi lớp một hình, một điệu nhảy, một hào quang hiệu ứng riêng). Camera tự lia tới
+dancer được gọi tên: **nhảy solo kiểu Audition ngay tại ô của dancer** (phím ←↑↓→, chấm
+PERFECT/GREAT/COOL/BAD/MISS + combo + bảng tally bên phải, spotlight + vòng sáng tại ô, hàng xóm cùng khu
+cổ vũ), **nhảy đôi** khi gõ "nhảy đôi" (camera đóng khung khu), thanh **Party Energy** đầy thì camera về
+toàn cảnh Party Max với chữ lớn "CẢ SÀN CÙNG QUẨY", quà vừa **nổ hũ vàng**, quà từ 99 xu **đổ bộ tại ô
+có cánh + hào quang**, quà từ 299 xu có **trực thăng VIP** đáp xuống, dancer **lên cấp** theo XP.
+**TV màn hình lớn ở Khu A** chiếu DJ + ticker sự kiện, có sự kiện nổi bật thì chiếu chính dancer đó.
+**Bảng vàng tuần** là thanh vàng ngang trên cùng và **top 3 đứng lớn trên sân khấu Khu B**; cảnh neon là
+nền panorama rộng vẽ riêng (`bg-wide.webp`), cảnh bãi biển / tuyết Giáng Sinh giữ nền v2.
 Chạy thử: mở http://localhost:8787/Games/san-nhay/?demo=1 — chi tiết trong `Games/san-nhay/README.md`.
