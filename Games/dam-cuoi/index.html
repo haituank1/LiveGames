@@ -36,6 +36,9 @@
   .person{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;will-change:transform}
   .person .figwrap{filter:drop-shadow(0 5px 6px rgba(90,10,40,.35));animation:bob 2.8s ease-in-out infinite}
   .person .figwrap svg{height:var(--fh,120px);display:block}
+  .person .figwrap img.chibi{height:var(--fh,120px);display:block}
+  .person.walking .figwrap img.chibi{animation:chibiSway .3s ease-in-out infinite alternate}
+  @keyframes chibiSway{from{transform:rotate(-2.6deg)}to{transform:rotate(2.6deg)}}
   .person.flip .figwrap{transform:scaleX(-1);animation:bobFlip 2.8s ease-in-out infinite}
   @keyframes bob{50%{transform:translateY(-1.8%)}}
   @keyframes bobFlip{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-1.8%)}}

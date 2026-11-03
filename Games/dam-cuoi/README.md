@@ -58,8 +58,10 @@ bằng trình duyệt khác).
 
 ## Ghi chú kỹ thuật
 
-- Nhân vật là SVG vẽ trong `js/people.js` (vẽ 1 lần, hoạt ảnh chân tay bằng CSS, di chuyển bằng rAF),
-  tối đa 110 nhân vật trên sân cùng lúc.
+- Nhân vật là **ảnh chibi nền trong suốt** trong thư mục `img/` (`bride.png`, `groom.png`,
+  `guest-girl.png`, `guest-boy.png`) do `js/people.js` gắn vào, hoạt ảnh nhún/lắc bằng CSS khi đi,
+  tối đa 110 nhân vật trên sân cùng lúc. Muốn thêm mẫu khách mới: thả thêm ảnh vào `img/` và
+  khai báo trong `CHIBI`/`figHTML` ở js/people.js.
 - Bố cục từng nền (vị trí bàn tiệc để xếp ghế + điểm thảm đỏ chạm sân khấu) nằm trong `FILE_LAYOUT`
   và điểm neo sàn sân khấu trong `FILE_ANCHOR` ở js/main.js — đổi nền phải đo lại hai thông số này.
 - Banner nghi thức (lễ thành hôn / nâng cấp sảnh / mừng cưới lớn) là hàm `showBanner` trong js/main.js.

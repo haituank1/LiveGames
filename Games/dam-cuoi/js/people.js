@@ -141,7 +141,7 @@ function makePersonEl(p) {
     ? `<span class="av"><img src="${esc(p.user.avatar)}" referrerpolicy="no-referrer" alt=""></span>`
     : `<span class="av" style="background:hsl(${hue},55%,48%)">${esc((Array.from(String(p.user.nickname || '?').trim())[0] || '?').toUpperCase())}</span>`;
   el.innerHTML = `<div class="figwrap"></div><div class="chip">${av}<span class="nm">${esc(p.user.nickname)}</span></div>`;
-  el.querySelector('.figwrap').innerHTML = figureSVG(p);
+  el.querySelector('.figwrap').innerHTML = figHTML(p);
   return el;
 }
 
@@ -263,9 +263,16 @@ P.spawn = function (user) {
 };
 
 /* ================= Ghép đôi & sân khấu ================= */
+const CHIBI = { bride: 'img/bride.png', groom: 'img/groom.png', girl: 'img/guest-girl.png', boy: 'img/guest-boy.png' };
+function figHTML(p) {
+  const seed = hash(p.user.id || p.user.nickname);
+  const file = p.outfit === 'bride' ? CHIBI.bride : p.outfit === 'groom' ? CHIBI.groom
+    : (seed % 2 ? CHIBI.girl : CHIBI.boy);
+  return `<img class="chibi" src="${file}" alt="">`;
+}
 function setOutfit(p, outfit) {
   p.outfit = outfit;
-  p.el.querySelector('.figwrap').innerHTML = figureSVG(p);
+  p.el.querySelector('.figwrap').innerHTML = figHTML(p);
   p.el.classList.toggle('wedding', outfit !== 'casual');
 }
 function notifyQueue() { if (P.onQueueChange) P.onQueueChange(stageQueue.map(c => `${c.a.user.nickname} ❤ ${c.b.user.nickname}`)); }
