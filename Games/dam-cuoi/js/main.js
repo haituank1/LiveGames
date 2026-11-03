@@ -21,15 +21,15 @@ const say = (html, cls) => { statusEl.className = cls || ''; statusEl.innerHTML 
 
 /* ============ Mốc sảnh theo TỔNG lượt view tích lũy ============ */
 const TIERS = [
-  { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg-wide.webp', royal: 0 },
-  { at: 500,   name: 'Hoa Khai',            file: 'bg-wide.webp', royal: 0 },
-  { at: 2000,  name: 'Kim Tuyến',           file: 'bg-wide.webp', royal: 0 },
-  { at: 5000,  name: 'Lung Linh',           file: 'bg-wide.webp', royal: 0 },
-  { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-wide.webp', royal: 1 },
-  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-wide.webp', royal: 2 },
+  { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg-full.webp', royal: 0 },
+  { at: 500,   name: 'Hoa Khai',            file: 'bg-full.webp', royal: 0 },
+  { at: 2000,  name: 'Kim Tuyến',           file: 'bg-full.webp', royal: 0 },
+  { at: 5000,  name: 'Lung Linh',           file: 'bg-full.webp', royal: 0 },
+  { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-full.webp', royal: 1 },
+  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-full.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
-const STAGE_Y = { 'bg-wide.webp': 20.6 };
+const STAGE_Y = { 'bg-full.webp': 38.5 };
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
@@ -174,12 +174,12 @@ function applyTierFx(tier) {
 }
 let bgToken = 0;
 function setBackground(file) {
-  P.setStageY(STAGE_Y[file] || 20.6);
+  P.setStageY(STAGE_Y[file] || 38.5);
   const tk = ++bgToken;
   const img = new Image();
   img.onload = () => {
     if (tk !== bgToken) return;   // đã có nền mới hơn đang tải — bỏ qua ảnh cũ về muộn
-    $('backdrop').style.backgroundImage = `url("${file}")`;
+    $('bgfull').style.backgroundImage = `url("${file}")`;
   };
   img.src = file;
 }
@@ -214,7 +214,7 @@ const Cam = {
   follow(couple) { this.followC = couple; this.busyUntil = 0; },
   unfollow() { this.followC = null; },
   home() { this.panTo(50, 36, 0.63); },
-  stage() { this.panTo(50, 15.5, 1.04); },
+  stage() { this.panTo(50, 34, 1.02); },
   toScreen(x, y) {
     return { fx: 0.5 + (x - this.cx) / 100 * WW * this.z / SW, fy: 0.5 + (y - this.cy) / 100 * WH * this.z / SH };
   },
@@ -251,7 +251,7 @@ P.onPairReveal = function (c) {
 };
 function bgFileFor(total) {
   const rules = Array.isArray(cfg.bgRules) ? cfg.bgRules.filter(r => r && r.file).slice().sort((a, b) => a.viewers - b.viewers) : [];
-  let file = 'bg-wide.webp';
+  let file = 'bg-full.webp';
   for (const r of rules) if (total >= r.viewers) file = r.file;
   return file;
 }
@@ -550,8 +550,8 @@ if (isDemo) {
     coupleSec: 25,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
-      { viewers: 500, file: 'bg-wide.webp' }, { viewers: 2000, file: 'bg-wide.webp' },
-      { viewers: 5000, file: 'bg-wide.webp' }, { viewers: 10000, file: 'bg-wide.webp' }, { viewers: 20000, file: 'bg-wide.webp' },
+      { viewers: 500, file: 'bg-full.webp' }, { viewers: 2000, file: 'bg-full.webp' },
+      { viewers: 5000, file: 'bg-full.webp' }, { viewers: 10000, file: 'bg-full.webp' }, { viewers: 20000, file: 'bg-full.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
     guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],

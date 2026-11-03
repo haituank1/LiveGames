@@ -14,7 +14,7 @@ const P = {};
 window.Wedding.peopleApi = P;
 
 const MAX_PEOPLE = 2000;
-const FLOOR_Y = 33;              // sàn tiệc bắt đầu từ đây (% chiều cao phòng)
+const FLOOR_Y = 44;              // sàn tiệc bắt đầu từ đây (% chiều cao phòng — dưới bục sân khấu trong ảnh toàn cảnh)
 let Ww = 2700, Hw = 3840;        // kích thước phòng (px) — main cập nhật qua P.resize
 let FH = 192;                    // chiều cao nhân vật gốc (px trong phòng)
 let box = null, tablesBox = null;
@@ -85,24 +85,33 @@ function setOutfit(p, outfit) {
 /* ---------- Vị trí trong phòng: ghế quanh bàn + điểm đứng ---------- */
 const positions = [];            // {x, y, kind, taken}
 let freePool = [];
+/* Bàn tiệc ĐÃ VẼ SẴN trong ảnh toàn cảnh bg-full.webp — tọa độ % đo theo ảnh,
+   ghế xếp quanh đúng các bàn đó để khách đứng khớp tranh */
+const PAINTED_TABLES = [];
+for (const row of [
+  { y: 45, xs: [17, 24, 30, 36, 64, 70, 77, 84] },
+  { y: 50, xs: [14, 22, 29, 36, 64, 71, 78, 86] },
+  { y: 56, xs: [11, 20, 29, 37, 63, 71, 80, 89] },
+  { y: 63, xs: [8, 18, 28, 38, 62, 72, 82, 92] },
+  { y: 71, xs: [6, 16, 27, 38, 62, 73, 84, 94] },
+  { y: 80, xs: [4, 14, 26, 38, 62, 74, 86, 96] },
+  { y: 90, xs: [10, 24, 38, 62, 76, 90] },
+]) for (const x of row.xs) PAINTED_TABLES.push({ x, y: row.y });
+
 function buildPositions() {
   positions.length = 0;
-  const tables = [];
-  for (let cx = 10; cx <= 90.1; cx += 11.5)
-    for (let cy = 45; cy <= 92.1; cy += 11.8) {
-      if (CARPETS.some(c => Math.abs(cx - c) < 6.4)) continue;   // chừa thảm đỏ
-      tables.push({ x: cx, y: cy });
-    }
+  const tables = PAINTED_TABLES;
   for (const t of tables) {
+    const s = 0.72 + Math.max(0, (t.y - 45)) / 55 * 0.55;   // bàn gần thì to hơn (phối cảnh)
     for (let k = 0; k < 6; k++) {
       const a = k / 6 * Math.PI * 2 + 0.26;
-      positions.push({ x: t.x + Math.cos(a) * 3.6, y: t.y + Math.sin(a) * 2.5, kind: 'seat', taken: null });
+      positions.push({ x: t.x + Math.cos(a) * 3.7 * s, y: Math.max(43.5, t.y + Math.sin(a) * 2.6 * s), kind: 'seat', taken: null });
     }
   }
   for (let gx = 3.6; gx <= 96.5; gx += 2.35)
     for (let gy = FLOOR_Y + 2.4; gy <= 98.4; gy += 1.95) {
       const x = gx + rand(-0.7, 0.7), y = gy + rand(-0.5, 0.5);
-      if (tables.some(t => Math.abs(x - t.x) < 3.4 && Math.abs(y - t.y) < 2.4)) continue;
+      if (tables.some(t => Math.abs(x - t.x) < 3.6 && Math.abs(y - t.y) < 2.6)) continue;
       positions.push({ x, y, kind: 'stand', taken: null });
     }
   // Ưu tiên lấp vị trí từ gần sân khấu ra xa (vẫn ngẫu nhiên) để phòng ít người trông vẫn đông vui

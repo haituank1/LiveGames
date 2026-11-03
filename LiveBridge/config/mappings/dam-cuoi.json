@@ -32,23 +32,23 @@
     "bgRules": [
       {
         "viewers": 500,
-        "file": "bg-wide.webp"
+        "file": "bg-full.webp"
       },
       {
         "viewers": 2000,
-        "file": "bg-wide.webp"
+        "file": "bg-full.webp"
       },
       {
         "viewers": 5000,
-        "file": "bg-wide.webp"
+        "file": "bg-full.webp"
       },
       {
         "viewers": 10000,
-        "file": "bg-wide.webp"
+        "file": "bg-full.webp"
       },
       {
         "viewers": 20000,
-        "file": "bg-wide.webp"
+        "file": "bg-full.webp"
       }
     ],
     "coupleSec": 22,

@@ -11,23 +11,9 @@
   #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#2a0a18}
   /* ---------- Phòng cưới rộng + camera lia ---------- */
   #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;background:#430b18}
-  #floor{position:absolute;left:0;right:0;top:29%;bottom:0;background:
-    radial-gradient(ellipse 90% 34% at 50% 0%,rgba(255,190,120,.20),transparent 70%),
-    repeating-linear-gradient(90deg,rgba(255,215,150,.045) 0 3px,transparent 3px 90px),
-    linear-gradient(180deg,#93273d,#701227 34%,#560e20 72%,#400917)}
-  #backdrop{position:absolute;left:0;top:0;width:100%;height:34.9%;background-size:100% 100%;background-repeat:no-repeat;z-index:1}
-  #floorfade{position:absolute;left:0;top:30.5%;width:100%;height:4.4%;z-index:1;pointer-events:none;
-    background:linear-gradient(180deg,rgba(86,14,32,0),#560e20)}
-  .carpet{position:absolute;top:32.5%;bottom:0;width:3.6%;z-index:1;
-    background:linear-gradient(180deg,#c01722,#9c1120 60%,#7d0d1b);border-left:3px solid rgba(255,205,110,.75);border-right:3px solid rgba(255,205,110,.75)}
-  #tables{position:absolute;inset:0;z-index:2}
-  .wtable{position:absolute;width:5.9%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);
-    background:radial-gradient(circle at 42% 36%,#fffaf0,#f3e2cd 55%,#dec096);border:3px solid #c9a86a;
-    box-shadow:0 10px 22px rgba(0,0,0,.4),inset 0 0 0 6px rgba(255,255,255,.35)}
-  .wtable::after{content:'';position:absolute;left:50%;top:50%;width:26%;height:26%;transform:translate(-50%,-50%);border-radius:50%;
-    background:radial-gradient(circle,#ff8fb8,#e75480 70%,#c2437f)}
+  #bgfull{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat;z-index:1}
   #people{position:absolute;inset:0;z-index:3}
-  #spot{position:absolute;left:50%;top:1%;width:31%;height:33%;transform:translateX(-50%);pointer-events:none;z-index:2;
+  #spot{position:absolute;left:50%;top:13%;width:31%;height:27%;transform:translateX(-50%);pointer-events:none;z-index:2;
     background:radial-gradient(ellipse at 50% 88%,rgba(255,225,150,.5),rgba(255,225,150,.14) 55%,transparent 75%);
     opacity:0;transition:opacity .8s}
   #spot.on{opacity:1;animation:spotPulse 2.6s ease-in-out infinite}
@@ -155,13 +141,7 @@
 <body>
 <div id="stage">
   <div id="world">
-    <div id="floor"></div>
-    <div id="backdrop"></div>
-    <div id="floorfade"></div>
-    <div class="carpet" style="left:20.2%"></div>
-    <div class="carpet" style="left:48.2%"></div>
-    <div class="carpet" style="left:76.2%"></div>
-    <div id="tables"></div>
+    <div id="bgfull"></div>
     <div id="spot"></div>
     <div id="people"></div>
   </div>
