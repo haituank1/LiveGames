@@ -32,7 +32,7 @@
     "bgRules": [
       {
         "viewers": 500,
-        "file": "bg-full.webp"
+        "file": "bg-500.webp"
       },
       {
         "viewers": 2000,
@@ -48,7 +48,7 @@
       },
       {
         "viewers": 20000,
-        "file": "bg-full.webp"
+        "file": "bg-20000.webp"
       }
     ],
     "coupleSec": 22,

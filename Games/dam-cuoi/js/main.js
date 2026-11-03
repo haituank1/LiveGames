@@ -22,14 +22,14 @@ const say = (html, cls) => { statusEl.className = cls || ''; statusEl.innerHTML 
 /* ============ Mốc sảnh theo TỔNG lượt view tích lũy ============ */
 const TIERS = [
   { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg-full.webp', royal: 0 },
-  { at: 500,   name: 'Hoa Khai',            file: 'bg-full.webp', royal: 0 },
+  { at: 500,   name: 'Hoa Khai',            file: 'bg-500.webp', royal: 0 },
   { at: 2000,  name: 'Kim Tuyến',           file: 'bg-full.webp', royal: 0 },
   { at: 5000,  name: 'Lung Linh',           file: 'bg-full.webp', royal: 0 },
   { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-full.webp', royal: 1 },
-  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-full.webp', royal: 2 },
+  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-20000.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
-const STAGE_Y = { 'bg-full.webp': 37.2 };   // đường đứng làm lễ: chắc chân trên mặt bục, không sát mép bậc thang
+const STAGE_Y = { 'bg-full.webp': 37.2, 'bg-500.webp': 37.2, 'bg-20000.webp': 37.2 };   // mọi nền cùng khung BG-LAYOUT nên cùng đường đứng làm lễ
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
@@ -174,7 +174,7 @@ function applyTierFx(tier) {
 }
 let bgToken = 0;
 function setBackground(file) {
-  P.setStageY(STAGE_Y[file] || 38.5);
+  P.setStageY(STAGE_Y[file] || 37.2);
   const tk = ++bgToken;
   const img = new Image();
   img.onload = () => {
@@ -622,8 +622,8 @@ if (isDemo) {
     zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
-      { viewers: 500, file: 'bg-full.webp' }, { viewers: 2000, file: 'bg-full.webp' },
-      { viewers: 5000, file: 'bg-full.webp' }, { viewers: 10000, file: 'bg-full.webp' }, { viewers: 20000, file: 'bg-full.webp' },
+      { viewers: 500, file: 'bg-500.webp' }, { viewers: 2000, file: 'bg-full.webp' },
+      { viewers: 5000, file: 'bg-full.webp' }, { viewers: 10000, file: 'bg-full.webp' }, { viewers: 20000, file: 'bg-20000.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
     guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],
@@ -639,19 +639,24 @@ if (isDemo) {
   setupSoundBtn();
   startDemo();
 } else {
-  const client = new LiveBridgeClient({
-    game: 'dam-cuoi',
-    onConfig: applyConfig,
-    onEvent: handle,
-    onChat: onChat,
-    onBlock: onBlock,
-    onStatus: st => {
+  // LiveBridgeClient dùng API .on('event'|'chat'|'hello'|'config'|'status'|'block'|'seen')
+  // — bản cũ truyền onConfig/onEvent qua opts nên client BỎ QUA hết: live thật sẽ
+  // không nhận được config lẫn sự kiện TikTok. URL lấy theo đúng cổng đang mở game.
+  const bridgeUrl = 'ws://' + location.hostname + ':' + (location.port || '8787');
+  new LiveBridgeClient({ url: bridgeUrl, game: 'dam-cuoi' })
+    .on('event', handle)
+    .on('chat', onChat)
+    .on('block', onBlock)
+    .on('config', m => applyConfig(m.config))
+    .on('hello', h => { if (h && h.config) applyConfig(h.config); })
+    .on('seen', m => { if (m && m.user) ensureGuest(m.user); })   // thả tim cũng tính là khách đến dự
+    .on('status', m => {
+      const st = (m && m.tiktok) || {};
       if (st.state === 'live') { say('● LIVE — ' + (st.username ? '@' + st.username : ''), 'ok'); refreshBg(false); }
       else if (st.state === 'error') say('⚠ ' + (st.message || 'Lỗi kết nối TikTok'), 'err');
       else say('Đang chờ kết nối LIVE…', '');
-    },
-  });
-  client.connect();
+    })
+    .connect();
   setTimeout(setupSoundBtn, 300);
 }
 mcRandomLoop();
