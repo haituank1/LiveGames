@@ -11,7 +11,7 @@ P.coupleSec = 25;
 const MAX_PEOPLE = 110;
 const COURT = { x1: 5, x2: 95, y1: 55, y2: 96 };       // vùng khuôn viên (% khung)
 let courtY1 = 55;                                        // mép trên khuôn viên, chỉnh theo từng nền
-const SPOTS = [{ x: 50 }, { x: 24 }, { x: 76 }];        // 3 vị trí cặp đôi trên sân khấu
+const SPOTS = [{ x: 50 }, { x: 16 }, { x: 84 }];        // 3 vị trí cặp đôi trên sân khấu
 let box = null, Wpx = 400, Hpx = 700, stageAnchor = 54;
 let avoid = null;                                        // vùng cấm đứng theo nền (vd. đài phun nước)
 const people = new Map();                                // user.id -> person
@@ -172,7 +172,7 @@ function nearestFreeSeat(x, y, excl) {
   return best;
 }
 function scaleFor(p) {
-  if (p.state === 'stage' || p.state === 'toStage') return 1.3;
+  if (p.state === 'stage' || p.state === 'toStage') return p.spotScale || 1.12;
   return 0.5 + Math.max(0, (p.y - 42)) / (97 - 42) * 0.52;
 }
 function render(p) {
@@ -278,7 +278,7 @@ function setOutfit(p, outfit) {
 function notifyQueue() { if (P.onQueueChange) P.onQueueChange(stageQueue.map(c => `${c.a.user.nickname} ❤ ${c.b.user.nickname}`)); }
 function carpetPoints(px, side) {
   // điểm tập kết ở cuối thảm đỏ rồi đi thẳng lên sân khấu
-  return [{ x: 50 + side * 5.5, y: 90 }, { x: 50 + side * 5.5, y: carpetTop + 6 }];
+  return [{ x: 50 + side * 7.5, y: 90 }, { x: 50 + side * 7.5, y: carpetTop + 6 }];
 }
 function promoteStage() {
   for (let i = 0; i < SPOTS.length && stageQueue.length; i++) {
@@ -286,10 +286,14 @@ function promoteStage() {
     const c = stageQueue.shift();
     c.state = 'toStage'; c.spot = i;
     stageSlots[i] = c;
+    c.a.spotScale = c.b.spotScale = i === 0 ? 1.12 : 0.82;   // cặp hai bên nhỏ hơn để không chen cặp tâm điểm
     const y = stageAnchor + (i ? 1.4 : 0);
-    const side = i === 1 ? -1 : 1;
-    walkPath(c.a, [...carpetPoints(c.a.x, -1), { x: SPOTS[i].x - 6.6, y }], 'toStage');
-    walkPath(c.b, [...carpetPoints(c.b.x, 1), { x: SPOTS[i].x + 6.6, y }], 'toStage', () => arriveStage(c));
+    const off = i === 0 ? 10.5 : 8.5;   // ảnh chibi bè ngang — phải đứng cách xa nhau kẻo che mất nhau
+    // chú rể đứng hơi thấp hơn (phía trước) để không bị váy cô dâu che khuất
+    const yA = y + (c.a.outfit === 'groom' ? 1.3 : 0);
+    const yB = y + (c.b.outfit === 'groom' ? 1.3 : 0);
+    walkPath(c.a, [...carpetPoints(c.a.x, -1), { x: SPOTS[i].x - off, y: yA }], 'toStage');
+    walkPath(c.b, [...carpetPoints(c.b.x, 1), { x: SPOTS[i].x + off, y: yB }], 'toStage', () => arriveStage(c));
     notifyQueue();
   }
 }
@@ -310,6 +314,7 @@ function leaveStage(c) {
   clearTimeout(c.timer); clearInterval(c.heartTimer);
   if (c.spot >= 0 && stageSlots[c.spot] === c) stageSlots[c.spot] = null;
   c.spot = -1; c.state = 'court';
+  c.a.spotScale = c.b.spotScale = null;
   c.a.el.classList.remove('paired'); c.b.el.classList.remove('paired');
   // về hai ghế cạnh nhau (cùng một bàn nếu còn trống)
   let sa = nearestFreeSeat(30, 80, c.a), sb = null;
@@ -317,7 +322,7 @@ function leaveStage(c) {
   if (!sb) sb = nearestFreeSeat(70, 80, c.b);
   const goBack = (p, s, side) => {
     if (s) takeSeat(p, s);
-    const pts = [{ x: 50 + side * 5.5, y: 90 }];
+    const pts = [{ x: 50 + side * 7.5, y: 90 }];
     if (s) pts.push({ x: s.x, y: s.y });
     walkPath(p, pts, 'walk');
   };
@@ -339,8 +344,8 @@ P.makeCouple = function (userA, userB) {
   a.couple = c; b.couple = c;
   couples.push(c);
   // hai người ra cuối thảm đỏ gặp nhau trước
-  walkPath(a, [{ x: 44.5, y: 90 }], 'walk');
-  walkPath(b, [{ x: 55.5, y: 90 }], 'walk');
+  walkPath(a, [{ x: 42, y: 90 }], 'walk');
+  walkPath(b, [{ x: 58, y: 90 }], 'walk');
   stageQueue.push(c);
   notifyQueue();
   setTimeout(promoteStage, 1400);
