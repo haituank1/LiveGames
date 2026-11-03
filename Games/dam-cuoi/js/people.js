@@ -24,7 +24,20 @@ const people = new Map();        // id -> person
 const couples = [];
 const stageQueue = [];
 const stageSlots = [null, null, null];
-const SPOTS = [{ x: 50 }, { x: 39 }, { x: 61 }];   // 3 vị trí cặp trên sân khấu (% chiều rộng phòng)
+/* ================= KHUNG SÂN KHẤU / KHÁN ĐÀI CỐ ĐỊNH (xem BG-LAYOUT.md) =================
+   Bục vẽ sẵn trong ảnh: mặt bục từ y≈32% (sát vòm hoa) tới y≈42% (mép trước).
+   Cặp đôi CHỈ đứng trong vùng an toàn dưới đây — không đè lên bánh cưới
+   (x 45–55, y≤35), không chạm 2 cột vòm hoa (x 26–33 & 67–74), bậc thang
+   (x 40–60, y 42–46) chỉ đi qua, không đứng lại. */
+const STAGE_FRAME = {
+  zoneX: [34, 66],        // khoảng x được phép đứng trên bục
+  zoneDropMax: 1.6,       // đứng thấp hơn đường lễ tối đa (vẫn trên mặt bục)
+  spots: [50, 40, 60],    // tâm 3 vị trí cặp: giữa + 2 bên (đã thu vào để không bị cắt mép khi camera ở khung sân khấu)
+  pairOff: [3.1, 2.7, 2.7],   // nửa khoảng cách 2 người trong cặp theo vị trí
+  sideDrop: 0.55,         // cặp 2 bên đứng thấp hơn cặp giữa một chút
+  groomDrop: 0.5,         // chú rể đứng hơi thấp hơn (trước) cô dâu
+};
+const SPOTS = STAGE_FRAME.spots.map(x => ({ x }));
 const CARPETS = [22, 50, 78];    // 3 thảm đỏ (% chiều rộng phòng)
 
 function rand(a, b) { return a + Math.random() * (b - a); }
@@ -310,12 +323,16 @@ function promoteStage() {
     c.state = 'toStage'; c.spot = i;
     stageSlots[i] = c;
     c.a.spotScale = c.b.spotScale = i === 0 ? 1.18 : 0.95;
-    const y = stageY + (i ? 0.55 : 0);
-    const off = i === 0 ? 3.1 : 2.7;
-    const yG = y + (c.groom === c.a ? 0.5 : 0), yB = y + (c.bride === c.a ? 0.5 : 0);
+    const y = stageY + (i ? STAGE_FRAME.sideDrop : 0);
+    const off = STAGE_FRAME.pairOff[i];
+    const yG = y + (c.groom === c.a ? STAGE_FRAME.groomDrop : 0), yB = y + (c.bride === c.a ? STAGE_FRAME.groomDrop : 0);
     const yA = c.a === c.groom ? yG : yB, yB2 = c.b === c.groom ? yG : yB;
-    walkPath(c.a, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: SPOTS[i].x - off, y: yA }], 'toStage');
-    walkPath(c.b, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: SPOTS[i].x + off, y: yB2 }], 'toStage', () => arriveStage(c));
+    // Kẹp điểm đứng cuối vào đúng vùng an toàn trên bục (khung cố định)
+    const sxA = Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], SPOTS[i].x - off));
+    const sxB = Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], SPOTS[i].x + off));
+    const syA = Math.min(stageY + STAGE_FRAME.zoneDropMax, yA), syB = Math.min(stageY + STAGE_FRAME.zoneDropMax, yB2);
+    walkPath(c.a, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: sxA, y: syA }], 'toStage');
+    walkPath(c.b, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: sxB, y: syB }], 'toStage', () => arriveStage(c));
     if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
   }
 }

@@ -15,10 +15,25 @@ vật trong game luôn khớp tranh và KHÔNG BAO GIỜ đứng lên mặt bàn
 | Phần tử | Vị trí |
 |---|---|
 | Sân khấu (vòm hoa, bánh cưới) | giữa, x = 50%, phần trên ảnh |
-| **Đường đứng làm lễ trên bục** | **y = 38.5%** (chân cặp đôi chạm đúng đây) |
+| **Đường đứng làm lễ trên bục** | **y = 37.2%** (chân cặp đôi chạm đúng đây) |
 | Mép trước bục sân khấu | y ≈ 42% |
 | Sàn tiệc bắt đầu | y = 44% |
 | Lối đi thảm đỏ giữa | x từ 43% → 57%, chạy từ bậc thang xuống đáy ảnh |
+
+## Khung sân khấu / khán đài (đã cài trong js/people.js — STAGE_FRAME)
+
+| Phần tử | Vị trí chuẩn |
+|---|---|
+| Mặt bục | y từ ≈32% (sát vòm hoa) tới ≈42% (mép trước bục) |
+| Đường đứng làm lễ | y = 37.2% |
+| 3 vị trí cặp đôi | tâm x = **40% · 50% · 60%**; cặp giữa to 1.18×, hai bên 0.95× và thấp hơn 0.55% |
+| Vùng được phép đứng | x từ 34% → 66%, không thấp quá đường lễ +1.6% |
+
+Vùng CẤM đứng (phải vẽ trống, nhân vật không bao giờ đặt chân vào):
+
+- **Bánh cưới:** x 45–55%, y ≤ 35% (cặp giữa đứng TRƯỚC bánh, không đè lên).
+- **2 cột vòm hoa:** x 26–33% và 67–74% ở ngang mặt bục.
+- **Bậc thang giữa:** x 40–60%, y 42–46% — chỉ đi qua khi lên/xuống, không đứng lại.
 
 ## Bàn tiệc — 54 bàn, ellipse theo hàng (tâm y, bán kính rx × ry, các tâm x)
 

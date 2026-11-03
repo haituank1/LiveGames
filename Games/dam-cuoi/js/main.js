@@ -29,7 +29,7 @@ const TIERS = [
   { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-full.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
-const STAGE_Y = { 'bg-full.webp': 38.5 };
+const STAGE_Y = { 'bg-full.webp': 37.2 };   // đường đứng làm lễ: chắc chân trên mặt bục, không sát mép bậc thang
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
