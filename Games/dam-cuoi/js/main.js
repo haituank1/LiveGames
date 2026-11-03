@@ -97,7 +97,17 @@ function renderBoard() {
   board.querySelector('ol').innerHTML = top.map((s, i) =>
     `<li><span>${i === 0 ? '👑 ' : ''}${escapeHtml(s.a)} ❤ ${escapeHtml(s.b)}</span><em>${fmtNum(s.score)}</em></li>`).join('');
   P.setCrown(top.length ? coupleByKey.get(top[0].key) : null);
+  if (top.length && top[0].key !== lastLeaderKey) {
+    const first = lastLeaderKey === null;
+    lastLeaderKey = top[0].key;
+    if (!first && Date.now() - lastLeaderAt > 25000) {
+      lastLeaderAt = Date.now();
+      showBanner(`👑 CẶP ĐÔI DẪN ĐẦU MỚI · ${top[0].a} ❤ ${top[0].b}`, 5000);
+      FX.fireworks(2); FX.hearts(14);
+    }
+  }
 }
+let lastLeaderKey = null, lastLeaderAt = 0;
 function fmtNum(n) { return n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n); }
 function escapeHtml(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
 
@@ -167,7 +177,7 @@ function renderRules() { /* luật chơi đã gộp vào khung hướng dẫn xo
 /* ============ Nền / mốc sảnh ============ */
 const BG = { file: '', tier: -1 };
 function applyTierFx(tier) {
-  $('beams').classList.toggle('on', !!TIERS[tier].royal);
+  $('beams').classList.toggle('on', tier >= 2 || !!TIERS[tier].royal);
   $('royalglow').classList.toggle('on', TIERS[tier].royal === 2);
 }
 let bgToken = 0;
@@ -206,7 +216,11 @@ function refreshBg(announce) {
     if (announce && old >= 0) {
       showBanner(`🎉 SẢNH CƯỚI NÂNG CẤP · ${TIERS[tier].name}`, 6000);
       mcReact(4, MC.milestone, { moc: TIERS[tier].name });
-      FX.fireworks(5); FX.petals(180); A.bell(3);
+      FX.fireworks(8); FX.petals(180); A.bell(3);
+      if (FX.cannon) FX.cannon();
+      if (FX.envelopes) FX.envelopes(60);
+      if (FX.glitter) FX.glitter(140);
+      if (FX.bokeh) FX.bokeh(14);
       const fl = $('flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
     }
   }
@@ -291,6 +305,12 @@ P.onCoupleStage = function (c) {
   coupleScore(c, 30);
   showBanner(`💍 LỄ THÀNH HÔN · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
   mcReact(2.5, MC.couple, { a: c.a.user.nickname, b: c.b.user.nickname });
+  const ay = (FILE_ANCHOR[BG.file] || 42) / 100;
+  if (FX.cannon) FX.cannon();
+  FX.petals(60);
+  if (FX.petalBurst) FX.petalBurst(0.5, ay);
+  if (FX.ringHearts) FX.ringHearts(0.5, ay - 0.09);
+  const spot = $('spot'); if (spot) spot.classList.add('on');
 };
 P.onQueueChange = function (names) {
   const el = $('queue');
@@ -325,7 +345,13 @@ function giftFx(diamonds) {
   if (t.petals) FX.petals(t.petals);
   if (t.confetti) FX.confetti(t.confetti);
   if (t.fw) FX.fireworks(t.fw);
-  if (diamonds >= 99) { const fl = $('flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on'); }
+  if (diamonds >= 10 && FX.glitter) FX.glitter(Math.min(120, 20 + diamonds));
+  if (diamonds >= 30 && FX.envelopes) FX.envelopes(diamonds >= 99 ? 90 : 40);
+  if (diamonds >= 99) {
+    if (FX.cannon) FX.cannon();
+    if (FX.bokeh) FX.bokeh(10);
+    const fl = $('flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
+  }
 }
 
 /* ============ Nhận sự kiện ============ */
@@ -430,6 +456,7 @@ function resize() {
 addEventListener('resize', resize);
 document.addEventListener('fullscreenchange', () => { lastLayoutKey = ''; resize(); });
 setInterval(resize, 2000);
+setInterval(() => { const sp = $('spot'); if (sp && !P.featured()) sp.classList.remove('on'); }, 3000);
 
 /* ============ Âm thanh: nút bật tiếng ============ */
 function setupSoundBtn() {

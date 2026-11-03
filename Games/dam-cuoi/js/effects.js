@@ -85,6 +85,38 @@ E.hearts = function (n = 10, x, y) {
   }
 };
 
+/* Vòng tim nở quanh một điểm (lúc cặp đôi làm lễ) */
+E.ringHearts = function (x = 0.5, y = 0.38) {
+  for (let i = 0; i < 14; i++) {
+    const a = (i / 14) * 6.283;
+    add({ kind: 'heart', x: x * w, y: y * h, vx: Math.cos(a) * rand(38, 60), vy: Math.sin(a) * rand(30, 48) - 14,
+      life: 0, max: rand(1.4, 2), size: rand(9, 14), color: PETALS[i % PETALS.length], grav: -4, drag: 1.1, sway: rand(0, 6.3) });
+  }
+};
+/* Chùm hoa nổ tung tại một điểm */
+E.petalBurst = function (x = 0.5, y = 0.42) {
+  for (let i = 0; i < 30; i++) {
+    const a = rand(0, 6.283), sp = rand(40, 190);
+    add({ kind: 'petal', x: x * w, y: y * h, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
+      life: 0, max: rand(1.6, 2.8), size: rand(6, 11), rot: rand(0, 6.3), vr: rand(-4, 4),
+      color: PETALS[Math.floor(Math.random() * PETALS.length)], grav: 55, drag: 1.4, sway: rand(0, 6.3) });
+  }
+};
+/* Mưa kim tuyến vàng lấp lánh */
+E.glitter = function (n = 50) {
+  for (let i = 0; i < n; i++) {
+    add({ kind: 'glit', x: rand(0, w), y: rand(-h * 0.25, -8), vx: rand(-8, 8), vy: rand(46, 96),
+      life: 0, max: rand(3.5, 6), size: rand(1.6, 3.2), color: '#ffd76a', grav: 0, drag: 0, sway: rand(0, 6.3) });
+  }
+};
+/* Bong bóng sáng bokeh bay lên mơ màng */
+E.bokeh = function (n = 8) {
+  for (let i = 0; i < n; i++) {
+    add({ kind: 'bokeh', x: rand(0, w), y: rand(h * 0.5, h * 1.02), vx: rand(-6, 6), vy: -rand(9, 24),
+      life: 0, max: rand(5, 9), size: rand(10, 30), color: ['#ffd9ec', '#ffe9a8', '#cfe8ff'][i % 3], grav: 0, drag: 0, sway: rand(0, 6.3) });
+  }
+};
+
 /* Mưa theo tổng xu của lần tặng (mốc càng cao càng rực rỡ, như GIFT_TIERS ở game chùa) */
 const GIFT_TIERS = [
   { min: 500, petals: 260, confetti: 160, fw: 6 },
@@ -99,6 +131,8 @@ E.giftRain = function (diamonds) {
   if (t.petals) E.petals(t.petals);
   if (t.confetti) E.confetti(t.confetti);
   if (t.fw) E.fireworksShow(t.fw, 300);
+  if (diamonds >= 10) E.glitter(Math.min(120, 20 + diamonds));
+  if (diamonds >= 99) E.bokeh(10);
   return GIFT_TIERS.length - 1 - GIFT_TIERS.indexOf(t);
 };
 
@@ -121,6 +155,22 @@ function loop(t) {
     sparkleAcc--;
     add({ kind: 'twinkle', x: rand(0, w), y: rand(h * 0.05, h * 0.6), vx: 0, vy: rand(-4, 2),
       life: 0, max: rand(1.2, 2.4), size: rand(1.4, 3), color: '#ffe9a8', grav: 0, drag: 0 });
+  }
+  // hoa rơi ambient rất nhẹ + bokeh mơ màng ở các mốc cao — sảnh lúc nào cũng "sống"
+  petalAcc += dt * (0.25 + tier * 0.16);
+  while (petalAcc >= 1) {
+    petalAcc--;
+    add({ kind: 'petal', x: rand(0, w), y: -12, vx: rand(-10, 10), vy: rand(22, 44),
+      life: 0, max: rand(7, 11), size: rand(5, 9), rot: rand(0, 6.3), vr: rand(-2, 2),
+      color: PETALS[Math.floor(Math.random() * PETALS.length)], grav: 0, drag: 0, sway: rand(0, 6.3) });
+  }
+  if (tier >= 2) {
+    bokehAcc += dt * 0.3;
+    while (bokehAcc >= 1) {
+      bokehAcc--;
+      add({ kind: 'bokeh', x: rand(0, w), y: rand(h * 0.55, h * 1.02), vx: rand(-6, 6), vy: -rand(9, 22),
+        life: 0, max: rand(5, 9), size: rand(10, 28), color: ['#ffd9ec', '#ffe9a8', '#cfe8ff'][Math.floor(Math.random() * 3)], grav: 0, drag: 0, sway: rand(0, 6.3) });
+    }
   }
   for (let i = P.length - 1; i >= 0; i--) {
     const p = P[i];
@@ -157,6 +207,21 @@ function loop(t) {
     } else if (p.kind === 'confetti') {
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot || 0); ctx.globalAlpha = Math.max(0, fade);
       ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2); ctx.restore();
+    } else if (p.kind === 'bokeh') {
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+      g.addColorStop(0, p.color); g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.globalAlpha = Math.sin((p.life / p.max) * Math.PI) * 0.16;
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 6.3); ctx.fill();
+    } else if (p.kind === 'glit') {
+      ctx.globalAlpha = Math.max(0, fade) * (0.45 + 0.55 * Math.abs(Math.sin(t / 130 + (p.sway || 0))));
+      ctx.fillStyle = p.color;
+      const s2 = p.size;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y - s2 * 2); ctx.lineTo(p.x + s2 * 0.6, p.y - s2 * 0.6); ctx.lineTo(p.x + s2 * 2, p.y);
+      ctx.lineTo(p.x + s2 * 0.6, p.y + s2 * 0.6); ctx.lineTo(p.x, p.y + s2 * 2); ctx.lineTo(p.x - s2 * 0.6, p.y + s2 * 0.6);
+      ctx.lineTo(p.x - s2 * 2, p.y); ctx.lineTo(p.x - s2 * 0.6, p.y - s2 * 0.6);
+      ctx.fill();
     } else if (p.kind === 'env') {
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot || 0); ctx.globalAlpha = Math.max(0, fade);
       const ew = p.size, eh = p.size * 1.45;
