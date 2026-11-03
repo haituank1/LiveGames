@@ -10,17 +10,19 @@ Game thứ hai của dự án, dùng chung **LiveBridge** với game chùa (khô
 
 Đưa lên OBS / TikTok LIVE Studio: thêm nguồn Browser với URL trên, kích thước **1080×1920** (khung dọc 9:16).
 
-## Cách chơi (v2)
+## Cách chơi (v3 — bố cục sảnh tiệc lớn)
 
-- **Ai vào phòng cũng có mặt ở khuôn viên:** mỗi người xem xuất hiện thành một nhân vật ở khuôn viên
-  tiệc (nửa dưới khung hình), tự đi dạo qua lại. Khi chưa kết duyên, nhân vật mặc đồ đời thường
-  hài hước ngẫu nhiên: áo thun quần đùi, pijama chấm bi, áo Hawaii đeo kính râm, ba lỗ đội mũ ngược,
-  váy hoa ở nhà, đồ thể thao cầm trà sữa...
+- **Sảnh tiệc kiểu ballroom:** sân khấu vòm hoa + bánh cưới ở trên cùng, **thảm đỏ dài ở giữa**,
+  hai bên là **hai dãy bàn tiệc**. Ai vào phòng cũng được xếp một **ghế quanh bàn tiệc** và đứng
+  tại bàn của mình (thỉnh thoảng đổi bàn cho sinh động). Khi chưa kết duyên, nhân vật mặc đồ đời
+  thường hài hước ngẫu nhiên: áo thun quần đùi, pijama chấm bi, áo Hawaii đeo kính râm, ba lỗ đội
+  mũ ngược, váy hoa ở nhà, đồ thể thao cầm trà sữa...
 - **Tag là cưới:** người xem bình luận `@tên người thương` → người bình luận và người được tag
   (không cần đang xem) **"lên đồ" ngay tại chỗ**: một người thành chú rể veston lịch lãm, một người
-  thành cô dâu váy cưới lộng lẫy, rồi nắm tay nhau đi lên sân khấu. Sân khấu có 3 vị trí (giữa là
-  tâm điểm), cặp sau xếp hàng chờ (bảng dưới-trái). Hết giờ trên sân khấu, cặp đôi nắm tay nhau
-  quay xuống khuôn viên đi dạo tiếp — từ đó hai người luôn đi cùng nhau.
+  thành cô dâu váy cưới lộng lẫy, rồi cả hai ra thảm đỏ, **đi dọc thảm đỏ lên sân khấu** trong
+  banner "💍 LỄ THÀNH HÔN". Sân khấu có 3 vị trí (giữa là tâm điểm, nhân vật trên sân khấu được
+  phóng to), cặp sau xếp hàng chờ (bảng dưới-trái). Hết giờ, cặp đôi đi thảm đỏ về **hai ghế cạnh
+  nhau cùng một bàn**.
 - **MC Anh Tú:** dẫn chương trình như MC đám cưới thật: giới thiệu cặp đôi lên sân khấu, cảm ơn quà,
   chào khách mới, chúc mừng khi sảnh nâng cấp, xen kẽ câu ý nghĩa và câu hài. Câu chữ sửa trong
   `LiveBridge/config/mappings/dam-cuoi.json` mục `defaults` (mcLines, mcFunny, mcCouple...).
@@ -43,10 +45,10 @@ duyệt (localStorage). Sân khấu chiếm nửa trên khung hình, khuôn viê
 
 | Tổng lượt view | Mốc | Khác biệt |
 |---|---|---|
-| 0 | Lễ Ấm Áp | Nền `bg.webp` |
-| 500 | Hoa Khai | Nền `bg-1.webp` |
-| 2.000 | Kim Tuyến | Nền `bg-2.webp` |
-| 5.000 | Lung Linh | Nền `bg-3.webp` |
+| 0 | Lễ Ấm Áp | Nền `bg.webp` (sảnh tiệc lớn) |
+| 500 | Hoa Khai | Nền `bg.webp` |
+| 2.000 | Kim Tuyến | Nền `bg.webp` |
+| 5.000 | Lung Linh | Nền `bg-3.webp` (sảnh hoàng gia) |
 | 10.000 | Đại Tiệc Vàng | Nền `bg-3.webp` + tia sáng sân khấu xoay |
 | 20.000 | Đám Cưới Hoàng Gia | Thêm hào quang vàng + pháo hoa chúc mừng định kỳ |
 
@@ -58,10 +60,9 @@ bằng trình duyệt khác).
 
 - Nhân vật là SVG vẽ trong `js/people.js` (vẽ 1 lần, hoạt ảnh chân tay bằng CSS, di chuyển bằng rAF),
   tối đa 110 nhân vật trên sân cùng lúc.
-- Điểm neo sàn sân khấu của từng nền nằm trong `FILE_ANCHOR` (js/main.js), mép trên của khuôn viên
-  trong `FILE_COURT` — mỗi nền vẽ sàn sân khấu ở độ cao khác nhau nên phải chỉnh riêng từng nền.
-- Cả 4 nền dùng chung một phong cách minh họa truyện tranh (đồng bộ với nhân vật hoạt hình),
-  cùng bố cục: sân khấu nửa trên, khuôn viên rộng nửa dưới, độ lộng lẫy tăng dần theo mốc.
+- Bố cục từng nền (vị trí bàn tiệc để xếp ghế + điểm thảm đỏ chạm sân khấu) nằm trong `FILE_LAYOUT`
+  và điểm neo sàn sân khấu trong `FILE_ANCHOR` ở js/main.js — đổi nền phải đo lại hai thông số này.
+- Banner nghi thức (lễ thành hôn / nâng cấp sảnh / mừng cưới lớn) là hàm `showBanner` trong js/main.js.
 - Trạng thái kiểm chứng: đã test bản demo bằng môi trường giả lập + chụp ảnh thật từ trình duyệt
   headless (khách đi dạo, cặp đôi lên sân khấu, các mốc sảnh). Quà TikTok thật vẫn cần kiểm chứng
   khi live thật (LiveBridge chưa từng nhận quà thật — giống game chùa).

@@ -22,15 +22,22 @@ const say = (html, cls) => { statusEl.className = cls || ''; statusEl.innerHTML 
 /* ============ Mốc sảnh theo TỔNG lượt view tích lũy ============ */
 const TIERS = [
   { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg.webp',  royal: 0 },
-  { at: 500,   name: 'Hoa Khai',            file: 'bg-1.webp', royal: 0 },
-  { at: 2000,  name: 'Kim Tuyến',           file: 'bg-2.webp', royal: 0 },
+  { at: 500,   name: 'Hoa Khai',            file: 'bg.webp',  royal: 0 },
+  { at: 2000,  name: 'Kim Tuyến',           file: 'bg.webp',  royal: 0 },
   { at: 5000,  name: 'Lung Linh',           file: 'bg-3.webp', royal: 0 },
   { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-3.webp', royal: 1 },
   { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-3.webp', royal: 2 },
 ];
-const FILE_ANCHOR = { 'bg.webp': 49, 'bg-1.webp': 58, 'bg-2.webp': 54, 'bg-3.webp': 57 };
-const FILE_AVOID = {};
-const FILE_COURT = { 'bg.webp': 52, 'bg-1.webp': 63, 'bg-2.webp': 57, 'bg-3.webp': 60 };
+const FILE_ANCHOR = { 'bg.webp': 40, 'bg-3.webp': 43 };
+/* Bố cục từng nền: vị trí các bàn tiệc (ghế sẽ xếp quanh bàn) + điểm thảm đỏ chạm sân khấu */
+const FILE_LAYOUT = {
+  'bg.webp': { carpetTop: 42, tables: [
+    { x: 22, y: 47 }, { x: 13, y: 59 }, { x: 22, y: 71 }, { x: 16, y: 86 },
+    { x: 78, y: 47 }, { x: 87, y: 59 }, { x: 78, y: 71 }, { x: 84, y: 86 } ] },
+  'bg-3.webp': { carpetTop: 46, tables: [
+    { x: 24, y: 51 }, { x: 12, y: 63 }, { x: 28, y: 73 }, { x: 16, y: 87 },
+    { x: 76, y: 51 }, { x: 88, y: 63 }, { x: 72, y: 73 }, { x: 84, y: 87 } ] },
+};
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
@@ -173,9 +180,8 @@ function applyTierFx(tier) {
 }
 let bgToken = 0;
 function setBackground(file) {
-  P.setAnchor(FILE_ANCHOR[file] || 50);
-  P.setAvoid(FILE_AVOID[file] || null);
-  P.setCourtY1(FILE_COURT[file] || 55);
+  P.setAnchor(FILE_ANCHOR[file] || 42);
+  P.setLayout(FILE_LAYOUT[file]);
   const tk = ++bgToken;
   const img = new Image();
   img.onload = () => {
@@ -206,6 +212,7 @@ function refreshBg(announce) {
     FX.setTier(tier);
     applyTierFx(tier);
     if (announce && old >= 0) {
+      showBanner(`🎉 SẢNH CƯỚI NÂNG CẤP · ${TIERS[tier].name}`, 6000);
       mcReact(4, MC.milestone, { moc: TIERS[tier].name });
       FX.fireworks(5); FX.petals(180); A.bell(3);
       const fl = $('flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
@@ -222,6 +229,17 @@ function refreshBg(announce) {
     $('goaltext').innerHTML = `👑 <span class="tiername">${cur.name}</span> · 👁 tổng ${fmtNum(total)} lượt xem — cảm ơn cả nhà!`;
     $('goalbar').style.width = '100%';
   }
+}
+
+/* ============ Banner nghi thức giữa sân khấu ============ */
+let bannerTimer = 0;
+function showBanner(text, ms = 4600) {
+  const el = $('banner');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.add('on');
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => el.classList.remove('on'), ms);
 }
 
 /* ============ Ghép đôi ============ */
@@ -279,6 +297,7 @@ function requestCouple(a, b, viaTag) {
 }
 P.onCoupleStage = function (c) {
   coupleScore(c, 30);
+  showBanner(`💍 LỄ THÀNH HÔN · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
   mcReact(2.5, MC.couple, { a: c.a.user.nickname, b: c.b.user.nickname });
 };
 P.onQueueChange = function (names) {
@@ -362,6 +381,7 @@ function handle(ev) {
     const featured = P.featured() || P.coupleOf(ev.user && ev.user.id);
     if (featured) coupleScore(featured, dia * 50);
     giftFx(dia);
+    if (dia >= 99) showBanner(`🎁 ${ev.user ? ev.user.nickname : 'Khách quý'} VỪA MỪNG CƯỚI LỚN!`, 5200);
     A.bell(dia >= 30 ? 3 : 1);
     mcReact(3, MC.thank, { ten: ev.user ? ev.user.nickname : 'Bạn' });
     toast(`🎁 ${ev.user ? ev.user.nickname : 'Khách'} tặng ${src.giftName || 'quà'}${dia >= 99 ? ' — pháo hoa rực trời!' : ''}`, dia >= 30);
@@ -442,7 +462,7 @@ if (isDemo) {
     coupleSec: 25,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
-      { viewers: 500, file: 'bg-1.webp' }, { viewers: 2000, file: 'bg-2.webp' },
+      { viewers: 500, file: 'bg.webp' }, { viewers: 2000, file: 'bg.webp' },
       { viewers: 5000, file: 'bg-3.webp' }, { viewers: 10000, file: 'bg-3.webp' }, { viewers: 20000, file: 'bg-3.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],

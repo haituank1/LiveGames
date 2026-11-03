@@ -32,11 +32,11 @@
     "bgRules": [
       {
         "viewers": 500,
-        "file": "bg-1.webp"
+        "file": "bg.webp"
       },
       {
         "viewers": 2000,
-        "file": "bg-2.webp"
+        "file": "bg.webp"
       },
       {
         "viewers": 5000,
