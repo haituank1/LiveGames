@@ -264,12 +264,14 @@ P.spawn = function (user) {
 
 /* ================= Ghép đôi & sân khấu ================= */
 const CHIBI = { bride: 'img/bride.png', groom: 'img/groom.png', girl: 'img/guest-girl.png', boy: 'img/guest-boy.png' };
-const BRIDES = ['img/bride.png', 'img/bride2.png', 'img/bride3.png'];   // 3 kiểu cô dâu: váy trắng / áo dài đỏ / váy hồng
-const GROOMS = ['img/groom.png', 'img/groom2.png', 'img/groom3.png'];   // 3 kiểu chú rể: vest đen / vest kem / vest xanh kính cận
+const BRIDES = ['img/bride.png', 'img/bride2.png', 'img/bride3.png', 'img/bride4.png'];   // 4 kiểu cô dâu: váy trắng / áo dài đỏ / váy hồng / váy vàng
+const GROOMS = ['img/groom.png', 'img/groom2.png', 'img/groom3.png', 'img/groom4.png'];   // 4 kiểu chú rể: vest đen / vest kem / vest xanh kính / áo dài gấm
+const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png'];   // khách nữ: pijama trà sữa / hoodie gậy selfie
+const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png'];      // khách nam: Hawaii kính râm / shipper ôm mũ bảo hiểm
 function figHTML(p) {
   const seed = hash(p.user.id || p.user.nickname);
   const file = p.outfit === 'bride' ? BRIDES[seed % BRIDES.length] : p.outfit === 'groom' ? GROOMS[seed % GROOMS.length]
-    : (seed % 2 ? CHIBI.girl : CHIBI.boy);
+    : (seed % 2 ? GUEST_GIRLS[(seed >> 4) % GUEST_GIRLS.length] : GUEST_BOYS[(seed >> 4) % GUEST_BOYS.length]);
   return `<img class="chibi" src="${file}" alt="">`;
 }
 function setOutfit(p, outfit) {
