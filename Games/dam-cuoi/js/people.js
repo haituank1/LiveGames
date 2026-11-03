@@ -268,10 +268,40 @@ const BRIDES = ['img/bride.png', 'img/bride2.png', 'img/bride3.png', 'img/bride4
 const GROOMS = ['img/groom.png', 'img/groom2.png', 'img/groom3.png', 'img/groom4.png'];   // 4 kiểu chú rể: vest đen / vest kem / vest xanh kính / áo dài gấm
 const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png'];   // khách nữ: pijama trà sữa / hoodie gậy selfie
 const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png'];      // khách nam: Hawaii kính râm / shipper ôm mũ bảo hiểm
+[...BRIDES, ...GROOMS, ...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; }); // nạp trước ảnh cho nhân vật hiện lên không bị chớp
+
+/* ---------- Đoán giới tính theo tên tiếng Việt (để chọn nhân vật nam/nữ cho hợp) ----------
+   Điểm > 0: nữ · < 0: nam · = 0: không rõ. Dấu hiệu mạnh nhất: tên đệm Thị (nữ) / Văn (nam),
+   sau đó là tên chính (từ cuối) tra trong danh sách tên nam/nữ phổ biến. */
+const FEMALE_GIVEN = new Set(('thao huong hang trang linh phuong ngoc hong lan hoa mai dao cuc truc quynh chi hanh dung nhung tuyet nguyet thu ha hien hue kieu lien lieu ly my nga ngan nhi nhien oanh quyen sen thuy thuong tien tram trinh tuyen uyen van yen dieu diem bich chau gam').split(' '));
+const MALE_GIVEN = new Set(('tuan dung hung cuong manh quan hoang duc hai nam phong son tung kien trung hieu thang vinh long dat tien viet quang huy khoa dang loc phat tai tri khang minh duy trong nghia binh lam vu sang thai thinh toan truong').split(' '));
+function normName(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd')
+    .replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function genderScore(name) {
+  const w = normName(name).split(' ').filter(Boolean);
+  if (!w.length) return 0;
+  const given = w[w.length - 1];
+  let s = 0;
+  if (given === 'van') s += 2;                    // tên chính "Vân" → nữ
+  else if (w.includes('van')) s -= 3;             // tên đệm "Văn" → nam
+  if (w.includes('thi')) s += 3;                  // tên đệm "Thị" → nữ
+  if (FEMALE_GIVEN.has(given)) s += 2;
+  if (MALE_GIVEN.has(given)) s -= 2;
+  return s;
+}
+P.guessGender = name => { const s = genderScore(name); return s > 0 ? 'F' : s < 0 ? 'M' : '?'; };
 function figHTML(p) {
   const seed = hash(p.user.id || p.user.nickname);
-  const file = p.outfit === 'bride' ? BRIDES[seed % BRIDES.length] : p.outfit === 'groom' ? GROOMS[seed % GROOMS.length]
-    : (seed % 2 ? GUEST_GIRLS[(seed >> 4) % GUEST_GIRLS.length] : GUEST_BOYS[(seed >> 4) % GUEST_BOYS.length]);
+  let file;
+  if (p.outfit === 'bride') file = BRIDES[seed % BRIDES.length];
+  else if (p.outfit === 'groom') file = GROOMS[seed % GROOMS.length];
+  else {
+    const gs = genderScore(p.user.nickname);   // khách chưa ghép cặp cũng chọn nam/nữ theo tên
+    const girl = gs > 0 || (gs === 0 && seed % 2 === 1);
+    file = girl ? GUEST_GIRLS[(seed >> 4) % GUEST_GIRLS.length] : GUEST_BOYS[(seed >> 4) % GUEST_BOYS.length];
+  }
   return `<img class="chibi" src="${file}" alt="">`;
 }
 function setOutfit(p, outfit) {
@@ -340,10 +370,13 @@ P.makeCouple = function (userA, userB) {
   if (a.couple && a.couple !== b.couple) return null;
   if (b.couple && b.couple !== a.couple) return null;
   if (a.couple) return a.couple;
-  const swap = (hash(a.user.id) + hash(b.user.id)) % 2 === 0;
   freeSeat(a); freeSeat(b);
-  setOutfit(a, swap ? 'groom' : 'bride');
-  setOutfit(b, swap ? 'bride' : 'groom');
+  // Phân vai theo TÊN: ai "nữ" hơn thì làm cô dâu, ai "nam" hơn làm chú rể; hòa điểm thì người được tag làm cô dâu
+  const sa = genderScore(a.user.nickname), sb = genderScore(b.user.nickname);
+  const bride = sa > sb ? a : b;
+  const groom = bride === a ? b : a;
+  setOutfit(groom, 'groom');
+  setOutfit(bride, 'bride');
   const c = { key: [a.user.id, b.user.id].sort().join('|'), a, b, state: 'queue', spot: -1, timer: 0, heartTimer: 0 };
   a.couple = c; b.couple = c;
   couples.push(c);
