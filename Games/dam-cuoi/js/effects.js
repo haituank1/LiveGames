@@ -6,7 +6,7 @@ const W = (window.Wedding = window.Wedding || {});
 const E = (W.effects = {});
 let cv, ctx, w = 1, h = 1;
 const P = [];            // hạt chung: {kind, x,y,vx,vy,life,max,size,color,rot,vr,grav,drag}
-let tier = 0, sparkleAcc = 0, lastT = 0;
+let tier = 0, sparkleAcc = 0, lastT = 0, petalAcc = 0, bokehAcc = 0;
 const rand = (a, b) => a + Math.random() * (b - a);
 const FW_COLORS = ['#ffd76a', '#ff7eb0', '#ff9d5c', '#a8e6ff', '#c3a6ff', '#ffffff', '#ff5c7a'];
 const PETALS = ['#ffb7cd', '#ff8fab', '#ffd6e3', '#fff0f5', '#ff6b9d'];
