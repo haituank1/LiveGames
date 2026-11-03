@@ -28,13 +28,13 @@ const TIERS = [
   { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-3.webp', royal: 1 },
   { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-3.webp', royal: 2 },
 ];
-const FILE_ANCHOR = { 'bg.webp': 40, 'bg-3.webp': 43 };
+const FILE_ANCHOR = { 'bg.webp': 46.5, 'bg-3.webp': 49 };
 /* Bố cục từng nền: vị trí các bàn tiệc (ghế sẽ xếp quanh bàn) + điểm thảm đỏ chạm sân khấu */
 const FILE_LAYOUT = {
-  'bg.webp': { carpetTop: 42, tables: [
+  'bg.webp': { carpetTop: 48, tables: [
     { x: 22, y: 47 }, { x: 13, y: 59 }, { x: 22, y: 71 }, { x: 16, y: 86 },
     { x: 78, y: 47 }, { x: 87, y: 59 }, { x: 78, y: 71 }, { x: 84, y: 86 } ] },
-  'bg-3.webp': { carpetTop: 46, tables: [
+  'bg-3.webp': { carpetTop: 51, tables: [
     { x: 24, y: 51 }, { x: 12, y: 63 }, { x: 28, y: 73 }, { x: 16, y: 87 },
     { x: 76, y: 51 }, { x: 88, y: 63 }, { x: 72, y: 73 }, { x: 84, y: 87 } ] },
 };
@@ -91,7 +91,7 @@ function coupleScore(c, pts) {
   saveScores(); renderBoard();
 }
 function renderBoard() {
-  const top = Object.entries(scores).map(([key, s]) => ({ key, ...s })).sort((x, y) => y.score - x.score).slice(0, 5);
+  const top = Object.entries(scores).map(([key, s]) => ({ key, ...s })).sort((x, y) => y.score - x.score).slice(0, 3);
   const board = $('board');
   board.style.display = top.length ? '' : 'none';
   board.querySelector('ol').innerHTML = top.map((s, i) =>
@@ -154,7 +154,7 @@ function mcRandomLoop() {
 /* ============ Bảng hướng dẫn / luật chơi ============ */
 let guideIdx = 0, guideTimer = null;
 function startGuide() {
-  const lines = (cfg.guideLines || []).filter(Boolean);
+  const lines = [...(cfg.rulesLines || []), ...(cfg.guideLines || [])].filter(Boolean);
   const el = $('guide');
   if (!lines.length) { el.textContent = ''; return; }
   const show = () => { el.classList.remove('out'); el.textContent = lines[guideIdx++ % lines.length]; };
@@ -162,15 +162,7 @@ function startGuide() {
   clearInterval(guideTimer);
   guideTimer = setInterval(() => { el.classList.add('out'); setTimeout(show, 380); }, 4200);
 }
-function renderRules() {
-  const el = $('rules');
-  el.textContent = '';
-  (Array.isArray(cfg.rulesLines) ? cfg.rulesLines : []).forEach(t => {
-    const d = document.createElement('div');
-    d.textContent = t;
-    el.appendChild(d);
-  });
-}
+function renderRules() { /* luật chơi đã gộp vào khung hướng dẫn xoay vòng cho gọn màn hình */ }
 
 /* ============ Nền / mốc sảnh ============ */
 const BG = { file: '', tier: -1 };
@@ -314,7 +306,7 @@ function toast(text, vip) {
   t.className = 'toast' + (vip ? ' vip' : '');
   t.textContent = text;
   box.prepend(t);
-  while (box.children.length > 3) box.lastChild.remove();
+  while (box.children.length > 2) box.lastChild.remove();
   setTimeout(() => t.classList.add('out'), 6000);
   setTimeout(() => t.remove(), 6600);
 }
