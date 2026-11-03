@@ -108,6 +108,7 @@ function beatStart() {
     if (s % 2 === 0) kick(t);
     else hat(t, s % 8 === 7);
     if (s % 2 === 0) bassNote(BASS[(s >> 1) % BASS.length], t);
+    if (s % 2 === 0 && W.onBeat) W.onBeat(s >> 1);   // nhịp phách cho main.js nháy đèn sàn theo beat
     beatTimer = setTimeout(tick, spb * 1000);
   };
   tick();
