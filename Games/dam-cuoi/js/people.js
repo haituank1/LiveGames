@@ -32,8 +32,8 @@ const stageSlots = [null, null, null];
 const STAGE_FRAME = {
   zoneX: [34, 66],        // khoảng x được phép đứng trên bục
   zoneDropMax: 1.6,       // đứng thấp hơn đường lễ tối đa (vẫn trên mặt bục)
-  spots: [50, 40, 60],    // tâm 3 vị trí cặp: giữa + 2 bên (đã thu vào để không bị cắt mép khi camera ở khung sân khấu)
-  pairOff: [3.1, 2.7, 2.7],   // nửa khoảng cách 2 người trong cặp theo vị trí
+  spots: [50, 37, 63],    // tâm 3 vị trí cặp: giữa + 2 bên CÁCH XA nhau cho thoáng
+  pairOff: [2.2, 2.0, 2.0],   // nửa khoảng cách 2 người trong cặp: XÍCH GẦN nhau, âu yếm
   sideDrop: 0.55,         // cặp 2 bên đứng thấp hơn cặp giữa một chút
   groomDrop: 0.5,         // chú rể đứng hơi thấp hơn (trước) cô dâu
 };
@@ -302,7 +302,7 @@ P.makeCouple = function (userA, userB) {
   setTimeout(() => {                                      // camera tới nơi: đổi đồ cưới + phóng to + vòng sáng
     if (!couples.includes(c)) return;
     setOutfit(groom, 'groom'); setOutfit(bride, 'bride');
-    a.boost = b.boost = 1.32; a.dirty = b.dirty = true;
+    a.boost = b.boost = P.tune.boost; a.dirty = b.dirty = true;
     a.el.classList.add('pairfx'); b.el.classList.add('pairfx');
     if (P.onPairReveal) P.onPairReveal(c);
   }, 1500);
@@ -317,22 +317,31 @@ P.makeCouple = function (userA, userB) {
 };
 
 function promoteStage() {
+  /* Số cặp lên cùng lúc: vắng thì 1 cặp; có hàng chờ thì mở thêm tới tối đa
+     (config soCapToiDa) — sức chứa = tổng số cặp đang có mặt, kẹp ở mức tối đa */
+  const staged = stageSlots.filter(Boolean).length;
+  const cap = Math.max(1, Math.min(P.tune.maxStage || 3, staged + stageQueue.length));
+  let onStage = staged;
   for (let i = 0; i < 3; i++) {
-    if (stageSlots[i] || !stageQueue.length) continue;
+    if (stageSlots[i] || !stageQueue.length || onStage >= cap) continue;
     const c = stageQueue.shift(); notifyQueue();
     c.state = 'toStage'; c.spot = i;
     stageSlots[i] = c;
-    c.a.spotScale = c.b.spotScale = i === 0 ? 1.18 : 0.95;
+    onStage++;
+    c.a.spotScale = c.b.spotScale = i === 0 ? P.tune.scaleC : P.tune.scaleS;
     const y = stageY + (i ? STAGE_FRAME.sideDrop : 0);
     const off = STAGE_FRAME.pairOff[i];
-    const yG = y + (c.groom === c.a ? STAGE_FRAME.groomDrop : 0), yB = y + (c.bride === c.a ? STAGE_FRAME.groomDrop : 0);
-    const yA = c.a === c.groom ? yG : yB, yB2 = c.b === c.groom ? yG : yB;
+    /* Xếp NỮ KỀ NỮ, NAM KỀ NAM ở đường giáp giữa các cặp:
+       cặp giữa: nam trái – nữ phải; cặp 2 bên: nữ trái – nam phải */
+    const leftP = i === 0 ? c.groom : c.bride;
+    const rightP = i === 0 ? c.bride : c.groom;
+    const yL = y + (leftP === c.groom ? STAGE_FRAME.groomDrop : 0);
+    const yR = y + (rightP === c.groom ? STAGE_FRAME.groomDrop : 0);
     // Kẹp điểm đứng cuối vào đúng vùng an toàn trên bục (khung cố định)
-    const sxA = Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], SPOTS[i].x - off));
-    const sxB = Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], SPOTS[i].x + off));
-    const syA = Math.min(stageY + STAGE_FRAME.zoneDropMax, yA), syB = Math.min(stageY + STAGE_FRAME.zoneDropMax, yB2);
-    walkPath(c.a, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: sxA, y: syA }], 'toStage');
-    walkPath(c.b, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: sxB, y: syB }], 'toStage', () => arriveStage(c));
+    const clampX = v => Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], v));
+    const yMax = stageY + STAGE_FRAME.zoneDropMax;
+    walkPath(leftP, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: clampX(SPOTS[i].x - off), y: Math.min(yMax, yL) }], 'toStage');
+    walkPath(rightP, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: clampX(SPOTS[i].x + off), y: Math.min(yMax, yR) }], 'toStage', () => arriveStage(c));
     if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
   }
 }
@@ -373,6 +382,16 @@ function dissolveCouple(c, leaving) {
   }
 }
 P.featured = () => stageSlots[0];
+P.staged = () => stageSlots.map((c, i) => c ? { couple: c, spot: i } : null).filter(Boolean);
+/* Thông số tinh chỉnh — main.js nạp từ config (mapping) qua setTune */
+P.tune = { boost: 1.32, scaleC: 1.18, scaleS: 0.95, maxStage: 3 };
+P.setTune = function (t) {
+  if (!t) return;
+  for (const k of ['boost', 'scaleC', 'scaleS', 'maxStage']) {
+    const v = Number(t[k]);
+    if (isFinite(v) && v > 0) P.tune[k] = v;
+  }
+};
 P.coupleOf = function (uid) { const p = people.get(uid); return p ? p.couple : null; };
 P.danceAll = function (sec = 5) {
   for (const p of people.values()) { p.el.classList.add('dance'); setTimeout(() => p.el.classList.remove('dance'), sec * 1000); }

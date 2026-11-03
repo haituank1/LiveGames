@@ -247,7 +247,7 @@ function camLoop(t) {
   camLastT = t;
   const c = Cam.followC;
   if (c && c.a && c.b) {
-    Cam.tz = fitZoom(c.a, c.b, 16, 14, 1.08);
+    Cam.tz = fitZoom(c.a, c.b, 16, 14, cfg.zoomBamTheo || 1.08);
     const mx = (c.a.x + c.b.x) / 2, my = (c.a.y + c.b.y) / 2 - 2.5;
     const [x, y] = Cam.clampXY(mx, my, Cam.tz);
     Cam.tx = x; Cam.ty = y;
@@ -262,14 +262,14 @@ requestAnimationFrame(camLoop);
 P.onPairFocus = function (c) {
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 11000;
-  const zFit = fitZoom(c.a, c.b, 17, 15, 1.18);
+  const zFit = fitZoom(c.a, c.b, 17, 15, cfg.zoomGoiTen || 1.18);
   if (zFit >= 0.62) {
     // Đủ gần nhau: 1 cú lia tới điểm giữa, zoom vừa đủ thấy cả hai
     Cam.panTo((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2 - 2, zFit);
   } else {
     // Ở quá xa nhau: lia cận cảnh người A trước, lát đổi đồ xong lia sang người B
     Cam.farPair = c;
-    Cam.panTo(c.a.x, c.a.y - 2, 1.12);
+    Cam.panTo(c.a.x, c.a.y - 2, cfg.zoomGoiTen || 1.18);
   }
 };
 P.onPairWalk = function (c) { Cam.follow(c); };       // bám theo lúc đi thảm đỏ lên sân khấu
@@ -289,7 +289,7 @@ P.onPairReveal = function (c) {
   if (far) {
     // Cặp ở xa nhau: vừa đổi đồ cho A xong thì lia sang B cho khán giả thấy B lên đồ
     Cam.farPair = null;
-    setTimeout(() => { if (!Cam.followC) Cam.panTo(c.b.x, c.b.y - 2, 1.12); }, 350);
+    setTimeout(() => { if (!Cam.followC) Cam.panTo(c.b.x, c.b.y - 2, cfg.zoomGoiTen || 1.18); }, 350);
   }
 };
 function bgFileFor(total) {
@@ -520,6 +520,7 @@ function applyConfig(c) {
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
   MC.milestone = cfg.mcMilestone || [];
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
+  P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
   A.setConfig(cfg);
   renderRules(); startGuide(); renderBoard(); refreshBg(false);
@@ -559,6 +560,30 @@ document.addEventListener('fullscreenchange', () => { lastLayoutKey = ''; resize
 setInterval(resize, 2000);
 setInterval(() => { const sp = $('spot'); if (sp && !P.featured()) sp.classList.remove('on'); }, 3000);
 
+/* Hiệu ứng ÂU YẾM riêng cho từng cặp đang trên bục — mỗi vị trí 1 kiểu khác nhau:
+   cặp giữa: suối tim + vòng tim · cặp trái: mưa cánh hoa · cặp phải: vòng tim + hoa xen kẽ */
+let loveTick = 0;
+setInterval(() => {
+  if (!P.staged) return;
+  loveTick++;
+  for (const s of P.staged()) {
+    const c = s.couple;
+    if (c.state !== 'stage') continue;
+    const mid = Cam.toScreen((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2);
+    if (s.spot === 0) {
+      FX.hearts(9, mid.fx, mid.fy - 0.04);
+      if (loveTick % 2 === 0 && FX.ringHearts) FX.ringHearts(mid.fx, mid.fy - 0.05);
+    } else if (s.spot === 1) {
+      if (FX.petalBurst) FX.petalBurst(mid.fx, mid.fy);
+      FX.hearts(4, mid.fx, mid.fy - 0.03);
+    } else {
+      if (loveTick % 2 === 0) { if (FX.ringHearts) FX.ringHearts(mid.fx, mid.fy - 0.05); }
+      else if (FX.petalBurst) FX.petalBurst(mid.fx, mid.fy);
+      FX.hearts(5, mid.fx, mid.fy - 0.03);
+    }
+  }
+}, 2400);
+
 /* ============ Âm thanh: nút bật tiếng ============ */
 function setupSoundBtn() {
   const btn = $('sound');
@@ -591,6 +616,8 @@ if (isDemo) {
   applyConfig({
     mcName: 'MC Anh Tú',
     coupleSec: 25,
+    phongToGoiTen: 1.32, coCapGiua: 1.18, coCapBen: 0.95, soCapToiDa: 3,
+    zoomGoiTen: 1.18, zoomBamTheo: 1.08,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
       { viewers: 500, file: 'bg-full.webp' }, { viewers: 2000, file: 'bg-full.webp' },

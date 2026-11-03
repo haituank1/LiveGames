@@ -119,7 +119,13 @@
       "🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm",
       "👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện",
       "👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view"
-    ]
+    ],
+    "phongToGoiTen": 1.32,
+    "coCapGiua": 1.18,
+    "coCapBen": 0.95,
+    "soCapToiDa": 3,
+    "zoomGoiTen": 1.18,
+    "zoomBamTheo": 1.08
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {

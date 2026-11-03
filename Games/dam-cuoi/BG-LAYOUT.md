@@ -26,7 +26,7 @@ vật trong game luôn khớp tranh và KHÔNG BAO GIỜ đứng lên mặt bàn
 |---|---|
 | Mặt bục | y từ ≈32% (sát vòm hoa) tới ≈42% (mép trước bục) |
 | Đường đứng làm lễ | y = 37.2% |
-| 3 vị trí cặp đôi | tâm x = **40% · 50% · 60%**; cặp giữa to 1.18×, hai bên 0.95× và thấp hơn 0.55% |
+| 3 vị trí cặp đôi | tâm x = **37% · 50% · 63%**; trong cặp 2 người cách nhau 4.0–4.4% (xích gần), cặp giữa to 1.18×, hai bên 0.95× và thấp hơn 0.55% |
 | Vùng được phép đứng | x từ 34% → 66%, không thấp quá đường lễ +1.6% |
 
 Vùng CẤM đứng (phải vẽ trống, nhân vật không bao giờ đặt chân vào):
