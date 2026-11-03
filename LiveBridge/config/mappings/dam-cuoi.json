@@ -36,15 +36,15 @@
       },
       {
         "viewers": 2000,
-        "file": "bg-full.webp"
+        "file": "bg-2000.webp"
       },
       {
         "viewers": 5000,
-        "file": "bg-full.webp"
+        "file": "bg-5000.webp"
       },
       {
         "viewers": 10000,
-        "file": "bg-full.webp"
+        "file": "bg-10000.webp"
       },
       {
         "viewers": 20000,

@@ -23,13 +23,13 @@ const say = (html, cls) => { statusEl.className = cls || ''; statusEl.innerHTML 
 const TIERS = [
   { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg-full.webp', royal: 0 },
   { at: 500,   name: 'Hoa Khai',            file: 'bg-500.webp', royal: 0 },
-  { at: 2000,  name: 'Kim Tuyến',           file: 'bg-full.webp', royal: 0 },
-  { at: 5000,  name: 'Lung Linh',           file: 'bg-full.webp', royal: 0 },
-  { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-full.webp', royal: 1 },
+  { at: 2000,  name: 'Kim Tuyến',           file: 'bg-2000.webp', royal: 0 },
+  { at: 5000,  name: 'Lung Linh',           file: 'bg-5000.webp', royal: 0 },
+  { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-10000.webp', royal: 1 },
   { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-20000.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
-const STAGE_Y = { 'bg-full.webp': 37.2, 'bg-500.webp': 37.2, 'bg-20000.webp': 37.2 };   // mọi nền cùng khung BG-LAYOUT nên cùng đường đứng làm lễ
+const STAGE_Y = { 'bg-full.webp': 37.2, 'bg-500.webp': 37.2, 'bg-2000.webp': 37.2, 'bg-5000.webp': 37.2, 'bg-10000.webp': 37.2, 'bg-20000.webp': 37.2 };   // mọi nền cùng khung BG-LAYOUT nên cùng đường đứng làm lễ
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
@@ -622,8 +622,8 @@ if (isDemo) {
     zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
-      { viewers: 500, file: 'bg-500.webp' }, { viewers: 2000, file: 'bg-full.webp' },
-      { viewers: 5000, file: 'bg-full.webp' }, { viewers: 10000, file: 'bg-full.webp' }, { viewers: 20000, file: 'bg-20000.webp' },
+      { viewers: 500, file: 'bg-500.webp' }, { viewers: 2000, file: 'bg-2000.webp' },
+      { viewers: 5000, file: 'bg-5000.webp' }, { viewers: 10000, file: 'bg-10000.webp' }, { viewers: 20000, file: 'bg-20000.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
     guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],
