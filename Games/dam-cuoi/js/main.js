@@ -187,67 +187,110 @@ function setBackground(file) {
 /* ============ Camera lia trong phòng rộng ============ */
 let SW = 0, SH = 0, WW = 0, WH = 0;
 const Cam = {
-  cx: 50, cy: 39, z: 0.64, busyUntil: 0,
-  apply(anim = true) {
+  cx: 50, cy: 36, z: 0.63, tx: 50, ty: 36, tz: 0.63, busyUntil: 0,
+  apply() {
     const world = $('world');
     if (!world || !WW) return;
-    const tx = SW / 2 - (this.cx / 100 * WW) * this.z;
-    const ty = SH / 2 - (this.cy / 100 * WH) * this.z;
-    world.style.transition = anim ? 'transform 1.25s cubic-bezier(.35,.7,.25,1)' : 'none';
-    world.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${this.z})`;
+    const px = SW / 2 - (this.cx / 100 * WW) * this.z;
+    const py = SH / 2 - (this.cy / 100 * WH) * this.z;
+    world.style.transform = `translate(${px.toFixed(1)}px,${py.toFixed(1)}px) scale(${this.z})`;
+  },
+  cullNow() {
     const mx = (SW / 2) / this.z / WW * 100 + 7, my = (SH / 2) / this.z / WH * 100 + 7;
     P.cull(this.cx - mx, this.cy - my, this.cx + mx, this.cy + my);
   },
-  clampPos() {
+  clampXY(cx, cy, z) {
     // Kẹp tâm camera để khung hình không lia ra ngoài phòng (tránh dải đen)
-    const halfW = (SW / 2) / this.z / WW * 100, halfH = (SH / 2) / this.z / WH * 100;
+    const halfW = (SW / 2) / z / WW * 100, halfH = (SH / 2) / z / WH * 100;
     const mX = Math.min(halfW, 49), mY = Math.min(halfH, 49);
-    this.cx = Math.max(mX, Math.min(100 - mX, this.cx));
-    this.cy = Math.max(mY, Math.min(100 - mY, this.cy));
+    return [Math.max(mX, Math.min(100 - mX, cx)), Math.max(mY, Math.min(100 - mY, cy))];
   },
   panTo(cx, cy, z) {
-    this.z = z; this.cx = cx; this.cy = cy;
-    this.clampPos();
-    this.apply(true);
+    const [x, y] = this.clampXY(cx, cy, z);
+    this.tx = x; this.ty = y; this.tz = z;
   },
-  followC: null,
+  snap() { this.cx = this.tx; this.cy = this.ty; this.z = this.tz; this.apply(); this.cullNow(); },
+  followC: null, farPair: null,
   follow(couple) { this.followC = couple; this.busyUntil = 0; },
-  unfollow() { this.followC = null; },
+  unfollow() { this.followC = null; this.farPair = null; },
   home() { this.panTo(50, 36, 0.63); },
   stage() { this.panTo(50, 34, 1.02); },
   toScreen(x, y) {
     return { fx: 0.5 + (x - this.cx) / 100 * WW * this.z / SW, fy: 0.5 + (y - this.cy) / 100 * WH * this.z / SH };
   },
 };
+/* Zoom vừa đủ để CẢ HAI người lọt khung hình (dựa trên khoảng cách giữa họ) */
+function fitZoom(a, b, padX, padY, zMax) {
+  const zx = 31.25 / (Math.abs(a.x - b.x) + padX);
+  const zy = 45.45 / (Math.abs(a.y - b.y) + padY);
+  return Math.max(0.55, Math.min(zMax, zx, zy));
+}
+/* Vòng camera chạy theo rAF (60fps, khớp nhịp vẽ của trình duyệt).
+   Dùng lò xo giảm chấn (smooth-damp): vận tốc bắt đầu từ 0, tăng tốc dần rồi
+   chậm dần khi tới đích — như máy quay thật, không giật đầu/giật cuối. */
+function damp(cur, target, vel, smoothTime, dt) {
+  const omega = 2 / smoothTime;
+  const x = omega * dt;
+  const e = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+  const change = cur - target;
+  const temp = (vel + omega * change) * dt;
+  let v = (vel - omega * temp) * e;
+  let out = target + (change + temp) * e;
+  if ((target - cur > 0) === (out > target)) { out = target; v = 0; }  // chống vọt qua đích
+  return [out, v];
+}
+let camLastT = 0, camCullT = 0;
+function camLoop(t) {
+  requestAnimationFrame(camLoop);
+  if (!WW) return;
+  const dt = Math.min(0.05, camLastT ? (t - camLastT) / 1000 : 0.016);
+  camLastT = t;
+  const c = Cam.followC;
+  if (c && c.a && c.b) {
+    Cam.tz = fitZoom(c.a, c.b, 16, 14, 1.08);
+    const mx = (c.a.x + c.b.x) / 2, my = (c.a.y + c.b.y) / 2 - 2.5;
+    const [x, y] = Cam.clampXY(mx, my, Cam.tz);
+    Cam.tx = x; Cam.ty = y;
+  }
+  [Cam.cx, Cam.vx] = damp(Cam.cx, Cam.tx, Cam.vx || 0, 0.55, dt);
+  [Cam.cy, Cam.vy] = damp(Cam.cy, Cam.ty, Cam.vy || 0, 0.55, dt);
+  [Cam.z, Cam.vz] = damp(Cam.z, Cam.tz, Cam.vz || 0, 0.75, dt);
+  Cam.apply();
+  if (t - camCullT > 220) { camCullT = t; Cam.cullNow(); }
+}
+requestAnimationFrame(camLoop);
 P.onPairFocus = function (c) {
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 11000;
-  Cam.panTo((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2 - 2, 1.18);
+  const zFit = fitZoom(c.a, c.b, 17, 15, 1.18);
+  if (zFit >= 0.62) {
+    // Đủ gần nhau: 1 cú lia tới điểm giữa, zoom vừa đủ thấy cả hai
+    Cam.panTo((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2 - 2, zFit);
+  } else {
+    // Ở quá xa nhau: lia cận cảnh người A trước, lát đổi đồ xong lia sang người B
+    Cam.farPair = c;
+    Cam.panTo(c.a.x, c.a.y - 2, 1.12);
+  }
 };
 P.onPairWalk = function (c) { Cam.follow(c); };       // bám theo lúc đi thảm đỏ lên sân khấu
 P.onPairReturn = function (c) { Cam.follow(c); };     // bám theo lúc đi về chỗ
 P.onPairHome = function (c) {                          // về tới nơi: nhả camera, quay về toàn cảnh
   if (Cam.followC === c) { Cam.unfollow(); Cam.home(); }
 };
-/* Vòng bám camera: nội suy mềm về giữa 2 người đang di chuyển */
-setInterval(() => {
-  const c = Cam.followC;
-  if (!c || !c.a || !c.b) return;
-  const tx = (c.a.x + c.b.x) / 2, ty = (c.a.y + c.b.y) / 2 - 2.5;
-  const dist = Math.hypot(tx - Cam.cx, ty - Cam.cy);
-  const k = Math.min(0.38, 0.13 + dist * 0.012);   // xa thì bắt kịp nhanh, gần thì bám mượt
-  Cam.cx += (tx - Cam.cx) * k;
-  Cam.cy += (ty - Cam.cy) * k;
-  Cam.z += (1.07 - Cam.z) * 0.08;
-  Cam.clampPos();
-  Cam.apply(false);
-}, 50);
+
 P.onPairReveal = function (c) {
-  const mid = Cam.toScreen((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2);
+  const far = Cam.farPair === c;
+  const fp = far ? c.a : { x: (c.a.x + c.b.x) / 2, y: (c.a.y + c.b.y) / 2 };
+  const mid = Cam.toScreen(fp.x, fp.y);
   if (FX.ringHearts) FX.ringHearts(mid.fx, mid.fy - 0.05);
   if (FX.petalBurst) FX.petalBurst(mid.fx, mid.fy);
   FX.hearts(12, mid.fx, mid.fy);
   mcReact(2.5, MC.couple, { a: c.a.user.nickname, b: c.b.user.nickname });
+  if (far) {
+    // Cặp ở xa nhau: vừa đổi đồ cho A xong thì lia sang B cho khán giả thấy B lên đồ
+    Cam.farPair = null;
+    setTimeout(() => { if (!Cam.followC) Cam.panTo(c.b.x, c.b.y - 2, 1.12); }, 350);
+  }
 };
 function bgFileFor(total) {
   const rules = Array.isArray(cfg.bgRules) ? cfg.bgRules.filter(r => r && r.file).slice().sort((a, b) => a.viewers - b.viewers) : [];

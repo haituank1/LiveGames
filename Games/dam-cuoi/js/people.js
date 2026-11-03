@@ -163,7 +163,10 @@ function render(p) {
   const X = p.x / 100 * Ww, Y = p.y / 100 * Hw;
   const depth = 0.8 + Math.max(0, Math.min(1, (p.y - FLOOR_Y) / 62)) * 0.38;
   const stMul = (p.state === 'stage' || p.state === 'toStage') ? (p.spotScale || 1.18) : 1;
-  const fh = FH * depth * stMul * (p.boost || 1);
+  if (p.boostCur == null) p.boostCur = p.boost || 1;
+  p.boostCur += ((p.boost || 1) - p.boostCur) * 0.13;   // phóng to/thu nhỏ cũng phải mượt, không nhảy cóc
+  if (Math.abs((p.boost || 1) - p.boostCur) > 0.01) p.dirty = true;
+  const fh = FH * depth * stMul * p.boostCur;
   p.el.style.transform = `translate(${X.toFixed(1)}px,${Y.toFixed(1)}px) translate(-50%,-100%)`;
   p.el.style.zIndex = Math.round(Y) + (p.boost > 1 ? 6000 : 0);
   p.el.style.setProperty('--fh', fh.toFixed(0) + 'px');
