@@ -6,7 +6,7 @@ const W = (window.Wedding = window.Wedding || {});
 const E = (W.effects = {});
 let cv, ctx, w = 1, h = 1;
 const P = [];            // hạt chung: {kind, x,y,vx,vy,life,max,size,color,rot,vr,grav,drag}
-let tier = 0, sparkleAcc = 0, lastT = 0, petalAcc = 0, bokehAcc = 0;
+let tier = 0, sparkleAcc = 0, lastT = 0, petalAcc = 0, bokehAcc = 0, dustAcc = 0, streakT = 6, royalT = 14;
 const rand = (a, b) => a + Math.random() * (b - a);
 const FW_COLORS = ['#ffd76a', '#ff7eb0', '#ff9d5c', '#a8e6ff', '#c3a6ff', '#ffffff', '#ff5c7a'];
 const PETALS = ['#ffb7cd', '#ff8fab', '#ffd6e3', '#fff0f5', '#ff6b9d'];
@@ -117,6 +117,21 @@ E.bokeh = function (n = 8) {
   }
 };
 
+/* Vầng lấp lánh bùng quanh cặp đôi lúc làm lễ: vòng sao vàng + mưa kim tuyến
+   phủ xuống sân khấu — khoảnh khắc lung linh nhất của buổi live */
+E.stageSparkle = function (x = 0.5, y = 0.4) {
+  for (let i = 0; i < 26; i++) {
+    const a = (i / 26) * 6.283 + rand(-0.1, 0.1), sp = rand(50, 150);
+    add({ kind: 'glit', x: x * w, y: y * h, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 26,
+      life: 0, max: rand(1.4, 2.4), size: rand(2, 3.6), color: '#ffd76a', grav: 42, drag: 1.2, sway: rand(0, 6.3) });
+  }
+  for (let i = 0; i < 12; i++) {
+    add({ kind: 'twinkle', x: x * w + rand(-70, 70), y: y * h + rand(-52, 30), vx: 0, vy: rand(-6, 0),
+      life: 0, max: rand(1.4, 2.6), size: rand(2.2, 4.2), color: '#ffe9a8', grav: 0, drag: 0 });
+  }
+  E.glitter(42);
+};
+
 /* Mưa theo tổng xu của lần tặng (mốc càng cao càng rực rỡ, như GIFT_TIERS ở game chùa) */
 const GIFT_TIERS = [
   { min: 500, petals: 260, confetti: 160, fw: 6 },
@@ -149,12 +164,35 @@ function loop(t) {
   requestAnimationFrame(loop);
   const dt = Math.min(0.05, lastT ? (t - lastT) / 1000 : 0.016); lastT = t;
   ctx.clearRect(0, 0, w, h);
-  // lấp lánh ambient: mốc càng cao càng nhiều (0.4 → 3 hạt/giây)
-  sparkleAcc += dt * (0.4 + tier * 0.55);
+  // lấp lánh ambient: mốc càng cao càng dày (1.1 → 5.4 hạt/giây), thỉnh thoảng
+  // có "sao lớn" sáng hẳn lên giữa sảnh cho ra chất lung linh
+  sparkleAcc += dt * (1.1 + tier * 0.85);
   while (sparkleAcc >= 1) {
     sparkleAcc--;
-    add({ kind: 'twinkle', x: rand(0, w), y: rand(h * 0.05, h * 0.6), vx: 0, vy: rand(-4, 2),
-      life: 0, max: rand(1.2, 2.4), size: rand(1.4, 3), color: '#ffe9a8', grav: 0, drag: 0 });
+    const hero = Math.random() < 0.12;
+    add({ kind: 'twinkle', x: rand(0, w), y: rand(h * 0.05, h * 0.62), vx: 0, vy: rand(-4, 2),
+      life: 0, max: rand(1.2, 2.4), size: rand(1.4, 3.2) * (hero ? 1.9 : 1), color: '#ffe9a8', grav: 0, drag: 0 });
+  }
+  // bụi vàng li ti bay lơ lửng khắp sảnh — nền "có không khí" ở mọi mốc
+  dustAcc += dt * (0.7 + tier * 0.5);
+  while (dustAcc >= 1) {
+    dustAcc--;
+    add({ kind: 'dust', x: rand(0, w), y: rand(h * 0.25, h * 1.02), vx: rand(-7, 7), vy: -rand(5, 15),
+      life: 0, max: rand(6, 11), size: rand(5, 13), color: '#ffd76a', grav: 0, drag: 0, sway: rand(0, 6.3) });
+  }
+  // sao băng xẹt qua vòm hoa ở hai mốc cao nhất
+  if (tier >= 4) {
+    streakT -= dt;
+    if (streakT <= 0) {
+      streakT = rand(8, 15);
+      add({ kind: 'streak', x: rand(w * 0.08, w * 0.5), y: rand(h * 0.05, h * 0.2), vx: rand(280, 400), vy: rand(70, 120),
+        life: 0, max: rand(0.7, 1), size: rand(1.8, 2.6), color: '#ffffff', grav: 0, drag: 0 });
+    }
+  }
+  // mốc hoàng gia: cứ ~30 giây tự có một tràng pháo hoa nhỏ mừng sảnh
+  if (tier >= 5) {
+    royalT -= dt;
+    if (royalT <= 0) { royalT = rand(26, 38); E.fireworksShow(3, 340); }
   }
   // hoa rơi ambient rất nhẹ + bokeh mơ màng ở các mốc cao — sảnh lúc nào cũng "sống"
   petalAcc += dt * (0.25 + tier * 0.16);
@@ -200,6 +238,21 @@ function loop(t) {
       ctx.lineTo(p.x + s * 0.6, p.y + s * 0.6); ctx.lineTo(p.x, p.y + s * 2); ctx.lineTo(p.x - s * 0.6, p.y + s * 0.6);
       ctx.lineTo(p.x - s * 2, p.y); ctx.lineTo(p.x - s * 0.6, p.y - s * 0.6);
       ctx.fill();
+    } else if (p.kind === 'dust') {
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+      g.addColorStop(0, p.color); g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.globalAlpha = Math.sin((p.life / p.max) * Math.PI) * (0.1 + 0.1 * Math.abs(Math.sin(t / 300 + (p.sway || 0))));
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 6.3); ctx.fill();
+    } else if (p.kind === 'streak') {
+      const fadeS = Math.sin((p.life / p.max) * Math.PI);
+      const tl = 0.22;   // đuôi sao: ngược hướng bay 0.22 giây quãng đường
+      const grad = ctx.createLinearGradient(p.x, p.y, p.x - p.vx * tl, p.y - p.vy * tl);
+      grad.addColorStop(0, 'rgba(255,255,255,.95)'); grad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.globalAlpha = fadeS; ctx.strokeStyle = grad; ctx.lineWidth = p.size; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * tl, p.y - p.vy * tl); ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 1.15, 0, 6.3); ctx.fill();
     } else if (p.kind === 'petal') {
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot || 0); ctx.globalAlpha = Math.max(0, fade);
       ctx.fillStyle = p.color;

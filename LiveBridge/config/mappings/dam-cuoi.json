@@ -29,6 +29,10 @@
     ]
   },
   "defaults": {
+    "npcVoiceOn": true,
+    "npcVoice": "vi-VN-HoaiMyNeural",
+    "npcVoiceMinGapSec": 8,
+    "npcVoiceMaxPerMin": 6,
     "bgRules": [
       {
         "viewers": 500,
@@ -121,8 +125,8 @@
       "👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view"
     ],
     "phongToGoiTen": 1.32,
-    "coCapGiua": 1.05,
-    "coCapBen": 1.05,
+    "coCapGiua": 1.22,
+    "coCapBen": 1.22,
     "soCapToiDa": 3,
     "zoomGoiTen": 1.18,
     "zoomBamTheo": 1.08,

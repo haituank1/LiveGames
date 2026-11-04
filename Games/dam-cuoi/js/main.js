@@ -123,26 +123,44 @@ function pick(arr, avoid) {
   while (s === avoid && arr.length > 1 && n++ < 6) s = arr[Math.floor(Math.random() * arr.length)];
   return s;
 }
-function mcSay(text, prio) {
+function mcSay(text, prio, kind) {
   if (!text) return;
-  MC.queue.push({ text, prio: prio || 1, at: performance.now() });
+  MC.queue.push({ text, prio: prio || 1, kind: kind || ((prio || 1) >= 2 ? 'event' : 'random'), at: performance.now() });
   MC.queue.sort((a, b) => b.prio - a.prio);
   if (MC.queue.length > 4) MC.queue.length = 4;
+  if (window.NpcVoice) NpcVoice.prefetch(text);   // chuyển giọng TRƯỚC ngay khi câu vào hàng chờ: tới lượt hiện chữ là tiếng sẵn sàng
   mcPump();
 }
-function mcPump() {
+let mcSpeaking = false;
+async function mcPump() {
+  if (mcSpeaking) return;
   const now = performance.now();
   if (now < MC.busyUntil || !MC.queue.length) return;
   MC.queue = MC.queue.filter(m => now - m.at < 40000);
   const m = MC.queue.shift();
   if (!m) return;
+  mcSpeaking = true;
   const el = $('mc');
-  el.querySelector('.say b').textContent = MC.name;
-  el.querySelector('.say span').textContent = m.text;
-  el.classList.add('on');
-  const dur = Math.min(9000, Math.max(3400, m.text.length * 95));
-  MC.busyUntil = now + dur;
-  setTimeout(() => { el.classList.remove('on'); setTimeout(mcPump, 350); }, dur);
+  let shown = false, dur = Math.min(9000, Math.max(3400, m.text.length * 95));
+  const show = voiceDurMs => {
+    if (shown) return; shown = true;
+    el.querySelector('.say b').textContent = MC.name;
+    el.querySelector('.say span').textContent = m.text;
+    el.classList.add('on');
+    if (voiceDurMs) dur = Math.min(14000, Math.max(dur, voiceDurMs + 700));
+    MC.busyUntil = performance.now() + dur;
+    setTimeout(() => { el.classList.remove('on'); mcSpeaking = false; setTimeout(mcPump, 350); }, dur);
+  };
+  let r = { played: false };
+  if (window.NpcVoice && NpcVoice.enabled()) {
+    // chữ chỉ hiện khi voice bắt đầu phát (onStart) — chữ và tiếng khớp nhau;
+    // voice bị chặn tần suất / lỗi / chậm quá thì hiện chữ luôn, không kẹt game
+    try { r = await NpcVoice.speak(m.text, { kind: m.kind, onStart: ({ durationMs }) => show(durationMs) }); } catch (_) { /* rơi xuống hiện chữ */ }
+  }
+  if (!r.played && !shown) show(0);
+  if (!r.played && shown) { /* onStart đã hiện + đã hẹn giờ ẩn */ }
+  if (r.played) { /* show() đã chạy trong onStart */ }
+  if (!shown) { mcSpeaking = false; }
 }
 function mcReact(prio, tplArr, vars) {
   mcSay(fill(pick(tplArr), vars || {}), prio);
@@ -153,7 +171,7 @@ function mcRandomLoop() {
     const funny = Math.random() < 0.45;
     const line = pick(funny ? MC.funny : MC.lines, MC.lastLine);
     MC.lastLine = line;
-    if (line) mcSay(line, 1);
+    if (line) mcSay(line, 1, 'random');
     mcRandomLoop();
   }, lo + Math.random() * Math.max(0, hi - lo));
 }
@@ -290,6 +308,7 @@ P.onPairReveal = function (c) {
   const mid = Cam.toScreen(fp.x, fp.y);
   if (FX.ringHearts) FX.ringHearts(mid.fx, mid.fy - 0.05);
   if (FX.petalBurst) FX.petalBurst(mid.fx, mid.fy);
+  if (FX.stageSparkle) FX.stageSparkle(mid.fx, mid.fy - 0.04);
   FX.hearts(12, mid.fx, mid.fy);
   mcReact(2.5, MC.couple, { a: c.a.user.nickname, b: c.b.user.nickname });
   if (far) {
@@ -415,6 +434,7 @@ P.onCoupleStage = function (c) {
   FX.petals(60);
   if (FX.petalBurst) FX.petalBurst(sp.fx, sp.fy);
   if (FX.ringHearts) FX.ringHearts(sp.fx, sp.fy - 0.09);
+  if (FX.stageSparkle) FX.stageSparkle(sp.fx, sp.fy - 0.06);
   const spot = $('spot'); if (spot) spot.classList.add('on');
 };
 P.onQueueChange = function (names) {
@@ -527,6 +547,7 @@ function applyConfig(c) {
   MC.lines = cfg.mcLines || []; MC.funny = cfg.mcFunny || []; MC.couple = cfg.mcCouple || [];
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
   MC.milestone = cfg.mcMilestone || [];
+  if (window.NpcVoice) NpcVoice.setConfig(cfg);
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
   P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
@@ -623,8 +644,9 @@ if (isDemo) {
   say('<span style="color:#ffd76a">● CHẾ ĐỘ DEMO</span> — xem thử, không cần LIVE thật', 'demo');
   applyConfig({
     mcName: 'MC Anh Tú',
+    npcVoiceOn: true, npcVoice: 'vi-VN-HoaiMyNeural', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
     coupleSec: 25,
-    phongToGoiTen: 1.32, coCapGiua: 1.05, coCapBen: 1.05, soCapToiDa: 3,
+    phongToGoiTen: 1.32, coCapGiua: 1.22, coCapBen: 1.22, soCapToiDa: 3,
     zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,
     uuTienChoTrong: true, nguongDongNguoi: 70, phutImMatCho: 4, tyLeChoTrong: 0.45,
     mcMinSec: 16, mcMaxSec: 24,
@@ -650,7 +672,9 @@ if (isDemo) {
   // — bản cũ truyền onConfig/onEvent qua opts nên client BỎ QUA hết: live thật sẽ
   // không nhận được config lẫn sự kiện TikTok. URL lấy theo đúng cổng đang mở game.
   const bridgeUrl = 'ws://' + location.hostname + ':' + (location.port || '8787');
-  new LiveBridgeClient({ url: bridgeUrl, game: 'dam-cuoi' })
+  const bridge = new LiveBridgeClient({ url: bridgeUrl, game: 'dam-cuoi' });
+  if (window.NpcVoice) NpcVoice.attach(bridge);   // MC nói -> báo LiveBridge để voice khán giả tự tắt tiếng
+  bridge
     .on('event', handle)
     .on('chat', onChat)
     .on('block', onBlock)

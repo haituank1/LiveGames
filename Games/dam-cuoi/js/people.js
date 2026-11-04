@@ -600,7 +600,7 @@ function dissolveCouple(c, leaving) {
 P.featured = () => stageSlots[0];
 P.staged = () => stageSlots.map((c, i) => c ? { couple: c, spot: i } : null).filter(Boolean);
 /* Thông số tinh chỉnh — main.js nạp từ config (mapping) qua setTune */
-P.tune = { boost: 1.32, scaleC: 1.05, scaleS: 1.05, maxStage: 3, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45 };
+P.tune = { boost: 1.32, scaleC: 1.22, scaleS: 1.22, maxStage: 3, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45 };
 P.setTune = function (t) {
   if (!t) return;
   for (const k of ['boost', 'scaleC', 'scaleS', 'maxStage']) {
