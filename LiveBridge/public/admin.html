@@ -544,7 +544,8 @@ const GAME_SCHEMAS = {
       { k: 'bannerY', l: 'Banner "Lễ thành hôn" — cao từ mép trên (%)', t: 'num', min: 0, max: 60 },
     ] },
     { title: '🎤 MC & câu thoại', wide: true, fields: [
-      { k: 'mcName', l: 'Tên MC', t: 'txt' },
+      { k: 'mcName', l: 'Tên MC nam', t: 'txt' },
+      { k: 'mcNameNu', l: 'Tên MC nữ', t: 'txt' },
       { k: 'mcMinSec', l: 'MC nói cách nhau từ (giây)', t: 'num', min: 5, max: 3600 },
       { k: 'mcMaxSec', l: 'đến (giây)', t: 'num', min: 5, max: 3600 },
       { k: 'mcLines', l: 'Câu MC nói ngẫu nhiên ({ten} = tên khách)', t: 'lines', rows: 6 },
@@ -682,6 +683,7 @@ const COMMON_GROUPS = [
   { title: '🗣 Giọng NPC — MC nói thành tiếng', live: 'voice', note: 'Khi NPC nói, voice khán giả (ToolVoice) tự tắt tiếng và nhạc nền game nhỏ lại. Câu vướng tần suất thì chỉ hiện chữ.', fields: [
     { k: 'npcVoiceOn', l: 'Bật giọng NPC (chữ hiện lên là nói luôn)', t: 'chk' },
     { k: 'npcVoice', l: 'Giọng NPC', t: 'sel', opts: [['vi-VN-HoaiMyNeural', 'Nữ — HoaiMy'], ['vi-VN-NamMinhNeural', 'Nam — NamMinh']] },
+    { k: 'npcVoiceNam', l: 'Giọng NPC thứ hai (MC nam ở đám cưới)', t: 'sel', opts: [['vi-VN-NamMinhNeural', 'Nam — NamMinh'], ['vi-VN-HoaiMyNeural', 'Nữ — HoaiMy']] },
     { k: 'npcVoiceRate', l: 'Tốc độ đọc (%, -50..50)', t: 'num', min: -50, max: 50, step: 5 },
     { k: 'npcVoiceVolume', l: 'Âm lượng voice NPC', t: 'slider' },
     { k: 'npcVoiceMinGapSec', l: 'Hai câu NPC cách nhau ít nhất (giây)', t: 'num', min: 0, max: 300 },

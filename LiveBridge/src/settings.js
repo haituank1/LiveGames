@@ -90,6 +90,7 @@ class Settings {
     // giọng NPC (MC / thầy nói thành tiếng, LiveBridge chuyển sẵn qua /api/tts)
     if (cfg.npcVoiceOn != null) clean.npcVoiceOn = !!cfg.npcVoiceOn;
     if (cfg.npcVoice != null) clean.npcVoice = ['vi-VN-HoaiMyNeural', 'vi-VN-NamMinhNeural'].includes(cfg.npcVoice) ? cfg.npcVoice : 'vi-VN-HoaiMyNeural';
+    if (cfg.npcVoiceNam != null) clean.npcVoiceNam = ['vi-VN-HoaiMyNeural', 'vi-VN-NamMinhNeural'].includes(cfg.npcVoiceNam) ? cfg.npcVoiceNam : 'vi-VN-NamMinhNeural';   // giọng thứ hai (MC nam ở đám cưới)
     if (cfg.npcVoiceRate != null) clean.npcVoiceRate = num(cfg.npcVoiceRate, -50, 50, 0);
     if (cfg.npcVoiceVolume != null) clean.npcVoiceVolume = num(cfg.npcVoiceVolume, 0, 100, 90);
     if (cfg.npcVoiceMinGapSec != null) clean.npcVoiceMinGapSec = num(cfg.npcVoiceMinGapSec, 0, 300, 8);
