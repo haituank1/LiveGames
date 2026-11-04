@@ -878,8 +878,18 @@ function rolesFor(a, b) {
 P.makeCouple = function (userA, userB) {
   const a = P.spawn(userA), b = P.spawn(userB);
   if (!a || !b || a === b) return null;
-  if (a.couple && a.couple !== b.couple) return null;
-  if (b.couple && b.couple !== a.couple) return null;
+  /* GHÉP LẠI THOẢI MÁI (Nguyen chốt 2026-11-04 22:13): một người đã có
+     đôi vẫn ghép cặp MỚI được — cặp cũ tự tan, người bị bỏ lại thành
+     độc thân về chỗ ngồi. Chỉ chặn khi cặp cũ đang trong dòng sân khấu
+     (focus/queue/toStage/đang diễn) — xem coupleReleasable. Kiểm tra
+     KHẢ THI của cả hai phía trước, đạt hết mới thả thật, để một lần từ
+     chối không làm tan oan cặp của phía còn lại. */
+  const ca = (a.couple && a.couple !== b.couple) ? a.couple : null;
+  const cb = (b.couple && b.couple !== a.couple && b.couple !== ca) ? b.couple : null;
+  if (ca && !coupleReleasable(ca)) return null;
+  if (cb && !coupleReleasable(cb)) return null;
+  if (ca) releaseOldCouple(ca);
+  if (cb) releaseOldCouple(cb);
   if (a.couple) return a.couple;
   const { bride, groom } = rolesFor(a, b);
   a.lastActive = Date.now(); b.lastActive = Date.now();   // được ghép đôi = đang tương tác, không bị nhường chỗ
@@ -1169,8 +1179,9 @@ function dissolveCouple(c, leaving) {
   }
 }
 /* Tan ca cap + giai phong CA HAI nguoi (dissolveCouple chi giai phong
-   phia 'other') — main.js dung cho cap NPC tu tan de xoay vong doi cap. */
-P.dissolveCoupleFull = function (c) {
+   phia 'other') — main.js dung cho cap NPC tu tan de xoay vong doi cap,
+   makeCouple dung lai khi tha cap cu cho ghep cap moi. */
+function dissolveFull(c) {
   if (!c) return;
   const a = c.a;
   dissolveCouple(c, a);
@@ -1180,7 +1191,36 @@ P.dissolveCoupleFull = function (c) {
     setOutfit(a, 'casual');
     walkTo(a, { x: a.home.x, y: a.home.y }, 'walk', () => { a.state = 'home'; });
   }
-};
+}
+P.dissolveCoupleFull = dissolveFull;
+
+/* Cap cu co THA duoc de ghep cap moi khong: chi khi da yen vi —
+   'court' (lam le xong, dang ngoi o ban) hoac dang HOLD tren san khau
+   (dien xong, dung giu san khau vi chua co cap ke). Dang focus / trong
+   hang cho / dang di len / dang dien thi khong tha. */
+function coupleReleasable(c) {
+  return !!c && (c.state === 'court' || (c.state === 'stage' && c.hold));
+}
+function releaseOldCouple(c) {
+  if (c.state === 'court') { dissolveFull(c); return; }
+  // stage + hold: cho ca hai xuong theo dung duong thoat cua leaveStage
+  // (cheo ra 40/60 o stageY+7 roi ve cho) + danh dau cho len san khau
+  // nhu mot lan xuong binh thuong, roi moi go dang ky cap.
+  const cdUntil = Date.now() + (P.stageCooldownSec || 0) * 1000;
+  const i = couples.indexOf(c); if (i >= 0) couples.splice(i, 1);
+  const qi = stageQueue.indexOf(c); if (qi >= 0) { stageQueue.splice(qi, 1); notifyQueue(); }
+  if (c.spot >= 0 && stageSlots[c.spot] === c) stageSlots[c.spot] = null;
+  c.spot = -1; c.hold = false;
+  for (const p of [c.a, c.b]) {
+    if (people.get(p.user.id) !== p) continue;
+    p.couple = null; p.boost = 1; p.spotScale = 1; p.stageCdUntil = cdUntil;
+    p.el.classList.remove('pairfx');
+    setOutfit(p, 'casual');
+    walkPath(p, [{ x: p.x < 50 ? 40 : 60, y: stageY + 7 }, { x: p.home.x, y: p.home.y }], 'walk', () => { p.state = 'home'; });
+    if (p.speedPx) p.speedPx = Math.min(1250, Math.round(p.speedPx * 1.55));
+  }
+  promoteStage();
+}
 P.featured = () => stageSlots[0];
 P.staged = () => stageSlots.map((c, i) => c ? { couple: c, spot: i } : null).filter(Boolean);
 /* Thông số tinh chỉnh — main.js nạp từ config (mapping) qua setTune */

@@ -1160,6 +1160,9 @@ function npcDissolveRested() {
   const now = Date.now();
   for (const c of [...coupleByKey.values()]) {
     if (!c || !(c.a.npc || c.b.npc)) continue;
+    if (c.a.couple !== c || c.b.couple !== c) {   // cặp đã tan bằng đường khác (khách thật ghép lại) -> chỉ dọn sổ, không đụng vào người
+      NPC.courtSince.delete(c.key); coupleByKey.delete(c.key); continue;
+    }
     if (c.state !== 'court') { NPC.courtSince.delete(c.key); continue; }
     if (!NPC.courtSince.has(c.key)) { NPC.courtSince.set(c.key, now); continue; }
     if (now - NPC.courtSince.get(c.key) >= restMs) {
