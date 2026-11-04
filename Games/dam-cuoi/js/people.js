@@ -659,13 +659,12 @@ P.makeCouple = function (userA, userB) {
   couples.push(c);
   for (const p of [a, b]) { p.target = null; p.path = []; p.done = null; p.state = 'focus'; p.dirty = true; }  // đứng yên tại chỗ cho camera lia tới
   if (P.onPairFocus) P.onPairFocus(c);                    // main lia camera tới vị trí 2 người
-  setTimeout(() => {                                      // camera tới nơi: đổi đồ cưới + phóng to + vòng sáng
+  setTimeout(() => {                                      // camera tới nơi: chỉ phóng to gây chú ý — CHƯA thay đồ
     if (!couples.includes(c)) return;
-    groom.set = c.set; bride.set = c.set;
-    setOutfit(groom, 'groom'); setOutfit(bride, 'bride');
     a.boost = b.boost = P.tune.boost; a.dirty = b.dirty = true;
-    a.el.classList.add('pairfx'); b.el.classList.add('pairfx');
-    if (P.onPairReveal) P.onPairReveal(c);
+    /* Hiệu ứng THAY ĐỒ CƯỚI dời sang promoteStage (Nguyen chot 2026-11-04):
+       tới lượt lên sân khấu mới thay đồ + vòng sáng; cặp còn đang chờ trong
+       hàng thì vẫn mặc đồ thường, không hiệu ứng gì. */
   }, 1500);
   setTimeout(() => {                                      // rồi nắm tay nhau ra thảm đỏ lên sân khấu
     if (!couples.includes(c)) return;
@@ -700,6 +699,12 @@ function promoteStage() {
     stageSlots[i] = c;
     onStage++;
     c.a.spotScale = c.b.spotScale = i === 0 ? P.tune.scaleC : P.tune.scaleS;
+    /* TỚI LƯỢT cặp này: giờ mới THAY ĐỒ CƯỚI + vòng sáng + ăn mừng, rồi mới
+       nắm tay nhau đi thảm đỏ (cặp còn chờ vẫn đồ thường — xem makeCouple) */
+    c.groom.set = c.set; c.bride.set = c.set;
+    setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
+    c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
+    if (P.onPairReveal) P.onPairReveal(c);
     const y = stageY + (i ? STAGE_FRAME.sideDrop : 0);
     const off = STAGE_FRAME.pairOff[i];
     /* Xếp NỮ KỀ NỮ, NAM KỀ NAM ở đường giáp giữa các cặp:
