@@ -400,6 +400,45 @@ function startGuide() {
 }
 function renderRules() { /* luật chơi đã gộp vào khung hướng dẫn xoay vòng cho gọn màn hình */ }
 
+/* HIỆN TẤT CẢ KHUNG (hienTatCaKhung, Nguyen yêu cầu 2026-11-04): bật
+   lên là mọi khung đều hiện — kể cả khung đang trống (hàng chờ chưa có
+   ai, sổ chưa có quà, MC chưa nói...) — kèm nội dung MẪU, để chỉnh vị
+   trí/cỡ chữ nhìn thấy hết một lượt. Tắt đi là game chạy như thường.
+   CSS body.showall ép hiển thị; hàm này lo phần nội dung mẫu + banner
+   mẫu + bong bóng MC mẫu. */
+function applyShowAll() {
+  const on = cfg.hienTatCaKhung === true;
+  document.body.classList.toggle('showall', on);
+  const banner = $('banner');
+  if (!on) {
+    if (banner) banner.classList.remove('on');
+    /* Dọn nội dung MẪU đã điền lúc bật (chỉ dọn đúng phần mẫu, không
+       đụng nội dung thật) để các khung về lại trạng thái trống như cũ. */
+    const ul0 = document.querySelector('#ledger ul');
+    if (ul0 && ul0.textContent.includes('Khách Mẫu')) ul0.innerHTML = '';
+    const q0 = $('queue');
+    if (q0 && q0.textContent.includes('🧪')) q0.innerHTML = '';
+    const cc0 = $('couplecount');
+    if (cc0 && cc0.textContent.includes('(mẫu)')) cc0.textContent = '';
+    const gt0 = $('goaltext');
+    if (gt0 && gt0.textContent.includes('Sảnh Mẫu')) gt0.textContent = '';
+    const say0 = document.querySelector('#mc .say');
+    if (say0 && say0.textContent.includes('kiểm tra vị trí')) say0.innerHTML = '';
+    return;
+  }
+  const ul = document.querySelector('#ledger ul');
+  if (ul && !ul.children.length) ul.innerHTML = '<li><span>Khách Mẫu</span><em>Hoa hồng · 10</em></li>';
+  const q = $('queue');
+  if (q && !q.textContent.trim()) q.innerHTML = '<div class="qrow">🧪 Sắp tới: <b>Mẫu ❤ Mẫu</b></div>';
+  const cc = $('couplecount');
+  if (cc && !cc.textContent.trim()) cc.textContent = '💒 CẶP ĐÔI THỨ 1 (mẫu)';
+  const gt = $('goaltext');
+  if (gt && !gt.textContent.trim()) gt.textContent = 'Sảnh Mẫu · tổng 100 lượt xem — còn 10 lượt nữa lên sảnh mới';
+  const say = document.querySelector('#mc .say');
+  if (say && !say.textContent.trim()) say.innerHTML = '<b>MC</b>Khung MC — kiểm tra vị trí';
+  showBanner('🧪 BANNER — KIỂM TRA VỊ TRÍ', 60000);
+}
+
 /* BẢNG LỆNH CHAT (Nguyen yêu cầu 2026-11-04): khung tĩnh ở cột phải cho
    người chơi nhìn là biết gõ gì ra hiệu ứng gì — khớp đúng các lệnh hệ
    thống thật sự bắt (tag, đổi đồ, 3 lệnh hiệu ứng gần đúng, quà). Tắt
@@ -682,7 +721,7 @@ function showBanner(text, ms = 4600) {
   el.classList.add('on');
   placeBanner();
   clearTimeout(bannerTimer);
-  bannerTimer = setTimeout(() => el.classList.remove('on'), ms);
+  bannerTimer = setTimeout(() => { if (!cfg.hienTatCaKhung) el.classList.remove('on'); }, ms);
 }
 /* Can vi tri banner cho vua ca hai phia (Nguyen chot 2026-11-04): mac dinh o
    bannerY (30%) — nhung khi bong MC dang hien thi phai dat banner NGAY DUOI
@@ -1421,6 +1460,21 @@ function applyPanelPos() {
   root.setProperty('--prx', px(cfg.khungPhaiX, SW)); root.setProperty('--pry', px(cfg.khungPhaiY, SH));
   root.setProperty('--qx', px(cfg.khungHangChoX, SW)); root.setProperty('--qy', px(cfg.khungHangChoY, SH));
   root.setProperty('--mcx', px(cfg.khungMcX, SW)); root.setProperty('--mcy', px(cfg.khungMcY, SH));
+  /* Vị trí + cỡ chữ TỪNG KHUNG (Nguyen yêu cầu 2026-11-04 23:41): mỗi
+     khung một cặp lệch X/Y riêng (% khung hình, áp qua thuộc tính CSS
+     translate để không phá hiệu ứng riêng của khung) + một hệ số cỡ
+     chữ riêng (config là %, 100 = như cũ) cho chữ khỏi nhỏ khó đọc. */
+  root.setProperty('--gdx', px(cfg.khungHuongDanX, SW)); root.setProperty('--gdy', px(cfg.khungHuongDanY, SH));
+  root.setProperty('--gox', px(cfg.khungMucTieuX, SW)); root.setProperty('--goy', px(cfg.khungMucTieuY, SH));
+  root.setProperty('--ccx', px(cfg.khungDemCapX, SW)); root.setProperty('--ccy', px(cfg.khungDemCapY, SH));
+  root.setProperty('--bx', px(cfg.khungBxhX, SW)); root.setProperty('--byy', px(cfg.khungBxhY, SH));
+  root.setProperty('--ldx', px(cfg.khungSoMungX, SW)); root.setProperty('--ldy', px(cfg.khungSoMungY, SH));
+  root.setProperty('--cbx', px(cfg.khungBangLenhX, SW)); root.setProperty('--cby', px(cfg.khungBangLenhY, SH));
+  const fv = v => String((Number(v) || 100) / 100);
+  root.setProperty('--f-guide', fv(cfg.coChuHuongDan)); root.setProperty('--f-goal', fv(cfg.coChuMucTieu));
+  root.setProperty('--f-count', fv(cfg.coChuDemCap)); root.setProperty('--f-board', fv(cfg.coChuBxh));
+  root.setProperty('--f-ledger', fv(cfg.coChuSoMung)); root.setProperty('--f-cmd', fv(cfg.coChuBangLenh));
+  root.setProperty('--f-queue', fv(cfg.coChuHangCho)); root.setProperty('--f-mc', fv(cfg.coChuMc));
   /* Banner "LE THANH HON" (va banner moc/qua lon): cao bao nhieu % tinh tu
      mep tren — dua len cao de khong che mat nhan vat tren san khau (mac dinh
      30%, truoc day co dinh 44% nen che ngang cap doi). */
@@ -1495,6 +1549,7 @@ function applyConfig(c) {
   P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong, quietMax: cfg.phongVangDuoi });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
   applyPanelPos();
+  try { applyShowAll(); } catch (e) { console.warn('[dam-cuoi] showall:', e.message); }
   A.setConfig(cfg);
   } catch (e) { console.error('[dam-cuoi] applyConfig loi o phan cau hinh:', e); }
   /* Hàng UI chạy SAU và TỪNG BƯỚC RIÊNG: dù bất kỳ bước cấu hình nào ở trên
@@ -1621,6 +1676,10 @@ if (isDemo) {
     npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
     hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
     lenhHoaRoi: 'hoa,roi,tung,vui', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
+    khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0,
+    khungBxhX: 0, khungBxhY: 0, khungSoMungX: 0, khungSoMungY: 0, khungBangLenhX: 0, khungBangLenhY: 0,
+    coChuHuongDan: 100, coChuMucTieu: 100, coChuDemCap: 100, coChuBxh: 100, coChuSoMung: 100, coChuBangLenh: 100, coChuHangCho: 100, coChuMc: 100,
+    hienTatCaKhung: false,
     bgRules: [
       { viewers: 10, file: 'bg-500.webp' }, { viewers: 30, file: 'bg-2000.webp' },
       { viewers: 50, file: 'bg-5000.webp' }, { viewers: 100, file: 'bg-10000.webp' }, { viewers: 200, file: 'bg-sanh-moi.webp' },

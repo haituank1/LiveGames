@@ -169,7 +169,7 @@ class Settings {
         choNguongDong: [0, 1000000, 1500], choHeSoDong: [0, 3, 1.3], hieuUngNgauNhienTuGiay: [1, 3600, 12], hieuUngNgauNhienDenGiay: [1, 3600, 25],
         doiTrangPhucChoGiay: [0, 120, 5], bongChatGiay: [1, 30, 4], bongChatMaxKyTu: [10, 200, 60], bongChatAnKhiTuCamQua: [0, 20, 2],
         khungTraiX: [-20, 20, 0], khungTraiY: [-20, 20, 0], khungPhaiX: [-20, 20, 0], khungPhaiY: [-20, 20, 0],
-        khungHangChoX: [-20, 20, 0], khungHangChoY: [-20, 20, 0], khungMcX: [-20, 20, 0], khungMcY: [-20, 20, 0], npcNguongVang: [0, 100, 6], npcMoiBaoLauGiay: [10, 3600, 25], npcNghiGiay: [10, 3600, 60], lenhHieuUngChoGiay: [0, 120, 8] },
+        khungHangChoX: [-20, 20, 0], khungHangChoY: [-20, 20, 0], khungMcX: [-20, 20, 0], khungMcY: [-20, 20, 0], npcNguongVang: [0, 100, 6], npcMoiBaoLauGiay: [10, 3600, 25], npcNghiGiay: [10, 3600, 60], lenhHieuUngChoGiay: [0, 120, 8], khungHuongDanX: [-40, 40, 0], khungHuongDanY: [-40, 40, 0], khungMucTieuX: [-40, 40, 0], khungMucTieuY: [-40, 40, 0], khungDemCapX: [-40, 40, 0], khungDemCapY: [-40, 40, 0], khungBxhX: [-40, 40, 0], khungBxhY: [-40, 40, 0], khungSoMungX: [-40, 40, 0], khungSoMungY: [-40, 40, 0], khungBangLenhX: [-40, 40, 0], khungBangLenhY: [-40, 40, 0], coChuHuongDan: [50, 300, 100], coChuMucTieu: [50, 300, 100], coChuDemCap: [50, 300, 100], coChuBxh: [50, 300, 100], coChuSoMung: [50, 300, 100], coChuBangLenh: [50, 300, 100], coChuHangCho: [50, 300, 100], coChuMc: [50, 300, 100] },
       'san-nhay': { anticsIntervalSec: [1, 120, 7], camHomeZoom: [0.3, 1.5, 0.62], directorMinHoldSec: [0, 10, 1.2], djDoiSauGiay: [5, 600, 24],
         doMoPhanConLai: [0, 1, 0.55], doRucDen: [0, 2, 1], dropHeight: [0, 100, 40], dropHeightVip: [0, 100, 48],
         durEntry: [0, 30, 3.6], durGiftMid: [0, 30, 5], durGiftBig: [0, 30, 7], durGiftHuge: [0, 30, 8.5], durLevelup: [0, 30, 6],
@@ -181,7 +181,7 @@ class Settings {
         zoomPairMax: [0.5, 2, 1.1], zoomSolo: [0.5, 2, 1.12] },
     };
     const BOOL_BY_GAME = {
-      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh'],
+      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung'],
       'san-nhay': ['hieuUngDen', 'khuayDong', 'lamMoKhiLia', 'liaCamLenTrenCung', 'partyMaxNhanhHon', 'phuKienQua'],
     };
     const CHOICE_BY_GAME = {   // key: [các giá trị cho phép, mặc định]
