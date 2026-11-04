@@ -1234,14 +1234,25 @@ function scanLooseTag(text, self) {
   return null;
 }
 
-/* ===== LỆNH CHAT HIỆU ỨNG — bắt GẦN ĐÚNG (Nguyen yêu cầu 2026-11-04) =====
-   Người chơi gõ tự do, không cần khớp chính xác: comment được gấp không
-   dấu rồi so TỪNG TỪ với các cụm từ khóa trong config — khớp đúng từ,
-   hoặc lệch nhẹ (từ dài >= 4 ký tự thì giống >= 75%) là ăn. Ưu tiên cụm
-   đặc thù: pháo giấy > pháo hoa > hoa rơi. Mỗi người 1 lần mỗi
-   lenhHieuUngChoGiay giây để khỏi spam hiệu ứng. (Thay 2 regex cứng
-   trước đây — mọi câu từng ăn trước đây vẫn ăn qua các cụm mặc định.) */
+/* ===== LỆNH CHAT HIỆU ỨNG — bắt LỎNG tối đa (Nguyen chốt 2026-11-04
+   23:09: "thứ mình cần là không khí... cho dù vô tình nhập trúng từ khóa
+   cũng kích hoạt luôn") =====
+   Từ khóa nhập trong admin dạng MỘT Ô chữ, các từ cách nhau dấu phẩy
+   (mặc định hoa rơi: "hoa, roi, tung"; pháo hoa: "phao"; pháo giấy:
+   "giay"). Comment được gấp không dấu (không phân biệt hoa thường/có
+   dấu) rồi so TỪNG TỪ: câu chứa đúng 1 từ khóa bất kỳ là ăn (từ khóa
+   dài >= 4 ký tự thì lệch nhẹ, giống >= 75%, vẫn ăn) — gõ tắt, gõ
+   thiếu dấu, vô tình trúng cũng nổ hiệu ứng cho sảnh sôi động. Ưu
+   tiên: pháo giấy > pháo hoa > hoa rơi. Hàng rào duy nhất còn giữ:
+   mỗi người 1 lần mỗi lenhHieuUngChoGiay giây để một người không
+   spam liên tục (người khác gọi vẫn nổ bình thường). */
 const fxCmdAt = new Map();
+function stemList(v) {
+  const out = [];
+  const push = s => { for (const p of String(s).split(/[,;\n]+/)) { const w = p.trim(); if (w) out.push(w); } };
+  if (Array.isArray(v)) v.forEach(push); else if (v != null) push(v);
+  return out;
+}
 function stemHit(tokens, stem) {
   const st = foldCmd(stem).split(' ').filter(Boolean);
   if (!st.length) return false;
@@ -1259,7 +1270,7 @@ function chatFx(user, text) {
     { list: cfg.lenhHoaRoi, go: () => { FX.petals(120); toast('🌸 ' + user.nickname + ' gọi hoa rơi!', false); } },
   ];
   for (const r of rules) {
-    if (asList(r.list).some(st => stemHit(tokens, st))) { fxCmdAt.set(user.id, now); r.go(); return; }
+    if (stemList(r.list).some(st => stemHit(tokens, st))) { fxCmdAt.set(user.id, now); r.go(); return; }
   }
 }
 function greet(user) {
@@ -1416,7 +1427,7 @@ function applyConfig(c) {
      chứng các bản admin cũ) — asList ép hết về mảng chuỗi sạch. 1 key sai
      kiểu không được phép giết cả quá trình áp config/UI (lỗi 2026-11-04:
      màn hình mất hết khung/BXH/MC dù sự kiện vẫn chạy). */
-  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'rulesLines', 'guideLines', 'npcDanhSach', 'lenhHoaRoi', 'lenhPhaoHoa', 'lenhPhaoGiay']) {
+  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'rulesLines', 'guideLines', 'npcDanhSach']) {
     cfg[k] = asList(cfg[k]).filter(x => typeof x === 'string');
   }
   if (cfg.mcName) MC.name = cfg.mcName;
@@ -1602,7 +1613,7 @@ if (isDemo) {
     npcTuDong: true, npcNguongVang: 6, npcMoiBaoLauGiay: 25, npcNghiGiay: 60,
     npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
     hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
-    lenhHoaRoi: ['hoa rơi', 'mưa hoa', 'hoa'], lenhPhaoHoa: ['pháo hoa', 'pháo'], lenhPhaoGiay: ['pháo giấy', 'confetti'],
+    lenhHoaRoi: 'hoa, roi, tung', lenhPhaoHoa: 'phao', lenhPhaoGiay: 'giay',
     bgRules: [
       { viewers: 10, file: 'bg-500.webp' }, { viewers: 30, file: 'bg-2000.webp' },
       { viewers: 50, file: 'bg-5000.webp' }, { viewers: 100, file: 'bg-10000.webp' }, { viewers: 200, file: 'bg-sanh-moi.webp' },

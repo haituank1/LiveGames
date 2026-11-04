@@ -601,9 +601,9 @@ const GAME_SCHEMAS = {
       { k: 'tuAnToanComment', l: 'Từ an toàn — giống từ cấm nhưng được phép (mỗi dòng một từ)', t: 'words', rows: 2 },
       { k: 'hieuUngChat', l: 'Lệnh chat hiệu ứng bắt GẦN ĐÚNG (gõ tự do, sai chút vẫn ăn — không cần khớp chính xác)', t: 'chk', defTrue: true },
       { k: 'lenhHieuUngChoGiay', l: 'Mỗi người gọi hiệu ứng cách nhau (giây)', t: 'num', min: 0, max: 120, step: 1 },
-      { k: 'lenhHoaRoi', l: 'Từ khóa gọi HOA RƠI (mỗi dòng một cụm; ưu tiên: pháo giấy > pháo hoa > hoa rơi)', t: 'lines', rows: 3 },
-      { k: 'lenhPhaoHoa', l: 'Từ khóa gọi PHÁO HOA (mỗi dòng một cụm)', t: 'lines', rows: 3 },
-      { k: 'lenhPhaoGiay', l: 'Từ khóa gọi PHÁO GIẤY (mỗi dòng một cụm)', t: 'lines', rows: 2 },
+      { k: 'lenhHoaRoi', l: 'Từ khóa gọi HOA RƠI — các từ cách nhau dấu phẩy, gõ trúng 1 từ là ăn (không phân biệt dấu/hoa thường)', t: 'txt' },
+      { k: 'lenhPhaoHoa', l: 'Từ khóa gọi PHÁO HOA — cách nhau dấu phẩy (ưu tiên: pháo giấy > pháo hoa > hoa rơi)', t: 'txt' },
+      { k: 'lenhPhaoGiay', l: 'Từ khóa gọi PHÁO GIẤY — cách nhau dấu phẩy', t: 'txt' },
       { k: 'hienBangLenh', l: 'Hiện bảng "Lệnh chat" trên màn hình cho người chơi biết gõ gì', t: 'chk', defTrue: true },
     ] },
     { title: '🖼 Vị trí các khung (lệch % khung hình)', note: 'X dương = dịch phải, Y dương = dịch xuống. Chỉnh khi khung bị TikTok che trên điện thoại.', fields: [

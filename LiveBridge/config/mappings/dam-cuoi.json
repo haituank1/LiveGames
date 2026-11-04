@@ -242,19 +242,9 @@
     "hieuUngChat": true,
     "hienBangLenh": true,
     "lenhHieuUngChoGiay": 8,
-    "lenhHoaRoi": [
-      "hoa rơi",
-      "mưa hoa",
-      "hoa"
-    ],
-    "lenhPhaoHoa": [
-      "pháo hoa",
-      "pháo"
-    ],
-    "lenhPhaoGiay": [
-      "pháo giấy",
-      "confetti"
-    ],
+    "lenhHoaRoi": "hoa, roi, tung",
+    "lenhPhaoHoa": "phao",
+    "lenhPhaoGiay": "giay",
     "npcDanhSach": [
       "Ngọc Linh",
       "Tuấn Kiệt",
