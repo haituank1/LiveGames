@@ -196,14 +196,26 @@ function buildPositions() {
   // Ưu tiên: GHẾ QUANH BÀN trước (đúng chất tiệc cưới), từ gần sân khấu ra xa;
   // điểm đứng tự do chỉ dùng khi hết ghế — tránh khách dồn cục giữa thảm đỏ
   const fillKey = p => (p.kind === 'seat' ? 0 : 1000) + Math.hypot(p.x - 50, (p.y - 52) * 1.35) + rand(0, 14);
-  freePool = positions.slice().sort((p1, p2) => fillKey(p1) - fillKey(p2));
+  for (const p of positions) p.key = fillKey(p);
+  freePool = positions.slice().sort((p1, p2) => p1.key - p2.key);
+  freePool.forEach((p, i) => { p.rank = i; });   // rank 0 = chỗ đẹp nhất (trong cùng, gần sân khấu)
   return tables;
 }
 function takePosition() {
   while (freePool.length) { const pos = freePool.shift(); if (!pos.taken) return pos; }   // lấy từ GẦN sân khấu trước (đầu mảng đã sắp xếp)
   return null;
 }
-function freePosition(pos) { if (pos && pos.taken) { pos.taken = null; freePool.push(pos); } }
+/* Trả chỗ về pool theo ĐÚNG thứ tự ưu tiên (chèn nhị phân theo key) — chỗ trong
+   vừa trống ra phải được khách tới sau lấy trước, không chìm xuống cuối hàng. */
+function freePosition(pos) {
+  if (!pos || !pos.taken) return;
+  pos.taken = null;
+  let lo = 0, hi = freePool.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (freePool[mid].key < pos.key) lo = mid + 1; else hi = mid; }
+  freePool.splice(lo, 0, pos);
+}
+/* "Khu vực bên trong" = phần đầu của thứ tự ưu tiên (gần sân khấu nhất) */
+function isInner(pos) { return !!pos && pos.rank != null && pos.rank < positions.length * (P.tune && P.tune.innerRatio || 0.45); }
 
 /* ---------- Tìm đường vòng quanh bàn (lưới ô + BFS) ----------
    Đoạn thẳng bị bàn chắn thì rẽ qua các ô trống (hành lang thảm đỏ x 43–57 luôn
@@ -370,13 +382,27 @@ P.spawn = function (user) {
   const old = people.get(user.id);
   if (old) return old;
   if (people.size >= MAX_PEOPLE) return null;
-  const home = takePosition();
+  let home = takePosition();
   if (!home) return null;
+  /* ƯU TIÊN KHÁCH MỚI KHI ĐÔNG NGƯỜI (yêu cầu của chủ phòng): khách vừa tới mà
+     chỉ còn chỗ ngoài, trong khi khách im lặng rất lâu (kiểu đã out mà live
+     không bắt được sự kiện rời đi) đang giữ chỗ trong -> ĐỔI CHỖ: khách mới
+     vào thẳng chỗ trong, khách im lặng lùi ra chỗ ngoài làm nền phụ hoạ. */
+  if (P.tune.priorityOn && people.size >= (P.tune.crowdMin || 70) && !isInner(home)) {
+    const stale = findStaleInner();
+    if (stale) {
+      const inner = stale.home;
+      stale.home = home; home.taken = stale;
+      walkTo(stale, { x: home.x, y: home.y }, 'walk', () => { stale.state = 'home'; });
+      home = inner;
+    }
+  }
   const p = {
     user, el: makeEl(user), x: home.x + rand(-2.4, 2.4), y: 99.4, home, outfit: 'casual',
     state: 'walk', target: null, path: [], done: null, faceLeft: false,
     couple: null, idleFor: rand(2, 9), boost: 1, spotScale: 1, dirty: true, speedPx: 200,
     zSeed: Math.abs(hash(user.id || user.nickname || '')) % 8,   // phá hoà z-index ổn định, chống chớp lớp
+    lastActive: Date.now(),   // mốc tương tác gần nhất — căn cứ nhường chỗ trong
   };
   home.taken = p;
   people.set(user.id, p);
@@ -396,6 +422,39 @@ P.removeUser = function (id) {
 };
 P.count = () => people.size;
 P.get = id => people.get(id) || null;
+/* Mọi sự kiện của 1 người (vào phòng, chat, thả tim, tặng quà, follow...) đều
+   qua đây để làm mới mốc hoạt động — người còn tương tác thì giữ chỗ đẹp. */
+P.touch = function (id) { const p = people.get(id); if (p) p.lastActive = Date.now(); };
+/* Khách ở khu TRONG nhưng đã im lặng quá lâu (ứng viên nhường chỗ) */
+function findStaleInner() {
+  const now = Date.now(), staleMs = (P.tune.staleMin || 4) * 60000;
+  let best = null;
+  for (const q of people.values()) {
+    if (q.couple || q.state !== 'home' || !isInner(q.home)) continue;
+    if (now - (q.lastActive || 0) < staleMs) continue;
+    if (!best || q.home.rank < best.home.rank) best = q;
+  }
+  return best;
+}
+/* Quét định kỳ khi ĐÔNG người: khách im lặng lâu ở khu trong tự lùi ra vị trí
+   trống ở khu ngoài (phụ hoạ không gian), nhả chỗ trong cho khách sắp tới.
+   Ít người hơn ngưỡng thì KHÔNG quét — ai cũng đứng yên bình thường. */
+setInterval(() => {
+  if (!P.tune.priorityOn || people.size < (P.tune.crowdMin || 70)) return;
+  let moved = 0;
+  for (const q of [...people.values()]) {
+    if (moved >= 3) break;   // mỗi đợt tối đa 3 người di chuyển, tránh cả sảnh xáo động
+    if (q.couple || q.state !== 'home' || !isInner(q.home)) continue;
+    if (Date.now() - (q.lastActive || 0) < (P.tune.staleMin || 4) * 60000) continue;
+    let oi = -1;
+    for (let i = freePool.length - 1; i >= 0; i--) if (!isInner(freePool[i])) { oi = i; break; }
+    if (oi < 0) return;
+    const np = freePool.splice(oi, 1)[0];
+    freePosition(q.home); np.taken = q; q.home = np;
+    walkTo(q, { x: np.x, y: np.y }, 'walk', () => { q.state = 'home'; });
+    moved++;
+  }
+}, 20000);
 P.tourTarget = function () {
   const arr = [...people.values()].filter(p => !p.couple && p.state === 'home');
   if (!arr.length) return null;
@@ -417,6 +476,7 @@ P.makeCouple = function (userA, userB) {
   if (b.couple && b.couple !== a.couple) return null;
   if (a.couple) return a.couple;
   const { bride, groom } = rolesFor(a, b);
+  a.lastActive = Date.now(); b.lastActive = Date.now();   // được ghép đôi = đang tương tác, không bị nhường chỗ
   const c = { key: [a.user.id, b.user.id].sort().join('|'), a, b, bride, groom, state: 'focus', spot: -1, timer: 0 };
   c.set = pickSet(c);   // cả cặp mặc CHUNG 1 bộ phối sẵn cùng phong cách
   a.couple = c; b.couple = c;
@@ -511,13 +571,21 @@ function dissolveCouple(c, leaving) {
 P.featured = () => stageSlots[0];
 P.staged = () => stageSlots.map((c, i) => c ? { couple: c, spot: i } : null).filter(Boolean);
 /* Thông số tinh chỉnh — main.js nạp từ config (mapping) qua setTune */
-P.tune = { boost: 1.32, scaleC: 1.05, scaleS: 1.05, maxStage: 3 };
+P.tune = { boost: 1.32, scaleC: 1.05, scaleS: 1.05, maxStage: 3, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45 };
 P.setTune = function (t) {
   if (!t) return;
   for (const k of ['boost', 'scaleC', 'scaleS', 'maxStage']) {
     const v = Number(t[k]);
     if (isFinite(v) && v > 0) P.tune[k] = v;
   }
+  // Cơ chế ưu tiên chỗ trong cho khách mới (khi đông người)
+  for (const k of ['crowdMin', 'staleMin']) {
+    const v = Number(t[k]);
+    if (isFinite(v) && v > 0) P.tune[k] = v;
+  }
+  const ir = Number(t.innerRatio);
+  if (isFinite(ir) && ir > 0.1 && ir < 0.9) P.tune.innerRatio = ir;
+  if (typeof t.priorityOn === 'boolean') P.tune.priorityOn = t.priorityOn;
   // Khoảng cách đội hình trên bục cũng chỉnh được từ config
   const offC = Number(t.pairOffC), offS = Number(t.pairOffS), side = Number(t.spotSide);
   if (isFinite(offC) && offC > 0) STAGE_FRAME.pairOff[0] = offC;

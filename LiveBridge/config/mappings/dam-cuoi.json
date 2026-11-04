@@ -128,7 +128,11 @@
     "zoomBamTheo": 1.08,
     "lechCapGiua": 1.8,
     "lechCapBen": 1.7,
-    "tamCapBen": 42
+    "tamCapBen": 42,
+    "uuTienChoTrong": true,
+    "nguongDongNguoi": 70,
+    "phutImMatCho": 4,
+    "tyLeChoTrong": 0.45
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {
