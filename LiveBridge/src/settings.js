@@ -161,8 +161,8 @@ class Settings {
     // config RIÊNG của đám cưới / sàn nhảy: trước đây setGame chỉ hiểu key của chùa nên mọi
     // key riêng đều bị bỏ qua (trang quản trị báo "chưa hiểu"). [min, max, mặc định] cho số.
     const NUM_BY_GAME = {
-      'dam-cuoi': { coupleSec: [5, 600, 15], nhaCapTiepSauGiay: [1, 60, 6], soCapToiDa: [1, 10, 2], phongToGoiTen: [1, 2, 1.32], zoomGoiTen: [1, 2, 1.18], zoomBamTheo: [1, 2, 1.08],
-        coCapGiua: [0.5, 2, 1.22], coCapBen: [0.5, 2, 1.22], lechCapGiua: [0, 10, 1.8], lechCapBen: [0, 10, 1.7], tamCapBen: [0, 100, 42], bannerY: [0, 60, 30],
+      'dam-cuoi': { coupleSec: [5, 600, 9], nhaCapTiepSauGiay: [1, 60, 6], phongToGoiTen: [1, 2, 1.32], zoomGoiTen: [1, 2, 1.18], zoomBamTheo: [1, 2, 1.08],
+        coCapGiua: [0.5, 2, 1.22], lechCapGiua: [0, 10, 1.8], lechCapBen: [0, 10, 1.7], tamCapBen: [0, 100, 42], bannerY: [0, 60, 30],
         mcMinSec: [5, 3600, 18], mcMaxSec: [5, 3600, 26], hangChoToiDa: [0, 20, 4], nguongDongNguoi: [0, 10000, 70], phutImMatCho: [0, 120, 4], tyLeChoTrong: [0, 1, 0.45],
         choLenSanKhauCoBan: [0, 3600, 90], choLenSanKhauMin: [0, 3600, 20], choLenSanKhauMax: [0, 7200, 600], choCongMoiCapCho: [0, 600, 15],
         choCongMoiCapGhep: [0, 600, 8], choMienGhep: [0, 100, 2], choNguongVang: [0, 100000, 300], choHeSoVang: [0, 2, 0.6],
@@ -188,7 +188,7 @@ class Settings {
       'san-nhay': { tocDoNhay: [['cham', 'thuong', 'nhanh'], 'thuong'], hieuUngManHinh: [['song', 'vong', 'led'], 'vong'] },
     };
     for (const [k, [mn, mx, def]] of Object.entries(NUM_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = num(cfg[k], mn, mx, def);
-    for (const k of ['soCapToiDa', 'nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])
+    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])
       if (clean[k] != null) clean[k] = Math.round(clean[k]);
     for (const k of BOOL_BY_GAME[id] || []) if (cfg[k] != null) clean[k] = !!cfg[k];
     for (const [k, [opts, def]] of Object.entries(CHOICE_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = opts.includes(cfg[k]) ? cfg[k] : def;

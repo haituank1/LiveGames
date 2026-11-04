@@ -55,7 +55,7 @@
         "file": "bg-sanh-moi.webp"
       }
     ],
-    "coupleSec": 15,
+    "coupleSec": 9,
     "nhaCapTiepSauGiay": 6,
     "mcCouple": [
       "Xin giới thiệu cặp đôi {a} ❤ {b}! Mời hai bạn lên sân khấu làm lễ nào!",
@@ -179,8 +179,6 @@
     ],
     "phongToGoiTen": 1.32,
     "coCapGiua": 1.22,
-    "coCapBen": 1.22,
-    "soCapToiDa": 2,
     "phongVangDuoi": 15,
     "liaCamNguoiMoiKhiVang": true,
     "liaCamNguoiMoiGiay": 4,

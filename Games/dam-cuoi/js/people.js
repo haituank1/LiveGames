@@ -861,120 +861,76 @@ function syncPairSpeed(a, b) {
   a.speedPx = Math.max(170, Math.min(1100, la / T));
   b.speedPx = Math.max(170, Math.min(1100, lb / T));
 }
-/* Trượt 1 cặp ĐANG DIỄN sang ô sân khấu khác (dùng khi nhường giữa):
-   trạng thái giữ nguyên 'stage', đồng hồ buổi lễ KHÔNG đặt lại — cặp chỉ
-   đổi chỗ đứng, diễn nốt phần thời gian còn lại ở ô mới. */
-function moveCoupleToSlot(c, i) {
-  if (c.spot >= 0) stageSlots[c.spot] = null;
-  stageSlots[i] = c; c.spot = i;
-  c.a.spotScale = c.b.spotScale = i === 0 ? P.tune.scaleC : P.tune.scaleS;
-  const pose = slotPose(c, i);
-  walkPath(pose.leftP, [pose.l], 'stage');
-  walkPath(pose.rightP, [pose.r], 'stage');
-  syncPairSpeed(pose.leftP, pose.rightP);
-  c.a.dirty = c.b.dirty = true;
-}
-
 function promoteStage() {
-  /* CỔNG NHỊP THỐNG NHẤT (Nguyen chốt lại 2026-11-04 18:46, thay cho
-     cơ chế 2 chế độ vắng/đông trước đây): dù hàng chờ ít hay đông, cặp
-     tiếp theo chỉ được BẮT ĐẦU DI CHUYỂN khi (a) không có hành trình
-     nào đang chạy — không bao giờ 2 cặp cùng đi lên, và (b) mọi cặp
-     đang diễn đã ĐỨNG ĐỦ releaseSec giây (mặc định 6 — config
-     nhaCapTiepSauGiay). Di chuyển và lia cam dùng CHUNG một mốc này:
-     hết khóa tâm điểm ở sân khấu thì cặp sau mới bước đi, camera bám
-     theo ngay — không còn cảnh cặp sau lén đi trước trong lúc camera
-     còn khóa. Sân khấu đang trống (chưa ai diễn / cặp trước đã xuống)
-     thì cặp đầu hàng chờ đi ngay. Chưa tới nhịp thì DỪNG ở đây; hẹn
-     giờ ở arriveStage sẽ gọi lại đúng mốc nhả. Trần đứng cùng lúc vẫn
-     là soCapToiDa (mặc định 2): 1 cặp diễn + 1 cặp đang trên đường lên
-     trong lúc cặp trước sắp hết lượt. */
-  const staged = stageSlots.filter(Boolean).length;
-  const hardMax = Math.max(1, P.tune.maxStage || 2);
-  const cap = Math.max(1, Math.min(2, hardMax, staged + stageQueue.length));
-  if (stageQueue.length) {
-    let journeying = false, freshPerforming = false;
-    for (const c of couples) {
-      if (c.state === 'toStage') journeying = true;
-      else if (c.state === 'stage') {
-        const performed = (P.coupleSec || 25) - Math.max(0, c.timer != null ? c.timer : 0);
-        if (performed < (P.releaseSec || 6)) freshPerforming = true;
-      }
-    }
-    if (journeying || freshPerforming) return;
-  }
-  /* NHƯỜNG GIỮA CHO CẶP LÊN SAU (Nguyen chốt 2026-11-04 17:18): nếu ô
-     giữa đang có cặp diễn và sắp có cặp mới được lên (còn ô bên trống,
-     cap cho phép), mà cặp giữa đã diễn QUÁ NỬA lượt (≥55% coupleSec)
-     thì cặp giữa trượt sang ô bên — cặp mới vào giữa làm tâm điểm
-     (featured = ô 0 nên camera + điểm quà tự dồn về cặp mới). Cặp giữa
-     mới diễn chưa lâu thì giữ nguyên, cặp mới lấy ô bên như thường. */
-  if (stageQueue.length && staged && staged < cap && stageSlots[0] && stageSlots[0].state === 'stage') {
-    const freeSide = !stageSlots[1] ? 1 : (!stageSlots[2] ? 2 : -1);
-    if (freeSide > 0) {
-      const inc = stageSlots[0];
-      const total = P.coupleSec || 25;
-      const performed = total - Math.max(0, inc.timer != null ? inc.timer : total);
-      if (performed >= total * 0.55) moveCoupleToSlot(inc, freeSide);
+  /* MOT TAM DIEM DUY NHAT O GIUA SAN KHAU (Nguyen chot lai 2026-11-04
+     19:00 — thay han co che o ben + nhuong giua): cap nao len cung
+     duoc DUNG GIUA (spot 0), khong con cap nao phai dien o o ben.
+     Cap truoc dien o giua; cap sau duoc nha di len trong luc cap
+     truoc con dien va vao giua ngay khi cap truoc xuong dung han
+     coupleSec (nay 9 giay). Cap dang tren duong len CHUA giu o giua
+     (spot = -1) — o giua chi chuyen chu khi cap sau TOI NOI
+     (arriveStage), va cap nao con dang dung luc do (thuong la cap
+     giu san khau vi phong vang) phai xuong nhuong ngay.
+     CONG NHIP (chot 18:46, giu nguyen): cap sau chi BAT DAU DI
+     CHUYEN khi (a) khong co hanh trinh nao dang chay va (b) moi cap
+     dang dien da dung du releaseSec (mac dinh 6 — config
+     nhaCapTiepSauGiay). Chua toi nhip thi DUNG o day; nhip game o
+     vong lap nguoi + hen gio arriveStage se goi lai dung moc. */
+  if (!stageQueue.length) return;
+  let journeying = false, freshPerforming = false;
+  for (const c of couples) {
+    if (c.state === 'toStage') journeying = true;
+    else if (c.state === 'stage') {
+      const performed = (P.coupleSec || 25) - Math.max(0, c.timer != null ? c.timer : 0);
+      if (performed < (P.releaseSec || 6)) freshPerforming = true;
     }
   }
-  let onStage = stageSlots.filter(Boolean).length;
-  for (let i = 0; i < 3; i++) {
-    if (stageSlots[i] || !stageQueue.length || onStage >= cap) continue;
-    const c = stageQueue.shift(); c.giftPriority = false; notifyQueue();
-    c.state = 'toStage'; c.spot = i;
-    stageSlots[i] = c;
-    onStage++;
-    c.a.spotScale = c.b.spotScale = i === 0 ? P.tune.scaleC : P.tune.scaleS;
-    /* TỚI LƯỢT cặp này — nhưng CHƯA thay đồ vội: hai người mặc đồ
-       thường đi ra điểm hẹn giữa thảm trước, đứng cạnh nhau rồi mới
-       cùng biến hình ở đó (xem onGather dưới đây). Cặp còn chờ trong
-       hàng vẫn đồ thường — xem makeCouple. */
-    /* HÀNH TRÌNH LÊN SÂN KHẤU — 3 chặng (gộp 2 chốt của Nguyen
-       2026-11-04 17:19 + 17:41): CHẶNG 1 hai người mặc đồ thường đi ra
-       ĐIỂM HẸN GIỮA THẢM ĐỎ và ĐỢI nhau (hết cảnh người tới trước đứng
-       một mình, người kia lũi thủi theo sau — "khá mắt cười" cả 2
-       chiều nam/nữ); CHẶNG 2 cả hai đứng cạnh nhau ở giữa thảm mới
-       cùng BIẾN HÌNH (ở onGather); CHẶNG 3 nắm tay đi lên sân khấu,
-       tốc độ căn khớp để tới nơi cùng lúc, buổi lễ chỉ bắt đầu khi cả
-       hai đã vào vị trí (arriveStage chờ đủ 2 người). */
-    let gathered = 0;
-    const onGather = () => {
-      if (++gathered !== 2 || !couples.includes(c) || c.state !== 'toStage') return;
-      /* CẢ HAI ĐÃ ĐỨNG CẠNH NHAU Ở GIỮA THẢM — giờ mới BIẾN HÌNH:
-         thay đồ cưới + vòng sáng + onPairReveal (hiệu ứng, MC giới
-         thiệu, camera bắt trọn khoảnh khắc), giữ ~1.4 giây cho người
-         xem kịp nhìn, rồi mới nắm tay nhau đi lên sân khấu. */
-      c.groom.set = c.set; c.bride.set = c.set;
-      setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
-      c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
-      if (P.onPairReveal) P.onPairReveal(c);
-      setTimeout(() => {
-        if (!couples.includes(c) || c.state !== 'toStage') return;
-        const pose = slotPose(c, i);
-        const tgt = p => (p === pose.leftP ? pose.l : pose.r);
-        let arrived = 0;
-        const onArr = () => { if (++arrived === 2) arriveStage(c); };
-        walkPath(c.groom, [{ x: 47, y: stageY + 7 }, tgt(c.groom)], 'toStage', onArr);
-        walkPath(c.bride, [{ x: 53, y: stageY + 7 }, tgt(c.bride)], 'toStage', onArr);
-        syncPairSpeed(c.groom, c.bride);
-      }, 1400);
-    };
-    walkPath(c.groom, [{ x: 47, y: REVEAL_Y }], 'toStage', onGather);
-    walkPath(c.bride, [{ x: 53, y: REVEAL_Y }], 'toStage', onGather);
-    if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
-    /* Mỗi lần gọi chỉ nhả ĐÚNG 1 cặp — nếu
-       không, lúc sân khấu vừa trống mà hàng chờ có sẵn 2+ cặp, vòng lặp
-       này sẽ nhả 2 cặp đi lên CÙNG LÚC (bắt gặp ở ảnh chụp test bộ ba
-       tính năng 2026-11-04 18:14: 2 cặp quà cùng đi thảm song song),
-       trái hẳn quy tắc 'không 2 hành trình song song'. Cặp kế tiếp sẽ
-       được nhả bởi hẹn giờ arriveStage / leaveStage như thường. */
-    break;
-  }
+  if (journeying || freshPerforming) return;
+  const c = stageQueue.shift(); c.giftPriority = false; notifyQueue();
+  c.state = 'toStage'; c.spot = -1;
+  c.a.spotScale = c.b.spotScale = P.tune.scaleC;
+  /* TOI LUOT cap nay — nhung CHUA thay do voi: hai nguoi mac do
+     thuong di ra diem hen giua tham truoc, dung canh nhau roi moi
+     cung bien hinh o do (xem onGather duoi day). Cap con cho trong
+     hang van do thuong — xem makeCouple. */
+  /* HANH TRINH LEN SAN KHAU — 3 chang (gop 2 chot cua Nguyen
+     2026-11-04 17:19 + 17:41): CHANG 1 hai nguoi mac do thuong di ra
+     DIEM HEN GIUA THAM DO va DOI nhau; CHANG 2 ca hai dung canh nhau
+     o giua tham moi cung BIEN HINH (o onGather); CHANG 3 nam tay di
+     len san khau vao DUNG VI TRI GIUA, toc do can khop de toi noi
+     cung luc, buoi le chi bat dau khi ca hai da vao vi tri
+     (arriveStage cho du 2 nguoi). */
+  let gathered = 0;
+  const onGather = () => {
+    if (++gathered !== 2 || !couples.includes(c) || c.state !== 'toStage') return;
+    /* CA HAI DA DUNG CANH NHAU O GIUA THAM — gio moi BIEN HINH:
+       thay do cuoi + vong sang + onPairReveal (hieu ung, MC gioi
+       thieu, camera bat tron khoanh khac), giu ~1.4 giay cho nguoi
+       xem kip nhin, roi moi nam tay nhau di len san khau. */
+    c.groom.set = c.set; c.bride.set = c.set;
+    setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
+    c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
+    if (P.onPairReveal) P.onPairReveal(c);
+    setTimeout(() => {
+      if (!couples.includes(c) || c.state !== 'toStage') return;
+      const pose = slotPose(c, 0);
+      const tgt = p => (p === pose.leftP ? pose.l : pose.r);
+      let arrived = 0;
+      const onArr = () => { if (++arrived === 2) arriveStage(c); };
+      walkPath(c.groom, [{ x: 47, y: stageY + 7 }, tgt(c.groom)], 'toStage', onArr);
+      walkPath(c.bride, [{ x: 53, y: stageY + 7 }, tgt(c.bride)], 'toStage', onArr);
+      syncPairSpeed(c.groom, c.bride);
+    }, 1400);
+  };
+  walkPath(c.groom, [{ x: 47, y: REVEAL_Y }], 'toStage', onGather);
+  walkPath(c.bride, [{ x: 53, y: REVEAL_Y }], 'toStage', onGather);
+  if (P.onPairWalk) P.onPairWalk(c);   // camera bam theo khi di tham do
 }
 function arriveStage(c) {
   if (c.state !== 'toStage') return;
   c.state = 'stage';
+  c.spot = 0;
+  stageSlots[0] = c;
   c.hold = false;
   c.timer = P.coupleSec || 25;
   c.a.state = 'stage'; c.b.state = 'stage';
@@ -984,10 +940,13 @@ function arriveStage(c) {
      cam ở promoteStage): tới giờ gọi lại promoteStage, cổng nhịp ở đó
      tự quyết có nhả hay chưa (hàng chờ có thể đã đổi khác lúc đó). */
   setTimeout(() => promoteStage(), (P.releaseSec || 6) * 1000);
-  /* Cặp nào đang "đứng chờ" (hết giờ nhưng phòng trống lịch nên được
-     đứng tiếp) thì giờ mới đi xuống, nhường sân khấu cho cặp vừa lên
-     tới nơi — đúng ý chủ phòng: có cặp khác lên thì họ mới xuống. */
-  for (const o of couples) if (o !== c && o.state === 'stage' && o.hold) leaveStage(o);
+  /* NHUONG GIUA: cap nao khac con dang dung dien thi xuong ngay de
+     nhuong tam diem cho cap vua toi noi — binh thuong la cap dang
+     "dung cho" (het gio nhung phong vang nen dung tiep); cung bao
+     truong hop coupleSec duoc chinh dai hon ca hanh trinh: cap truoc
+     chua het gio cung xuong nhuong, cap moi luon la tam diem duy
+     nhat o giua. */
+  for (const o of couples) if (o !== c && o.state === 'stage') leaveStage(o);
 }
 /* ===== Chong spam len san khau (Nguyen chot 2026-11-04) =====
    Moi nguoi xuong san khau xong la bat dau DEM NGUOC (stageCdUntil): trong
@@ -1014,7 +973,7 @@ function leaveStage(c) {
   c.hold = false;
   const cdUntil = Date.now() + (P.stageCooldownSec || 0) * 1000;
   c.a.stageCdUntil = cdUntil; c.b.stageCdUntil = cdUntil;   // xuong san khau -> bat dau dem nguoc
-  if (c.spot >= 0) stageSlots[c.spot] = null;
+  if (c.spot >= 0 && stageSlots[c.spot] === c) stageSlots[c.spot] = null;
   c.spot = -1; c.state = 'court';
   c.a.spotScale = c.b.spotScale = 1;
   // người về sau: nếu còn vị trí trống sát cạnh vị trí của bạn đời thì chuyển sang ngồi cạnh
@@ -1034,7 +993,8 @@ function leaveStage(c) {
 function dissolveCouple(c, leaving) {
   const i = couples.indexOf(c); if (i >= 0) couples.splice(i, 1);
   const qi = stageQueue.indexOf(c); if (qi >= 0) { stageQueue.splice(qi, 1); notifyQueue(); }
-  if (c.spot >= 0) { stageSlots[c.spot] = null; promoteStage(); }
+  if (c.spot >= 0 && stageSlots[c.spot] === c) stageSlots[c.spot] = null;
+  promoteStage();
   const other = leaving === c.a ? c.b : c.a;
   if (other && people.get(other.user.id) === other) {
     other.couple = null; other.boost = 1;
@@ -1046,10 +1006,10 @@ function dissolveCouple(c, leaving) {
 P.featured = () => stageSlots[0];
 P.staged = () => stageSlots.map((c, i) => c ? { couple: c, spot: i } : null).filter(Boolean);
 /* Thông số tinh chỉnh — main.js nạp từ config (mapping) qua setTune */
-P.tune = { boost: 1.32, scaleC: 1.22, scaleS: 1.22, maxStage: 3, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45, quietMax: 15 };
+P.tune = { boost: 1.32, scaleC: 1.22, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45, quietMax: 15 };
 P.setTune = function (t) {
   if (!t) return;
-  for (const k of ['boost', 'scaleC', 'scaleS', 'maxStage']) {
+  for (const k of ['boost', 'scaleC']) {
     const v = Number(t[k]);
     if (isFinite(v) && v > 0) P.tune[k] = v;
   }
