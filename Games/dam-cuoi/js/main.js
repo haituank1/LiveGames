@@ -539,6 +539,47 @@ function computeStageCooldown() {
   return Math.round(Math.min(max, Math.max(min, sec)));
 }
 setInterval(() => { P.setStageCooldown(computeStageCooldown()); }, 5000);
+/* ===== Hieu ung NGAU NHIEN giu sanh luon song (Nguyen chot 2026-11-04) =====
+   Nguoi xem nhieu khi chi chat / tha tim chu khong tang qua — neu chi cho
+   qua moi co hieu ung thi sanh trong chet. Cu moi mot khoang ngau nhien
+   [hieuUngNgauNhienTuGiay, hieuUngNgauNhienDenGiay] giay game tu ban 1 hieu
+   ung bat ky (hoa roi, kim tuyen, phao hoa, tim bay...) — moc sanh cang cao
+   lua chon cang phong phu. Tat bang hieuUngNgauNhien: false. */
+let nextRandomFxAt = 0;
+function fireRandomFx() {
+  const tier = BG.tier;
+  const pool = ['petals', 'glitter', 'hearts', 'confetti', 'fireworks'];
+  if (tier >= 2) pool.push('petals', 'bokeh', 'fireworks');
+  if (tier >= 3) pool.push('lanterns');
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  const R = (a, b) => a + Math.random() * (b - a);
+  if (pick === 'petals') FX.petals(Math.round(R(45, 95)));
+  else if (pick === 'glitter') FX.glitter(Math.round(R(45, 85)));
+  else if (pick === 'confetti') FX.confetti(Math.round(R(30, 60)));
+  else if (pick === 'fireworks') FX.fireworksShow(Math.round(R(1, 3.4)), 320);
+  else if (pick === 'bokeh') FX.bokeh(Math.round(R(5, 9)));
+  else if (pick === 'lanterns') FX.lanterns(Math.round(R(3, 5)));
+  else if (pick === 'hearts') {
+    const feat = P.featured();
+    if (feat) { const sp = Cam.toScreen(feat.a.x, feat.a.y); FX.ringHearts(sp.fx, sp.fy - 0.05); }
+    else FX.hearts(Math.round(R(8, 14)));
+  }
+  const feat2 = P.featured();
+  if (feat2 && Math.random() < 0.35 && FX.stageSparkle) {
+    const sp2 = Cam.toScreen(feat2.a.x, feat2.a.y);
+    FX.stageSparkle(sp2.fx, sp2.fy - 0.05);
+  }
+}
+setInterval(() => {
+  if (cfg.hieuUngNgauNhien === false) return;
+  const now = performance.now();
+  const lo = (cfg.hieuUngNgauNhienTuGiay != null ? cfg.hieuUngNgauNhienTuGiay : 12) * 1000;
+  const hi = Math.max(lo, (cfg.hieuUngNgauNhienDenGiay != null ? cfg.hieuUngNgauNhienDenGiay : 25) * 1000);
+  if (!nextRandomFxAt) { nextRandomFxAt = now + lo + Math.random() * (hi - lo); return; }
+  if (now < nextRandomFxAt) return;
+  nextRandomFxAt = now + lo + Math.random() * (hi - lo);
+  fireRandomFx();
+}, 1000);
 P.onStageSkipped = function (c) {
   toast(`⏳ ${c.a.user.nickname} ❤ ${c.b.user.nickname} vừa làm lễ xong — ${P.stageCooldownRemain(c)}s nữa mới lên lại được`, false);
 };
@@ -871,6 +912,7 @@ if (isDemo) {
     choLenSanKhauCoBan: 90, choTuDong: true, choLenSanKhauMin: 20, choLenSanKhauMax: 600,
     choCongMoiCapCho: 15, choCongMoiCapGhep: 8, choMienGhep: 2,
     choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
+    hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,
     hangChoToiDa: 4,
     bannerY: 30,
     khungTraiX: 0, khungTraiY: 0, khungPhaiX: 0, khungPhaiY: 0, khungHangChoX: 0, khungHangChoY: 0, khungMcX: 0, khungMcY: 0,
