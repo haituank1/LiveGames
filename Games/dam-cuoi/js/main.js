@@ -50,13 +50,13 @@ const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i;
    vào việc tải ảnh lúc đông người nữa. */
 const ASSET_IMGS = [
   'img/mc.png', 'img/mc-nu.png',
-  'img/bride.png', 'img/bride2.png', 'img/bride3.png', 'img/bride4.png',
-  'img/groom.png', 'img/groom2.png', 'img/groom3.png', 'img/groom4.png',
-  'img/royal-bride1.png', 'img/royal-bride2.png', 'img/royal-groom1.png', 'img/royal-groom2.png',
+  'img/bride.png', 'img/bride2.png', 'img/bride3.png', 'img/bride4.png', 'img/bride5.png',
+  'img/groom.png', 'img/groom2.png', 'img/groom3.png', 'img/groom4.png', 'img/groom5.png',
+  'img/royal-bride1.png', 'img/royal-bride2.png', 'img/royal-groom1.png', 'img/royal-groom2.png', 'img/royal-groom3.png',
   'img/guest-girl.png', 'img/guest-girl2.png', 'img/guest-girl3.png', 'img/guest-girl4.png',
   'img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.png', 'img/guest-boy4.png',
-  ...Array.from({ length: 10 }, (_, i) => `img/avatars/av-f${i + 1}.webp`),
-  ...Array.from({ length: 10 }, (_, i) => `img/avatars/av-m${i + 1}.webp`),
+  ...Array.from({ length: 11 }, (_, i) => `img/avatars/av-f${i + 1}.webp`),
+  ...Array.from({ length: 12 }, (_, i) => `img/avatars/av-m${i + 1}.webp`),
 ];
 const assetState = {};    // file -> 'ok' | 'err'
 const assetPromise = {};  // file -> Promise<boolean>

@@ -57,6 +57,7 @@ const SETS_BASE = [
   { name: 'Truyền thống áo dài', bride: 'img/bride2.png', groom: 'img/groom4.png' },
   { name: 'Hồng hiện đại', bride: 'img/bride3.png', groom: 'img/groom3.png' },
   { name: 'Công chúa vàng', bride: 'img/bride4.png', groom: 'img/groom2.png' },
+  { name: 'Sapphire đêm', bride: 'img/bride5.png', groom: 'img/groom5.png' },
 ];
 const SETS_ROYAL = [
   { name: 'Hoàng gia vàng', bride: 'img/royal-bride1.png', groom: 'img/royal-groom1.png' },
@@ -70,8 +71,8 @@ const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.p
    game, để ở img/avatars/): người chưa có ảnh TikTok thì lấy 1 mặt trong bộ
    này làm ảnh đại diện — theo giới của nhân vật, cố định theo id — thay cho
    hình bóng người trống trơn trước đây (Nguyen chot 2026-11-04). */
-const AV_GIRLS = Array.from({ length: 10 }, (_, i) => `img/avatars/av-f${i + 1}.webp`);
-const AV_BOYS = Array.from({ length: 10 }, (_, i) => `img/avatars/av-m${i + 1}.webp`);
+const AV_GIRLS = Array.from({ length: 11 }, (_, i) => `img/avatars/av-f${i + 1}.webp`);
+const AV_BOYS = Array.from({ length: 12 }, (_, i) => `img/avatars/av-m${i + 1}.webp`);
 [...AV_GIRLS, ...AV_BOYS].forEach(src => { const im = new Image(); im.src = src; });
 function isGirlFigure(p) {
   if (p.outfit === 'bride') return true;
