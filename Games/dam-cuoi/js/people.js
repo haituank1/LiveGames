@@ -900,40 +900,88 @@ function promoteStage() {
      len san khau vao DUNG VI TRI GIUA, toc do can khop de toi noi
      cung luc, buoi le chi bat dau khi ca hai da vao vi tri
      (arriveStage cho du 2 nguoi). */
-  let gathered = 0;
+  c.journeyAt = Date.now(); c._heals = 0;
+  startLeg1(c);
+  if (P.onPairWalk) { try { P.onPairWalk(c); } catch (e) { diagErr('onPairWalk: ' + e.message); } }   // camera bam theo khi di tham do
+}
+/* Loi hook ben ngoai (camera/hieu ung/MC cua main.js) khong bao gio duoc
+   lam chet chuoi hanh trinh: bat loi tai cho, ghi vao hop chan doan. */
+function diagErr(m) { try { if (window.__diag) window.__diag.errs.push(m); } catch (e) {} }
+/* CHANG 1: hai nguoi mac do thuong di ra DIEM HEN giua tham va doi nhau.
+   Tach thanh ham rieng de watchdog ben duoi LAI LAI duoc khi hanh trinh
+   bi ket (mat callback, loi hook...) — truoc day chuoi nay chet la chet
+   han, ca hang cho dung im theo (Nguyen bao 2026-11-04 19:24: hang cho
+   dung im hon 2 phut khong cap nao len duoc nua). */
+function startLeg1(c) {
+  c._gather = 0;
   const onGather = () => {
-    if (++gathered !== 2 || !couples.includes(c) || c.state !== 'toStage') return;
-    /* CA HAI DA DUNG CANH NHAU O GIUA THAM — gio moi BIEN HINH:
-       thay do cuoi + vong sang + onPairReveal (hieu ung, MC gioi
-       thieu, camera bat tron khoanh khac), giu ~1.4 giay cho nguoi
-       xem kip nhin, roi moi nam tay nhau di len san khau. */
-    c.groom.set = c.set; c.bride.set = c.set;
-    setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
-    c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
-    if (P.onPairReveal) P.onPairReveal(c);
-    setTimeout(() => {
-      if (!couples.includes(c) || c.state !== 'toStage') return;
-      /* CẶP MỚI BẮT ĐẦU CHẶNG LÊN CUỐI = đã "lên gần tới": cặp nào
-         đang đứng diễn trên sân khấu phải DI CHUYỂN XUỐNG LIỀN để
-         nhường giữa (Nguyen chốt 2026-11-04 19:14) — không đợi hết
-         giờ coupleSec (cặp giữ sân khấu / coupleSec chỉnh dài), cũng
-         không đợi cặp mới tới nơi hẳn như cơ chế cũ. Camera không bị
-         cướp theo cặp xuống: khóa tâm điểm đang bảo vệ hành trình
-         của cặp mới nên follow của cặp xuống bị bỏ qua. */
-      for (const o of couples) if (o !== c && o.state === 'stage') leaveStage(o);
-      const pose = slotPose(c, 0);
-      const tgt = p => (p === pose.leftP ? pose.l : pose.r);
-      let arrived = 0;
-      const onArr = () => { if (++arrived === 2) arriveStage(c); };
-      walkPath(c.groom, [{ x: 47, y: stageY + 7 }, tgt(c.groom)], 'toStage', onArr);
-      walkPath(c.bride, [{ x: 53, y: stageY + 7 }, tgt(c.bride)], 'toStage', onArr);
-      syncPairSpeed(c.groom, c.bride);
-    }, 1400);
+    if (++c._gather !== 2 || !couples.includes(c) || c.state !== 'toStage') return;
+    journeyReveal(c);
   };
   walkPath(c.groom, [{ x: 47, y: REVEAL_Y }], 'toStage', onGather);
   walkPath(c.bride, [{ x: 53, y: REVEAL_Y }], 'toStage', onGather);
-  if (P.onPairWalk) P.onPairWalk(c);   // camera bam theo khi di tham do
 }
+/* CHANG 2: ca hai da dung canh nhau o giua tham — BIEN HINH (thay do
+   cuoi + vong sang + onPairReveal), giu ~1.4s roi di tiep chang cuoi. */
+function journeyReveal(c) {
+  c.groom.set = c.set; c.bride.set = c.set;
+  setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
+  c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
+  if (P.onPairReveal) { try { P.onPairReveal(c); } catch (e) { diagErr('onPairReveal: ' + e.message); } }
+  setTimeout(() => driveLeg3(c), 1400);
+}
+/* CHANG 3: nam tay nhau len san khau vao dung vi tri giua, toc do can
+   khop de toi noi cung luc; buoi le chi bat dau khi du 2 nguoi. */
+function driveLeg3(c) {
+  if (!couples.includes(c) || c.state !== 'toStage') return;
+  /* Cap moi bat dau chang len cuoi = da "len gan toi": cap nao dang
+     dung dien tren san khau phai DI CHUYEN XUONG LIEN de nhuong giua
+     (Nguyen chot 2026-11-04 19:14) — khong doi het gio coupleSec,
+     cung khong doi cap moi toi noi han. Camera khong bi cuop theo
+     cap xuong: khoa tam diem dang bao ve hanh trinh cua cap moi. */
+  for (const o of couples) if (o !== c && o.state === 'stage') leaveStage(o);
+  const pose = slotPose(c, 0);
+  const tgt = p => (p === pose.leftP ? pose.l : pose.r);
+  c._arrive = 0;
+  const onArr = () => { if (++c._arrive === 2 && couples.includes(c) && c.state === 'toStage') arriveStage(c); };
+  walkPath(c.groom, [{ x: 47, y: stageY + 7 }, tgt(c.groom)], 'toStage', onArr);
+  walkPath(c.bride, [{ x: 53, y: stageY + 7 }, tgt(c.bride)], 'toStage', onArr);
+  syncPairSpeed(c.groom, c.bride);
+}
+/* WATCHDOG SAN KHAU (chot sau su co hang cho dung im 2026-11-04):
+   chay bang setInterval (doc lap vong lap ve) — moi 4 giay kiem tra:
+   (a) cap 'toStage' qua 30 giay chua xong (hanh trinh binh thuong chi
+       ~12 giay) -> chan doan dang ket o chang nao roi LAI LAI chang
+       do; da dung sat san khau thi ep vao le luon; lai 3 lan khong
+       xong thi cho cap do xuong ngoi (court) de pipeline chay tiep.
+   (b) hang cho con nguoi ma san khau trong + khong ai dang di -> goi
+       lai promoteStage (phong khi mat trigger).
+   Nho lop nay, bat ky loi le nao lam dut chuoi cung chi lam tre 1
+   cap vai chuc giay, khong con dong bang ca buoi live. */
+setInterval(() => {
+  const now = Date.now();
+  for (const c of [...couples]) {
+    if (c.state !== 'toStage' || !c.journeyAt) continue;
+    const age = (now - c.journeyAt) / 1000;
+    if (age < 30) continue;
+    diagErr('watchdog: toStage ket ' + Math.round(age) + 's — ' + c.a.user.nickname + ' ❤ ' + c.b.user.nickname + ' (lan chua ' + ((c._heals || 0) + 1) + ')');
+    const nearStage = c.a.y <= stageY + 12 && c.b.y <= stageY + 12;
+    const transformed = c.groom.outfit === 'groom' && c.bride.outfit === 'bride';
+    if (nearStage) {
+      const pose = slotPose(c, 0);
+      for (const [pp, tt] of [[pose.leftP, pose.l], [pose.rightP, pose.r]]) { pp.x = tt.x; pp.y = tt.y; pp.target = null; pp.path = []; pp.done = null; pp.dirty = true; }
+      arriveStage(c);
+    } else if ((c._heals || 0) >= 3) {
+      c.state = 'court'; c.spot = -1; c.journeyAt = 0;
+      for (const p of [c.a, c.b]) { p.target = null; p.path = []; p.done = null; walkTo(p, { x: p.home.x, y: p.home.y }, 'walk', () => { p.state = 'home'; }); }
+      diagErr('watchdog: bo cuoc hanh trinh — ' + c.key);
+    } else if (transformed) driveLeg3(c);
+    else startLeg1(c);
+    if (c.state === 'toStage') { c.journeyAt = now; c._heals = (c._heals || 0) + 1; }
+    promoteStage();
+  }
+  if (stageQueue.length && !couples.some(c => c.state === 'stage' || c.state === 'toStage')) promoteStage();
+}, 4000);
 function arriveStage(c) {
   if (c.state !== 'toStage') return;
   c.state = 'stage';
@@ -943,7 +991,8 @@ function arriveStage(c) {
   c.timer = P.coupleSec || 25;
   c.a.state = 'stage'; c.b.state = 'stage';
   c.a.el.classList.remove('pairfx'); c.b.el.classList.remove('pairfx');
-  if (P.onCoupleStage) P.onCoupleStage(c);
+  c.journeyAt = 0; c._heals = 0;
+  if (P.onCoupleStage) { try { P.onCoupleStage(c); } catch (e) { diagErr('onCoupleStage: ' + e.message); } }
   /* Hẹn giờ NHẢ cặp tiếp theo đúng mốc đứng đủ releaseSec (nhịp lia
      cam ở promoteStage): tới giờ gọi lại promoteStage, cổng nhịp ở đó
      tự quyết có nhả hay chưa (hàng chờ có thể đã đổi khác lúc đó). */
@@ -1009,7 +1058,7 @@ function leaveStage(c) {
     });
     if (p.speedPx) p.speedPx = Math.min(1250, Math.round(p.speedPx * 1.55));
   }
-  if (P.onPairReturn) P.onPairReturn(c);   // camera bám theo khi đi về chỗ
+  if (P.onPairReturn) { try { P.onPairReturn(c); } catch (e) { diagErr('onPairReturn: ' + e.message); } }   // camera bám theo khi đi về chỗ
   promoteStage();
 }
 function dissolveCouple(c, leaving) {
