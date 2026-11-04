@@ -168,11 +168,11 @@ function register(user) {
 function ensureGuest(user) {
   const u = register(user);
   if (!u) return null;
-  countView(u);
+  if (!u.npc) countView(u);              // NPC gắn sẵn vào phòng KHÔNG tính lượt xem (mốc sảnh là của mắt xem thật)
   const moi = !P.get(u.id);   // lần đầu xuất hiện trong phòng?
   const p = P.spawn(u);
-  if (p) P.touch(u.id);   // bất kỳ sự kiện nào cũng tính là còn tương tác -> giữ chỗ đẹp
-  if (moi && p) maybeWelcomePan(p);
+  if (p) { if (u.npc) p.npc = true; P.touch(u.id); }   // bất kỳ sự kiện nào cũng tính là còn tương tác -> giữ chỗ đẹp
+  if (moi && p && !u.npc) maybeWelcomePan(p);          // NPC vào lặng lẽ: không giật cam chào, không câu chào MC
   return p;
 }
 /* LIA CAM CHÀO KHÁCH MỚI (Nguyen yêu cầu 2026-11-04): chỉ khi KHÔNG có cặp
@@ -195,7 +195,7 @@ function maybeWelcomePan(p) {
   }, holdMs + 1500);
 }
 function coupleScore(c, pts) {
-  if (!c || pts <= 0) return;
+  if (!c || pts <= 0 || c.a.npc || c.b.npc) return;   // cặp NPC không ghi điểm BXH — điểm là của khách thật
   coupleByKey.set(c.key, c);
   const s = scores[c.key] || (scores[c.key] = { a: c.a.user.nickname, b: c.b.user.nickname, score: 0 });
   s.a = c.a.user.nickname; s.b = c.b.user.nickname;
@@ -957,15 +957,18 @@ function requestCouple(a, b, viaTag) {
   return c;
 }
 P.onCoupleStage = function (c) {
-  couplesDone++;
-  try { localStorage.setItem(LS_COUPLLES, String(couplesDone)); } catch (e) {}
-  renderCoupleCount();
-  coupleScore(c, 30);
+  const npc = !!(c.a.npc || c.b.npc);   // cặp NPC diễn cho phòng vui: KHÔNG đếm lễ, KHÔNG ghi điểm
+  if (!npc) {
+    couplesDone++;
+    try { localStorage.setItem(LS_COUPLLES, String(couplesDone)); } catch (e) {}
+    renderCoupleCount();
+    coupleScore(c, 30);
+  }
   if (BG.tier >= 4) P.setCrown(c);   // từ mốc Đại Tiệc Vàng (600+): cặp nào lên bục cũng đội vương miện
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 9000;
   Cam.stage();
-  showBanner(`💍 LỄ THÀNH HÔN #${couplesDone} · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
+  showBanner(npc ? `💍 LỄ THÀNH HÔN · ${c.a.user.nickname} ❤ ${c.b.user.nickname}` : `💍 LỄ THÀNH HÔN #${couplesDone} · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
   const sp = Cam.toScreen(c.a.x, c.a.y);
   if (FX.cannon) FX.cannon();
   if (FX.butterflies) FX.butterflies(2);   // bướm phát sáng bay ra mừng lễ thành hôn
@@ -1109,6 +1112,80 @@ function greet(user) {
   greeted.add(user.id); lastGreet = now;
   mcReact(1, MC.greet, { ten: user.nickname });
 }
+/* ================= NPC TỰ ĐỘNG KHI VẮNG KHÁCH (Nguyen yêu cầu 2026-11-04) =================
+   Phòng vắng mà sân khấu đứng yên thì buổi live chết: gắn sẵn một dàn
+   NPC (config npcDanhSach, mặc định 10 người) vào phòng như khách
+   thường. Khi khách THẬT còn ít (<= npcNguongVang) và sân khấu đang
+   rảnh, game tự cho một NPC "chat tag" một NPC độc thân khác — đi
+   đúng đường onChat -> requestCouple như khách thật: MC giới thiệu,
+   biến hình thảm đỏ, lên làm lễ đủ bài. Khác khách thật ở 4 điểm:
+   (1) NPC vào phòng KHÔNG tính lượt xem, không lia cam chào, không
+   câu chào MC; (2) cặp NPC KHÔNG ghi điểm BXH và KHÔNG đếm vào bộ
+   đếm cặp đôi — số liệu để dành cho khách thật; (3) cặp NPC diễn
+   xong, ngồi nghỉ npcNghiGiay thì TỰ TAN (cặp thường không bao giờ
+   tan) để các lần sau xoay vòng sang cặp khác; (4) phòng đông lên quá
+   ngưỡng thì ngừng rủ cặp mới. Sửa danh sách/ngưỡng trong admin,
+   áp dụng khi tải lại trang game. */
+const NPC = { started: false, users: [], lastTagAt: 0, courtSince: new Map() };
+function npcRoster() {
+  return asList(cfg.npcDanhSach).map(x => String(x).trim()).filter(Boolean).slice(0, 30)
+    .map((name, i) => ({ id: 'npc-' + (i + 1), nickname: name, uniqueId: 'npc' + (i + 1), avatar: '', npc: true }));
+}
+function npcSync() {
+  if (NPC.started || cfg.npcTuDong === false) return;
+  const list = npcRoster();
+  if (!list.length) return;
+  NPC.started = true; NPC.users = list;
+  list.forEach((u, i) => setTimeout(() => { if (cfg.npcTuDong !== false) ensureGuest(u); }, 1500 + i * 1500));
+  setInterval(npcTick, 4000);
+}
+function npcRealCount() {
+  let n = 0;
+  for (const u of known.values()) if (!u.npc && P.get(u.id)) n++;
+  return n;
+}
+function npcStageBusy() {
+  if (lastQueueLen > 0) return true;
+  for (const c of coupleByKey.values()) if (c && (c.state === 'focus' || c.state === 'queue' || c.state === 'toStage')) return true;
+  const f = P.featured();
+  // Cap that dang dien thi phai cho xong. NGOAI LE: cap NPC dang "giu san
+  // khau" (hold = het gio dien ma chua co cap ke nen tam dung lai) thi
+  // KHONG chan — tag cap NPC moi chinh la cach game xoay vong: cap cu se
+  // tu xuong khi cap moi di toi san khau. Cap that dang hold thi de yen.
+  if (f && !(f.hold && (f.a.npc || f.b.npc))) return true;
+  return false;
+}
+function npcDissolveRested() {
+  const restMs = (Number(cfg.npcNghiGiay) || 60) * 1000;
+  const now = Date.now();
+  for (const c of [...coupleByKey.values()]) {
+    if (!c || !(c.a.npc || c.b.npc)) continue;
+    if (c.state !== 'court') { NPC.courtSince.delete(c.key); continue; }
+    if (!NPC.courtSince.has(c.key)) { NPC.courtSince.set(c.key, now); continue; }
+    if (now - NPC.courtSince.get(c.key) >= restMs) {
+      NPC.courtSince.delete(c.key);
+      coupleByKey.delete(c.key);
+      P.dissolveCoupleFull(c);
+    }
+  }
+}
+function npcTick() {
+  if (!NPC.started || cfg.npcTuDong === false) return;
+  npcDissolveRested();
+  if (npcRealCount() > (Number(cfg.npcNguongVang) || 6)) return;
+  if (Date.now() - NPC.lastTagAt < (Number(cfg.npcMoiBaoLauGiay) || 25) * 1000) return;
+  if (npcStageBusy()) return;
+  const singles = NPC.users.filter(u => { const p = P.get(u.id); return p && !p.couple && p.state === 'home'; });
+  if (singles.length < 2) return;
+  const shuffled = singles.slice().sort(() => Math.random() - 0.5);
+  const a = shuffled[0];
+  const aGirl = P.isGirl(a.id);
+  const b = shuffled.find(u => u !== a && P.isGirl(u.id) !== aGirl) || shuffled.find(u => u !== a);
+  if (!b) return;
+  NPC.lastTagAt = Date.now();
+  onChat({ user: known.get(a.id) || a, text: '@' + b.nickname });
+}
+
 function handle(ev) {
   const src = ev.source || {};
   if (ev.user) ensureGuest(ev.user);
@@ -1180,7 +1257,7 @@ function applyConfig(c) {
      chứng các bản admin cũ) — asList ép hết về mảng chuỗi sạch. 1 key sai
      kiểu không được phép giết cả quá trình áp config/UI (lỗi 2026-11-04:
      màn hình mất hết khung/BXH/MC dù sự kiện vẫn chạy). */
-  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'rulesLines', 'guideLines']) {
+  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'rulesLines', 'guideLines', 'npcDanhSach']) {
     cfg[k] = asList(cfg[k]).filter(x => typeof x === 'string');
   }
   if (cfg.mcName) MC.name = cfg.mcName;
@@ -1250,6 +1327,7 @@ function applyConfig(c) {
     try { fn(); } catch (e) { console.error('[dam-cuoi] loi ve UI:', e); if (window.__diag) window.__diag.uiErr = String((e && e.message) || e); }
   }
   if (window.__diag) window.__diag.stage = 'config-ok';   // mốc cho hộp tự chẩn đoán ở index.html
+  try { npcSync(); } catch (e) { console.error('[dam-cuoi] npcSync loi:', e); }
 }
 
 /* ============ Khung hình 9:16 ============ */
@@ -1362,6 +1440,8 @@ if (isDemo) {
     zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,
     uuTienChoTrong: true, nguongDongNguoi: 70, phutImMatCho: 4, tyLeChoTrong: 0.45,
     mcMinSec: 16, mcMaxSec: 24,
+    npcTuDong: true, npcNguongVang: 6, npcMoiBaoLauGiay: 25, npcNghiGiay: 60,
+    npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
     bgRules: [
       { viewers: 10, file: 'bg-500.webp' }, { viewers: 30, file: 'bg-2000.webp' },
       { viewers: 50, file: 'bg-5000.webp' }, { viewers: 100, file: 'bg-10000.webp' }, { viewers: 200, file: 'bg-sanh-moi.webp' },

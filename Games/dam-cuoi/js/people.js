@@ -809,6 +809,7 @@ P.removeUser = function (id) {
 };
 P.count = () => people.size;
 P.get = id => people.get(id) || null;
+P.isGirl = function (id) { const p = people.get(id); return p ? isGirlFigure(p) : false; };
 /* Mọi sự kiện của 1 người (vào phòng, chat, thả tim, tặng quà, follow...) đều
    qua đây để làm mới mốc hoạt động — người còn tương tác thì giữ chỗ đẹp. */
 P.touch = function (id) { const p = people.get(id); if (p) p.lastActive = Date.now(); };
@@ -1167,6 +1168,19 @@ function dissolveCouple(c, leaving) {
     walkTo(other, { x: other.home.x, y: other.home.y }, 'walk', () => { other.state = 'home'; });
   }
 }
+/* Tan ca cap + giai phong CA HAI nguoi (dissolveCouple chi giai phong
+   phia 'other') — main.js dung cho cap NPC tu tan de xoay vong doi cap. */
+P.dissolveCoupleFull = function (c) {
+  if (!c) return;
+  const a = c.a;
+  dissolveCouple(c, a);
+  if (a && people.get(a.user.id) === a) {
+    a.couple = null; a.boost = 1;
+    a.el.classList.remove('pairfx');
+    setOutfit(a, 'casual');
+    walkTo(a, { x: a.home.x, y: a.home.y }, 'walk', () => { a.state = 'home'; });
+  }
+};
 P.featured = () => stageSlots[0];
 P.staged = () => stageSlots.map((c, i) => c ? { couple: c, spot: i } : null).filter(Boolean);
 /* Thông số tinh chỉnh — main.js nạp từ config (mapping) qua setTune */

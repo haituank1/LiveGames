@@ -235,6 +235,22 @@
     "phutImMatCho": 4,
     "tyLeChoTrong": 0.45,
     "ghepDoiNgauNhien": true,
+    "npcTuDong": true,
+    "npcNguongVang": 6,
+    "npcMoiBaoLauGiay": 25,
+    "npcNghiGiay": 60,
+    "npcDanhSach": [
+      "Ngọc Linh",
+      "Tuấn Kiệt",
+      "Mỹ Duyên",
+      "Minh Đức",
+      "Hồng Nhung",
+      "Quốc Bảo",
+      "Thu Hằng",
+      "Hoàng Long",
+      "Phương Thảo",
+      "Tiến Dũng"
+    ],
     "mcTagVang": [
       "{a} gọi {ten} mà {ten} chưa có trong phòng — MC ghép tạm {a} với {b} cho đỡ trống nhé! {ten} ơi, vào nhanh để làm lễ cùng {a} nào!",
       "{ten} ơi, {a} đang gọi bạn kìa! MC giữ chỗ sẵn rồi — vào nhanh để thành đôi với {a} nhé!",

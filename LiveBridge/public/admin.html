@@ -566,6 +566,13 @@ const GAME_SCHEMAS = {
       { k: 'phutImMatCho', l: 'Im lặng bao lâu thì ưu tiên cặp chờ (phút)', t: 'num', min: 0, max: 120, step: 0.5 },
       { k: 'tyLeChoTrong', l: 'Tỉ lệ giữ chỗ khi vắng (0–1)', t: 'num', min: 0, max: 1, step: 0.05 },
     ] },
+    { title: '🤖 NPC tự động (vắng khách)', note: 'Gắn sẵn dàn khách ảo vào phòng; vắng khách thật là chúng tự tag nhau lên sân khấu làm lễ cho live luôn sống. Cặp NPC không tính điểm BXH, không đếm vào "Cặp đôi thứ N", không tính lượt xem. Đổi danh sách xong nhớ tải lại trang game.', fields: [
+      { k: 'npcTuDong', l: 'Bật NPC tự động khi vắng khách', t: 'chk', defTrue: true },
+      { k: 'npcNguongVang', l: 'Khách thật từ N người trở xuống = vắng', t: 'num', min: 0, max: 100, step: 1 },
+      { k: 'npcMoiBaoLauGiay', l: 'Đang rảnh thì mỗi N giây rủ 1 cặp NPC lên', t: 'num', min: 10, max: 3600, step: 1 },
+      { k: 'npcNghiGiay', l: 'Cặp NPC diễn xong, nghỉ N giây thì tự tan để đổi cặp khác', t: 'num', min: 10, max: 3600, step: 1 },
+      { k: 'npcDanhSach', l: 'Danh sách NPC (mỗi dòng 1 tên — nên để nửa nam nửa nữ, tên rõ giới tính để ghép đúng đôi)', t: 'lines', rows: 10 },
+    ] },
     { title: '⏳ Chờ lên sân khấu (chống spam)', note: 'Mỗi người làm lễ xong phải chờ một lúc mới lên lại được. Bật tự động thì thời gian chờ tự tăng khi đông mắt xem / nhiều cặp chờ, giảm khi vắng.', fields: [
       { k: 'choTuDong', l: 'Tự động chỉnh thời gian chờ theo lượng mắt xem', t: 'chk', defTrue: true },
       { k: 'choLenSanKhauCoBan', l: 'Thời gian chờ cơ bản (giây)', t: 'num', min: 0, max: 3600 },
