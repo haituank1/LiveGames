@@ -32,11 +32,25 @@
   @keyframes pairRing{from{transform:translateX(-50%) scale(.45);opacity:1}to{transform:translateX(-50%) scale(1.15);opacity:0}}
   .person.far .figwrap{animation-play-state:paused!important}
   .person.far .figwrap img.chibi{animation-play-state:paused!important}
-  #beams{position:absolute;inset:-20% -10%;opacity:0;transition:opacity 2s;pointer-events:none;
-    background:conic-gradient(from 180deg at 50% -10%,transparent 0deg,rgba(255,230,150,.20) 12deg,transparent 26deg,rgba(255,200,220,.16) 44deg,transparent 60deg,rgba(255,230,150,.20) 84deg,transparent 100deg,rgba(255,200,220,.16) 128deg,transparent 146deg,rgba(255,230,150,.20) 172deg,transparent 190deg,rgba(255,200,220,.16) 214deg,transparent 232deg,rgba(255,230,150,.20) 258deg,transparent 276deg,rgba(255,200,220,.16) 300deg,transparent 318deg,rgba(255,230,150,.2) 342deg,transparent 360deg);
-    animation:beams 26s linear infinite}
+  /* Anh sang 2.0 (Nguyen chot 2026-11-04): bo han kieu 1 tam gradient xoay
+     tron phu ca man hinh (nhin mo + re) — thay bang TIA NANG xoe sau vom hoa
+     (lac nhe +-2.2 do, khong quay vong) + 3 DEN CHIEU tu tren tran doi xuong
+     san khau dang con lac cham, tia sang mem va chi tap trung o khu san khau */
+  #beams{position:absolute;inset:0;opacity:0;transition:opacity 2s;pointer-events:none;overflow:hidden}
   #beams.on{opacity:1}
-  @keyframes beams{to{transform:rotate(360deg)}}
+  #beams .rays{position:absolute;left:50%;top:30%;width:165%;aspect-ratio:1;transform:translate(-50%,-50%);
+    background:repeating-conic-gradient(from -26deg at 50% 50%, rgba(255,216,140,.12) 0deg 3.5deg, transparent 3.5deg 8.5deg);
+    -webkit-mask-image:radial-gradient(circle,#000 0%,transparent 60%);mask-image:radial-gradient(circle,#000 0%,transparent 60%);
+    animation:raysway 12s ease-in-out infinite alternate}
+  @keyframes raysway{from{transform:translate(-50%,-50%) rotate(-2.2deg)}to{transform:translate(-50%,-50%) rotate(2.2deg)}}
+  #beams .spot{position:absolute;top:-5%;height:82%;width:34%;transform-origin:50% 0;mix-blend-mode:screen;filter:blur(6px);
+    clip-path:polygon(45% 0,55% 0,97% 100%,3% 100%)}
+  #beams .spot.l{left:0;background:linear-gradient(to bottom, rgba(255,244,214,.50), rgba(255,244,214,.10) 55%, transparent 78%);animation:spotl 8.5s ease-in-out infinite alternate}
+  #beams .spot.c{left:33%;background:linear-gradient(to bottom, rgba(255,226,150,.40), rgba(255,226,150,.08) 55%, transparent 78%);animation:spotc 7s ease-in-out infinite alternate}
+  #beams .spot.r{right:0;background:linear-gradient(to bottom, rgba(255,214,230,.44), rgba(255,214,230,.09) 55%, transparent 78%);animation:spotr 9.5s ease-in-out infinite alternate}
+  @keyframes spotl{from{transform:rotate(12deg)}to{transform:rotate(4deg)}}
+  @keyframes spotc{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+  @keyframes spotr{from{transform:rotate(-4deg)}to{transform:rotate(-12deg)}}
   #royalglow{position:absolute;inset:0;opacity:0;transition:opacity 2s;pointer-events:none;
     background:radial-gradient(circle at 50% 30%,rgba(255,225,140,.34),rgba(255,190,90,0) 55%)}
   #royalglow.on{opacity:1;animation:pulseGlow 3.2s ease-in-out infinite}
@@ -141,10 +155,6 @@
   #mc .say b{display:block;font-size:calc(var(--u)*2);color:#c2185b;margin-bottom:calc(var(--u)*.3)}
   #mc .say::before{content:'';position:absolute;left:calc(var(--u)*-2.2);top:calc(var(--u)*3.4);border:calc(var(--u)*1) solid transparent;border-right:calc(var(--u)*1.2) solid #e75480}
 
-  #status{position:absolute;top:calc(var(--u0)*.6);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:calc(var(--u0)*2.2);color:#fff;z-index:2200;
-    background:rgba(0,0,0,.5);padding:calc(var(--u0)*.4) calc(var(--u0)*1.6);border-radius:999px;max-width:90%;overflow:hidden;text-overflow:ellipsis}
-  #status.err{background:rgba(140,20,20,.85)} #status.demo{background:rgba(150,30,90,.85)}
-  #status.ok{display:none!important}
   @keyframes pulse{50%{transform:scale(1.06)}}
 </style>
 </head>
@@ -155,12 +165,11 @@
     <div id="spot"></div>
     <div id="people"></div>
   </div>
-  <div id="beams"></div>
+  <div id="beams"><div class="rays"></div><div class="spot l"></div><div class="spot c"></div><div class="spot r"></div></div>
   <div id="royalglow"></div>
   <canvas id="fx"></canvas>
   <div id="banner"></div>
   <div id="flash"></div>
-  <div id="status"></div>
   <div id="left">
     <div id="rules"></div>
     <div id="guide"></div>

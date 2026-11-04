@@ -16,8 +16,11 @@ const q = new URLSearchParams(location.search);
 const isDemo = q.has('demo');
 const $ = id => document.getElementById(id);
 const rand = (a, b) => a + Math.random() * (b - a);
-const stageEl = $('stage'), statusEl = $('status');
-const say = (html, cls) => { statusEl.className = cls || ''; statusEl.innerHTML = html; };
+const stageEl = $('stage');
+/* Dong trang thai "Dang cho ket noi LIVE..." tren dau da bo han (Nguyen chot
+   2026-11-04: khong can de) — say() giu lai lam ham rong de cac cho goi cu
+   (trang thai cau noi, demo) chay qua khong loi, khong hien gi len man hinh. */
+const say = () => {};
 
 /* ============ Mốc sảnh theo TỔNG lượt view tích lũy ============ */
 const TIERS = [

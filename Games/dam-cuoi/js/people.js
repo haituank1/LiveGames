@@ -66,6 +66,29 @@ const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png', 'img/guest-gir
 const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.png', 'img/guest-boy4.png'];
 [...SETS_BASE, ...SETS_ROYAL].forEach(s => { for (const src of [s.bride, s.groom]) { const im = new Image(); im.src = src; } });
 [...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; });
+/* Bộ avatar nhỏ làm sẵn cho chip tên (cắt mặt từ chính các nhân vật của
+   game, để ở img/avatars/): người chưa có ảnh TikTok thì lấy 1 mặt trong bộ
+   này làm ảnh đại diện — theo giới của nhân vật, cố định theo id — thay cho
+   hình bóng người trống trơn trước đây (Nguyen chot 2026-11-04). */
+const AV_GIRLS = Array.from({ length: 10 }, (_, i) => `img/avatars/av-f${i + 1}.webp`);
+const AV_BOYS = Array.from({ length: 10 }, (_, i) => `img/avatars/av-m${i + 1}.webp`);
+[...AV_GIRLS, ...AV_BOYS].forEach(src => { const im = new Image(); im.src = src; });
+function isGirlFigure(p) {
+  if (p.outfit === 'bride') return true;
+  if (p.outfit === 'groom') return false;
+  if (p.genderFixed) return p.genderFixed === 'F';
+  return genderScore(p.user.nickname) > 0 || (genderScore(p.user.nickname) === 0 && hash(p.user.id || p.user.nickname) % 2 === 1);
+}
+function defAvatarOf(p) {
+  const pool = isGirlFigure(p) ? AV_GIRLS : AV_BOYS;
+  return pool[hash(p.user.id || p.user.nickname) % pool.length];
+}
+function defAvatarForUser(user) {
+  const gs = genderScore(user.nickname);
+  const girl = gs > 0 || (gs === 0 && hash(user.id || user.nickname) % 2 === 1);
+  const pool = girl ? AV_GIRLS : AV_BOYS;
+  return pool[hash(user.id || user.nickname) % pool.length];
+}
 let tierLevel = 0;
 P.setTierLevel = function (n) { tierLevel = n | 0; };
 function setPool() {
@@ -161,9 +184,7 @@ function figHTML(p) {
   if (p.outfit === 'bride') file = (p.set || SETS_BASE[seed % SETS_BASE.length]).bride;
   else if (p.outfit === 'groom') file = (p.set || SETS_BASE[seed % SETS_BASE.length]).groom;
   else {
-    // đã tự khai giới tính thì nghe theo lời khai; chưa khai mới đoán theo tên
-    const girl = p.genderFixed ? p.genderFixed === 'F' : (genderScore(p.user.nickname) > 0 || (genderScore(p.user.nickname) === 0 && seed % 2 === 1));
-    const pool = girl ? GUEST_GIRLS : GUEST_BOYS;
+    const pool = isGirlFigure(p) ? GUEST_GIRLS : GUEST_BOYS;
     file = pool[((seed >> 4) + (p.guestShift || 0)) % pool.length];
   }
   return `<img class="chibi" src="${file}" alt="">`;
@@ -174,6 +195,11 @@ function setOutfit(p, outfit) {
   p.el.querySelector('.figwrap').innerHTML = figHTML(p);
   p.el.classList.toggle('wedding', outfit !== 'casual');
   p.dirty = true;
+  // chưa có ảnh thật thì ảnh đại diện mặc định cũng theo vai/giới hiện tại
+  if (!p.user.avatar) {
+    const avImg = p.el.querySelector('.chip .av img');
+    if (avImg) { const d = defAvatarOf(p); if (!avImg.src.endsWith(d)) avImg.src = d; }
+  }
 }
 
 /* ---------- Vị trí trong phòng: ghế quanh bàn + điểm đứng ---------- */
@@ -468,12 +494,12 @@ function makeEl(user) {
   const el = document.createElement('div');
   el.className = 'person';
   /* Avatar canh ten: uu tien ANH THAT cua nguoi choi (URL TikTok). Chua co
-     anh thi dung bong nguoi mau mem lam cho giu cho (khong dung chu cai viet
-     tat nua — Nguyen chon 2026-11-04: de chu nhin tho). Anh tai loi thi cung
-     tu ve bong nguoi chu khong de vong tron trong. */
+     anh that thi lay 1 mat trong BO AVATAR LAM SAN cua game (cat tu nhan vat
+     cua game, theo gioi + co dinh theo id) — khong de vong tron trong/bong
+     nguoi nua. Anh that tai loi thi cung tu lui ve avatar mac dinh nay. */
   const av = user.avatar
-    ? `<span class="av" style="background-color:${avatarColor(user.id)}"><img src="${esc(user.avatar)}" alt="" onerror="this.parentNode.classList.add('def');this.remove()"></span>`
-    : `<span class="av def" style="background-color:${avatarColor(user.id)}"></span>`;
+    ? `<span class="av" style="background-color:${avatarColor(user.id)}"><img src="${esc(user.avatar)}" alt="" onerror="this.onerror=null;this.src='${defAvatarForUser(user)}'"></span>`
+    : `<span class="av" style="background-color:${avatarColor(user.id)}"><img src="${defAvatarForUser(user)}" alt=""></span>`;
   el.innerHTML = `<div class="figwrap"></div><div class="chip">${av}<span class="nm">${esc(user.nickname)}</span></div>`;
   return el;
 }
@@ -490,7 +516,7 @@ P.setAvatar = function (id, url) {
   const span = document.createElement('span');
   span.className = 'av';
   span.style.backgroundColor = avatarColor(id);
-  span.innerHTML = `<img src="${esc(url)}" alt="" onerror="this.parentNode.classList.add('def');this.remove()">`;
+  span.innerHTML = `<img src="${esc(url)}" alt="" onerror="this.onerror=null;this.src='${defAvatarOf(p)}'">`;
   const old = chip.querySelector('.av');
   if (old) old.replaceWith(span); else chip.prepend(span);
 };
