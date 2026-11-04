@@ -170,7 +170,16 @@
     "tuAnToanComment": [
       "cac"
     ],
-    "uuTienQuaTang": true
+    "uuTienQuaTang": true,
+    "hangChoToiDa": 4,
+    "khungTraiX": 0,
+    "khungTraiY": 0,
+    "khungPhaiX": 0,
+    "khungPhaiY": 0,
+    "khungHangChoX": 0,
+    "khungHangChoY": 0,
+    "khungMcX": 0,
+    "khungMcY": 0
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {

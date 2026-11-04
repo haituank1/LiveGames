@@ -92,7 +92,7 @@
     filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));animation:bob 2.2s ease-in-out infinite}
 
   /* ---------- Khung trên ---------- */
-  #left{position:absolute;top:calc(var(--safe) + var(--u)*2);left:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*.6);max-width:calc(100% - var(--side)*2 - var(--u)*42);z-index:2000;
+  #left{position:absolute;top:calc(var(--safe) + var(--u)*2 + var(--ply,0px));left:calc(var(--side) + var(--u)*1 + var(--plx,0px));display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*.6);max-width:calc(100% - var(--side)*2 - var(--u)*42);z-index:2000;
     background:rgba(46,6,24,.55);border:1px solid rgba(255,190,215,.3);border-radius:calc(var(--u)*1.8);padding:calc(var(--u)*1) calc(var(--u)*1.6)}
   #rules{display:none}
   #guide{color:#ffd9e8;font-size:calc(var(--u)*2.05);font-weight:700;line-height:1.3;
@@ -104,7 +104,7 @@
   #goal .bar i{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#ff7eb0,#ffc93c);transition:width 1.2s ease}
   #goal .tiername{color:#ffd76a}
 
-  #side{position:absolute;top:calc(var(--safe) + var(--u)*2);right:calc(var(--side) + var(--u)*1);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1);z-index:2000}
+  #side{position:absolute;top:calc(var(--safe) + var(--u)*2 + var(--pry,0px));right:calc(var(--side) + var(--u)*1 - var(--prx,0px));display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1);z-index:2000}
   #board{background:rgba(60,10,32,.58);color:#ffe3ef;border:1px solid rgba(255,180,210,.38);border-radius:calc(var(--u)*1.6);
     padding:calc(var(--u)*.7) calc(var(--u)*1.5);font-size:calc(var(--u)*1.9);min-width:calc(var(--u)*24)}
   #board h4{margin:0 0 calc(var(--u)*.4);font-size:calc(var(--u)*2.2);color:#ffd9e8}
@@ -121,7 +121,7 @@
   .toast.out{opacity:0;transform:translateX(30px)}
   @keyframes tin{from{opacity:0;transform:translateX(calc(var(--u)*30)) scale(.9)}}
 
-  #queue{position:absolute;left:calc(var(--side) + var(--u)*1);bottom:calc(var(--u)*2);background:rgba(45,6,22,.6);z-index:2000;
+  #queue{position:absolute;left:calc(var(--side) + var(--u)*1 + var(--qx,0px));bottom:calc(var(--u)*2 - var(--qy,0px));background:rgba(45,6,22,.6);z-index:2000;
     border:1px solid rgba(255,190,215,.35);border-radius:calc(var(--u)*1.8);padding:calc(var(--u)*.9) calc(var(--u)*1.6);
     color:#ffe9f2;font-size:calc(var(--u)*2);line-height:1.5;max-width:calc(var(--u)*38)}
   #queue b{color:#ffd76a}
@@ -129,7 +129,7 @@
   #queue:empty{display:none}
 
   /* ---------- MC ---------- */
-  #mc{position:absolute;left:calc(var(--side) + var(--u)*1);top:calc(var(--u)*30);display:flex;flex-direction:row;align-items:flex-start;
+  #mc{position:absolute;left:calc(var(--side) + var(--u)*1 + var(--mcx,0px));top:calc(var(--u)*30 + var(--mcy,0px));display:flex;flex-direction:row;align-items:flex-start;
     gap:calc(var(--u)*1.2);width:calc(100% - var(--side)*2 - var(--u)*30);z-index:2100;
     opacity:0;transform:translateX(-110%);transition:transform .7s cubic-bezier(.2,.9,.3,1.1),opacity .5s;pointer-events:none}
   #mc.on{opacity:1;transform:none}

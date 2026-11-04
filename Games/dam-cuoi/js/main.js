@@ -526,9 +526,13 @@ P.onCoupleStage = function (c) {
 };
 P.onQueueChange = function (names) {
   const el = $('queue');
-  el.innerHTML = names.length
-    ? `<b>💌 Cặp chờ lên sân khấu:</b>` + names.map(n => `<div class="qrow">💞 ${escapeHtml(n)}</div>`).join('')
-    : '';
+  if (!names.length) { el.innerHTML = ''; return; }
+  /* Chi hien toi da hangChoToiDa cap (mac dinh 4) cho gon khung hinh —
+     phan con lai gom thanh 1 dong tong (Nguyen chot 2026-11-04). */
+  const cap = Math.max(1, cfg.hangChoToiDa || 4);
+  const rows = names.slice(0, cap).map(n => `<div class="qrow">💞 ${escapeHtml(n)}</div>`).join('');
+  const more = names.length > cap ? `<div class="qrow" style="opacity:.75">➕ ${names.length - cap} cặp đang chờ nữa</div>` : '';
+  el.innerHTML = `<b>💌 Cặp chờ lên sân khấu:</b>` + rows + more;
 };
 
 /* ============ Toast ============ */
@@ -643,6 +647,19 @@ function onBlock(m) {
   }
 }
 
+/* Vi tri cac KHUNG UI theo config (Nguyen chot 2026-11-04): khi live qua
+   TikTok, nhieu vung bi giao dien TikTok che — moi khung chinh duoc dich
+   bang 2 so % cua khung hinh: X duong = dich sang phai, Y duong = dich
+   xuong. Ap vao cac bien CSS offset ma index.html da cong vao vi tri
+   neo cua tung khung (khung ben phai neo theo canh phai nen tru nguoc). */
+function applyPanelPos() {
+  const root = document.documentElement.style;
+  const px = (v, base) => ((Number(v) || 0) / 100 * (base || 0)) + 'px';
+  root.setProperty('--plx', px(cfg.khungTraiX, SW)); root.setProperty('--ply', px(cfg.khungTraiY, SH));
+  root.setProperty('--prx', px(cfg.khungPhaiX, SW)); root.setProperty('--pry', px(cfg.khungPhaiY, SH));
+  root.setProperty('--qx', px(cfg.khungHangChoX, SW)); root.setProperty('--qy', px(cfg.khungHangChoY, SH));
+  root.setProperty('--mcx', px(cfg.khungMcX, SW)); root.setProperty('--mcy', px(cfg.khungMcY, SH));
+}
 /* ============ Cấu hình ============ */
 function applyConfig(c) {
   cfg = c || {};
@@ -656,6 +673,7 @@ function applyConfig(c) {
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
   P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
+  applyPanelPos();
   A.setConfig(cfg);
   renderRules(); startGuide(); renderBoard(); refreshBg(false);
 }
@@ -684,6 +702,7 @@ function resize() {
   }
   FX.resize(sw, sh, Math.min(2, window.devicePixelRatio || 1));
   SW = sw; SH = sh; WW = Math.round(sw * 3.2); WH = Math.round(sh * 2.2);
+  applyPanelPos();
   const world = $('world');
   world.style.width = WW + 'px'; world.style.height = WH + 'px';
   P.resize(WW, WH);
@@ -769,6 +788,8 @@ if (isDemo) {
     mcFollowLines: ['Cảm ơn {ten} đã follow! MC se duyên cho bạn ngay đây!'],
     ghepDoiNgauNhien: true,
     uuTienQuaTang: true,
+    hangChoToiDa: 4,
+    khungTraiX: 0, khungTraiY: 0, khungPhaiX: 0, khungPhaiY: 0, khungHangChoX: 0, khungHangChoY: 0, khungMcX: 0, khungMcY: 0,
     hienBongChat: true, bongChatGiay: 4, bongChatMaxKyTu: 60, bongChatAnKhiTuCamQua: 2,
     tuCamComment: ['vl', 'vcl', 'vkl', 'vãi', 'địt', 'đụ', 'đéo', 'cặc', 'lồn', 'buồi', 'đĩ', 'đm', 'dm', 'đmm', 'dcm', 'đcm', 'cave', 'loz'],
     tuAnToanComment: ['cac'],
