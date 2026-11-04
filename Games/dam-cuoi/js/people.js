@@ -59,11 +59,13 @@ const SETS_BASE = [
   { name: 'Công chúa vàng', bride: 'img/bride4.png', groom: 'img/groom2.png' },
   { name: 'Sapphire đêm', bride: 'img/bride5.png', groom: 'img/groom5.png' },
   { name: 'Tím lavender', bride: 'img/bride6.png', groom: 'img/groom6.png' },
+  { name: 'Xanh biển', bride: 'img/bride7.png', groom: 'img/groom7.png' },
 ];
 const SETS_ROYAL = [
   { name: 'Hoàng gia vàng', bride: 'img/royal-bride1.png', groom: 'img/royal-groom1.png' },
   { name: 'Hoàng gia phượng', bride: 'img/royal-bride2.png', groom: 'img/royal-groom2.png' },
   { name: 'Hoàng gia đỏ vàng', bride: 'img/royal-bride3.png', groom: 'img/royal-groom3.png' },
+  { name: 'Hoàng gia bạch kim', bride: 'img/royal-bride4.png', groom: 'img/royal-groom4.png' },
 ];
 const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png', 'img/guest-girl3.png', 'img/guest-girl4.png', 'img/guest-girl5.png'];
 const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.png', 'img/guest-boy4.png'];
@@ -73,8 +75,8 @@ const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.p
    game, để ở img/avatars/): người chưa có ảnh TikTok thì lấy 1 mặt trong bộ
    này làm ảnh đại diện — theo giới của nhân vật, cố định theo id — thay cho
    hình bóng người trống trơn trước đây (Nguyen chot 2026-11-04). */
-const AV_GIRLS = Array.from({ length: 14 }, (_, i) => `img/avatars/av-f${i + 1}.webp`);
-const AV_BOYS = Array.from({ length: 13 }, (_, i) => `img/avatars/av-m${i + 1}.webp`);
+const AV_GIRLS = Array.from({ length: 16 }, (_, i) => `img/avatars/av-f${i + 1}.webp`);
+const AV_BOYS = Array.from({ length: 15 }, (_, i) => `img/avatars/av-m${i + 1}.webp`);
 [...AV_GIRLS, ...AV_BOYS].forEach(src => { const im = new Image(); im.src = src; });
 function isGirlFigure(p) {
   if (p.outfit === 'bride') return true;
