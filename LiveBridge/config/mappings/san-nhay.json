@@ -42,10 +42,12 @@
   ]
  },
  "defaults": {
+  "anticsIntervalSec": 7,
   "camHomeZoom": 0.62,
   "directorMinHoldSec": 1.2,
   "djDoiSauGiay": 24,
   "doMoPhanConLai": 0.55,
+  "doRucDen": 1,
   "dropHeight": 40,
   "dropHeightVip": 48,
   "durEntry": 3.6,
@@ -72,9 +74,13 @@
    "🎤 Gõ trái / lên / xuống / phải giúp dancer solo ăn điểm",
    "💃 Gõ \"nhảy đôi\" + tag tên bạn nhảy",
    "🎁 Quà 99 xu+ đổ bộ · 299 xu+ trực thăng VIP · 1000 xu+ quà khủng spotlight",
+   "🎁 Quà 99/299/1000 xu: nhận Cánh Vàng / Vương Miện / Bộ Hoàng Gia (giữ 6 giờ)",
    "⬆ Cày XP lên LV: vòng hào quang đổi bậc, LV10+ đội vương miện",
    "👑 Top quà tuần đứng podium — reset mỗi thứ 6"
   ],
+  "hieuUngDen": true,
+  "hieuUngManHinh": "vong",
+  "khuayDong": true,
   "lamMoKhiLia": true,
   "levelXp": [
    0,
@@ -105,6 +111,8 @@
   "pairSec": 20,
   "pairXp": 15,
   "partyMaxNhanhHon": true,
+  "phuKienGiuGio": 6,
+  "phuKienQua": true,
   "resetDay": 5,
   "retentionDays": 7,
   "sfxOn": true,

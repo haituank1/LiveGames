@@ -66,6 +66,33 @@
     58%{left:38.5%;transform:translateY(0)}
     100%{left:-32%;transform:translateY(-2%)}}
 
+  /* ---------- Dàn đèn bar thật: wash màu + chùm moving-head + laser + lấp lánh/bụi + khói (JS dựng trong #rig, main.js lái) ---------- */
+  #wash{position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:.1;
+    background:conic-gradient(from 0deg at 50% 30%,rgba(255,46,170,.5),rgba(70,190,255,.5),rgba(150,90,255,.5),rgba(255,170,40,.45),rgba(255,46,170,.5));
+    animation:washHue 46s linear infinite}
+  @keyframes washHue{to{filter:hue-rotate(360deg)}}
+  #rig{position:absolute;inset:0;z-index:5;pointer-events:none}
+  #rig .cone{position:absolute;top:29%;width:15%;height:57%;transform-origin:50% 0;mix-blend-mode:screen;opacity:0;
+    clip-path:polygon(46% 0,54% 0,100% 100%,0 100%);-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent)}
+  #rig .haze{position:absolute;left:16%;top:24%;width:68%;height:22%;mix-blend-mode:screen;opacity:.16;
+    background:radial-gradient(50% 50% at 50% 50%,rgba(190,160,255,.5),transparent 70%)}
+  #rig .glint{position:absolute;width:9px;height:9px;opacity:0;animation:glintTw 2.8s ease-in-out infinite}
+  #rig .glint::before,#rig .glint::after{content:'';position:absolute;left:50%;top:50%;background:#fff;border-radius:2px;transform:translate(-50%,-50%)}
+  #rig .glint::before{width:100%;height:2px}
+  #rig .glint::after{width:2px;height:100%}
+  @keyframes glintTw{0%,100%{opacity:0;transform:scale(.4) rotate(0deg)}50%{opacity:.85;transform:scale(1) rotate(40deg)}}
+  #rig .mote{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(255,240,200,.8);opacity:0;animation:moteDr 9s linear infinite}
+  @keyframes moteDr{0%{transform:translate(0,0);opacity:0}12%{opacity:.5}55%{opacity:.34}100%{transform:translate(26px,64px);opacity:0}}
+  #rig .laser{position:absolute;top:33.5%;width:44%;height:30%;opacity:0;transition:opacity .8s ease;mix-blend-mode:screen;pointer-events:none}
+  #rig .laser.on{opacity:.8}
+  #rig .laser .lray{position:absolute;left:0;bottom:0;width:100%;height:2px;transform-origin:0 50%;border-radius:2px}
+  #laserL{left:0}
+  #laserR{right:0;transform:scaleX(-1)}
+  #rigFront{position:absolute;inset:0;z-index:4;pointer-events:none;mix-blend-mode:screen;opacity:.12;
+    background:radial-gradient(60% 34% at 50% 30%,rgba(200,170,255,.4),transparent 70%)}
+  #strobe{position:absolute;inset:0;z-index:1630;pointer-events:none;background:#fff;opacity:0}
+
   /* ---------- Màn LED DOM — phủ ĐÚNG khung màn vẽ sẵn (BAR-LAYOUT: 19.2/19.4/61.6/11.2) ---------- */
   #screen{position:absolute;left:19.2%;top:19.4%;width:61.6%;height:11.2%;z-index:4;overflow:hidden;border-radius:6px;
     background:radial-gradient(130% 130% at 50% 0%,#2c1160,#0d0522 72%);
@@ -75,14 +102,14 @@
   @keyframes djPunch{0%{transform:scale(1.05)}22%{transform:scale(1.012)}100%{transform:scale(1)}}
   #screen.hype #screenInner{animation-name:djPunchBig}
   @keyframes djPunchBig{0%{transform:scale(1.09)}22%{transform:scale(1.02)}100%{transform:scale(1)}}
-  #screen .eq{position:absolute;left:2%;bottom:15%;display:flex;align-items:flex-end;gap:1.4%;height:64%;width:60%}
-  #screen .eq i{flex:1;background:linear-gradient(180deg,#ff2eaa,#39b9ff);border-radius:2px;animation:eqB 1.0344s ease-in-out infinite alternate;min-height:10%}
-  #screen .eq i:nth-child(2n){animation-duration:.5172s}
-  #screen .eq i:nth-child(3n){animation-duration:1.5516s;animation-delay:-.4s}
-  #screen .eq i:nth-child(4n){animation-duration:.7758s;animation-delay:-.2s}
-  #screen .eq i:nth-child(5n){animation-duration:1.293s;animation-delay:-.7s}
-  #screen .eq i:nth-child(7n){animation-duration:.5172s;animation-delay:-.31s}
-  @keyframes eqB{from{height:12%}to{height:97%}}
+  /* Nền hiệu ứng màn LED: 1 canvas sau lưng DJ — 3 kiểu chuyển bằng config hieuUngManHinh
+     (song = sóng neon + phản chiếu gương · vong = vòng phổ tròn · led = ma trận LED tạo hình), vẽ bằng JS trong main.js */
+  #screenFx{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+  #lightTag{position:absolute;left:50%;top:5%;transform:translateX(-50%) scale(.8);z-index:5;opacity:0;pointer-events:none;
+    background:rgba(8,2,24,.92);border:1.5px solid #ffd76a;border-radius:999px;color:#ffe9a8;font-weight:900;white-space:nowrap;
+    font-size:calc(var(--u0)*2);padding:0 calc(var(--u0)*1.5) calc(var(--u0)*.25);letter-spacing:.5px;box-shadow:0 0 14px rgba(255,215,106,.75);
+    transition:opacity .3s ease,transform .3s ease}
+  #lightTag.on{opacity:1;transform:translateX(-50%) scale(1)}
   /* 2 chùm đèn quét qua lại bên trong màn */
   #screen .beam{position:absolute;top:-38%;width:30%;height:185%;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:.55;transform-origin:50% 0}
   #screen .beam.b1{left:9%;background:linear-gradient(90deg,transparent,rgba(70,190,255,.55),transparent);animation:beamSw1 5.17s ease-in-out infinite alternate}
@@ -188,7 +215,7 @@
   #world.focusing .dancer{filter:brightness(var(--dimB,.55)) saturate(.65);opacity:.82}
   #world.focusing .dancer.is-focus{filter:brightness(1.07) drop-shadow(0 0 14px rgba(255,230,150,.55));opacity:1}
   .dancer .figwrap{position:relative;z-index:1;filter:drop-shadow(0 5px 6px rgba(10,0,30,.45))}
-  .dancer .figwrap img.chibi{height:var(--fh,120px);display:block}
+  .dancer .figwrap img.chibi{height:var(--fh,120px);display:block;position:relative;z-index:1}
   .dancer.onstage .figwrap{filter:drop-shadow(0 0 12px rgba(255,215,106,.8)) drop-shadow(0 5px 7px rgba(10,0,30,.4))}
   .dancer.paired .figwrap{filter:drop-shadow(0 0 13px rgba(255,110,200,.95)) drop-shadow(0 5px 7px rgba(10,0,30,.4))}
   .dancer.focused .figwrap,.dancer.vis-xung .figwrap{filter:drop-shadow(0 0 15px rgba(255,240,190,.9)) drop-shadow(0 5px 7px rgba(10,0,30,.4))}
@@ -204,6 +231,7 @@
   .dancer.bye{opacity:0;transition:opacity .7s ease;pointer-events:none}
   /* lớp PHỤ KIỆN trống (TODO giai đoạn trang phục/phụ kiện theo LV — xem README) */
   .dancer .acc{position:absolute;inset:0;z-index:2;pointer-events:none}
+  .dancer .accback{position:absolute;inset:0;z-index:0;pointer-events:none}
   /* vòng hào quang LV dưới chân: t0 ẩn · t1 đồng · t2 bạc · t3 vàng · t4 cầu vồng */
   .dancer .auraring{position:absolute;left:50%;bottom:calc(var(--fh,120px)*.13);transform:translateX(-50%);z-index:0;
     width:calc(var(--fh,120px)*.98);height:calc(var(--fh,120px)*.17);border-radius:50%;pointer-events:none;display:none}
@@ -264,6 +292,18 @@
   .dancer.grand .wing{opacity:.95}
   .dancer.grand .wingL{animation:flapL .7s ease-in-out infinite alternate}
   .dancer.grand .wingR{animation:flapR .7s ease-in-out infinite alternate}
+  /* ===== PHỤ KIỆN THEO QUÀ: lớp .accback (sau lưng) + .acc (trước thân) nằm trong .figwrap nên tự co giãn theo dancer (cả khi xung/spotlight phóng to) ===== */
+  .dancer .accback img,.dancer .acc img{position:absolute;pointer-events:none}
+  .dancer .accback img.accw{width:120%;left:-10%;top:-14%}
+  .dancer .accback img.accw.big{width:140%;left:-20%;top:-26%}
+  .dancer .accback img.accw.royal{width:146%;left:-23%;top:-30%}
+  .dancer .acc img.accc{width:58%;left:21%;top:-8%}
+  .dancer .acc img.accr{width:118%;left:-9%;top:-5%}
+  /* ===== KHUẤY ĐỘNG: hàng xóm cổ vũ + sóng người toàn sàn (animation trên .figwrap, không đụng transform của .dancer) ===== */
+  .dancer.cheering .figwrap{animation:cheerB .46s ease-in-out 4}
+  @keyframes cheerB{0%,100%{transform:translateY(0)}30%{transform:translateY(-9%) scale(1.03)}62%{transform:translateY(1%)}}
+  .dancer.waving .figwrap{animation:waveB .8s ease-in-out 2;animation-delay:var(--wvd,0s)}
+  @keyframes waveB{0%,100%{transform:translateY(0)}35%{transform:translateY(-13%)}70%{transform:translateY(0) scale(1.02)}}
   @keyframes flapL{to{transform:rotate(-17deg)}}
   @keyframes flapR{to{transform:rotate(17deg)}}
   /* ---------- Bảng vàng tuần ---------- */
@@ -351,10 +391,11 @@
 <div id="stage">
   <div id="world">
     <div id="scene"></div>
+    <div id="wash"></div>
     <div id="bstage"></div>
     <div id="screen">
       <div id="screenInner">
-        <div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <canvas id="screenFx"></canvas>
         <div class="beam b1"></div>
         <div class="beam b2"></div>
         <div id="screenDJwrap"><img class="djimg on" id="screenDJimgA" src="img/nv16-mix.gif" alt=""><img class="djimg" id="screenDJimgB" src="img/nv16-hype.gif" alt=""></div>
@@ -363,10 +404,12 @@
         <div class="title">DJ SÀN NHẢY</div>
       </div>
       <div id="screenSwapFx"><div class="burst"></div><div class="flash"></div><div id="swapTag"><div class="st1">🔄 ĐỔI DJ!</div><div class="st2" id="swapName">DJ KAI</div></div></div>
+      <div id="lightTag">✨ LIGHT SHOW</div>
       <div id="screenScan"></div>
       <div id="screenFocus"><img id="sfImg" src="img/nv03-dj-headspin.gif" alt=""><div><div class="sf-name" id="sfName"></div><div class="sf-sub" id="sfSub"></div></div></div>
       <div id="screenTicker"><div class="tk"><span id="tk1"></span><span id="tk2"></span></div></div>
     </div>
+    <div id="rig"></div>
     <div id="beams"></div>
     <div id="pairglow"></div>
     <div id="fallcone"></div>
@@ -376,6 +419,8 @@
     <img id="heli" src="img/heli.png" alt="">
   </div>
   <div id="floorglow"></div>
+  <div id="rigFront"></div>
+  <div id="strobe"></div>
   <div id="edgeglow"></div>
   <div id="judge"></div>
   <div id="bigtext"></div>

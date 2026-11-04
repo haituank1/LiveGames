@@ -67,14 +67,48 @@ Kiến trúc phòng + camera port từ game đám cưới (1 ảnh phòng lớn,
   giây (mặc định 24s); trong ca, DJ **luân phiên bản mix <-> hype mỗi ~4 giây** (crossfade 2 lớp ảnh, không
   cắt cứng). **Hết ca có HIỆU ỨNG ĐỔI DJ ~0.9s** ngay trong màn: chớp sáng quét + tia laser tỏa + rung/glitch
   nhẹ + bảng **"🔄 ĐỔI DJ!"** kèm tên DJ mới, DJ mới nảy/trượt vào phát sáng, DJ cũ trượt ra; thẻ màn hiện
-  tên DJ đang trực (**🔴 DJ CAM · MILA / · KAI**). Sau lưng DJ là **EQ 14 cột** nhảy theo thời lượng phách
-  116 BPM, **2 chùm đèn quét** trong màn, lớp **lưới chấm LED + scanline** và cả màn **"zoom punch" theo
+  tên DJ đang trực (**🔴 DJ CAM · MILA / · KAI**). Sau lưng DJ là **1 canvas hiệu ứng nền** (đã bỏ hẳn
+  EQ cột khối cũ) với **3 kiểu chuyển bằng config `hieuUngManHinh`**, tất cả bám phách 116 BPM (phổ tần
+  tổng hợp theo nhịp, không phải audio thật): **"vong" — vòng phổ tròn** sau lưng DJ (thanh tỏa tia quanh
+  vòng, quay chậm, nảy theo phách, đốm sáng bay lên) — **MẶC ĐỊNH vì đây là phong cách visualizer đang
+  thịnh hành nhất trên TikTok/live hiện nay (circular spectrum)**; **"song" — sóng neon**: cột neon bo
+  tròn gradient hồng->tím->cyan + bóng phản chiếu gương bên dưới + 2 dải sóng sin phát sáng; **"led" —
+  ma trận LED**: lưới điểm sáng lan sóng và cứ ~4s lại **tạo hình** (tim -> sao -> nốt nhạc -> mũi tên),
+  màu trôi hue chậm như tường LED bar thật. Chỉ kiểu đang chọn được vẽ (đổi config là đổi ngay khi nạp
+  lại), tạm dừng khi focus dancer chiếm màn; cao trào (lớp hype sẵn có) làm kiểu đang chạy sáng/mạnh hơn.
+  Kèm **2 chùm đèn quét** trong màn, lớp **lưới chấm LED + scanline** và cả màn **"zoom punch" theo
   phách** (scale 1<->1.05, cao trào 1.09). **Cao trào:** Party Max hoặc cảnh quà >=299 xu -> DJ đang trực
   chuyển **bản hype**; cảnh **quà khủng >=1000 xu** -> **bản spot** (trạng thái suy ra từ đạo diễn/Party Max
   sẵn có, hết cao trào tự về luân phiên). Khi camera cận cảnh ai thì màn chiếu chính người đó (GIF xung +
   tên + lý do/điểm trực tiếp) — DJ CAM tạm dừng luân phiên **và đồng hồ ca** (đổi DJ bị hoãn tới khi hết
   focus), hết focus tự chạy tiếp. Ticker sự kiện chạy ở mép dưới màn như cũ. Ảnh DJ cũng qua `sped()` nên
   `tocDoNhay` áp dụng cho cả DJ trên màn. (NV03 từ nay chỉ là dancer thường trên sàn như các lớp khác.)
+
+- **Dàn đèn bar thật (config `hieuUngDen`, độ sáng `doRucDen` 0.5–1.5):** **8 chùm moving-head** (nón
+  sáng blend screen, mỗi chùm 1 màu) neo ở hàng đèn trước sân khấu, quét bằng sin lớp chồng với 3 mẫu
+  hình trộn mềm mỗi ~6s (quét chéo / xòe quạt / sóng đuổi); **wash màu phủ cả phòng** trôi hue chậm;
+  **khói sân khấu** + **điểm lấp lánh** khắp sàn/tường + **hạt bụi bay** trong chùm sáng. Đèn **tự chạy
+  theo năng lượng game**: CALM (Party Energy < 50, không cảnh) quét chậm pastel · WARM (>= 50 hoặc đang
+  có cảnh lia) nhanh hơn, màu đậm · HYPE (Party Max / cảnh quà ưu tiên >= 100 / LIGHT SHOW) nhanh nhất +
+  **2 quạt laser** xanh lá + hồng từ 2 góc sân khấu + **chớp phách trắng rất nhẹ** (<= 0.13, tắt dần
+  trong 1 phách — không chói). Chùm chính nằm SAU lưng dancer + 1 lớp sáng mặt trước rất nhẹ nên dancer
+  luôn rõ, không cháy sàn.
+- **Phụ kiện theo quà (config `phuKienQua`, giữ `phuKienGiuGio` giờ, mặc định 6):** quà 1 lần **>= 99 xu
+  -> bậc 1 Cánh Vàng** (sau lưng) · **>= 299 xu -> bậc 2 Vương Miện Vàng** + cánh to hơn · **>= 1000 xu
+  -> bậc 3 Bộ Hoàng Gia Kim Cương** (vương miện kim cương + cánh hoàng gia + vòng đá quý xoay quanh
+  thân). Lưu `accTier/accExp` trong bản ghi người dùng: vào sàn lại còn hạn là mặc lại, bậc cao ghi đè,
+  quà mới gia hạn thêm. Mặc qua lớp `.accback` (sau lưng) / `.acc` (trước thân) nằm trong `.figwrap` nên
+  tự co giãn theo dancer, kể cả khi camera cận cảnh phóng to. Hình gốc: `~/workspace/san-nhay-anim/accessories/`.
+- **Khuấy động (config `khuayDong`, nhịp `anticsIntervalSec`, mặc định ~7s):** cứ vài giây, 1 dancer
+  lớp hài (NV02/04/05/06/11/14) đang trong khung hình **diễn trò ~3.5s** bằng GIF hài riêng (Idol ngã
+  hip-hop, Dân Quẩy hít đất, Vịt hít đất bằng bụng, Tân Binh đánh nhau giả, Siêu Hài nhảy dây vô hình,
+  Bê Rượu loạng choạng) + bong bóng thoại hài + hạt 😂⭐ — không bao giờ cắt ngang tâm điểm camera hay
+  người đang rơi; Party Max tối đa 2 trò cùng lúc. **Cổ vũ:** quà >= 99 / lên cấp / Party Max -> hàng
+  xóm quanh ngôi sao nảy cổ vũ + 👏🔥 + thoại ngắn ("Đỉnh quá!", "Chủ tịch tới!"...). **Nhân viên**
+  NV09–NV12 thỉnh thoảng lên tiếng theo tính cách (NV12 đứng gần trò hài thì "...đừng nhìn tui").
+  **Sóng người:** mỗi ~40s và lúc Party Max bắt đầu, cả sàn nảy truyền trái -> phải. **LIGHT SHOW:**
+  Party Energy vượt mốc 50% / 100% -> dàn đèn chạy hype 5 giây + thẻ "✨ LIGHT SHOW" trên màn DJ.
+  **Pháo giấy:** quà >= 299 xu bắn pháo giấy từ 2 góc sân khấu.
 
 ## Cách chơi
 

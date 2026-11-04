@@ -90,6 +90,20 @@ E.burstRainbow = function (x, y, n = 22) {   // bùng nổ cầu vồng: tia đ�
   add({ kind: 'flash', x: cx, y: cy, vx: 0, vy: 0, life: 0, max: 0.32, size: rand(20, 28), color: '#ffffff', grav: 0, drag: 0 });
 };
 
+/* ---------- Pháo giấy 2 góc sân khấu + emoji bật lên (cổ vũ / khuấy động) ---------- */
+E.cannon = function (x, y, dir) {   // pháo giấy bắn chéo từ 1 góc sân khấu (dir: 1 = từ góc trái, -1 = từ góc phải)
+  const cx = x * w, cy = y * h;
+  for (let i = 0; i < 30; i++) {
+    add({ kind: 'confetti', x: cx, y: cy, vx: dir * rand(60, 200) * (h / 800), vy: rand(-360, -190) * (h / 800),
+      life: 0, max: rand(1.7, 2.7), size: rand(6, 11), rot: rand(0, 6.3), vr: rand(-5, 5),
+      color: CONFETTI[Math.floor(Math.random() * CONFETTI.length)], grav: 330, drag: 0.55, sway: rand(0, 6.3) });
+  }
+};
+E.pop = function (x, y, glyph) {   // emoji 👏🔥😂⭐ bật lên rồi tan
+  add({ kind: 'pop', glyph, x: x * w + rand(-14, 14), y: y * h, vx: rand(-8, 8), vy: rand(-58, -38),
+    life: 0, max: rand(1, 1.5), size: rand(8, 12), color: '#fff', grav: -4, drag: 0, sway: rand(0, 6.3) });
+};
+
 /* ---------- Hiệu ứng ambient theo lớp (v3) ----------
    Tọa độ vào là phân số của THẾ GIỚI (canvas phủ cả #world): x = ngang, y = chân dancer. */
 E.ring = function (x, y, color) {   // vòng sóng lan ra dưới chân
@@ -220,6 +234,10 @@ function loop(t) {
       ctx.fillStyle = '#fffbe8'; ctx.beginPath(); ctx.ellipse(0, 0, p.size * 0.42, p.size, 0, 0, 6.3); ctx.fill();
       ctx.strokeStyle = 'rgba(190,170,120,.8)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(0, -p.size); ctx.lineTo(0, p.size); ctx.stroke(); ctx.restore();
+    } else if (p.kind === 'pop') {
+      ctx.save(); ctx.globalAlpha = Math.max(0, fade);
+      ctx.font = `${p.size * 2}px system-ui,sans-serif`; ctx.textAlign = 'center';
+      ctx.fillText(p.glyph, p.x, p.y); ctx.restore();
     }
   }
   ctx.globalAlpha = 1;

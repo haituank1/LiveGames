@@ -70,6 +70,10 @@ const STAFF = [
   { code: 'NV12', id: 'nv12', name: 'Bảo Vệ',           color: '#b8c4d6', crowd: 'img/nv12-bao-ve-nhay.gif', fx: 'green' },
 ];
 P.CHARS = CHARS; P.STAFF = STAFF;
+/* GIF "diễn trò hài" cho hệ khuấy động (main.js): Idol ngã hip-hop, Dân Quẩy hít đất, Vịt hít đất bụng,
+   Tân Binh đánh nhau giả, Siêu Hài nhảy dây vô hình; NV11 Bê Rượu thì chính điệu nhảy loạng choạng là trò hài */
+const FUNNY = { nv02: 'img/nv02-idol-hiphop-fail.gif', nv04: 'img/nv04-dan-quay-hit-dat.gif', nv05: 'img/nv05-mascot-hit-dat.gif', nv06: 'img/nv06-tan-binh-danh-nhau.gif', nv11: 'img/nv11-be-ruou-nhay.gif', nv14: 'img/nv14-sieu-hai-nhay-day.gif' };
+for (const c of [...CHARS, ...STAFF]) if (FUNNY[c.id]) c.funny = FUNNY[c.id];
 const charById = id => CHARS.find(c => c.id === id) || STAFF.find(c => c.id === id) || CHARS[5];
 P.charOf = p => charById(p && p.cls);
 /* ===== TỐC ĐỘ NHẢY (main.js gọi P.setSpeedDir theo config tocDoNhay) =====
@@ -81,13 +85,16 @@ function sped(path) { return speedDir && path ? path.replace('img/', 'img/' + sp
 P.sped = sped;
 P.setSpeedDir = d => { speedDir = d || ''; };
 P.charImg = id => sped(charById(id).crowd);
+function visFile(c, vis) {   // vis: crowd | xung | spot | funny (diễn trò hài)
+  return vis === 'spot' ? (c.spot || c.xung || c.crowd) : vis === 'xung' ? (c.xung || c.crowd) : vis === 'funny' ? (c.funny || c.crowd) : c.crowd;
+}
 P.refreshImgs = function () {   // áp lại src theo tốc độ hiện tại cho mọi dancer đang có mặt
   for (const p of people.values()) {
     const c = charById(p.cls);
-    const raw = p.vis === 'spot' ? (c.spot || c.xung || c.crowd) : p.vis === 'xung' ? (c.xung || c.crowd) : c.crowd;
-    const src = sped(raw);
+    const src = sped(visFile(c, p.vis));
     const img = p.el.querySelector('.chibi');
     if (img.getAttribute('src') !== src) img.src = src;
+    p.el.querySelectorAll('img[data-acc]').forEach(im => { const s2 = sped(im.dataset.acc); if (im.getAttribute('src') !== s2) im.src = s2; });
   }
 };
 function pickCharId() {
@@ -114,8 +121,7 @@ function makeEl(p) {
     : `<span class="av" style="background:hsl(${hue},55%,48%)">${esc((Array.from(String(p.user.nickname || '?').trim())[0] || '?').toUpperCase())}</span>`;
   el.innerHTML = `<div class="bubble"></div><div class="halo"></div><div class="wing wingL"></div><div class="wing wingR"></div>` +
     `<div class="auraring"></div><div class="focusring"></div>` +
-    `<div class="figwrap"><img class="chibi" src="${sped(charById(p.cls).crowd)}" alt=""></div>` +
-    `<div class="acc"></div>` +
+    `<div class="figwrap"><div class="accback"></div><img class="chibi" src="${sped(charById(p.cls).crowd)}" alt=""><div class="acc"></div></div>` +
     `<div class="chip">${av}<span class="nm">${esc(p.user.nickname)}</span><span class="lvb"></span></div>` +
     `<div class="slotmark">${p.staff ? 'STAFF' : (p.home ? p.home.id : '')}</div>`;
   return el;
@@ -170,7 +176,7 @@ P.setVis = function (p, vis) {
   if (!p || p.vis === vis) return;
   p.vis = vis;
   const c = charById(p.cls);
-  const src = sped(vis === 'spot' ? (c.spot || c.xung || c.crowd) : vis === 'xung' ? (c.xung || c.crowd) : c.crowd);
+  const src = sped(visFile(c, vis));
   const img = p.el.querySelector('.chibi');
   if (img.getAttribute('src') !== src) img.src = src;
   p.el.classList.toggle('vis-spot', vis === 'spot');
@@ -188,6 +194,24 @@ function clearSpecial(p) {
   if (p.onStage) { p.onStage = false; p.stageIdx = -1; p.el.classList.remove('onstage'); if (!p.staff) setCrown(p, (p.lv || 1) >= 10 || p.leader); }
   if (p.focused) { p.focused = false; p.el.classList.remove('focused'); }
 }
+
+/* ===== PHỤ KIỆN THEO QUÀ (main.js quyết định bậc + hạn dùng qua bản ghi người dùng; ở đây chỉ dựng lớp hình) =====
+   bậc 1: Cánh Vàng (sau lưng) · bậc 2: cánh TO hơn + Vương Miện Vàng · bậc 3: cánh hoàng gia +
+   Vương Miện Kim Cương + vòng đá quý xoay quanh thân. Lớp nằm trong .figwrap nên tự co giãn theo dancer. */
+P.setAcc = function (p, tier) {
+  if (!p) return;
+  tier = tier | 0;
+  p.accTier = tier;
+  const back = p.el.querySelector('.accback'), front = p.el.querySelector('.acc');
+  if (!back || !front) return;
+  const wings = tier >= 3 ? 'acc-wings-royal' : 'acc-wings-gold';
+  back.innerHTML = tier >= 1
+    ? `<img data-acc="img/${wings}.gif" class="accw${tier >= 3 ? ' royal' : tier === 2 ? ' big' : ''}" src="${sped('img/' + wings + '.gif')}" alt="">`
+    : '';
+  const crown = tier >= 3 ? 'acc-crown-diamond' : 'acc-crown-gold';
+  front.innerHTML = (tier >= 2 ? `<img data-acc="img/${crown}.gif" class="accc" src="${sped('img/' + crown + '.gif')}" alt="">` : '')
+    + (tier >= 3 ? `<img data-acc="img/acc-gem-ring.gif" class="accr" src="${sped('img/acc-gem-ring.gif')}" alt="">` : '');
+};
 
 /* ================= DI CHUYỂN: rơi + trượt (1 vòng rAF) ================= */
 function moveTo(p, x, y) { p.gx = x; p.gy = y; p.gliding = true; }

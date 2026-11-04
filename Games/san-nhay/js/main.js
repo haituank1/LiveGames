@@ -43,7 +43,7 @@ const DEFAULTS = {
   xpPerComment: 2, xpPerGiftCoin: 2, xpPerFollow: 5, xpPer100Likes: 5, soloXpDiv: 15, pairXp: 15,
   levelXp: [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200, 4000, 5000, 6200, 7600, 9200, 11000, 13000, 15500, 18500, 22000],
   lvScaleMax: 1.25, entryFlairLv: 5, entryFlairLv2: 10, dropHeight: 40, dropHeightVip: 48,
-  lamMoKhiLia: true, doMoPhanConLai: 0.55, tocDoNhay: 'thuong', partyMaxNhanhHon: true, djDoiSauGiay: 24,
+  lamMoKhiLia: true, doMoPhanConLai: 0.55, tocDoNhay: 'thuong', partyMaxNhanhHon: true, djDoiSauGiay: 24, hieuUngManHinh: 'vong', hieuUngDen: true, doRucDen: 1, phuKienQua: true, phuKienGiuGio: 6, khuayDong: true, anticsIntervalSec: 7,
   guideLines: [], funnyLines: [],
 };
 let cfg = { ...DEFAULTS };
@@ -83,7 +83,7 @@ function recordOf(user) {
   let r = users[user.id];
   const wk = weekKeyOf(new Date(), cfg.resetDay != null ? cfg.resetDay : 5);
   if (!r) {
-    r = users[user.id] = { name: user.nickname || '', cls: null, xp: 0, gifts: 0, weekGifts: 0, weekScore: 0, weekXp: 0, likes: 0, lastSeen: Date.now(), weekKey: wk };
+    r = users[user.id] = { name: user.nickname || '', cls: null, xp: 0, gifts: 0, weekGifts: 0, weekScore: 0, weekXp: 0, likes: 0, accTier: 0, accExp: 0, lastSeen: Date.now(), weekKey: wk };
   }
   if (r.weekKey !== wk) { r.weekGifts = 0; r.weekScore = 0; r.weekXp = 0; r.weekKey = wk; }
   r.name = user.nickname || r.name;
@@ -120,6 +120,7 @@ function ensureDancer(user, opts = {}) {
   if (p) {
     if (!rec.cls) { rec.cls = p.cls; }
     P.setLv(p, lv);
+    applyAcc(p);
     if (!opts.instant && p.home) {
       Dir.request({
         kind: 'focus', p, prio: 55, dur: cfg.durEntry, expires: nowMs() + 7000,
@@ -167,6 +168,7 @@ function levelUp(user, rec, lv) {
     FX.burstRainbow(p.x / 100, (p.y - 9) / 100, 18);
     FX.hearts(8, p.x / 100, (p.y - 12) / 100);
     P.sayBubble(p, `Mình lên cấp ${lv} rồi nè!`);
+    crowdCheer(p);
     Dir.request({
       kind: 'focus', p, prio: 95, dur: cfg.durLevelup, zoom: cfg.zoomLevelup, follow: true, vis: 'spot',
       reason: `⬆ LÊN CẤP ${lv}`, name: user.nickname,
@@ -500,6 +502,7 @@ function refreshVis(p) {
   else if (Dir.cur && itemDancers(Dir.cur).includes(p)) vis = Dir.cur.vis || 'xung';
   else if (solo && solo.p === p) vis = 'xung';
   else if (pair && pair.includes(p)) vis = 'xung';
+  if (p.anticUntil && nowMs() < p.anticUntil && vis !== 'spot') vis = 'funny';   // đang diễn trò hài (hệ khuấy động)
   P.setVis(p, vis);
 }
 setInterval(() => { for (const p of P.all()) refreshVis(p); }, 600);
@@ -624,6 +627,365 @@ function djCamSpeedRefresh() {   // applySpeed gọi mỗi khi tocDoNhay đổi:
   djCur = { file: '', mode: '' };                    // ép tick DJ CAM vẽ lại đúng file + tốc độ
 }
 
+/* ============ MÀN LED: 3 KIỂU HIỆU ỨNG NỀN SAU LƯNG DJ (config hieuUngManHinh) ============
+   1 canvas nhỏ trong #screenInner (z-index 0, sau lưng DJ/quầy, dưới ticker + focus). Chỉ vẽ kiểu
+   đang chọn; tạm dừng khi ẩn tab hoặc focus dancer chiếm màn. Phổ tần là TỔNG HỢP theo phách
+   116 BPM (game không có nguồn audio thật): mỗi phách đặt mục tiêu chiều cao mới cho từng dải,
+   khung hình nội suy tấn công nhanh / thả chậm nên chuyển động bám đúng nhịp.
+   - "song": cột neon bo tròn gradient hồng->tím->cyan + bóng phản chiếu gương bên dưới + 2 dải sóng sin.
+   - "vong": vòng phổ tròn sau lưng DJ (thanh tỏa tia quanh vòng, quay chậm, nảy theo phách) + đốm sáng bay lên. MẶC ĐỊNH.
+   - "led": lưới điểm LED, sóng sáng lan + cứ ~4s lại TẠO HÌNH (tim -> sao -> nốt nhạc -> mũi tên), màu trôi hue chậm.
+   Chế độ hype (lớp .hype sẵn có của #screen: Party Max / quà lớn) làm mọi kiểu sáng + mạnh hơn. */
+const SFX_BEAT = 60000 / 116;
+let sfxStyle = 'vong', sfxCv = null, sfxCtx = null, sfxBands = null, sfxLast = 0;
+function screenFxSetStyle(s) {
+  sfxStyle = ['song', 'vong', 'led'].includes(s) ? s : 'vong';
+  if (!sfxCv) { sfxCv = $('screenFx'); if (sfxCv) { sfxCtx = sfxCv.getContext('2d'); requestAnimationFrame(sfxLoop); } }
+}
+function sfxSpectrum(t, n, hype) {
+  if (!sfxBands || sfxBands.length !== n) sfxBands = new Float32Array(n);
+  const beatIdx = Math.floor(t / SFX_BEAT);
+  for (let i = 0; i < n; i++) {
+    let h1 = Math.sin(beatIdx * 12.9898 + i * 78.233) * 43758.5453; h1 -= Math.floor(h1);
+    let h2 = Math.sin(beatIdx * 26.7 + i * 13.7) * 28001.3; h2 -= Math.floor(h2);
+    const prof = 0.35 + 0.65 * Math.exp(-Math.pow((i / n - 0.32) * 2.4, 2)) + 0.3 * Math.pow(Math.sin(i * 0.7 + t / 900), 2);
+    const tgt = Math.min(1, (0.25 + 0.75 * h1 * (0.55 + 0.45 * h2)) * prof * (hype ? 1.3 : 1));
+    const cur = sfxBands[i];
+    sfxBands[i] = tgt > cur ? cur + (tgt - cur) * 0.5 : cur + (tgt - cur) * 0.1;
+  }
+  return sfxBands;
+}
+function sfxDrawSong(g, w, h, t, hype) {
+  const bands = sfxSpectrum(t, 30, hype);
+  const base = h * 0.78, maxH = h * (hype ? 0.74 : 0.62), bw = w / bands.length;
+  const grad = g.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, '#ff2eaa'); grad.addColorStop(0.5, '#b45cff'); grad.addColorStop(1, '#39d5ff');
+  g.globalCompositeOperation = 'lighter';
+  g.fillStyle = grad; g.shadowColor = 'rgba(255,80,220,.8)'; g.shadowBlur = hype ? 10 : 7;
+  for (let i = 0; i < bands.length; i++) {
+    const bh = Math.max(2, bands[i] * maxH), x = i * bw + bw * 0.18, ww = bw * 0.64;
+    g.beginPath(); g.roundRect(x, base - bh, ww, bh, [ww / 2, ww / 2, 0, 0]); g.fill();
+  }
+  g.shadowBlur = 0; g.globalAlpha = 0.3;
+  for (let i = 0; i < bands.length; i++) {
+    const bh = Math.max(2, bands[i] * maxH), x = i * bw + bw * 0.18, ww = bw * 0.64;
+    g.beginPath(); g.roundRect(x, base + 2, ww, bh * 0.42, [0, 0, ww / 2, ww / 2]); g.fill();
+  }
+  g.globalAlpha = 1;
+  const amp = 1 + 0.35 * Math.pow(1 - ((t % SFX_BEAT) / SFX_BEAT), 2);
+  for (let r = 0; r < 2; r++) {
+    g.strokeStyle = r ? 'rgba(57,213,255,.85)' : 'rgba(255,46,170,.85)';
+    g.lineWidth = 1.6; g.shadowColor = g.strokeStyle; g.shadowBlur = 6;
+    g.beginPath();
+    for (let x = 0; x <= w; x += 6) {
+      const y = h * (r ? 0.38 : 0.3) + Math.sin(x / w * 5.2 + t / (r ? 260 : 340) + r * 2.1) * h * 0.075 * amp;
+      if (x === 0) g.moveTo(x, y); else g.lineTo(x, y);
+    }
+    g.stroke();
+  }
+  g.shadowBlur = 0; g.globalCompositeOperation = 'source-over';
+}
+function sfxDrawVong(g, w, h, t, hype) {
+  const bands = sfxSpectrum(t, 44, hype);
+  const cx = w * 0.765, cy = h * 0.44;
+  const phase = (t % SFX_BEAT) / SFX_BEAT, pulse = Math.pow(1 - phase, 2.2);
+  const R = h * 0.27 * (1 + 0.09 * pulse * (hype ? 1.6 : 1));
+  const rot = t / 14000;
+  g.globalCompositeOperation = 'lighter';
+  const glow = g.createRadialGradient(cx, cy, 0, cx, cy, R * 1.5);
+  glow.addColorStop(0, `rgba(255,92,225,${0.2 + 0.18 * pulse})`); glow.addColorStop(1, 'rgba(255,92,225,0)');
+  g.fillStyle = glow; g.fillRect(cx - R * 1.5, cy - R * 1.5, R * 3, R * 3);
+  g.strokeStyle = 'rgba(140,220,255,.5)'; g.lineWidth = 1.4; g.setLineDash([5, 7]); g.lineDashOffset = -t / 30;
+  g.beginPath(); g.arc(cx, cy, R * 0.92, 0, 6.3); g.stroke(); g.setLineDash([]);
+  const N = 56;
+  for (let i = 0; i < N; i++) {
+    const a = rot + i / N * Math.PI * 2;
+    const bi = Math.min(bands.length - 1, Math.abs(Math.round(Math.sin(a) * (bands.length - 1))));
+    const v = bands[bi] || 0.3;
+    const len = R * (0.16 + v * (hype ? 0.66 : 0.5));
+    const hue = 322 - (i / N) * 130;
+    g.strokeStyle = `hsla(${hue},100%,66%,.9)`; g.lineWidth = Math.max(1.4, R * 0.055);
+    g.shadowColor = `hsla(${hue},100%,60%,.9)`; g.shadowBlur = 5;
+    g.beginPath();
+    g.moveTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
+    g.lineTo(cx + Math.cos(a) * (R + len), cy + Math.sin(a) * (R + len));
+    g.stroke();
+  }
+  g.shadowBlur = 0;
+  for (let k = 0; k < 10; k++) {
+    const seed = k * 61.7, ox = ((seed * 7.3) % 97) / 97;
+    const oy = 1 - ((t / (5200 + k * 430) + seed) % 1);
+    g.fillStyle = `hsla(${190 + k * 14},100%,74%,${0.5 * Math.sin(oy * Math.PI)})`;
+    g.beginPath(); g.arc(ox * w, oy * h, 1.6 + (k % 3) * 0.7, 0, 6.3); g.fill();
+  }
+  g.globalCompositeOperation = 'source-over';
+}
+function sfxInPoly(px, py, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+    if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+const SFX_STAR = (() => { const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 0.42 : 0.95; pts.push([r * Math.cos(a), r * Math.sin(a)]); } return pts; })();
+const SFX_SHAPES = [
+  (x, y) => Math.pow(x * x + y * y - 0.85, 3) - x * x * Math.pow(y, 3) < 0,                                    // trái tim
+  (x, y) => sfxInPoly(x, y, SFX_STAR),                                                                          // ngôi sao
+  (x, y) => Math.pow((x + 0.28) / 0.3, 2) + Math.pow((y + 0.42) / 0.22, 2) < 1 || Math.pow((x - 0.34) / 0.3, 2) + Math.pow((y + 0.42) / 0.22, 2) < 1
+    || (x > 0.52 && x < 0.66 && y > -0.45 && y < 0.6) || (x > 0.52 && x < 1 && y > 0.34 && y < 0.6),              // nốt nhạc
+  (x, y) => (Math.abs(y) < 0.17 && x > -0.75 && x < 0.3) || (x >= 0.3 && x < 0.85 && Math.abs(y) < (0.85 - x) * 0.95),   // mũi tên
+];
+function sfxDrawLed(g, w, h, t, hype) {
+  const rows = 13, cols = Math.max(24, Math.round(w / (h / rows)));
+  const cw = w / cols, ch = h / rows, cell = Math.min(cw, ch);
+  const shapeT = (t / 4000) % SFX_SHAPES.length, si = Math.floor(shapeT), sf = shapeT - si;
+  const fade = sf < 0.8 ? 0 : (sf - 0.8) / 0.2;
+  const hueBase = (t * 0.012) % 360, beat = Math.pow(1 - ((t % SFX_BEAT) / SFX_BEAT), 2);
+  g.globalCompositeOperation = 'lighter';
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const x = (c + 0.5) * cw, y = (r + 0.5) * ch, u = c / cols, v = r / rows;
+    let b = 0.1 + 0.09 * Math.sin(u * 9 - t / 620 + Math.sin(v * 6 + t / 900)) + 0.07 * Math.sin(Math.hypot(u - 0.5, v - 0.5) * 11 - t / 300);
+    const sx = (u - 0.37) * 2.6 * (w / h) * 0.34, sy = (0.46 - v) * 2.6;
+    let inShape = SFX_SHAPES[si](sx, sy);
+    if (fade > 0) { const hsh = ((c * 73 + r * 149) % 100) / 100; inShape = hsh < fade ? SFX_SHAPES[(si + 1) % SFX_SHAPES.length](sx, sy) : inShape; }
+    if (inShape) b += 0.95 + 0.25 * beat;
+    if (hype) b *= 1.25;
+    if (b < 0.05) continue;
+    const hue = (hueBase + u * 60 + (inShape ? 30 : 0)) % 360;
+    const rad = cell * (inShape ? 0.46 : 0.34) * (0.6 + 0.4 * Math.min(1, b));
+    if (b > 0.55) {
+      const gl = g.createRadialGradient(x, y, 0, x, y, rad * 2.6);
+      gl.addColorStop(0, `hsla(${hue},100%,64%,${0.5 * b})`); gl.addColorStop(1, 'hsla(0,0%,0%,0)');
+      g.fillStyle = gl; g.fillRect(x - rad * 2.6, y - rad * 2.6, rad * 5.2, rad * 5.2);
+    }
+    g.fillStyle = `hsla(${hue},100%,${inShape ? 68 : 58}%,${Math.min(1, b)})`;
+    g.beginPath(); g.arc(x, y, rad, 0, 6.3); g.fill();
+  }
+  g.globalCompositeOperation = 'source-over';
+}
+function sfxLoop(t) {
+  requestAnimationFrame(sfxLoop);
+  if (document.hidden || !sfxCv) return;
+  const sf = $('screenFocus');
+  if (sf && sf.classList.contains('on')) return;                    // focus dancer chiếm màn: dừng vẽ cho nhẹ máy
+  const w = sfxCv.clientWidth, h = sfxCv.clientHeight;
+  if (!w || !h || t - sfxLast < 1000 / 45) return;
+  sfxLast = t;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  if (sfxCv.width !== Math.round(w * dpr) || sfxCv.height !== Math.round(h * dpr)) { sfxCv.width = Math.round(w * dpr); sfxCv.height = Math.round(h * dpr); }
+  const g = sfxCtx;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  const hype = $('screen').classList.contains('hype');
+  if (sfxStyle === 'song') sfxDrawSong(g, w, h, t, hype);
+  else if (sfxStyle === 'led') sfxDrawLed(g, w, h, t, hype);
+  else sfxDrawVong(g, w, h, t, hype);
+}
+
+/* ============ DÀN ĐÈN BAR THẬT (config hieuUngDen / doRucDen) ============
+   8 chùm moving-head (nón cụt blend screen, neo x 7..93% ở y 29% — hàng đèn trước sân khấu) quét
+   bằng sin lớp chồng: 3 mẫu hình (quét chéo / xòe quạt / sóng đuổi) trộn mềm mỗi ~6s. Laser 2 góc
+   chỉ bật ở hype. Wash màu phủ phòng + khói sân khấu + điểm lấp lánh + hạt bụi bay trong chùm sáng.
+   3 chế độ tự theo năng lượng: CALM (năng lượng < 50, không cảnh) chậm + pastel · WARM (>= 50 hoặc
+   đang có cảnh lia) nhanh hơn + màu đậm · HYPE (Party Max / cảnh quà prio >= 100 / LIGHT SHOW)
+   nhanh nhất + laser + chớp phách trắng rất nhẹ (<= 0.13, tắt dần trong 1 phách — không chói). */
+const RIG_HUES = [322, 190, 265, 20, 130, 48, 200, 300];
+let rigBuilt = false, rigCones = [], rigLaserBoxes = [], rigRays = [], rigMode = 'calm', rigPhase = 0, rigLast = 0, rigShowUntil = 0;
+let washEl = null, rigFrontEl = null, strobeEl = null;
+function rigBuild() {
+  const rig = $('rig'); if (!rig) return;
+  rigBuilt = true;
+  washEl = $('wash'); rigFrontEl = $('rigFront'); strobeEl = $('strobe');
+  rigCones = [7, 19, 31, 43, 57, 69, 81, 93].map((x, i) => {
+    const d = document.createElement('div');
+    d.className = 'cone'; d.style.left = (x - 7.5) + '%';
+    d.style.background = `linear-gradient(180deg, hsla(${RIG_HUES[i]},100%,64%,.85), hsla(${RIG_HUES[i]},100%,58%,.28) 55%, transparent 96%)`;
+    rig.appendChild(d); return d;
+  });
+  const haze = document.createElement('div'); haze.className = 'haze'; rig.appendChild(haze);
+  for (let k = 0; k < 18; k++) {
+    const s = document.createElement('div'); s.className = 'glint';
+    s.style.left = (4 + ((k * 53) % 92)) + '%'; s.style.top = (33 + ((k * 37) % 58)) + '%';
+    s.style.animationDelay = ((k * 0.37) % 2.8) + 's'; s.style.animationDuration = (2.2 + (k % 5) * 0.35) + 's';
+    rig.appendChild(s);
+  }
+  for (let k = 0; k < 12; k++) {
+    const m = document.createElement('div'); m.className = 'mote';
+    m.style.left = (12 + ((k * 67) % 76)) + '%'; m.style.top = (31 + ((k * 29) % 30)) + '%';
+    m.style.animationDelay = ((k * 0.83) % 9) + 's'; m.style.animationDuration = (7 + (k % 4) * 1.6) + 's';
+    rig.appendChild(m);
+  }
+  rigLaserBoxes = ['laserL', 'laserR'].map((id, side) => {
+    const box = document.createElement('div'); box.className = 'laser'; box.id = id;
+    const col = side === 0 ? '80,255,140' : '255,60,220';
+    for (let i = 0; i < 7; i++) {
+      const r = document.createElement('div'); r.className = 'lray';
+      const base = -38 + i * 9;
+      r.style.transform = `rotate(${base}deg)`;
+      r.style.background = `linear-gradient(90deg, rgba(${col},.95), rgba(${col},0) 88%)`;
+      r.style.boxShadow = `0 0 6px rgba(${col},.8)`;
+      box.appendChild(r); rigRays.push({ el: r, base });
+    }
+    rig.appendChild(box); return box;
+  });
+  requestAnimationFrame(rigLoop);
+}
+function rigApplyConfig() {
+  if (!rigBuilt) rigBuild();
+  const on = cfg.hieuUngDen !== false;
+  const rig = $('rig');
+  if (rig) rig.style.display = on ? '' : 'none';
+  if (washEl) washEl.style.display = on ? '' : 'none';
+  if (rigFrontEl) rigFrontEl.style.display = on ? '' : 'none';
+  if (strobeEl && !on) strobeEl.style.opacity = '0';
+}
+function rigModeNow(t) {
+  if (t < rigShowUntil || t < partyUntil) return 'hype';
+  const cur = Dir.cur;
+  if (cur && cur.gift && (cur.prio || 0) >= 100) return 'hype';
+  if (energy >= 50 || (cur && itemDancers(cur).length)) return 'warm';
+  return 'calm';
+}
+function rigLoop(t) {
+  requestAnimationFrame(rigLoop);
+  if (document.hidden || cfg.hieuUngDen === false) return;
+  const dt = Math.min(0.05, rigLast ? (t - rigLast) / 1000 : 0.016); rigLast = t;
+  rigMode = rigModeNow(t);
+  rigPhase += dt * (rigMode === 'hype' ? 1.6 : rigMode === 'warm' ? 0.95 : 0.55);
+  const pt = rigPhase;
+  const bright = clamp(cfg.doRucDen != null ? cfg.doRucDen : 1, 0.5, 1.5);
+  const seg = Math.floor(pt / 6) % 3, blend = clamp((pt % 6 - 4.8) / 1.2, 0, 1), sm = blend * blend * (3 - 2 * blend);
+  const pat = (k, i) => k === 0 ? 26 * Math.sin(pt * 0.55 + i * 0.55)
+    : k === 1 ? (i - 3.5) * 6.5 * (0.55 + 0.45 * Math.sin(pt * 0.35))
+      : 20 * Math.sin(pt * 0.8 + i * Math.PI / 3.5) + 8 * Math.sin(pt * 1.7 + i);
+  const baseO = (rigMode === 'hype' ? 0.66 : rigMode === 'warm' ? 0.5 : 0.34) * bright;
+  for (let i = 0; i < rigCones.length; i++) {
+    const a = pat(seg, i) * (1 - sm) + pat((seg + 1) % 3, i) * sm;
+    const fl = 0.85 + 0.15 * Math.sin(pt * 2.3 + i * 1.7);
+    rigCones[i].style.transform = `rotate(${a.toFixed(2)}deg)`;
+    rigCones[i].style.opacity = Math.min(0.85, baseO * fl).toFixed(3);
+  }
+  const hype = rigMode === 'hype';
+  for (const b of rigLaserBoxes) b.classList.toggle('on', hype);
+  if (hype) for (const r of rigRays) r.el.style.transform = `rotate(${(r.base + 5 * Math.sin(pt * 1.3 + r.base)).toFixed(2)}deg)`;
+  if (washEl) washEl.style.opacity = ((hype ? 0.2 : rigMode === 'warm' ? 0.15 : 0.1) * bright).toFixed(3);
+  if (rigFrontEl) rigFrontEl.style.opacity = ((hype ? 0.2 : 0.12) * bright).toFixed(3);
+  if (strobeEl) {
+    const ph = (t % SFX_BEAT) / SFX_BEAT;
+    strobeEl.style.opacity = hype ? (Math.pow(1 - ph, 6) * 0.13 * bright).toFixed(3) : '0';
+  }
+}
+
+/* ============ PHỤ KIỆN THEO QUÀ (config phuKienQua / phuKienGiuGio giờ) ============
+   Quà 1 lần >= 99 xu: bậc 1 Cánh Vàng · >= 299: bậc 2 Vương Miện Vàng (+ cánh to) · >= 1000:
+   bậc 3 Bộ Hoàng Gia Kim Cương. Lưu accTier/accExp trong bản ghi sannhay.users.v4, mặc lại khi
+   vào sàn nếu chưa hết hạn; trang bị cao nhất giữ nguyên, quà mới gia hạn thêm. */
+const ACC_NAMES = { 1: 'Cánh Vàng', 2: 'Vương Miện Vàng', 3: 'Bộ Hoàng Gia Kim Cương' };
+function accTierOf(dia) { return dia >= 1000 ? 3 : dia >= 299 ? 2 : dia >= 99 ? 1 : 0; }
+function applyAcc(p) {
+  if (!p || p.staff) return;
+  const rec = recordOf(p.user);
+  P.setAcc(p, (rec.accExp && Date.now() < rec.accExp) ? (rec.accTier || 0) : 0);
+}
+function equipAcc(user, dia) {
+  if (!cfg.phuKienQua || !user) return;
+  const tier = accTierOf(dia);
+  if (!tier) return;
+  const rec = recordOf(user);
+  const cur = (rec.accExp && Date.now() < rec.accExp) ? (rec.accTier || 0) : 0;
+  rec.accTier = Math.max(cur, tier);
+  rec.accExp = Date.now() + (cfg.phuKienGiuGio || 6) * 3600e3;
+  saveUsers();
+  const p = P.get(user.id);
+  if (p) {
+    applyAcc(p);
+    FX.burstRainbow(p.x / 100, (p.y - 8) / 100, 18);
+    FX.ring(p.x / 100, p.y / 100, '#ffd76a');
+  }
+  if (tier > cur || cur === 0) {
+    toast(`🎁 ${user.nickname} nhận ${ACC_NAMES[tier]}!`, true);
+    screenPush(`🎁 ${user.nickname} nhận phụ kiện ${ACC_NAMES[tier]} (quà ${fmtNum(dia)} xu)`);
+  }
+}
+
+/* ============ KHUẤY ĐỘNG (config khuayDong / anticsIntervalSec) ============
+   - ANTICS: mỗi ~7s chọn 1 dancer lớp hài đang trong khung hình (không phải tâm điểm / không
+     đang rơi / không bận) -> diễn GIF hài ~3.5s + bong bóng thoại + hạt 😂⭐. Party Max: tối đa 2 cùng lúc.
+   - CỔ VŨ: quà >= 99 / lên cấp / Party Max -> hàng xóm quanh ngôi sao nảy cổ vũ + 👏🔥 + thoại.
+   - NHÂN VIÊN: NV09–NV12 thỉnh thoảng lên tiếng; NV12 đứng gần trò hài thì "...đừng nhìn tui".
+   - SÓNG NGƯỜI: mỗi ~40s (và lúc Party Max bắt đầu) nảy truyền trái -> phải khắp sàn.
+   - LIGHT SHOW: năng lượng Party vượt mốc 50% / 100% -> dàn đèn chạy hype 5s + thẻ trên màn DJ. */
+const FUNNY_CLS = ['nv02', 'nv04', 'nv05', 'nv06', 'nv11', 'nv14'];
+const FUNNY_LINES = ['Hít đất nè cả nhà! 😆', 'Ủa sao chân tui tự nhảy vậy?!', 'Quẩy lên đừng ngại! 🤣', 'Ai thấy tui té đâu không?', 'Đẳng cấp dân quẩy đây!', 'Nhảy vậy mới là nhảy chứ! 😂', 'Bắt chước tui được không?', 'Sàn này là của tui!', 'Cười cái coi nè 😝', 'Tui tập cả tuần rồi đó!'];
+const FUNNY_BY_CLS = { nv02: 'Hip-hop là phải ngã vậy đó!', nv05: 'Vịt mà, hít đất bằng bụng thôi!', nv06: 'Đánh nhau giả thôi, đừng sợ!', nv11: 'Đừng rung! Rượu rớt là đền đó!!', nv14: 'Dây vô hình nè, coi tui nhảy!' };
+const CHEER_LINES = ['Đỉnh quá!', 'Quá đã!', 'Chủ tịch tới!', 'Hay quá trời!', '🔥🔥🔥', 'Cố lên!!'];
+const STAFF_LINES = { nv09: ['Ai gọi món nè? 🍹', 'Order nhanh tay nào!'], nv10: ['Lắc đều tay mới ngon! 🍸'], nv11: ['Đừng đụng vào tui...', 'Năm chai, đừng rung mà!'], nv12: ['...', 'An ninh là trên hết.'] };
+let nextAnticAt = 0, lastWaveAt = 0, lightTagTimer = 0;
+const inViewP = p => p.el.style.display !== 'none';
+function anticCandidates() {
+  const focusSet = new Set(Dir.cur ? itemDancers(Dir.cur) : []);
+  return P.all().filter(p => FUNNY_CLS.includes(p.cls) && inViewP(p) && !p.falling && !P.busy(p) && !focusSet.has(p) && !(solo && solo.p === p) && !(pair && pair.includes(p)));
+}
+function doAntic(p) {
+  if (!p) return false;
+  p.anticUntil = nowMs() + 3500;
+  refreshVis(p);
+  const line = FUNNY_BY_CLS[p.cls] || FUNNY_LINES[Math.floor(Math.random() * FUNNY_LINES.length)];
+  setTimeout(() => P.sayBubble(p, line), 250);
+  FX.twinkleAt(p.x / 100, (p.y - 10) / 100, '#ffe14d', 5);
+  FX.pop(p.x / 100, (p.y - 14) / 100, '😂');
+  FX.pop(p.x / 100, (p.y - 12) / 100, '⭐');
+  const guard = P.all().find(o => o.cls === 'nv12' && inViewP(o) && Math.abs(o.x - p.x) < 26 && Math.abs(o.y - p.y) < 26);
+  if (guard && guard !== p) setTimeout(() => P.sayBubble(guard, '...đừng nhìn tui'), 900);
+  return true;
+}
+function forceAntic() { const c = anticCandidates(); return c.length ? doAntic(c[Math.floor(Math.random() * c.length)]) : false; }
+setInterval(() => {
+  if (!cfg.khuayDong) return;
+  const t = nowMs();
+  if (t < nextAnticAt) return;
+  const active = P.all().filter(p => p.anticUntil && t < p.anticUntil).length;
+  if (active >= (t < partyUntil ? 2 : 1)) { nextAnticAt = t + 1500; return; }
+  if (forceAntic()) nextAnticAt = t + (cfg.anticsIntervalSec || 7) * 1000 * (0.8 + Math.random() * 0.5);
+  else nextAnticAt = t + 2500;
+}, 1000);
+setInterval(() => {
+  if (!cfg.khuayDong || Math.random() < 0.45) return;
+  const staff = P.all().filter(p => p.staff && inViewP(p) && STAFF_LINES[p.cls]);
+  if (!staff.length) return;
+  const p = staff[Math.floor(Math.random() * staff.length)];
+  const lines = STAFF_LINES[p.cls];
+  P.sayBubble(p, lines[Math.floor(Math.random() * lines.length)]);
+}, 13000);
+function crowdCheer(centerP) {
+  if (!centerP) return;
+  const near = P.neighbours(centerP).filter(o => inViewP(o) && !o.falling && !P.busy(o)).slice(0, 7);
+  for (const o of near) {
+    o.el.classList.add('cheering');
+    setTimeout(() => o.el.classList.remove('cheering'), 2100);
+    FX.pop(o.x / 100, (o.y - 13) / 100, Math.random() < 0.5 ? '👏' : '🔥');
+    if (Math.random() < 0.3) setTimeout(() => P.sayBubble(o, CHEER_LINES[Math.floor(Math.random() * CHEER_LINES.length)]), 300 + Math.random() * 500);
+  }
+}
+function crowdWave() {
+  const t = nowMs();
+  if (t - lastWaveAt < 5000) return;
+  lastWaveAt = t;
+  for (const p of P.all().filter(q => inViewP(q) && !q.falling)) {
+    p.el.style.setProperty('--wvd', (p.x / 100 * 0.85).toFixed(2) + 's');
+    p.el.classList.add('waving');
+    setTimeout(() => p.el.classList.remove('waving'), 2600);
+  }
+}
+setInterval(() => { if (cfg.khuayDong && P.realCount() >= 6) crowdWave(); }, 40000);
+function lightShow() {
+  rigShowUntil = nowMs() + 5000;
+  const tag = $('lightTag');
+  if (tag) { tag.classList.add('on'); clearTimeout(lightTagTimer); lightTagTimer = setTimeout(() => tag.classList.remove('on'), 5000); }
+  screenPush('✨ LIGHT SHOW — đèn quẩy hết cỡ!');
+}
+
 /* ============ Party Energy / PARTY MAX ============ */
 let energy = 12, partyFxTimer = null;
 function renderEnergy() {
@@ -632,8 +994,10 @@ function renderEnergy() {
 }
 function addEnergy(n) {
   if (nowMs() < partyUntil) return;
+  const prev = energy;
   energy = Math.min(100, energy + n);
   renderEnergy();
+  if ((prev < 50 && energy >= 50) || (prev < 100 && energy >= 100)) lightShow();   // mốc năng lượng -> LIGHT SHOW 5 giây
   if (energy >= 100) partyMax();
 }
 function partyMax() {
@@ -662,6 +1026,8 @@ function startPartyMax() {
   screenPush('⚡ PARTY MAX — cả sàn cùng quẩy!');
   A.cheer();
   FX.moneyRain(170); FX.confetti(130); FX.fireworks(3);
+  FX.cannon(0.1, 0.37, 1); FX.cannon(0.9, 0.37, -1);
+  crowdWave();
   for (const p of P.all()) refreshVis(p);
   clearInterval(partyFxTimer);
   partyFxTimer = setInterval(() => { FX.moneyRain(90); FX.confetti(60); }, 2200);
@@ -976,7 +1342,10 @@ function giftFx(user, dia, giftName) {
   }
   addEnergy(Math.min(30, 4 + dia * 0.5));
   screenPush(`🎁 ${user ? user.nickname : 'Khách'} tặng ${giftName || 'quà'} (${fmtNum(dia)} xu)`);
+  if (user) equipAcc(user, dia);   // phụ kiện theo bậc quà (lưu vào bản ghi, hết hạn theo phuKienGiuGio)
+  if (dia >= 299) { FX.cannon(0.1, 0.37, 1); FX.cannon(0.9, 0.37, -1); }   // pháo giấy 2 góc sân khấu
   if (!p) { if (dia >= 10) FX.potBurst(x, y); return; }   // quà không rõ người tặng: chỉ hiệu ứng giữa sàn
+  if (dia >= 99) crowdCheer(p);   // hàng xóm quanh người tặng cổ vũ
   if (dia >= 1000) { hugeCelebration(user); return; }
   if (dia >= 299) { vipArrival(user); return; }
   if (dia >= 99) { grandArrival(user); return; }
@@ -1135,6 +1504,8 @@ function applyConfig(c) {
   P.setTune({ lvScaleMax: cfg.lvScaleMax, dropHeight: cfg.dropHeight, dropHeightVip: cfg.dropHeightVip });
   worldEl.style.setProperty('--dimB', clamp(cfg.doMoPhanConLai != null ? cfg.doMoPhanConLai : 0.55, 0.3, 1));
   applySpeed();
+  screenFxSetStyle(cfg.hieuUngManHinh);
+  rigApplyConfig();
   syncDim();
   storeInit();
   startGuide();
@@ -1316,6 +1687,12 @@ W.test = {   // móc kiểm chứng / chụp ảnh demo
   party: () => partyMax(),
   djSwap: () => doDjSwap(),
   dj: () => ({ idx: djIdx, name: djNow().full, file: djCur.file, mode: djCur.mode, shiftMs: djShiftMs, tag: $('djCamTag').textContent }),
+  screenFx: s => { screenFxSetStyle(s); return sfxStyle; },
+  rigState: () => ({ mode: rigMode, show: nowMs() < rigShowUntil, cones: rigCones.length }),
+  acc: (tier, idx) => { const all = P.all().filter(p => !p.staff); const p = all[idx || 0]; if (!p) return false; const rec = recordOf(p.user); rec.accTier = tier; rec.accExp = Date.now() + 6 * 3600e3; saveUsers(); applyAcc(p); FX.burstRainbow(p.x / 100, (p.y - 8) / 100, 16); Dir.request({ kind: 'focus', p, prio: 96, dur: 7, zoom: 1.3, follow: true, vis: 'xung', reason: '🎁 PHỤ KIỆN BẬC ' + tier, name: p.user.nickname }); return p.user.nickname + '/' + p.cls; },
+  antic: () => forceAntic(),
+  wave: () => crowdWave(),
+  lightshow: () => lightShow(),
   resetScores: () => resetScores(),
   clearFloor: () => { for (const p of P.all().filter(p => !p.staff)) P.removeUser(p.user.id); },
   fall: name => ensureDancer({ id: 'test-' + Date.now(), nickname: name || 'Khách Mới', avatar: '' }),
