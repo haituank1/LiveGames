@@ -768,10 +768,17 @@ P.makeCouple = function (userA, userB) {
 };
 
 function promoteStage() {
-  /* Số cặp lên cùng lúc: vắng thì 1 cặp; có hàng chờ thì mở thêm tới tối đa
-     (config soCapToiDa) — sức chứa = tổng số cặp đang có mặt, kẹp ở mức tối đa */
+  /* Số cặp lên cùng lúc (Nguyen chốt lại 2026-11-04 17:02): bình thường
+     CHỈ 1 CẶP trên sân khấu cho thoáng và tập trung; chỉ khi hàng chờ
+     THỰC SỰ đông (từ tune.crowdQueue cặp đang chờ trở lên, mặc định 4 —
+     config hangChoDongThiThemCap) mới mở thêm cặp thứ 2. Trần cứng là
+     soCapToiDa (nay để 2) và sức chứa vẫn kẹp theo tổng cặp đang có mặt.
+     Cặp đang diễn không bị đụng: cap co lại thì chỉ ngừng cho cặp mới
+     lên, các cặp trên sân khấu diễn hết lượt của mình. */
   const staged = stageSlots.filter(Boolean).length;
-  const cap = Math.max(1, Math.min(P.tune.maxStage || 3, staged + stageQueue.length));
+  const hardMax = Math.max(1, P.tune.maxStage || 2);
+  const want = stageQueue.length >= (P.tune.crowdQueue || 4) ? Math.min(2, hardMax) : Math.min(1, hardMax);
+  const cap = Math.max(1, Math.min(want, staged + stageQueue.length));
   let onStage = staged;
   for (let i = 0; i < 3; i++) {
     if (stageSlots[i] || !stageQueue.length || onStage >= cap) continue;
