@@ -250,7 +250,7 @@ let freePool = [];
      khấu tròn thấp hơn, sàn bắt đầu dưới bậc thang y=50. */
 const TABLE_FRAMES = {
   'mac-dinh': {
-    stageY: 37.2, floorY: 44, seatTop: 43.5,
+    stageY: 37.2, floorY: 44, seatTop: 43.5, stripW: 12,
     keepClear: [{ x: 50, y: 44, rx: 11, ry: 2.6 }],   // bậc thang giữa: chỉ đi qua, không đứng
     aisle: { y0: 43, hw: 7.5, slope: 0.13 },   // THẢM ĐỎ GIỮA: dải cấm đứng, mở rộng dần xuống dưới (phối cảnh) — Nguyen yêu cầu 2026-11-04: không ai đứng giữa thảm, chỉ đứng hai bên
     rows: [
@@ -265,7 +265,7 @@ const TABLE_FRAMES = {
     ],
   },
   'bg-sanh-moi.webp': {
-    stageY: 42.6, floorY: 50, seatTop: 47.5,
+    stageY: 42.6, floorY: 50, seatTop: 47.5, stripW: 11,
     keepClear: [{ x: 50, y: 44, rx: 40, ry: 6.5 }],   // toàn bộ vòng bậc thang của bục tròn + thang đỏ giữa: chỉ đi qua, không đứng
     aisle: { y0: 46, hw: 8.5, slope: 0.10 },   // THẢM ĐỎ GIỮA của sảnh hoàng gia: cấm đứng, chỉ đứng hai bên thảm
     rows: [
@@ -364,8 +364,39 @@ function buildPositions() {
   // xuống tận bàn cuối phòng dù phía trên còn trống. Nay: khoảng cách tới
   // điểm ngay dưới sân khấu là chính (trọng số dọc 1.5), ghế chỉ hơn điểm
   // đứng tự do một chút (+5), jitter nhỏ (0..3) cho thứ tự khỏi méo.
+  /* DẢI ƯU TIÊN HAI BÊN THẢM (Nguyen vẽ khung đen trên ảnh 2026-11-04
+     19:36): hai dải sàn ôm sát thảm đỏ giữa, từ dưới sân khấu xuống tận
+     cuối sảnh, là khu vực khách đứng được ƯU TIÊN số 1. Cách điền vòng
+     tròn quanh sân khấu + rải đều toàn sảnh trước đây làm hai dải này
+     bị "trên đông, dưới lẻ tẻ, GIỮA TRỐNG QUẮC" (chữ của chủ phòng).
+     Nay: vị trí trong dải được lấy TRƯỚC mọi vị trí khác, theo thứ tự
+     CHIA ĐÔI KHOẢNG DỌC lớn nhất (điểm giữa dải trước, rồi điểm giữa
+     các nửa...) và xen kẽ trái/phải — ở bất kỳ số khách nào, người
+     cũng trải đều suốt chiều dài hai dải, đoạn giữa không bao giờ
+     trống. stripW = bề rộng dải tính từ mép thảm ra ngoài (%). */
+  const stripW = (TABLE_FRAMES[frameId] && TABLE_FRAMES[frameId].stripW) || 12;
+  for (const p of positions) {
+    const dEdge = Math.abs(p.x - 50) - aisleHW(p.y);
+    p.strip = p.y >= FLOOR_Y + 1 && p.y <= 98.6 && dEdge > 0.5 && dEdge <= stripW;
+  }
+  const sideSeq = [0, 1].map(side => {
+    const arr = positions.filter(q => q.strip && (side === 0 ? q.x < 50 : q.x >= 50)).sort((a, b) => a.y - b.y || a.x - b.x);
+    const seq = [], ranges = [[0, arr.length - 1]];
+    while (ranges.length) {
+      const [lo, hi] = ranges.shift();
+      if (lo > hi) continue;
+      const mid = (lo + hi) >> 1;
+      seq.push(arr[mid]); ranges.push([lo, mid - 1], [mid + 1, hi]);
+    }
+    return seq;
+  });
+  const stripOrder = new Map();
+  for (let i = 0, n = Math.max(sideSeq[0].length, sideSeq[1].length); i < n; i++) {
+    if (sideSeq[0][i]) stripOrder.set(sideSeq[0][i], stripOrder.size);
+    if (sideSeq[1][i]) stripOrder.set(sideSeq[1][i], stripOrder.size);
+  }
   const fillKey = p => Math.hypot(p.x - 50, (p.y - (FLOOR_Y + 1)) * 1.5) + (p.kind === 'seat' ? 0 : 5) + rand(0, 3);
-  for (const p of positions) p.key = fillKey(p);
+  for (const p of positions) p.key = p.strip ? stripOrder.get(p) : 1000 + fillKey(p);
   freePool = positions.slice().sort((p1, p2) => p1.key - p2.key);
   freePool.forEach((p, i) => { p.rank = i; });   // rank 0 = chỗ đẹp nhất (trong cùng, gần sân khấu)
   return tables;
@@ -383,8 +414,10 @@ function takePosition() {
        càng tốt, chững ở SPREAD_CAP) trừ ưu thế gần sân khấu theo key. Chỗ
        thắng cuộc vừa rải đều vừa hơi thiên về phía sân khấu. */
     let best = null, bestScore = -Infinity;
+    const stripFree = freePool.some(q => !q.taken && q.strip);   // dải ưu tiên còn chỗ -> rải đều CHỈ trong dải
     for (const pos of freePool) {
       if (pos.taken) continue;
+      if (stripFree && !pos.strip) continue;
       let md = Infinity;
       for (const q of positions) {
         if (!q.taken) continue;
