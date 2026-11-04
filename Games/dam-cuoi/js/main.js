@@ -1106,6 +1106,8 @@ function applyConfig(c) {
     MC._warmTimer = setTimeout(pumpWarm, 2500);
   }
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
+  if (cfg.nhaCapTiepSauGiay) P.releaseSec = cfg.nhaCapTiepSauGiay;
+  if (cfg.boQuaLiaCamKhiChoTren) P.crowdSkip = cfg.boQuaLiaCamKhiChoTren;
   P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa, crowdQueue: cfg.hangChoDongThiThemCap, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong, quietMax: cfg.phongVangDuoi });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
   applyPanelPos();
@@ -1224,7 +1226,7 @@ if (isDemo) {
     mcName: 'MC Anh Tú',
     mcNameNu: 'MC Ngọc Trâm',
     npcVoiceOn: true, npcVoice: 'vi-VN-HoaiMyNeural', npcVoiceNam: 'vi-VN-NamMinhNeural', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
-    coupleSec: 15,
+    coupleSec: 15, nhaCapTiepSauGiay: 6, boQuaLiaCamKhiChoTren: 12,
     phongToGoiTen: 1.32, coCapGiua: 1.22, coCapBen: 1.22, soCapToiDa: 2, hangChoDongThiThemCap: 4,
     phongVangDuoi: 15, liaCamNguoiMoiKhiVang: true, liaCamNguoiMoiGiay: 4,
     zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,

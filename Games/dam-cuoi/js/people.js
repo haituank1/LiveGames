@@ -370,9 +370,34 @@ function buildPositions() {
   freePool.forEach((p, i) => { p.rank = i; });   // rank 0 = chỗ đẹp nhất (trong cùng, gần sân khấu)
   return tables;
 }
+/* RẢI ĐỀU KHI ĐÔNG NGƯỜI (Nguyen yêu cầu 2026-11-04 17:53): từ SPREAD_MIN
+   khách trở đi, chỗ mới không lấy sát sân khấu nữa mà lấy chỗ CÁCH XA các
+   chỗ đã có người nhất — hết cảnh khách dính trùm một khu, khu khác trống. */
+const SPREAD_MIN = 26;   // số khách bắt đầu rải đều
+const SPREAD_CAP = 16;   // bán kính cách ly tính điểm tối đa (% bề ngang sảnh) — xa hơn nữa coi như bằng nhau
 function takePosition() {
-  while (freePool.length) { const pos = freePool.shift(); if (!pos.taken) return pos; }   // lấy từ GẦN sân khấu trước (đầu mảng đã sắp xếp)
-  return null;
+  while (freePool.length && freePool[0].taken) freePool.shift();   // dọn chỗ đã bị lấy còn sót ở đầu pool
+  if (!freePool.length) return null;
+  if (people.size >= SPREAD_MIN) {
+    /* Điểm của 1 chỗ trống = khoảng cách tới chỗ CÓ NGƯỜI gần nhất (càng xa
+       càng tốt, chững ở SPREAD_CAP) trừ ưu thế gần sân khấu theo key. Chỗ
+       thắng cuộc vừa rải đều vừa hơi thiên về phía sân khấu. */
+    let best = null, bestScore = -Infinity;
+    for (const pos of freePool) {
+      if (pos.taken) continue;
+      let md = Infinity;
+      for (const q of positions) {
+        if (!q.taken) continue;
+        const dx = pos.x - q.x, dy = (pos.y - q.y) * 1.3;
+        const d = dx * dx + dy * dy;
+        if (d < md) md = d;
+      }
+      const score = Math.min(md, SPREAD_CAP * SPREAD_CAP) - pos.key * 0.5;
+      if (score > bestScore) { bestScore = score; best = pos; }
+    }
+    if (best) { freePool.splice(freePool.indexOf(best), 1); return best; }
+  }
+  return freePool.shift();   // phòng còn vắng: lấy từ GẦN sân khấu trước (đầu mảng đã sắp xếp)
 }
 /* PHÒNG VẮNG: chỗ trống GẦN TÂM KHUNG HÌNH MẶC ĐỊNH NHẤT (giữa phòng, ngay
    trước sân khấu — đúng vùng camera nhà đang ngắm) để khách mới vào là thấy
@@ -829,8 +854,32 @@ function promoteStage() {
      lên, các cặp trên sân khấu diễn hết lượt của mình. */
   const staged = stageSlots.filter(Boolean).length;
   const hardMax = Math.max(1, P.tune.maxStage || 2);
-  const want = stageQueue.length >= (P.tune.crowdQueue || 4) ? Math.min(2, hardMax) : Math.min(1, hardMax);
-  const cap = Math.max(1, Math.min(want, staged + stageQueue.length));
+  let cap;
+  if (stageQueue.length >= (P.crowdSkip || 12)) {
+    /* ĐÔNG QUÁ NGƯỠNG (config boQuaLiaCamKhiChoTren, mặc định 12 cặp
+       đang chờ): BỎ NHỊP lia cam cho kịp lượt — cho lên ngay theo sức
+       chứa như trước (tối đa 2 cặp khi hàng chờ đông). */
+    const want = stageQueue.length >= (P.tune.crowdQueue || 4) ? Math.min(2, hardMax) : Math.min(1, hardMax);
+    cap = Math.max(1, Math.min(want, staged + stageQueue.length));
+  } else {
+    /* NHỊP LIA CAM (Nguyen chốt 2026-11-04 17:45): hàng chờ còn ít thì
+       các cặp lên THEO NHỊP cho đẹp — cặp tiếp theo chỉ BẮT ĐẦU (khoảnh
+       khắc lia cam tới 2 nhân vật, tức lúc promote này) khi cặp đang
+       diễn đã ĐỨNG ĐỦ releaseSec giây trên sân khấu (mặc định 6 —
+       config nhaCapTiepSauGiay), và không bao giờ có 2 hành trình lên
+       sân khấu chạy song song. Chưa tới nhịp thì DỪNG ở đây; hẹn giờ
+       đặt ở arriveStage sẽ gọi lại promoteStage đúng mốc nhả. */
+    let journeying = false, freshPerforming = false;
+    for (const c of couples) {
+      if (c.state === 'toStage') journeying = true;
+      else if (c.state === 'stage') {
+        const performed = (P.coupleSec || 25) - Math.max(0, c.timer != null ? c.timer : 0);
+        if (performed < (P.releaseSec || 6)) freshPerforming = true;
+      }
+    }
+    if (stageQueue.length && (journeying || freshPerforming)) return;
+    cap = Math.max(1, Math.min(2, hardMax, staged + stageQueue.length));
+  }
   /* NHƯỜNG GIỮA CHO CẶP LÊN SAU (Nguyen chốt 2026-11-04 17:18): nếu ô
      giữa đang có cặp diễn và sắp có cặp mới được lên (còn ô bên trống,
      cap cho phép), mà cặp giữa đã diễn QUÁ NỬA lượt (≥55% coupleSec)
@@ -900,6 +949,10 @@ function arriveStage(c) {
   c.a.state = 'stage'; c.b.state = 'stage';
   c.a.el.classList.remove('pairfx'); c.b.el.classList.remove('pairfx');
   if (P.onCoupleStage) P.onCoupleStage(c);
+  /* Hẹn giờ NHẢ cặp tiếp theo đúng mốc đứng đủ releaseSec (nhịp lia
+     cam ở promoteStage): tới giờ gọi lại promoteStage, cổng nhịp ở đó
+     tự quyết có nhả hay chưa (hàng chờ có thể đã đổi khác lúc đó). */
+  setTimeout(() => promoteStage(), (P.releaseSec || 6) * 1000);
 }
 /* ===== Chong spam len san khau (Nguyen chot 2026-11-04) =====
    Moi nguoi xuong san khau xong la bat dau DEM NGUOC (stageCdUntil): trong
@@ -1043,3 +1096,5 @@ P.setBgFile = function (file) {
   }
 };
 P.coupleSec = 25;
+P.releaseSec = 6;    // nhịp lia cam: cặp đang diễn ĐỨNG ĐỦ từng này giây mới bắt đầu cặp tiếp theo (config nhaCapTiepSauGiay)
+P.crowdSkip = 12;    // hàng chờ từ từng này cặp trở lên thì bỏ nhịp lia cam, cho lên ngay (config boQuaLiaCamKhiChoTren)

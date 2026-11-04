@@ -56,6 +56,8 @@
       }
     ],
     "coupleSec": 15,
+    "nhaCapTiepSauGiay": 6,
+    "boQuaLiaCamKhiChoTren": 12,
     "mcCouple": [
       "Xin giới thiệu cặp đôi {a} ❤ {b}! Mời hai bạn lên sân khấu làm lễ nào!",
       "Cả nhà ơi, cặp đôi {a} và {b} sắp lên sân khấu! Chuẩn bị pháo tay nào!",
