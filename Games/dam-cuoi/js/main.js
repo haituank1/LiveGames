@@ -660,6 +660,10 @@ function applyPanelPos() {
   root.setProperty('--prx', px(cfg.khungPhaiX, SW)); root.setProperty('--pry', px(cfg.khungPhaiY, SH));
   root.setProperty('--qx', px(cfg.khungHangChoX, SW)); root.setProperty('--qy', px(cfg.khungHangChoY, SH));
   root.setProperty('--mcx', px(cfg.khungMcX, SW)); root.setProperty('--mcy', px(cfg.khungMcY, SH));
+  /* Banner "LE THANH HON" (va banner moc/qua lon): cao bao nhieu % tinh tu
+     mep tren — dua len cao de khong che mat nhan vat tren san khau (mac dinh
+     30%, truoc day co dinh 44% nen che ngang cap doi). */
+  root.setProperty('--by', String(cfg.bannerY != null ? cfg.bannerY : 30));
 }
 /* ============ Cấu hình ============ */
 function applyConfig(c) {
@@ -790,6 +794,7 @@ if (isDemo) {
     ghepDoiNgauNhien: true,
     uuTienQuaTang: true,
     hangChoToiDa: 4,
+    bannerY: 30,
     khungTraiX: 0, khungTraiY: 0, khungPhaiX: 0, khungPhaiY: 0, khungHangChoX: 0, khungHangChoY: 0, khungMcX: 0, khungMcY: 0,
     hienBongChat: true, bongChatGiay: 4, bongChatMaxKyTu: 60, bongChatAnKhiTuCamQua: 2,
     tuCamComment: ['vl', 'vcl', 'vkl', 'vãi', 'địt', 'đụ', 'đéo', 'cặc', 'lồn', 'buồi', 'đĩ', 'đm', 'dm', 'đmm', 'dcm', 'đcm', 'cave', 'loz'],
