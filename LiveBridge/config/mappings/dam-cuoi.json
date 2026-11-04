@@ -57,13 +57,28 @@
     ],
     "coupleSec": 22,
     "mcCouple": [
-      "Xin giới thiệu cặp đôi {a} ❤ {b}! Mời hai bạn lên sân khấu ra mắt bà con hai họ... online!",
-      "Một tràng pháo tay cho {a} và {b}! Trai tài gái sắc, đúng là trời sinh một cặp!",
-      "{a} ơi, {b} ơi — hai bạn chính thức là cặp đôi của sảnh cưới lúc này!",
-      "MC xin được se duyên cho {a} ❤ {b}. Chúc hai bạn trăm năm hạnh phúc, đầu bạc răng long!"
+      "Xin giới thiệu cặp đôi {a} ❤ {b}! Mời hai bạn lên sân khấu làm lễ nào!",
+      "Cả nhà ơi, cặp đôi {a} và {b} sắp lên sân khấu! Chuẩn bị pháo tay nào!",
+      "MC xin được se duyên cho {a} ❤ {b}. Chúc hai bạn trăm năm hạnh phúc, đầu bạc răng long!",
+      "Trân trọng giới thiệu: {a} và {b} — cặp đôi tiếp theo của sảnh cưới chúng ta!",
+      "Đến lượt {a} ❤ {b} rồi! Hai bạn nắm tay nhau bước lên sân khấu nhé!",
+      "Một tràng pháo tay cho {a} và {b} nào cả nhà! Cặp đôi này dễ thương quá đi!",
+      "MC gọi tên {a} ❤ {b}! Mời hai bạn lên nhận lời chúc phúc của cả sảnh!",
+      "Duyên trời sắp đặt: {a} và {b} đã thành một cặp! Mời hai bạn lên sân khấu!",
+      "Xin mời cặp đôi {a} ❤ {b} tiến lên sân khấu — nhạc đâu, hoa đâu, lên nào!",
+      "Cặp đôi vàng của giờ này: {a} và {b}! Chúc hai bạn sớm về chung một nhà!"
     ],
     "mcFollowLines": [
-      "Cảm ơn {ten} đã follow! Từ nay bạn là khách VIP của sảnh cưới này nhé!"
+      "Cảm ơn {ten} đã follow! Từ nay bạn là khách VIP của sảnh cưới này nhé!",
+      "Hoan hô! {ten} vừa follow phòng — MC ghi tên vào sổ khách quý rồi đó!",
+      "Cảm ơn {ten} đã theo dõi! Có bạn là sảnh cưới vui thêm hẳn luôn!",
+      "A, {ten} follow rồi nè! Từ nay đám cưới nào vui là có mặt bạn hết nhé!",
+      "MC cảm ơn {ten} đã follow. Tặng bạn một tràng pháo tay của cả sảnh cưới!",
+      "{ten} ơi, follow là có duyên với sảnh cưới này rồi đó — ở lại chơi lâu nhé!",
+      "Tuyệt vời! {ten} đã follow — từ nay bạn là người nhà của MC rồi!",
+      "Cảm ơn {ten} đã nhấn theo dõi! Chuẩn bị tinh thần, sắp có cặp đôi dễ thương lên sân khấu đó!",
+      "Một lượt follow từ {ten}! MC cảm ơn bạn — khách quý như bạn là sảnh cưới đông vui hẳn!",
+      "{ten} follow rồi! MC chúc bạn sớm tìm được người thương để tag lên sân khấu nhé!"
     ],
     "mcFunny": [
       "MC xin thông báo: ai còn độc thân thì cứ tag crush vào đây, MC gả luôn, khỏi cần mai mối!",
@@ -71,11 +86,21 @@
       "Cô dâu chú rể hôm nay đẹp quá, MC đứng cạnh cũng thấy mình... cần đi spa gấp.",
       "Ai tag người yêu cũ vào đây là MC tính phí gấp đôi nhé, vì tội làm sảnh cưới thêm phần kịch tính!",
       "Xin nhắc nhẹ: thả tim là miễn phí, còn bỏ lỡ người thương là mất phí cả đời đấy!",
-      "Hôm nay ai lên sân khấu cũng auto đẹp — vì sảnh này có filter hạnh phúc sẵn rồi!"
+      "Hôm nay ai lên sân khấu cũng auto đẹp — vì sảnh này có filter hạnh phúc sẵn rồi!",
+      "Luật của sảnh: vào đây là phải vui, ai buồn MC cho lên sân khấu cưới luôn!",
+      "MC đếm rồi: phòng mình còn nhiều người độc thân lắm — tag nhau đi kẻo MC mai mối đại đó!",
+      "Ăn cưới online sướng nhất là không phải rửa chén — cứ ngồi xem và thả tim thôi!",
+      "Ai tag trúng người yêu cũ thì MC không chịu trách nhiệm đâu nha, MC chỉ se duyên thôi!"
     ],
     "mcGreet": [
       "Chào {ten} đã ghé sảnh cưới! Tìm chỗ ngồi đẹp, chuẩn bị tag người thương nhé!",
-      "Hoan nghênh {ten}! Đám cưới đang vui, bạn vào là vui gấp đôi!"
+      "Hoan nghênh {ten}! Vào rồi thì ở lại dự tiệc, đừng về sớm đó nha!",
+      "A, {ten} tới rồi! Sảnh cưới hôm nay đông vui quá — chào mừng bạn!",
+      "Chào mừng {ten} đến với đám cưới online! Cứ tự nhiên như ở nhà nhé!",
+      "{ten} ơi, vào phòng là có duyên rồi — kiếm người thương tag lên sân khấu đi nè!",
+      "MC chào {ten}! Hôm nay bạn muốn dự tiệc hay muốn lên làm nhân vật chính đây?",
+      "Hoan hô, {ten} đã vào phòng! Ngồi xuống, thả tim, chuẩn bị xem lễ cưới nào!",
+      "Chào {ten}! Sảnh cưới đang vui lắm, bạn vào đúng lúc rồi đó!"
     ],
     "mcGuide": [
       "💌 Gõ \"@tên người thương\" → 2 bạn lên sân khấu",
@@ -90,12 +115,20 @@
       "Trăm năm tình viên mãn, bạc đầu nghĩa phu thê — chúc các cặp đôi của chúng ta mãi bền chặt!",
       "Một like của bạn là một lời chúc phúc. Một follow là một phong bao lì xì tinh thần đấy!",
       "Sảnh cưới đang nóng dần lên! Mọi người tag người thương vào để cùng lên sân khấu nào!",
-      "Đám cưới vui nhất là đám cưới đông khách. Mời bà con cô bác thả tim cho rộn ràng nào!"
+      "Đám cưới vui nhất là đám cưới đông khách. Mời bà con cô bác thả tim cho rộn ràng nào!",
+      "Đám cưới online mà vui như offline — chỉ thiếu mỗi phong bao của bạn thôi đó!",
+      "Ai chưa tag người thương thì tag lẹ đi, sân khấu đang trống nè!",
+      "Sảnh cưới hôm nay rộn ràng quá — MC dẫn mà cũng muốn cưới theo luôn!",
+      "Cả nhà nhớ thả tim đều tay nhé, tim càng nhiều cặp đôi càng hạnh phúc!"
     ],
     "mcMaxSec": 26,
     "mcMilestone": [
       "🎉 Sảnh cưới vừa nâng cấp lên {moc}! Càng đông càng đẹp — cảm ơn cả nhà đã tới chung vui!",
-      "Không khí quá tuyệt vời! Chúng ta đã chạm mốc {moc} rồi mọi người ơi!"
+      "Không khí quá tuyệt vời! Chúng ta đã chạm mốc {moc} rồi mọi người ơi!",
+      "Đẳng cấp mới rồi cả nhà ơi — sảnh {moc} chính thức mở cửa! Đẹp chưa, đẹp chưa?",
+      "Nhờ cả nhà chung tay, sảnh cưới đã lên {moc}! MC tự hào về phòng mình quá!",
+      "Khoảnh khắc này phải ghi nhớ: sảnh cưới đạt mốc {moc}! Cảm ơn từng lượt xem của mọi người!",
+      "Lên đời rồi! Sảnh {moc} lung linh hơn hẳn — cả nhà ở lại ngắm cho đã nhé!"
     ],
     "mcSapMoc": [
       "Cả nhà ơi, chỉ còn {con} lượt xem nữa là chạm mốc {moc} — sảnh {sanh} sắp mở rồi! Mọi người chia sẻ live giúp MC nhé!",
@@ -112,9 +145,16 @@
     "mcName": "MC Anh Tú",
     "mcOn": true,
     "mcThank": [
-      "Cảm ơn {ten} đã tặng quà mừng cưới! Phong bao này MC ghi sổ vàng luôn nhé!",
-      "{ten} chơi lớn quá! Cặp đôi trên sân khấu thay mặt hai họ cảm ơn bạn!",
-      "Quà của {ten} vừa tới là pháo hoa nổ tung trời luôn. Quá đã!"
+      "Cảm ơn {ten} đã tặng quà mừng cưới! Phong bao này MC ghi sổ vàng rồi nhé!",
+      "Ôi, {ten} tặng quà nè! Cả sảnh cưới cảm ơn bạn — hậu tạ này nồng ấm quá!",
+      "Quà của {ten} tới rồi! MC thay mặt cô dâu chú rể cảm ơn bạn nhiều lắm!",
+      "{ten} hào phóng quá! Quà này làm sảnh cưới sáng rực luôn — cảm ơn bạn!",
+      "Nhận được quà của {ten} rồi! Chúc bạn ví luôn đầy như phong bao bạn tặng nhé!",
+      "Cảm ơn {ten}! Quà mừng cưới này MC sẽ đọc to cho cả sảnh cùng vui!",
+      "Ui, {ten} tặng quà xịn quá! Cô dâu chú rể mà biết là cảm động lắm đó!",
+      "{ten} ơi, quà tới tay rồi! MC cảm ơn tấm lòng vàng của bạn nhé!",
+      "Một món quà từ {ten} — sảnh cưới rộn ràng hẳn lên! Cảm ơn bạn rất nhiều!",
+      "Cảm ơn {ten} đã mừng cưới! Chúc bạn tặng quà xong là lộc lá đầy nhà luôn!"
     ],
     "musicOn": true,
     "musicShuffle": true,
@@ -154,9 +194,12 @@
     "tyLeChoTrong": 0.45,
     "ghepDoiNgauNhien": true,
     "mcTagVang": [
-      "{a} gọi {ten} mà {ten} chưa có trong phòng — MC ghép tạm {a} với {b} cho đỡ trống nhé! {a} ơi, mau nhắn {ten} vào live để hai bạn được làm lễ cùng nhau!",
-      "{ten} ơi, {a} đang chờ bạn trong phòng cưới đó! MC se duyên tạm cho {a} với {b} trong lúc chờ — {ten} vào nhanh kẻo mất lượt nha!",
-      "Người thương {ten} của {a} chưa xuất hiện — MC đành ghép tạm {a} với bạn {b} đang độc thân. {a} nhớ rủ {ten} vào live để được ghép đúng đôi nhé!"
+      "{a} gọi {ten} mà {ten} chưa có trong phòng — MC ghép tạm {a} với {b} cho đỡ trống nhé! {ten} ơi, vào nhanh để làm lễ cùng {a} nào!",
+      "{ten} ơi, {a} đang gọi bạn kìa! MC giữ chỗ sẵn rồi — vào nhanh để thành đôi với {a} nhé!",
+      "{a} tag {ten} nhưng {ten} chưa tới — tạm thời MC se duyên {a} với {b}, {ten} xuất hiện là MC đổi lại ngay!",
+      "Alo {ten}, có {a} đang chờ bạn ở sảnh cưới! Trong lúc chờ, {a} đứng cặp tạm với {b} nhé!",
+      "{a} nhớ {ten} quá nên MC đành ghép tạm {a} với {b} — {ten} mà vào là có lễ cưới liền đó!",
+      "{ten} chưa vào phòng nên MC mượn tạm {b} đứng cặp với {a} — {ten} ơi, vào nhanh kẻo mất lượt!"
     ],
     "mcCheGheuChoGiay": 20,
     "mcTagDaCoDoi": [

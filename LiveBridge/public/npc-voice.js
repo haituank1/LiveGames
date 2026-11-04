@@ -150,20 +150,26 @@
         new Promise(r => setTimeout(() => r(null), this.cfg.waitMs)),
       ]);
       if (!readies || readies.some(e => !e || !e.url)) return { played: false, reason: 'not-ready' };
-      const clips = [];
-      let totalMs = 0;
-      for (const e of readies) {
+      /* Nạp đệm MỌI đoạn SONG SONG tới mức 'canplay' TRƯỚC khi phát đoạn đầu:
+         bản cũ chờ metadata TỪNG đoạn theo thứ tự (mỗi đoạn tối đa 1200ms)
+         rồi mới phát, và play() trên đoạn chưa có dữ liệu lại phải chờ nạp
+         tiếp -> nghe khưng ~2 giây giữa các đoạn (Nguyen phản ánh
+         2026-11-04: "Cảm ơn" ... "Hải Tuấn" ... "đã follow"). Nạp xong hết
+         từ đầu thì chuyển đoạn gần như tức thì. Đoạn nào không đệm kịp
+         trong 1800ms -> coi như chưa sẵn sàng, game hiện chữ như cũ. */
+      const clips = await Promise.all(readies.map(e => new Promise(res => {
         const audio = new Audio(e.url);
         audio.volume = Math.max(0, Math.min(1, this.cfg.volume / 100));
         audio.preload = 'auto';
-        const d = await new Promise(res => {
-          const to = setTimeout(() => res(0), 1200);
-          audio.addEventListener('loadedmetadata', () => { clearTimeout(to); res(isFinite(audio.duration) ? audio.duration * 1000 : 0); }, { once: true });
-          audio.addEventListener('error', () => { clearTimeout(to); res(0); }, { once: true });
-        });
-        clips.push({ audio, durMs: d });
-        totalMs += d;
-      }
+        let xong = false;
+        const fin = ok => { if (xong) return; xong = true; res(ok ? { audio, durMs: isFinite(audio.duration) ? audio.duration * 1000 : 0 } : null); };
+        audio.addEventListener('canplay', () => fin(true), { once: true });
+        audio.addEventListener('error', () => fin(false), { once: true });
+        setTimeout(() => fin(audio.readyState >= 3), 1800);
+        try { audio.load(); } catch (_) { fin(false); }
+      })));
+      if (clips.some(c => !c)) return { played: false, reason: 'not-ready' };
+      const totalMs = clips.reduce((s, c) => s + (c.durMs || 0), 0);
       this._playing = true;
       this._lastStart = Date.now();
       this._starts.push(this._lastStart);
