@@ -497,14 +497,24 @@ function foldWord(s) {
   return String(s).toLowerCase().split('').map(ch => FOLD_MAP[ch] || ch).join('').replace(/(.)\1+/g, '$1');
 }
 let banExact = new Set(), banFold = new Set(), safeFold = new Set(['cac']);
+/* Danh sách trong config PHẢI là mảng — nhưng settings.json trên máy người
+   dùng có thể lưu dạng CHUỖI thô (bản admin cũ ghi text thẳng vào file) và
+   cầu nối trộn nguyên xi vào config gửi cho game. Ép kiểu tại đây: mảng thì
+   giữ, chuỗi thì tách theo dấu phẩy/xuống dòng. Thiếu bước này, 1 key dạng
+   chuỗi làm .map() văng TypeError GIỮA applyConfig -> mọi thứ sau nó (bảng,
+   hướng dẫn, nền...) chết theo mà sự kiện vẫn chạy — đúng lỗi Nguyen gặp
+   2026-11-04 (màn hình đỏ #430b18, mất hết khung). */
+function asList(v) {
+  return Array.isArray(v) ? v : (typeof v === 'string' ? v.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean) : []);
+}
 function buildBanSets() {
   banExact = new Set(); banFold = new Set();
-  for (const w of cfg.tuCamComment || []) {
+  for (const w of asList(cfg.tuCamComment)) {
     const t = String(w).trim().toLowerCase();
     if (!t) continue;
     banExact.add(t); banFold.add(foldWord(t));
   }
-  safeFold = new Set((cfg.tuAnToanComment || ['cac']).map(w => foldWord(String(w).trim())));
+  safeFold = new Set((cfg.tuAnToanComment == null ? ['cac'] : asList(cfg.tuAnToanComment)).map(w => foldWord(String(w).trim())));
 }
 function chatFilter(raw) {
   const text = String(raw || '').trim().replace(/\s+/g, ' ');
@@ -918,6 +928,12 @@ function applyPanelPos() {
 /* ============ Cấu hình ============ */
 function applyConfig(c) {
   cfg = c || {};
+  /* Chuẩn hoá MỌI key danh sách ngay đầu vào: key nào đang là chuỗi (do
+     settings.json lưu thô) thì tách thành mảng — 1 key sai kiểu không được
+     phép giết cả quá trình áp config/UI như lỗi 2026-11-04. */
+  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'rulesLines', 'guideLines']) {
+    if (typeof cfg[k] === 'string') cfg[k] = asList(cfg[k]);
+  }
   if (cfg.mcName) MC.name = cfg.mcName;
   MC.lines = (cfg.mcLines && cfg.mcLines.length) ? cfg.mcLines : ['Một đám cưới vui là khi khách mời cười nhiều hơn cô dâu chú rể.', 'Tình yêu không cần hoàn hảo, chỉ cần hai người cùng tag nhau lên sân khấu là đủ.', 'Cả nhà thả tim thật nhiều để chúc phúc cho các cặp đôi nhé!'];
   MC.funny = (cfg.mcFunny && cfg.mcFunny.length) ? cfg.mcFunny : ['MC dặn nhỏ: tag người yêu cũ vào đây MC tính phí gấp đôi nhé!', 'Ai còn độc thân giơ tay, MC nhìn thấy hết đấy, đừng trốn sau hàng ghế nữa!', 'Đi ăn cưới online mà không mất tiền mừng, thời đại này sướng thật!'];
