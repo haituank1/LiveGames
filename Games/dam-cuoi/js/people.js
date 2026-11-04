@@ -14,7 +14,8 @@ const P = {};
 window.Wedding.peopleApi = P;
 
 const MAX_PEOPLE = 2000;
-const FLOOR_Y = 44;              // sàn tiệc bắt đầu từ đây (% chiều cao phòng — dưới bục sân khấu trong ảnh toàn cảnh)
+let FLOOR_Y = 44;                // sàn tiệc bắt đầu từ đây (% chiều cao phòng) — THAY THEO KHUNG của từng file nền (P.setBgFile)
+let SEAT_TOP = 43.5;             // ghế quanh bàn không vượt lên trên mức này (né bậc thang/sân khấu) — cũng theo khung nền
 let Ww = 2700, Hw = 3840;        // kích thước phòng (px) — main cập nhật qua P.resize
 let FH = 192;                    // chiều cao nhân vật gốc (px trong phòng)
 let box = null, tablesBox = null;
@@ -132,25 +133,49 @@ let freePool = [];
    QUY TẮC CỨNG: nhân vật CHỈ đứng NGOÀI ellipse mặt bàn (ghế quanh bàn đặt chân
    ngoài mép bàn + lề an toàn; lưới điểm đứng cũng né ellipse phồng to) —
    TUYỆT ĐỐI không để chân nhân vật rơi lên mặt bàn. */
-/* Khung bàn ĐO TRỰC TIẾP trên tranh (lưới tọa độ % phủ lên cả 6 nền, 2026-11-04):
-   42 bàn / 8 hàng. Khung cũ 54 bàn/7 hàng là ước lượng — có bàn "ma" ở cột giữa
-   các hàng dưới (trên tranh là sàn đá/thảm) và lệch tâm tới ~3% ở nhiều bàn thật,
-   khiến ghế vòng quanh bàn ma lại rơi đúng lên mặt bàn thật = lỗi đứng trên bàn
-   mãi không hết. Cả 6 nền dùng CHUNG khung này (đã kiểm: hình học lệch nhau
-   không quá ±0.5%). Bàn ở mép (x 0.8/99.2, 1.5/98.5) bị cắt nửa ngoài khung —
-   vẫn phải có mặt để chặn đường đi. */
-const TABLE_ROWS = [
-  { y: 42.8, rx: 2.6, ry: 1.4, xs: [16.5, 23.5, 30.5, 35.5, 64.5, 69.5, 76.5, 83.5] },
-  { y: 46.3, rx: 3.0, ry: 1.6, xs: [12.3, 20.5, 28.5, 71.5, 79.5, 87.7] },
-  { y: 50.3, rx: 3.5, ry: 1.9, xs: [9.3, 18.8, 28.3, 71.7, 81.2, 90.7] },
-  { y: 54.5, rx: 4.0, ry: 2.2, xs: [4.8, 15.8, 26.3, 73.7, 84.2, 95.2] },
-  { y: 59.8, rx: 4.6, ry: 2.6, xs: [0.8, 11.8, 24.3, 75.7, 88.2, 99.2] },
-  { y: 67.8, rx: 5.3, ry: 3.0, xs: [5.8, 21, 79, 94.2] },
-  { y: 78, rx: 6.1, ry: 3.5, xs: [1.5, 16.5, 83.5, 98.5] },
-  { y: 92.3, rx: 7.0, ry: 4.0, xs: [8.3, 91.7] },
-];
-const PAINTED_TABLES = [];
-for (const r of TABLE_ROWS) for (const x of r.xs) PAINTED_TABLES.push({ x, y: r.y, rx: r.rx, ry: r.ry });
+/* ============ KHUNG THEO TỪNG FILE NỀN (đo trực tiếp trên tranh bằng lưới %) ============
+   Mỗi nền có khung riêng: đường đứng sân khấu (stageY), mép sàn (floorY), mức
+   trần của ghế (seatTop) và bảng bàn. Đổi nền -> P.setBgFile nạp khung tương ứng
+   -> vị trí/đường đi tự khớp tranh, không lỗi đứng trên bàn vì lệch khung.
+   - 'mac-dinh': 6 nền cũ (bg-full + 5 bản recolor) DÙNG CHUNG 1 khung 42 bàn/8
+     hàng (đã kiểm: hình học lệch nhau không quá ±0.5%). Khung ước lượng 54 bàn
+     trước đó có bàn "ma" + lệch tâm ~3% — gốc của lỗi đứng trên bàn.
+   - 'bg-sanh-moi.webp': sảnh mới (bàn vàng lớn, thưa hơn): 28 bàn/7 hàng, sân
+     khấu tròn thấp hơn, sàn bắt đầu dưới bậc thang y=50. */
+const TABLE_FRAMES = {
+  'mac-dinh': {
+    stageY: 37.2, floorY: 44, seatTop: 43.5,
+    rows: [
+      { y: 42.8, rx: 2.6, ry: 1.4, xs: [16.5, 23.5, 30.5, 35.5, 64.5, 69.5, 76.5, 83.5] },
+      { y: 46.3, rx: 3.0, ry: 1.6, xs: [12.3, 20.5, 28.5, 71.5, 79.5, 87.7] },
+      { y: 50.3, rx: 3.5, ry: 1.9, xs: [9.3, 18.8, 28.3, 71.7, 81.2, 90.7] },
+      { y: 54.5, rx: 4.0, ry: 2.2, xs: [4.8, 15.8, 26.3, 73.7, 84.2, 95.2] },
+      { y: 59.8, rx: 4.6, ry: 2.6, xs: [0.8, 11.8, 24.3, 75.7, 88.2, 99.2] },
+      { y: 67.8, rx: 5.3, ry: 3.0, xs: [5.8, 21, 79, 94.2] },
+      { y: 78, rx: 6.1, ry: 3.5, xs: [1.5, 16.5, 83.5, 98.5] },
+      { y: 92.3, rx: 7.0, ry: 4.0, xs: [8.3, 91.7] },
+    ],
+  },
+  'bg-sanh-moi.webp': {
+    stageY: 42.6, floorY: 50, seatTop: 47.5,
+    rows: [
+      { y: 48.5, rx: 3.6, ry: 1.6, xs: [2.5, 13, 76, 87, 97.5] },
+      { y: 50.3, rx: 3.7, ry: 1.7, xs: [24, 32.5, 67.5] },
+      { y: 53, rx: 4.3, ry: 1.9, xs: [6, 17.5, 28, 72, 82.5, 94] },
+      { y: 61.5, rx: 5.0, ry: 2.2, xs: [3, 15, 26.5, 73.5, 85, 97] },
+      { y: 69.5, rx: 5.5, ry: 2.6, xs: [11, 24, 76, 89] },
+      { y: 78, rx: 6.4, ry: 3.0, xs: [8, 92] },
+      { y: 90, rx: 7.5, ry: 3.5, xs: [11, 89] },
+    ],
+  },
+};
+let frameId = 'mac-dinh';
+let PAINTED_TABLES = [];
+function applyFrameTables() {
+  PAINTED_TABLES = [];
+  for (const r of TABLE_FRAMES[frameId].rows) for (const x of r.xs) PAINTED_TABLES.push({ x, y: r.y, rx: r.rx, ry: r.ry });
+}
+applyFrameTables();
 /* Điểm (x,y) có rơi vào ellipse của bàn nào không (phồng thêm mx/my %)? self = bàn được bỏ qua */
 function inTable(x, y, mx, my, self) {
   for (const t of PAINTED_TABLES) {
@@ -176,10 +201,12 @@ function buildPositions() {
       const a = k / 6 * Math.PI * 2 + 0.26;
       // Ghế: chân đứng NGOÀI mép bàn + lề an toàn (1.7% ngang, 1.3% dọc)
       const sx = t.x + Math.cos(a) * (t.rx + 1.7);
-      const sy = Math.max(43.5, t.y + Math.sin(a) * (t.ry + 1.3));
+      const sy = Math.max(SEAT_TOP, t.y + Math.sin(a) * (t.ry + 1.3));
+      const ownX = (sx - t.x) / (t.rx + 0.9), ownY = (sy - t.y) / (t.ry + 0.7);
+      if (ownX * ownX + ownY * ownY < 1) continue;   // SEAT_TOP kéo ghế lọt vào chính bàn của nó -> bỏ
       if (inTable(sx, sy, 0.9, 0.7, t)) continue;   // ghế này lại chui vào bàn bên cạnh -> bỏ
       if (!farEnough(sx, sy)) continue;             // ghế này đè lên ghế đã nhận -> bỏ
-      positions.push({ x: sx, y: sy, kind: 'seat', taken: null });
+      positions.push({ x: sx, y: sy, kind: 'seat', taken: null, frame: frameId });
     }
   }
   // Lưới điểm đứng: hàng LẺ xô ngang nửa bước (so le như gạch) để người hàng sau
@@ -191,7 +218,7 @@ function buildPositions() {
       const x = gx + rand(-0.5, 0.5), y = gy + rand(-0.35, 0.35);
       if (inTable(x, y, 1.8, 1.4, null)) continue;   // điểm đứng cũng né mặt bàn + lề
       if (!farEnough(x, y)) continue;               // quá sát ghế/điểm đã nhận -> bỏ
-      positions.push({ x, y, kind: 'stand', taken: null });
+      positions.push({ x, y, kind: 'stand', taken: null, frame: frameId });
     }
   // Ưu tiên: GHẾ QUANH BÀN trước (đúng chất tiệc cưới), từ gần sân khấu ra xa;
   // điểm đứng tự do chỉ dùng khi hết ghế — tránh khách dồn cục giữa thảm đỏ
@@ -210,6 +237,7 @@ function takePosition() {
 function freePosition(pos) {
   if (!pos || !pos.taken) return;
   pos.taken = null;
+  if (pos.frame !== frameId) return;   // chỗ thuộc khung nền cũ -> bỏ hẳn, không cho tái sử dụng ở nền mới
   let lo = 0, hi = freePool.length;
   while (lo < hi) { const mid = (lo + hi) >> 1; if (freePool[mid].key < pos.key) lo = mid + 1; else hi = mid; }
   freePool.splice(lo, 0, pos);
@@ -221,12 +249,13 @@ function isInner(pos) { return !!pos && pos.rank != null && pos.rank < positions
    Đoạn thẳng bị bàn chắn thì rẽ qua các ô trống (hành lang thảm đỏ x 43–57 luôn
    thông). Chỉ tính 1 lần khi bắt đầu đi, không tính mỗi khung hình. */
 const GRID = { x0: 1.2, y0: 43.2, dx: 1.23, dy: 1.24, nx: 80, ny: 46 };
-const BLOCKED = (() => {
+function buildBlocked() {
   const s = new Set();
   for (let cy = 0; cy < GRID.ny; cy++) for (let cx = 0; cx < GRID.nx; cx++)
     if (inTable(GRID.x0 + cx * GRID.dx, GRID.y0 + cy * GRID.dy, 0.85, 0.6, null)) s.add(cx + ',' + cy);
   return s;
-})();
+}
+let BLOCKED = buildBlocked();
 function segClear(x1, y1, x2, y2) {
   const d = Math.hypot(x2 - x1, y2 - y1), steps = Math.max(1, Math.ceil(d / 0.8));
   for (let i = 1; i < steps; i++) { const t = i / steps; if (inTable(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, 0.85, 0.6, null)) return false; }
@@ -274,7 +303,7 @@ function walkPath(p, points, state, done) {
   const routed = [];
   let px = p.x, py = p.y;
   for (const q of points) {
-    if (py > FLOOR_Y - 2 && q.y > FLOOR_Y - 2) routed.push(...routeAround(px, py, q.x, q.y));
+    if (py > SEAT_TOP - 2 && q.y > SEAT_TOP - 2) routed.push(...routeAround(px, py, q.x, q.y));
     routed.push(q); px = q.x; py = q.y;
   }
   p.path = routed.slice(); p.state = state || 'walk'; p.done = done || null;
@@ -635,4 +664,25 @@ P.init = function (container, tablesEl) {
 };
 P.resize = function (w, h) { Ww = w; Hw = h; FH = h * 0.05; for (const p of people.values()) p.dirty = true; };
 P.setStageY = function (y) { stageY = y; };
+/* Nạp KHUNG theo file nền: đường đứng sân khấu + mép sàn + bảng bàn + lưới tìm
+   đường + pool vị trí đều khớp với tranh của nền đó. Người đang đứng mà vị trí
+   cũ lọt vào bàn theo khung mới thì được dời sang vị trí an toàn gần nhất. */
+P.setBgFile = function (file) {
+  const fid = TABLE_FRAMES[file] ? file : 'mac-dinh';
+  const fr = TABLE_FRAMES[fid];
+  P.setStageY(fr.stageY);
+  if (fid === frameId) return;
+  frameId = fid;
+  FLOOR_Y = fr.floorY; SEAT_TOP = fr.seatTop;
+  applyFrameTables();
+  BLOCKED = buildBlocked();
+  buildPositions();
+  for (const p of people.values()) {
+    if (p.couple || p.state !== 'home') continue;
+    if (inTable(p.home.x, p.home.y, 0.2, 0.15, null)) {
+      const np = takePosition();
+      if (np) { p.home.taken = null; np.taken = p; p.home = np; walkTo(p, { x: np.x, y: np.y }, 'walk', () => { p.state = 'home'; }); }
+    }
+  }
+};
 P.coupleSec = 25;

@@ -1,8 +1,11 @@
-# KHUNG BỐ CỤC CỐ ĐỊNH cho background Đám Cưới Online
+# KHUNG BỐ CỤC cho background Đám Cưới Online
 
-Mọi background mới (mốc hoàng gia, sự kiện...) PHẢI vẽ đúng khung này — chỉ thay
-màu sắc, chất liệu, cảnh quan. Không đổi vị trí/kích thước các phần tử, để nhân
-vật trong game luôn khớp tranh và KHÔNG BAO GIỜ đứng lên mặt bàn.
+Game hỗ trợ **khung riêng theo từng file nền** trong `js/people.js`
+(`TABLE_FRAMES` + `P.setBgFile`). Sáu nền cũ dùng chung hồ sơ `mac-dinh` bên
+dưới. Nếu một nền mới thay đổi vị trí sân khấu/bàn/sàn thì **không ép tranh vẽ
+giống hệt nền cũ**: phải đo lại bằng lưới tọa độ %, thêm một hồ sơ khung riêng
+cho đúng tên file, kiểm phủ ellipse/ghế lên tranh và chạy test vị trí trước khi
+đưa vào mốc. Chỉ khi hình học thật sự trùng khớp mới được dùng chung hồ sơ.
 
 ## Khung hình
 
@@ -58,9 +61,42 @@ Bàn tròn phủ khăn, tâm có hoa trang trí. Bàn xa nhỏ, bàn gần to (p
 bảng). Bàn ở mép (x 0.8/99.2, 1.5/98.5) bị cắt nửa ngoài khung — vẫn phải có
 mặt trong bảng để chặn đường đi và tính ghế.
 
-## Luật đứng của nhân vật (đã cài trong js/people.js — TABLE_ROWS / inTable)
+## Hồ sơ riêng: `bg-sanh-moi.webp` — sảnh vàng mẫu mới
+
+Đã đo trực tiếp trên tranh 1440×1760 bằng lưới tọa độ % và kiểm phủ
+ellipse + điểm ghế. Đây là bố cục khác nền cũ nên có khung riêng:
+
+| Phần tử | Vị trí |
+|---|---|
+| Đường đứng làm lễ | **y = 42.6%** |
+| Mặt bục tròn | khoảng y 40.5–43.5%; bậc thang giữa y 44–50% |
+| Sàn tiệc bắt đầu | **y = 50%** (`floorY`) |
+| Trần ghế quanh bàn | **y = 47.5%** (`seatTop`) |
+| Góc máy toàn cảnh | tâm (50%, 40%), zoom 0.63 |
+| Góc máy sân khấu | tâm (50%, 41%), zoom 1.02 |
+
+Bàn của sảnh mới — 28 bàn, ellipse theo hàng:
+
+| Hàng y% | rx% | ry% | Tâm x% |
+|---|---|---|---|
+| 48.5 | 3.6 | 1.6 | 2.5, 13 · 76, 87, 97.5 |
+| 50.3 | 3.7 | 1.7 | 24, 32.5 · 67.5 |
+| 53 | 4.3 | 1.9 | 6, 17.5, 28 · 72, 82.5, 94 |
+| 61.5 | 5.0 | 2.2 | 3, 15, 26.5 · 73.5, 85, 97 |
+| 69.5 | 5.5 | 2.6 | 11, 24 · 76, 89 |
+| 78 | 6.4 | 3.0 | 8 · 92 |
+| 90 | 7.5 | 3.5 | 11 · 89 |
+
+Kết quả test tự động trên nền mới: 90 người vào phòng, 88 người đã yên vị khi
+chụp kết quả, 0 cặp đứng gần như trùng, 0/40 vòng lấy mẫu có chân trong ellipse
+bàn; cặp đôi lên được sân khấu và chân ở y = 42.6–43.1%.
+
+## Luật đứng của nhân vật (đã cài trong js/people.js — TABLE_FRAMES / inTable)
 
 - Ghế quanh bàn: chân đứng NGOÀI ellipse mặt bàn, cộng lề an toàn 1.7% ngang /
-  1.3% dọc; ghế nào rơi vào ellipse bàn bên cạnh thì tự loại.
+  1.3% dọc; ghế nào rơi vào ellipse của **chính bàn đó** hoặc bàn bên cạnh thì
+  tự loại.
 - Điểm đứng tự do: né mọi ellipse phồng thêm 1.8% / 1.4%.
-- Vẽ bg mới chỉ cần giữ đúng bảng trên; code không phải chỉnh lại.
+- Khi đổi nền giữa phiên, `P.setBgFile` dựng lại bàn, lưới tìm đường và pool vị
+  trí theo đúng hồ sơ của file đang hiển thị; vị trí thuộc khung cũ không được
+  tái sử dụng. Người đang đứng lọt vào bàn theo khung mới sẽ được dời đi.

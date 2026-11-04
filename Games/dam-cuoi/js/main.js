@@ -29,7 +29,10 @@ const TIERS = [
   { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-20000.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
-const STAGE_Y = { 'bg-full.webp': 37.2, 'bg-500.webp': 37.2, 'bg-2000.webp': 37.2, 'bg-5000.webp': 37.2, 'bg-10000.webp': 37.2, 'bg-20000.webp': 37.2 };   // mọi nền cùng khung BG-LAYOUT nên cùng đường đứng làm lễ
+/* Góc máy theo từng nền (nền nào sân khấu nằm chỗ khác thì khung hình bám theo).
+   Khung vị trí nhân vật (bàn/sàn/đường đứng) nằm ở people.js TABLE_FRAMES. */
+const BG_VIEW = { 'bg-sanh-moi.webp': { home: [50, 40, 0.63], stage: [50, 41, 1.02] } };
+let curView = null;
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
@@ -176,7 +179,8 @@ function applyTierFx(tier) {
 }
 let bgToken = 0;
 function setBackground(file) {
-  P.setStageY(STAGE_Y[file] || 37.2);
+  P.setBgFile(file);   // nạp khung vị trí khớp với tranh của nền này
+  curView = BG_VIEW[file] || null;
   const tk = ++bgToken;
   const img = new Image();
   img.onload = () => {
@@ -215,8 +219,8 @@ const Cam = {
   followC: null, farPair: null,
   follow(couple) { this.followC = couple; this.busyUntil = 0; },
   unfollow() { this.followC = null; this.farPair = null; },
-  home() { this.panTo(50, 36, 0.63); },
-  stage() { this.panTo(50, 34, 1.02); },
+  home() { const v = (curView && curView.home) || [50, 36, 0.63]; this.panTo(v[0], v[1], v[2]); },
+  stage() { const v = (curView && curView.stage) || [50, 34, 1.02]; this.panTo(v[0], v[1], v[2]); },
   toScreen(x, y) {
     return { fx: 0.5 + (x - this.cx) / 100 * WW * this.z / SW, fy: 0.5 + (y - this.cy) / 100 * WH * this.z / SH };
   },
