@@ -913,6 +913,14 @@ function promoteStage() {
     if (P.onPairReveal) P.onPairReveal(c);
     setTimeout(() => {
       if (!couples.includes(c) || c.state !== 'toStage') return;
+      /* CẶP MỚI BẮT ĐẦU CHẶNG LÊN CUỐI = đã "lên gần tới": cặp nào
+         đang đứng diễn trên sân khấu phải DI CHUYỂN XUỐNG LIỀN để
+         nhường giữa (Nguyen chốt 2026-11-04 19:14) — không đợi hết
+         giờ coupleSec (cặp giữ sân khấu / coupleSec chỉnh dài), cũng
+         không đợi cặp mới tới nơi hẳn như cơ chế cũ. Camera không bị
+         cướp theo cặp xuống: khóa tâm điểm đang bảo vệ hành trình
+         của cặp mới nên follow của cặp xuống bị bỏ qua. */
+      for (const o of couples) if (o !== c && o.state === 'stage') leaveStage(o);
       const pose = slotPose(c, 0);
       const tgt = p => (p === pose.leftP ? pose.l : pose.r);
       let arrived = 0;
@@ -983,9 +991,23 @@ function leaveStage(c) {
   let back = 0;
   for (const p of [c.a, c.b]) {
     p.el.classList.remove('pairfx');
-    // Xuống bậc thang (điểm ngay dưới bục) rồi về THẲNG vị trí của mình — trước đây
-    // đường về vòng xuống tận y=90 cuối phòng rồi mới quay lên, rất vô lý.
-    walkPath(p, [{ x: p.home.x < 50 ? 47 : 53, y: stageY + 7 }, { x: p.home.x, y: p.home.y }], 'walk', () => { p.state = 'home'; if (++back === 2 && P.onPairHome) P.onPairHome(c); });
+    // Xuống LIỀN và thoát hẳn khỏi tâm điểm (Nguyen chê 2026-11-04
+    // 19:14: cặp trên lề mề, nhìn như vẫn đứng trái phải trên sân
+    // khấu): bước CHÉO RA HAI BÊN rồi vòng xuống dưới bục — không còn
+    // dồn về điểm giữa 47/53 ngay trước sân khấu như trước — và đi
+    // nhanh hơn ~1.5 lần để kịp nhường giữa cho cặp đang lên gần tới.
+    walkPath(p, [{ x: p.x < 50 ? 40 : 60, y: stageY + 7 }, { x: p.home.x, y: p.home.y }], 'walk', () => {
+      p.state = 'home';
+      if (++back === 2) {
+        /* Về tới bàn thì thay lại đồ thường: trên sân khấu lúc nào
+           cũng chỉ có ĐÚNG 1 cặp mặc đồ cưới (cặp đang làm lễ), các
+           cặp đã cưới ngồi ở bàn trong đồ thường như khách — tránh
+           cảnh mấy cặp đồ cưới đứng quanh sân khấu gây nhầm. */
+        setOutfit(c.a, 'casual'); setOutfit(c.b, 'casual');
+        if (P.onPairHome) P.onPairHome(c);
+      }
+    });
+    if (p.speedPx) p.speedPx = Math.min(1250, Math.round(p.speedPx * 1.55));
   }
   if (P.onPairReturn) P.onPairReturn(c);   // camera bám theo khi đi về chỗ
   promoteStage();
