@@ -38,6 +38,55 @@ const BG_VIEW = { 'bg-sanh-moi.webp': { home: [50, 40, 0.63], stage: [50, 41, 1.
 let curView = null;
 const tierOf = v => { let t = 0; TIERS.forEach((x, i) => { if (v >= x.at) t = i; }); return t; };
 
+/* ============ PRELOAD TOÀN BỘ HÌNH NGAY KHI MỞ GAME (Nguyen yêu cầu
+   2026-11-04 19:40, sau ảnh chụp: đang ở mốc Kim Tuyến mà sảnh TRỐNG ĐỎ
+   — nền của mốc chỉ được tải khi đủ view mới chuyển, đúng lúc live đông
+   request tranh nhau thì rớt/treo, CSS không có gì để hiện). Nay vừa mở
+   game là tải TRƯỚC + giải mã sẵn: cả 6 nền của 6 mốc, 2 ảnh MC, toàn
+   bộ sprite cô dâu/chú rể/khách và 20 avatar mẫu. Mỗi file được theo
+   dõi trạng thái ok/lỗi (ghi vào hộp chẩn đoán __diag.assets), lỗi tự
+   thử lại 2 lần kèm ?r=. setBackground gặp file đã preload ok thì hiện
+   ngay từ bộ nhớ đệm — chuyển mốc giữa buổi live không còn phụ thuộc
+   vào việc tải ảnh lúc đông người nữa. */
+const ASSET_IMGS = [
+  'img/mc.png', 'img/mc-nu.png',
+  'img/bride.png', 'img/bride2.png', 'img/bride3.png', 'img/bride4.png',
+  'img/groom.png', 'img/groom2.png', 'img/groom3.png', 'img/groom4.png',
+  'img/royal-bride1.png', 'img/royal-bride2.png', 'img/royal-groom1.png', 'img/royal-groom2.png',
+  'img/guest-girl.png', 'img/guest-girl2.png', 'img/guest-girl3.png', 'img/guest-girl4.png',
+  'img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.png', 'img/guest-boy4.png',
+  ...Array.from({ length: 10 }, (_, i) => `img/avatars/av-f${i + 1}.webp`),
+  ...Array.from({ length: 10 }, (_, i) => `img/avatars/av-m${i + 1}.webp`),
+];
+const assetState = {};    // file -> 'ok' | 'err'
+const assetPromise = {};  // file -> Promise<boolean>
+function preloadOne(file) {
+  if (assetPromise[file]) return assetPromise[file];
+  assetPromise[file] = new Promise(res => {
+    let n = 0;
+    const attempt = () => {
+      const img = new Image();
+      img.onload = () => {
+        assetState[file] = 'ok';
+        if (window.__diag) (window.__diag.assets = window.__diag.assets || {})[file] = 'ok';
+        if (img.decode) img.decode().catch(() => {});   // giải mã sẵn để lúc áp CSS hiện ngay, không chớp trắng
+        res(true);
+      };
+      img.onerror = () => {
+        if (n < 2) { n++; setTimeout(attempt, 600); return; }
+        assetState[file] = 'err';
+        if (window.__diag) { (window.__diag.assets = window.__diag.assets || {})[file] = 'err'; window.__diag.errs.push('preload fail: ' + file); }
+        res(false);
+      };
+      img.src = n ? file + '?r=' + n : file;
+    };
+    attempt();
+  });
+  return assetPromise[file];
+}
+function startPreload() { for (const f of [...TIERS.map(t => t.file), ...ASSET_IMGS]) preloadOne(f); }
+startPreload();
+
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
 let totalBase = parseInt(localStorage.getItem(LS_TOTAL) || '0', 10) || 0;
 const counted = new Set();
@@ -360,18 +409,22 @@ function setBackground(file) {
   curView = BG_VIEW[file] || null;
   const tk = ++bgToken;
   const el = $('bgfull');
-  /* ÁP CSS NGAY khi biết file nền, KHÔNG cổng qua Image() nữa: bản cổng
-     qua Image chờ ảnh tải xong mới hiện — mà lúc mới mở game, khâu làm
-     nóng voice bắn hàng trăm request tổng hợp cùng lúc (Chrome chỉ cho
-     ~6 kết nối/host, bridge lại tổng hợp TUẦN TỰ) nên request ảnh nền bị
-     kẹt sau hàng chờ cả phút: sảnh trống đỏ dù file nền hoàn toàn bình
-     thường (đúng lỗi Nguyen chụp 2026-11-04 16:18, vẫn tái diễn sau bản
-     vá retry trước). Nay CSS áp ngay (trình duyệt tự xếp hàng tải như
-     mọi tài nguyên khác, và khâu làm nóng voice đã bơm nhỏ giọt — xem
-     applyConfig), song song dùng Image() DÒ LỖI: file hỏng thật thì thử
-     lại 2 lần rồi lùi dần bg-full -> bg-500, mọi lần lùi đều ghi vào hộp
-     chẩn đoán để lần sau nhìn là biết file nào chết. */
   el.style.backgroundImage = `url("${file}")`;
+  /* File này mà PRELOAD đã báo ok (xem startPreload ở đầu file) thì ảnh
+     đã nằm trong bộ nhớ đệm + đã giải mã — CSS ở trên hiện ngay, không
+     cần dò lại. Chưa preload xong thì CHỜ nó (tối đa 3 giây) rồi quyết
+     định; preload báo hỏng hoặc chờ quá lâu thì mới chạy chuỗi cứu hộ
+     dò lỗi/lùi nền ở dưới (thử lại kèm ?r=, lùi dần bg-full -> bg-500,
+     mọi lần lùi đều ghi vào hộp chẩn đoán). */
+  if (assetState[file] === 'ok') return;
+  const ready = assetPromise[file] || Promise.resolve(null);
+  Promise.race([ready, new Promise(r => setTimeout(() => r(null), 3000))]).then(ok => {
+    if (tk !== bgToken) return;
+    if (ok === true) { el.style.backgroundImage = `url("${file}")`; return; }
+    bgRescue(file, tk, el);
+  });
+}
+function bgRescue(file, tk, el) {
   const chain = [file, 'bg-full.webp', 'bg-500.webp'].filter((v, i, a) => a.indexOf(v) === i);
   let ci = 0;
   const probe = (f, n) => {
