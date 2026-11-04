@@ -444,6 +444,22 @@ function chatFilter(raw) {
   const max = cfg.bongChatMaxKyTu || 60;
   return shown.length > max ? shown.slice(0, max - 1).trimEnd() + '…' : shown;
 }
+/* Uu tien len san khau cho NGUOI TANG QUA (Nguyen chot 2026-11-04): cap cua ho
+   duoc dua len DAU hang cho — tuc la cap KE TIEP duoc len san khau, khong chen
+   ngang cap dang dien. Ho con doc than thi MC se duyen luon (uu tien khac
+   gioi) roi cung dua len dau hang. Tat bang config uuTienQuaTang: false. */
+function giftPriority(user) {
+  if (!user) return;
+  const c = P.coupleOf(user.id);
+  if (c) {
+    if (P.bumpCouple(c)) toast(`🎁 ${user.nickname} tặng quà — cặp của bạn được ưu tiên lên sân khấu kế tiếp!`, true);
+    return;
+  }
+  const alt = randomSingleOpp(user) || randomSingle(user);
+  if (!alt) return;
+  const nc = requestCouple(user, alt, false);
+  if (nc) { nc.giftPriority = true; toast(`🎁 ${user.nickname} tặng quà — MC se duyên và ưu tiên cặp của bạn lên sân khấu kế tiếp!`, true); }
+}
 function showBubble(user, text) {
   if (cfg.hienBongChat === false) return;
   const shown = chatFilter(text);
@@ -614,6 +630,7 @@ function handle(ev) {
     A.bell(dia >= 30 ? 3 : 1);
     mcReact(3, MC.thank, { ten: ev.user ? ev.user.nickname : 'Bạn' });
     toast(`🎁 ${ev.user ? ev.user.nickname : 'Khách'} tặng ${src.giftName || 'quà'}${dia >= 99 ? ' — pháo hoa rực trời!' : ''}`, dia >= 30);
+    if (cfg.uuTienQuaTang !== false) giftPriority(ev.user);
   }
   refreshBg(false);
 }
@@ -751,6 +768,7 @@ if (isDemo) {
     mcGreet: ['Chào mừng {ten} đã đến dự đám cưới online của chúng ta!', 'Khách quý {ten} vừa đến! Mời bạn vào khuôn viên chọn chỗ đẹp nhé!'],
     mcFollowLines: ['Cảm ơn {ten} đã follow! MC se duyên cho bạn ngay đây!'],
     ghepDoiNgauNhien: true,
+    uuTienQuaTang: true,
     hienBongChat: true, bongChatGiay: 4, bongChatMaxKyTu: 60, bongChatAnKhiTuCamQua: 2,
     tuCamComment: ['vl', 'vcl', 'vkl', 'vãi', 'địt', 'đụ', 'đéo', 'cặc', 'lồn', 'buồi', 'đĩ', 'đm', 'dm', 'đmm', 'dcm', 'đcm', 'cave', 'loz'],
     tuAnToanComment: ['cac'],

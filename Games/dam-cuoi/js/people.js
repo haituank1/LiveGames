@@ -522,7 +522,22 @@ P.tourTarget = function () {
 };
 
 /* ---------- Ghép đôi: lia cam → đổi đồ cưới → lên sân khấu ---------- */
-function notifyQueue() { if (P.onQueueChange) P.onQueueChange(stageQueue.map(c => `${c.a.user.nickname} ❤ ${c.b.user.nickname}`)); }
+function notifyQueue() { if (P.onQueueChange) P.onQueueChange(stageQueue.map(c => `${c.giftPriority ? '🎁 ' : ''}${c.a.user.nickname} ❤ ${c.b.user.nickname}`)); }
+/* Uu tien hang cho cho cap cua NGUOI TANG QUA (yeu cau Nguyen 2026-11-04):
+   cap dang cho -> dua len DAU hang (se la cap KE TIEP len san khau, khong chen
+   ngang cap dang dien); cap con dang o phan gioi thieu chua vao hang -> danh
+   dau de khi vao hang thi vao thang dau hang. Tra ve true neu da uu tien. */
+P.bumpCouple = function (c) {
+  if (!c) return false;
+  const qi = stageQueue.indexOf(c);
+  if (qi >= 0) {
+    if (qi > 0) { stageQueue.splice(qi, 1); stageQueue.unshift(c); }
+    c.giftPriority = true; notifyQueue();
+    return true;
+  }
+  if (c.state === 'focus') { c.giftPriority = true; return true; }
+  return false;
+};
 function rolesFor(a, b) {
   const sa = genderScore(a.user.nickname), sb = genderScore(b.user.nickname);
   const bride = sa > sb ? a : b;
@@ -554,7 +569,8 @@ P.makeCouple = function (userA, userB) {
     if (!couples.includes(c)) return;
     a.boost = b.boost = 1; a.dirty = b.dirty = true;
     c.state = 'queue';
-    stageQueue.push(c); notifyQueue();
+    if (c.giftPriority) stageQueue.unshift(c); else stageQueue.push(c);
+    notifyQueue();
     promoteStage();
   }, 3600);
   return c;
@@ -568,7 +584,7 @@ function promoteStage() {
   let onStage = staged;
   for (let i = 0; i < 3; i++) {
     if (stageSlots[i] || !stageQueue.length || onStage >= cap) continue;
-    const c = stageQueue.shift(); notifyQueue();
+    const c = stageQueue.shift(); c.giftPriority = false; notifyQueue();
     c.state = 'toStage'; c.spot = i;
     stageSlots[i] = c;
     onStage++;
