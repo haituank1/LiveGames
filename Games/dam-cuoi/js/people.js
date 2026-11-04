@@ -189,10 +189,38 @@ function figHTML(p) {
   }
   return `<img class="chibi" src="${file}" alt="">`;
 }
+/* Đặt hình cho nhân vật + CANH HỎNG HÌNH: nếu ảnh chibi nạp về mà hỏng
+   (naturalWidth = 0 — ví dụ bản lưu đệm trong trình duyệt bị cắt cụt từ
+   một lần tải dở lúc mạng/bridge đang nghẽn, nhân vật chỉ còn cái tên mà
+   không thấy người, đúng lỗi Nguyen chụp 2026-11-04 16:44) thì tự tải
+   lại kèm ?r= để né bản hỏng, tối đa 2 lần; vẫn hỏng thì ghi vào hộp
+   chẩn đoán để lần sau nhìn là biết đích danh file nào chết. Ảnh chỉ
+   chậm (chưa nạp xong) thì chờ thêm, không tải lại oan. */
+function setFigure(p) {
+  const fw = p.el.querySelector('.figwrap');
+  fw.innerHTML = figHTML(p);
+  watchFigure(fw.querySelector('img.chibi'));
+}
+function watchFigure(img) {
+  if (!img) return;
+  const file = img.getAttribute('src');
+  let busts = 0, waits = 0;
+  const check = () => {
+    if (!img.isConnected) return;                        // đã thay hình khác
+    if (img.complete && img.naturalWidth > 0) return;    // hình ổn
+    const broken = img.complete && img.naturalWidth === 0;
+    if (broken || waits >= 3) {
+      if (busts < 2) { busts++; waits = 0; img.src = file + (file.includes('?') ? '&' : '?') + 'r=' + busts; setTimeout(check, 1500); }
+      else if (window.__diag) { window.__diag.errs.push('mat hinh: ' + file); window.__diag.uiErr = 'Nhân vật mất hình (' + file + ') — thử Ctrl+F5'; }
+    } else { waits++; setTimeout(check, 1800); }
+  };
+  img.onerror = () => { waits = 3; setTimeout(check, 250); };
+  setTimeout(check, 1800);
+}
 function setOutfit(p, outfit) {
   p.outfit = outfit;
   if (outfit === 'casual') p.set = null;
-  p.el.querySelector('.figwrap').innerHTML = figHTML(p);
+  setFigure(p);
   p.el.classList.toggle('wedding', outfit !== 'casual');
   p.dirty = true;
   // chưa có ảnh thật thì ảnh đại diện mặc định cũng theo vai/giới hiện tại
@@ -616,7 +644,7 @@ P.spawn = function (user) {
   };
   home.taken = p;
   people.set(user.id, p);
-  p.el.querySelector('.figwrap').innerHTML = figHTML(p);
+  setFigure(p);
   box.appendChild(p.el);
   render(p);
   walkTo(p, { x: home.x, y: home.y }, 'walk', () => { p.state = 'home'; });
