@@ -89,6 +89,11 @@
       return null;
     },
 
+    /* Ước lượng thời lượng đọc 1 câu (ms) khi không đo được duration của
+       file (MP3 stream báo Infinity/0): ~75ms/ký tự tiếng Việt, kẹp
+       [1.5s, 12s]. Chỉ dùng để game hiện chữ đủ lâu, không ảnh hưởng tiếng. */
+    _estMs(text) { const n = String(text || '').length; return Math.max(1500, Math.min(12000, n * 75)); },
+
     /* Phát 1 câu. onStart gọi đúng khoảnh khắc tiếng bắt đầu (game hiện chữ
        ở đó). Trả { played, durationMs?, reason? } */
     async speak(text, opts = {}) {
@@ -117,7 +122,7 @@
       this._starts.push(this._lastStart);
       this._audio = audio;
       this._notify('start', text);
-      try { if (opts.onStart) opts.onStart({ durationMs: durMs }); } catch (e) { console.error('[NpcVoice]', e); }
+      try { if (opts.onStart) opts.onStart({ durationMs: durMs > 0 ? durMs : this._estMs(text) }); } catch (e) { console.error('[NpcVoice]', e); }
       try { await audio.play(); } catch (_) { this._playing = false; this._notify('end', text); return { played: false, reason: 'autoplay' }; }
       await new Promise(res => {
         audio.addEventListener('ended', res, { once: true });
@@ -186,7 +191,7 @@
        dòng thời gian chung — mối nối gần như không còn khoảng lặng, khác
        hẳn cách phát từng thẻ Audio nối đuôi. Mọi lỗi/không hỗ trợ -> trả
        null để speakParts lùi về cách phát Audio thường. */
-    async _playPartsWA(readies, text, opts) {
+    async _playPartsWA(readies, text, opts, token) {
       const AC = global.AudioContext || global.webkitAudioContext;
       if (!AC) return null;
       let segs = null;
@@ -194,11 +199,17 @@
         if (!this._ctx) { this._ctx = new AC(); this._gain = this._ctx.createGain(); this._gain.connect(this._ctx.destination); }
         const ctx = this._ctx;
         this._gain.gain.value = Math.max(0, Math.min(1, this.cfg.volume / 100));
-        if (ctx.state !== 'running') { try { await ctx.resume(); } catch (_) {} }
+        // KHÔNG await resume() trần: khi trình duyệt chưa có click nào
+        // (mở game bằng Edge/Chrome rồi để đó chạy live), resume() có thể
+        // TREO VÔ HẠN không resolve — đã đo được 2026-11-04: MC đám cưới
+        // im lặng cả buổi live vì kẹt đúng ở đây. Race 700ms rồi bỏ qua,
+        // đường dự phòng (thẻ Audio) sẽ xử lý tiếp.
+        if (ctx.state !== 'running') { try { await Promise.race([ctx.resume(), new Promise(r => setTimeout(r, 700))]); } catch (_) {} }
         if (ctx.state !== 'running') return null;   // trình duyệt chưa cho phát tiếng -> đường dự phòng xử lý
         segs = [];
         for (const e of readies) { const s = await this._decoded(e.url); if (!s) return null; segs.push(s); }
       } catch (_) { return null; }
+      if (token && token.aborted) return null;   // speakParts đã bỏ cuộc chờ -> đừng báo start muộn
       const totalMs = segs.reduce((sum, s) => sum + s.dur * 1000, 0);
       this._playing = true;
       this._lastStart = Date.now();
@@ -240,7 +251,13 @@
       ]);
       if (!readies || readies.some(e => !e || !e.url)) return { played: false, reason: 'not-ready' };
       // Đường chính: WebAudio cắt lặng đầu/cuối mỗi đoạn + xếp liền mạch.
-      const wa = await this._playPartsWA(readies, text, opts);
+      // Bọc race waitMs: bất kỳ kẹt nào trong đường WebAudio cũng không
+      // được giữ câu quá hạn — quá hạn thì hủy (token) và lùi về dự phòng.
+      const waToken = {};
+      const wa = await Promise.race([
+        this._playPartsWA(readies, text, opts, waToken),
+        new Promise(r => setTimeout(() => { waToken.aborted = true; r(null); }, this.cfg.waitMs)),
+      ]);
       if (wa) return wa;
       /* Đường dự phòng — Nạp đệm MỌI đoạn SONG SONG tới mức 'canplay' TRƯỚC khi phát đoạn đầu:
          bản cũ chờ metadata TỪNG đoạn theo thứ tự (mỗi đoạn tối đa 1200ms)
@@ -249,12 +266,12 @@
          2026-11-04: "Cảm ơn" ... "Hải Tuấn" ... "đã follow"). Nạp xong hết
          từ đầu thì chuyển đoạn gần như tức thì. Đoạn nào không đệm kịp
          trong 1800ms -> coi như chưa sẵn sàng, game hiện chữ như cũ. */
-      const clips = await Promise.all(readies.map(e => new Promise(res => {
+      const clips = await Promise.all(readies.map((e, idx) => new Promise(res => {
         const audio = new Audio(e.url);
         audio.volume = Math.max(0, Math.min(1, this.cfg.volume / 100));
         audio.preload = 'auto';
         let xong = false;
-        const fin = ok => { if (xong) return; xong = true; res(ok ? { audio, durMs: isFinite(audio.duration) ? audio.duration * 1000 : 0 } : null); };
+        const fin = ok => { if (xong) return; xong = true; res(ok ? { audio, durMs: (isFinite(audio.duration) && audio.duration > 0) ? audio.duration * 1000 : this._estMs(list[idx]) } : null); };
         audio.addEventListener('canplay', () => fin(true), { once: true });
         audio.addEventListener('error', () => fin(false), { once: true });
         setTimeout(() => fin(audio.readyState >= 3), 1800);
