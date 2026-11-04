@@ -35,23 +35,23 @@
     "npcVoiceMaxPerMin": 6,
     "bgRules": [
       {
-        "viewers": 500,
+        "viewers": 50,
         "file": "bg-500.webp"
       },
       {
-        "viewers": 2000,
+        "viewers": 150,
         "file": "bg-2000.webp"
       },
       {
-        "viewers": 5000,
+        "viewers": 300,
         "file": "bg-5000.webp"
       },
       {
-        "viewers": 10000,
+        "viewers": 600,
         "file": "bg-10000.webp"
       },
       {
-        "viewers": 20000,
+        "viewers": 1000,
         "file": "bg-sanh-moi.webp"
       }
     ],
@@ -129,6 +129,9 @@
     "coCapGiua": 1.22,
     "coCapBen": 1.22,
     "soCapToiDa": 3,
+    "phongVangDuoi": 15,
+    "liaCamNguoiMoiKhiVang": true,
+    "liaCamNguoiMoiGiay": 4,
     "zoomGoiTen": 1.18,
     "zoomBamTheo": 1.08,
     "lechCapGiua": 1.8,

@@ -325,6 +325,30 @@ function takePosition() {
   while (freePool.length) { const pos = freePool.shift(); if (!pos.taken) return pos; }   // lấy từ GẦN sân khấu trước (đầu mảng đã sắp xếp)
   return null;
 }
+/* PHÒNG VẮNG: chỗ trống GẦN TÂM KHUNG HÌNH MẶC ĐỊNH NHẤT (giữa phòng, ngay
+   trước sân khấu — đúng vùng camera nhà đang ngắm) để khách mới vào là thấy
+   ngay trên hình, thay vì lấy theo thứ tự gần-sân-khấu có thể lệch sang hai
+   bên cánh. Chỉ dùng khi tổng số khách < tune.quietMax. */
+function takeCentralPosition() {
+  const fx = 50, fy = (typeof FLOOR_Y === 'number' ? FLOOR_Y : 44) + 4;
+  let bi = -1, bd = Infinity;
+  for (let i = 0; i < freePool.length; i++) {
+    const pos = freePool[i];
+    if (pos.taken) continue;
+    const d = (pos.x - fx) * (pos.x - fx) + (pos.y - fy) * (pos.y - fy);
+    if (d < bd) { bd = d; bi = i; }
+  }
+  return bi < 0 ? null : freePool.splice(bi, 1)[0];
+}
+/* Có cặp nào đang trong hành trình làm lễ không (ghép xong chờ / đang chờ
+   lên / đang đi lên / đang trên sân khấu) — main.js dùng để biết lúc nào
+   KHÔNG được lia cam đi ngắm khách mới. */
+P.stageBusy = function () {
+  for (const c of couples) {
+    if (c.state === 'focus' || c.state === 'queue' || c.state === 'toStage' || c.state === 'stage') return true;
+  }
+  return false;
+};
 /* Trả chỗ về pool theo ĐÚNG thứ tự ưu tiên (chèn nhị phân theo key) — chỗ trong
    vừa trống ra phải được khách tới sau lấy trước, không chìm xuống cuối hàng. */
 function freePosition(pos) {
@@ -540,7 +564,10 @@ P.spawn = function (user) {
   const old = people.get(user.id);
   if (old) return old;
   if (people.size >= MAX_PEOPLE) return null;
-  let home = takePosition();
+  /* Phòng vắng (dưới ngưỡng quietMax): ưu tiên chỗ TRỌNG TÂM cho khách mới */
+  let home = null;
+  if ((P.tune.quietMax || 0) > 0 && people.size < P.tune.quietMax) home = takeCentralPosition();
+  if (!home) home = takePosition();
   if (!home) return null;
   /* ƯU TIÊN KHÁCH MỚI KHI ĐÔNG NGƯỜI (yêu cầu của chủ phòng): khách vừa tới mà
      chỉ còn chỗ ngoài, trong khi khách im lặng rất lâu (kiểu đã out mà live
@@ -786,15 +813,15 @@ function dissolveCouple(c, leaving) {
 P.featured = () => stageSlots[0];
 P.staged = () => stageSlots.map((c, i) => c ? { couple: c, spot: i } : null).filter(Boolean);
 /* Thông số tinh chỉnh — main.js nạp từ config (mapping) qua setTune */
-P.tune = { boost: 1.32, scaleC: 1.22, scaleS: 1.22, maxStage: 3, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45 };
+P.tune = { boost: 1.32, scaleC: 1.22, scaleS: 1.22, maxStage: 3, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45, quietMax: 15 };
 P.setTune = function (t) {
   if (!t) return;
   for (const k of ['boost', 'scaleC', 'scaleS', 'maxStage']) {
     const v = Number(t[k]);
     if (isFinite(v) && v > 0) P.tune[k] = v;
   }
-  // Cơ chế ưu tiên chỗ trong cho khách mới (khi đông người)
-  for (const k of ['crowdMin', 'staleMin']) {
+  // Cơ chế ưu tiên chỗ trong cho khách mới (khi đông người) + ngưỡng phòng vắng
+  for (const k of ['crowdMin', 'staleMin', 'quietMax']) {
     const v = Number(t[k]);
     if (isFinite(v) && v > 0) P.tune[k] = v;
   }

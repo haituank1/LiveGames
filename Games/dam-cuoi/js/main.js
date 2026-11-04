@@ -25,11 +25,11 @@ const say = () => {};
 /* ============ Mốc sảnh theo TỔNG lượt view tích lũy ============ */
 const TIERS = [
   { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg-full.webp', royal: 0 },
-  { at: 500,   name: 'Hoa Khai',            file: 'bg-500.webp', royal: 0 },
-  { at: 2000,  name: 'Kim Tuyến',           file: 'bg-2000.webp', royal: 0 },
-  { at: 5000,  name: 'Lung Linh',           file: 'bg-5000.webp', royal: 0 },
-  { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-10000.webp', royal: 1 },
-  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-sanh-moi.webp', royal: 2 },
+  { at: 50,    name: 'Hoa Khai',            file: 'bg-500.webp', royal: 0 },
+  { at: 150,   name: 'Kim Tuyến',           file: 'bg-2000.webp', royal: 0 },
+  { at: 300,   name: 'Lung Linh',           file: 'bg-5000.webp', royal: 0 },
+  { at: 600,   name: 'Đại Tiệc Vàng',       file: 'bg-10000.webp', royal: 1 },
+  { at: 1000,  name: 'Đám Cưới Hoàng Gia',  file: 'bg-sanh-moi.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
 /* Góc máy theo từng nền (nền nào sân khấu nằm chỗ khác thì khung hình bám theo).
@@ -65,6 +65,16 @@ const coupleByKey = new Map();
 const LS = isDemo ? 'damcuoi.scores.demo' : 'damcuoi.scores';
 let scores = {};
 try { scores = JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { scores = {}; }
+/* Làm sạch điểm đã lưu từ các bản game đời đầu: có mục tên bị lưu dạng
+   OBJECT (lên bảng thành "[object Object]") và điểm trống ("undefined").
+   Chuẩn hoá ngay lúc nạp: tên là object thì lấy nickname, điểm ép số,
+   mục nào không cứu được thì bỏ — bảng tự lành, khỏi xoá tay. */
+for (const k of Object.keys(scores)) {
+  const s = scores[k] || {};
+  const ten = v => typeof v === 'string' ? v : (v && typeof v.nickname === 'string' ? v.nickname : '');
+  s.a = ten(s.a); s.b = ten(s.b); s.score = Number(s.score) || 0;
+  if (!s.a || !s.b) delete scores[k];
+}
 const saveScores = () => localStorage.setItem(LS, JSON.stringify(scores));
 
 function register(user) {
@@ -79,9 +89,30 @@ function ensureGuest(user) {
   const u = register(user);
   if (!u) return null;
   countView(u);
+  const moi = !P.get(u.id);   // lần đầu xuất hiện trong phòng?
   const p = P.spawn(u);
   if (p) P.touch(u.id);   // bất kỳ sự kiện nào cũng tính là còn tương tác -> giữ chỗ đẹp
+  if (moi && p) maybeWelcomePan(p);
   return p;
+}
+/* LIA CAM CHÀO KHÁCH MỚI (Nguyen yêu cầu 2026-11-04): chỉ khi KHÔNG có cặp
+   nào đang làm lễ hay đang chờ tới lượt — có đám cưới thì tuyệt đối không
+   giật cam khỏi sân khấu. Chống lia dồn dập khi khách vào ồ ạt (tối thiểu
+   6s giữa 2 lần) và không chen khi camera đang bận việc khác. */
+let lastWelcomePanAt = 0;
+function maybeWelcomePan(p) {
+  if (cfg.liaCamNguoiMoiKhiVang === false) return;
+  if (P.stageBusy && P.stageBusy()) return;
+  if (Cam.followC || Date.now() < Cam.busyUntil) return;
+  const now = Date.now();
+  if (now - lastWelcomePanAt < 6000) return;
+  lastWelcomePanAt = now;
+  const holdMs = (Number(cfg.liaCamNguoiMoiGiay) || 4) * 1000;
+  Cam.busyUntil = now + holdMs + 1500;
+  Cam.panTo(p.home.x, p.home.y - 2, 1.0);
+  setTimeout(() => {
+    if (!Cam.followC && Date.now() >= Cam.busyUntil - 100 && !(P.stageBusy && P.stageBusy())) Cam.home();
+  }, holdMs + 1500);
 }
 function coupleScore(c, pts) {
   if (!c || pts <= 0) return;
@@ -92,7 +123,7 @@ function coupleScore(c, pts) {
   saveScores(); renderBoard();
 }
 function renderBoard() {
-  const top = Object.entries(scores).map(([key, s]) => ({ key, ...s })).sort((x, y) => y.score - x.score).slice(0, 3);
+  const top = Object.entries(scores).map(([key, s]) => ({ key, a: String((s && s.a) || ''), b: String((s && s.b) || ''), score: Number(s && s.score) || 0 })).filter(s => s.a && s.b).sort((x, y) => y.score - x.score).slice(0, 3);
   const board = $('board');
   /* Bang LUON hien: chua co cap nao ghi diem thi hien dong moi choi thay vi
      an han bang — truoc day an khi rong nen nhin nhu bang "bi mat" luc moi
@@ -730,7 +761,7 @@ function requestCouple(a, b, viaTag) {
 }
 P.onCoupleStage = function (c) {
   coupleScore(c, 30);
-  if (BG.tier >= 4) P.setCrown(c);   // mốc Hoàng Gia (10.000+): cặp nào lên bục cũng đội vương miện
+  if (BG.tier >= 4) P.setCrown(c);   // từ mốc Đại Tiệc Vàng (600+): cặp nào lên bục cũng đội vương miện
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 9000;
   Cam.stage();
@@ -962,7 +993,7 @@ function applyConfig(c) {
     }
   }
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
-  P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong });
+  P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong, quietMax: cfg.phongVangDuoi });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
   applyPanelPos();
   A.setConfig(cfg);
@@ -1081,12 +1112,13 @@ if (isDemo) {
     npcVoiceOn: true, npcVoice: 'vi-VN-HoaiMyNeural', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
     coupleSec: 25,
     phongToGoiTen: 1.32, coCapGiua: 1.22, coCapBen: 1.22, soCapToiDa: 3,
+    phongVangDuoi: 15, liaCamNguoiMoiKhiVang: true, liaCamNguoiMoiGiay: 4,
     zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,
     uuTienChoTrong: true, nguongDongNguoi: 70, phutImMatCho: 4, tyLeChoTrong: 0.45,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
-      { viewers: 500, file: 'bg-500.webp' }, { viewers: 2000, file: 'bg-2000.webp' },
-      { viewers: 5000, file: 'bg-5000.webp' }, { viewers: 10000, file: 'bg-10000.webp' }, { viewers: 20000, file: 'bg-sanh-moi.webp' },
+      { viewers: 50, file: 'bg-500.webp' }, { viewers: 150, file: 'bg-2000.webp' },
+      { viewers: 300, file: 'bg-5000.webp' }, { viewers: 600, file: 'bg-10000.webp' }, { viewers: 1000, file: 'bg-sanh-moi.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
     guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👗 Gõ "nam" / "nữ" / "đổi đồ" → đổi nhân vật, trang phục', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],
