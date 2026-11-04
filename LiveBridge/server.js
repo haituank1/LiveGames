@@ -275,7 +275,7 @@ wss.on('connection', (ws, req) => {
   ws.on('message', buf => {
     let m;
     try { m = JSON.parse(buf); } catch (_) { return; }
-    if (m.type === 'hello') { c.game = m.game || c.game; c.role = m.role || c.role; sendHello(c); return; }
+    if (m.type === 'hello') { c.game = m.game || c.game; c.role = m.role || c.role; if (c.role === 'game') { try { tts.sweepStale(); } catch (_) { /* dọn hàng đợi voice thừa lúc game (re)start/F5 — xem src/tts.js */ } } sendHello(c); return; }
     if (m.type === 'npc-voice') { setNpcVoice(m.state === 'start' ? 'start' : 'end', { game: c.game || m.game, text: m.text }); return; }
     if (m.type === 'simulate') { try { injectRaw(m.event); } catch (e) { send(c, { type: 'error', message: e.message }); } return; }
     if (c.role === 'admin' || c.role === 'monitor') onAdmin(c, m);

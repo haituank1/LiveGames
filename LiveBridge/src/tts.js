@@ -30,15 +30,42 @@ function cleanForSpeech(text) {
   return normalizeText(t);
 }
 
+/* Việc trong hàng đợi tổng hợp mà phải CHỜ quá lâu thì coi là THỪA: trang
+   game đã F5/khởi động lại (đúng tình huống Nguyen nêu 2026-11-04) thì
+   không còn ai nghe các câu đó nữa — giữ lại chỉ tổ nghẽn hàng đợi cho
+   yêu cầu mới. Mặc định 5 phút; biến môi trường TTS_STALE_MS chỉ để test. */
+const STALE_MS = Number(process.env.TTS_STALE_MS) > 0 ? Number(process.env.TTS_STALE_MS) : 5 * 60 * 1000;
+
 class TtsEngine {
   constructor(cacheDir) {
     this.cacheDir = cacheDir;
     this.ram = new Map();          // key -> Buffer (tối đa ~80 câu gần nhất)
     this.pending = new Map();       // key -> Promise<Buffer|null>
-    this.queue = [];                // [{ key, text, voice, rate, prio, resolve }]
+    this.queue = [];                // [{ key, text, voice, rate, prio, at, resolve }]
     this.busy = false;
-    this.stats = { synth: 0, cacheHit: 0, errors: 0 };
+    this.stats = { synth: 0, cacheHit: 0, errors: 0, stale: 0 };
     try { fs.mkdirSync(cacheDir, { recursive: true }); } catch (_) { /* không ghi được thì chỉ dùng RAM */ }
+    // Tự quét định kỳ để hàng đợi không bao giờ chứa việc quá hạn,
+    // kể cả khi không có yêu cầu mới nào tới để kích hoạt vòng pump.
+    this._sweepTimer = setInterval(() => this.sweepStale(), 30000);
+    if (this._sweepTimer.unref) this._sweepTimer.unref();
+  }
+
+  /* Xoá các việc ĐANG CHỜ đã quá hạn (mặc định 5 phút): trả lời null cho
+     phía đang chờ để POST kết thúc êm (game coi như chuyển giọng hụt 1
+     lần, hiện chữ thay thế — đúng đường lỗi sẵn có). Việc đang tổng hợp
+     dở KHÔNG bị đụng (chỉ vài giây là xong). LƯU Ý: cache file trên đĩa
+     không xoá — đó là thư viện đoạn đã tổng hợp để dùng lại mãi, xoá đi
+     là mỗi câu phải tổng hợp lại từ đầu, còn nghẽn hơn. */
+  sweepStale(maxAgeMs = STALE_MS) {
+    if (!this.queue.length) return 0;
+    const now = Date.now();
+    let dropped = 0;
+    this.queue = this.queue.filter(job => {
+      if (now - (job.at || now) > maxAgeMs) { dropped++; this.stats.stale++; job.resolve(null); return false; }
+      return true;
+    });
+    return dropped;
   }
 
   key(text, voice, rate) {
@@ -82,7 +109,7 @@ class TtsEngine {
     if (disk) { this._ramPut(key, disk); this.stats.cacheHit++; return { id: key, cached: true }; }
     if (!this.pending.has(key)) {
       const p = new Promise(resolve => {
-        this.queue.push({ key, text, voice, rate, prio: Number(opts.prio) || 1, resolve });
+        this.queue.push({ key, text, voice, rate, prio: Number(opts.prio) || 1, at: Date.now(), resolve });
         this.queue.sort((a, b) => b.prio - a.prio);
         this._pump();
       });
@@ -98,6 +125,8 @@ class TtsEngine {
     if (this.busy) return;
     this.busy = true;
     while (this.queue.length) {
+      this.sweepStale();   // dọn việc quá hạn trước mỗi lượt — việc ở đầu hàng mà đã chờ quá 5 phút thì bỏ luôn, khỏi tốn lượt tổng hợp
+      if (!this.queue.length) break;
       const job = this.queue.shift();
       try {
         const buf = await this._synthesize(job.text, job.voice, job.rate);
