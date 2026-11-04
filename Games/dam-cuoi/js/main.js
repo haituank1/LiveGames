@@ -499,13 +499,13 @@ function randomSingle(except) {
    không có thì lấy người chưa đoán được giới tính; tuyệt không ghép cùng giới
    khi đã đoán được giới tính của cả hai. */
 function randomSingleOpp(except) {
-  const g = P.guessGender(except.nickname || '');
+  const g = (P.get(except.id) || {}).genderFixed || P.guessGender(except.nickname || '');
   const strict = [], loose = [];
   for (const u of known.values()) {
     if (u.id === except.id) continue;
     const p = P.get(u.id);
     if (!p || p.couple) continue;
-    const gu = P.guessGender(u.nickname || '');
+    const gu = p.genderFixed || P.guessGender(u.nickname || '');
     if (g !== '?' && gu !== '?' && gu === g) continue;   // cùng giới rõ ràng -> bỏ qua
     (gu !== '?' && g !== '?' ? strict : loose).push(u);
   }
@@ -687,11 +687,53 @@ function giftFx(diamonds) {
 }
 
 /* ============ Nhận sự kiện ============ */
+/* ===== Lệnh chat tương tác: tự khai giới tính + đổi trang phục (Nguyen chot) =====
+   Tên người dùng rất khó đoán nam/nữ (nickname lạ, không dấu, tên nước ngoài)
+   — thay vì đoán mò, cho họ TỰ KHAI: gõ "nam" / "nữ" (hoặc "tôi là nam",
+   "là nữ", "con trai", "con gái") là nhân vật đổi sang đúng giới tính, đang
+   có đôi thì đảo vai cô dâu/chú rể cho đúng. Gõ "đổi đồ" là thay trang phục
+   (có đôi thì cả cặp đổi bộ phối sẵn). Vừa sửa được nhận dạng sai, vừa thêm
+   lý do để khách comment tương tác và có cảm giác trải nghiệm. */
+const outfitCd = new Map();
+function foldCmd(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/\s+/g, ' ').trim();
+}
+function handleChatCommands(user, text) {
+  const p = P.get(user.id);
+  if (!p) return;
+  const f = foldCmd(text);
+  if (cfg.lenhDoiGioiTinh !== false) {
+    let g = null;
+    if (/\b(la nu|la gai|con gai)\b/.test(f) || /^(nu|gai)[ !.~]*$/.test(f)) g = 'F';
+    else if (/\b(la nam|la trai|con trai)\b/.test(f) || /^(nam|trai)[ !.~]*$/.test(f)) g = 'M';
+    if (g) {
+      const r = P.declareGender(user.id, g);
+      const sp = Cam.toScreen(p.x, p.y);
+      FX.hearts(6, sp.fx, sp.fy - 0.03);
+      toast(g === 'F'
+        ? `✅ ${user.nickname} là nữ — đã đổi sang nhân vật nữ${r && r.roleSwapped ? ' + đảo vai cô dâu cho đúng' : ''}!`
+        : `✅ ${user.nickname} là nam — đã đổi sang nhân vật nam${r && r.roleSwapped ? ' + đảo vai chú rể cho đúng' : ''}!`, false);
+    }
+  }
+  if (cfg.lenhDoiTrangPhuc !== false && /\b(doi do|doi trang phuc|thay do|thay trang phuc)\b/.test(f)) {
+    const now = performance.now();
+    const cdMs = (cfg.doiTrangPhucChoGiay != null ? cfg.doiTrangPhucChoGiay : 5) * 1000;
+    if (now - (outfitCd.get(user.id) || -1e9) >= cdMs) {
+      outfitCd.set(user.id, now);
+      const r = P.cycleOutfit(user.id);
+      const sp = Cam.toScreen(p.x, p.y);
+      FX.hearts(6, sp.fx, sp.fy - 0.03);
+      if (r && r.couple) toast(`👗 ${p.couple.a.user.nickname} ❤ ${p.couple.b.user.nickname} đổi bộ đồ cưới "${r.setName}"!`, false);
+      else toast(`👗 ${user.nickname} vừa đổi trang phục mới!`, false);
+    }
+  }
+}
 function onChat(m) {
   if (!m.user) return;
   ensureGuest(m.user);
   const text = String(m.text || '');
   showBubble(m.user, text);
+  handleChatCommands(m.user, text);
   const partner = parseTag(text, m.user);
   if (partner) {
     /* Người được tag CHƯA HỀ có mặt trong game (parseTag trả về "bóng ma"
@@ -903,7 +945,7 @@ if (isDemo) {
       { viewers: 5000, file: 'bg-5000.webp' }, { viewers: 10000, file: 'bg-10000.webp' }, { viewers: 20000, file: 'bg-sanh-moi.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
-    guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],
+    guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👗 Gõ "nam" / "nữ" / "đổi đồ" → đổi nhân vật, trang phục', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],
     mcLines: ['Một đám cưới vui là khi khách mời cười nhiều hơn cô dâu chú rể.', 'Tình yêu không cần hoàn hảo, chỉ cần hai người cùng tag nhau lên sân khấu là đủ.', 'Cả nhà thả tim thật nhiều để chúc phúc cho các cặp đôi nhé!'],
     mcFunny: ['MC dặn nhỏ: tag người yêu cũ vào đây MC tính phí gấp đôi nhé!', 'Ai còn độc thân giơ tay, MC nhìn thấy hết đấy, đừng trốn sau hàng ghế nữa!', 'Đi ăn cưới online mà không mất tiền mừng, thời đại này sướng thật!'],
     mcCouple: ['Xin giới thiệu cặp đôi {a} và {b} — hai bạn bước lên sân khấu trong tiếng vỗ tay của cả nhà!', 'Trời sinh một cặp: {a} ❤ {b}! Cả nhà thả tim chúc phúc nào!'],
@@ -916,6 +958,7 @@ if (isDemo) {
     choCongMoiCapCho: 15, choCongMoiCapGhep: 8, choMienGhep: 2,
     choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
     hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,
+    lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4,
     bannerY: 30,
     khungTraiX: 0, khungTraiY: 0, khungPhaiX: 0, khungPhaiY: 0, khungHangChoX: 0, khungHangChoY: 0, khungMcX: 0, khungMcY: 0,

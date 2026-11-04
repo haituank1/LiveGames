@@ -104,15 +104,67 @@ function genderScore(name) {
 }
 P.guessGender = name => { const s = genderScore(name); return s > 0 ? 'F' : s < 0 ? 'M' : '?'; };
 
+/* ===== Người xem TỰ KHAI giới tính + lệnh đổi trang phục (Nguyen chot) =====
+   Nickname lạ/không dấu thì đoán theo tên sai là chuyện thường — người xem gõ
+   "nam"/"nữ" là chuẩn nhất: ghi genderFixed (áp đảo điểm đoán tên ở mọi chỗ:
+   hình khách, phân vai cô dâu/chú rể, ghép tạm khác giới). Đang có đôi mà
+   vai hiện tại ngược với lời khai thì ĐẢO VAI cho cả cặp (trừ khi bạn đời đã
+   khai cùng giới — giữ nguyên vai, tránh phá cặp). */
+P.declareGender = function (id, g) {
+  const p = people.get(id); if (!p) return null;
+  p.genderFixed = g;
+  let roleSwapped = false;
+  if (p.couple) {
+    const c = p.couple, isBride = c.bride === p;
+    if ((g === 'F') !== isBride) {
+      const other = isBride ? c.groom : c.bride;
+      if (!other.genderFixed || other.genderFixed !== g) {
+        c.bride = g === 'F' ? p : other;
+        c.groom = g === 'F' ? other : p;
+        roleSwapped = true;
+        if (p.outfit === 'bride' || p.outfit === 'groom') {
+          setOutfit(p, g === 'F' ? 'bride' : 'groom');
+          setOutfit(other, g === 'F' ? 'groom' : 'bride');
+        }
+      }
+    }
+  }
+  if (p.outfit === 'casual') setOutfit(p, 'casual');   // vẽ lại hình khách theo giới vừa khai
+  return { roleSwapped };
+};
+/* Đổi trang phục: khách độc thân xoay vòng 4 biến thể của giới mình; người có
+   đôi thì CẢ CẶP đổi sang bộ đồ cưới phối sẵn khác (luôn khớp nhau, né bộ các
+   cặp khác đang mặc) — không bao giờ lẻ bộ/trái phong cách. */
+P.cycleOutfit = function (id) {
+  const p = people.get(id); if (!p) return null;
+  if (p.couple) {
+    const c = p.couple, pool = setPool();
+    const used = new Set();
+    for (const o of couples) if (o !== c && o.set) used.add(o.set);
+    const cur = pool.indexOf(c.set);
+    let next = null;
+    for (let k = 1; k <= pool.length; k++) { const cand = pool[(cur + k) % pool.length]; if (!used.has(cand)) { next = cand; break; } }
+    if (!next) next = pool[(cur + 1) % pool.length];
+    c.set = next; c.bride.set = next; c.groom.set = next;
+    if (c.bride.outfit === 'bride') setOutfit(c.bride, 'bride');
+    if (c.groom.outfit === 'groom') setOutfit(c.groom, 'groom');
+    return { couple: true, setName: next.name };
+  }
+  p.guestShift = (p.guestShift || 0) + 1;
+  setOutfit(p, 'casual');
+  return { couple: false };
+};
+
 function figHTML(p) {
   const seed = hash(p.user.id || p.user.nickname);
   let file;
   if (p.outfit === 'bride') file = (p.set || SETS_BASE[seed % SETS_BASE.length]).bride;
   else if (p.outfit === 'groom') file = (p.set || SETS_BASE[seed % SETS_BASE.length]).groom;
   else {
-    const gs = genderScore(p.user.nickname);
-    const girl = gs > 0 || (gs === 0 && seed % 2 === 1);
-    file = girl ? GUEST_GIRLS[(seed >> 4) % GUEST_GIRLS.length] : GUEST_BOYS[(seed >> 4) % GUEST_BOYS.length];
+    // đã tự khai giới tính thì nghe theo lời khai; chưa khai mới đoán theo tên
+    const girl = p.genderFixed ? p.genderFixed === 'F' : (genderScore(p.user.nickname) > 0 || (genderScore(p.user.nickname) === 0 && seed % 2 === 1));
+    const pool = girl ? GUEST_GIRLS : GUEST_BOYS;
+    file = pool[((seed >> 4) + (p.guestShift || 0)) % pool.length];
   }
   return `<img class="chibi" src="${file}" alt="">`;
 }
@@ -559,8 +611,11 @@ P.bumpCouple = function (c) {
   if (c.state === 'focus') { c.giftPriority = true; return true; }
   return false;
 };
+function effGenderScore(p) {
+  return p.genderFixed === 'F' ? 99 : p.genderFixed === 'M' ? -99 : genderScore(p.user.nickname);
+}
 function rolesFor(a, b) {
-  const sa = genderScore(a.user.nickname), sb = genderScore(b.user.nickname);
+  const sa = effGenderScore(a), sb = effGenderScore(b);
   const bride = sa > sb ? a : b;
   return { bride, groom: bride === a ? b : a };
 }

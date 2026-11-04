@@ -122,7 +122,8 @@
       "💌 Gõ \"@tên người thương\" → 2 bạn lên sân khấu",
       "🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm",
       "👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện",
-      "👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view"
+      "👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view",
+      "👗 Gõ \"nam\" / \"nữ\" / \"đổi đồ\" → đổi nhân vật, trang phục"
     ],
     "phongToGoiTen": 1.32,
     "coCapGiua": 1.22,
@@ -194,7 +195,10 @@
     "choHeSoDong": 1.3,
     "hieuUngNgauNhien": true,
     "hieuUngNgauNhienTuGiay": 12,
-    "hieuUngNgauNhienDenGiay": 25
+    "hieuUngNgauNhienDenGiay": 25,
+    "lenhDoiGioiTinh": true,
+    "lenhDoiTrangPhuc": true,
+    "doiTrangPhucChoGiay": 5
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {
