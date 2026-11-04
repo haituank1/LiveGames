@@ -767,6 +767,12 @@ P.makeCouple = function (userA, userB) {
   return c;
 };
 
+/* Điểm hẹn GIỮA THẢM ĐỎ (Nguyen chốt 2026-11-04 17:41): cặp tới lượt
+   không thay đồ tại chỗ ngồi nữa — hai người mặc đồ thường đi ra giữa
+   thảm (nam x=47, nữ x=53, y=REVEAL_Y), đứng cạnh nhau rồi mới cùng
+   biến hình, để camera bắt trọn khoảnh khắc đổi đồ cô dâu chú rể. */
+const REVEAL_Y = 68;
+
 /* Tư thế đứng của 1 cặp ở ô sân khấu i: ai đứng trái/phải + toạ độ đích
    của từng người. Xếp NỮ KỀ NỮ, NAM KỀ NAM ở đường giáp giữa các cặp:
    cặp giữa: nam trái – nữ phải; cặp 2 bên: nữ trái – nam phải. Đích được
@@ -848,32 +854,42 @@ function promoteStage() {
     stageSlots[i] = c;
     onStage++;
     c.a.spotScale = c.b.spotScale = i === 0 ? P.tune.scaleC : P.tune.scaleS;
-    /* TỚI LƯỢT cặp này: giờ mới THAY ĐỒ CƯỚI + vòng sáng + ăn mừng, rồi mới
-       nắm tay nhau đi thảm đỏ (cặp còn chờ vẫn đồ thường — xem makeCouple) */
-    c.groom.set = c.set; c.bride.set = c.set;
-    setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
-    c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
-    if (P.onPairReveal) P.onPairReveal(c);
-    /* ĐI LÊN SÂN KHẤU CÙNG NHAU (Nguyen yêu cầu 2026-11-04 17:19):
-       trước đây mỗi người đi một mạch từ nhà lên — quãng đường khác
-       nhau nên người tới trước đứng một mình trên sân khấu, người kia
-       lũi thủi theo sau trông rất buồn cười (cả 2 chiều nam/nữ). Nay
-       chia 2 chặng: CHẶNG 1 mỗi người tự đi tới ĐIỂM TẬP KẾT ở đầu thảm
-       đỏ (47/53, y=90) rồi ĐỢI bạn đời; CHẶNG 2 cả hai mới cùng đi lên,
-       tốc độ căn khớp để tới nơi cùng lúc, và buổi lễ chỉ bắt đầu khi
-       CẢ HAI đã đứng vào vị trí (arriveStage chờ đủ 2 người). */
-    const pose = slotPose(c, i);
+    /* TỚI LƯỢT cặp này — nhưng CHƯA thay đồ vội: hai người mặc đồ
+       thường đi ra điểm hẹn giữa thảm trước, đứng cạnh nhau rồi mới
+       cùng biến hình ở đó (xem onGather dưới đây). Cặp còn chờ trong
+       hàng vẫn đồ thường — xem makeCouple. */
+    /* HÀNH TRÌNH LÊN SÂN KHẤU — 3 chặng (gộp 2 chốt của Nguyen
+       2026-11-04 17:19 + 17:41): CHẶNG 1 hai người mặc đồ thường đi ra
+       ĐIỂM HẸN GIỮA THẢM ĐỎ và ĐỢI nhau (hết cảnh người tới trước đứng
+       một mình, người kia lũi thủi theo sau — "khá mắt cười" cả 2
+       chiều nam/nữ); CHẶNG 2 cả hai đứng cạnh nhau ở giữa thảm mới
+       cùng BIẾN HÌNH (ở onGather); CHẶNG 3 nắm tay đi lên sân khấu,
+       tốc độ căn khớp để tới nơi cùng lúc, buổi lễ chỉ bắt đầu khi cả
+       hai đã vào vị trí (arriveStage chờ đủ 2 người). */
     let gathered = 0;
     const onGather = () => {
       if (++gathered !== 2 || !couples.includes(c) || c.state !== 'toStage') return;
-      let arrived = 0;
-      const onArr = () => { if (++arrived === 2) arriveStage(c); };
-      walkPath(pose.leftP, [{ x: 47, y: stageY + 7 }, pose.l], 'toStage', onArr);
-      walkPath(pose.rightP, [{ x: 53, y: stageY + 7 }, pose.r], 'toStage', onArr);
-      syncPairSpeed(pose.leftP, pose.rightP);
+      /* CẢ HAI ĐÃ ĐỨNG CẠNH NHAU Ở GIỮA THẢM — giờ mới BIẾN HÌNH:
+         thay đồ cưới + vòng sáng + onPairReveal (hiệu ứng, MC giới
+         thiệu, camera bắt trọn khoảnh khắc), giữ ~1.4 giây cho người
+         xem kịp nhìn, rồi mới nắm tay nhau đi lên sân khấu. */
+      c.groom.set = c.set; c.bride.set = c.set;
+      setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
+      c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
+      if (P.onPairReveal) P.onPairReveal(c);
+      setTimeout(() => {
+        if (!couples.includes(c) || c.state !== 'toStage') return;
+        const pose = slotPose(c, i);
+        const tgt = p => (p === pose.leftP ? pose.l : pose.r);
+        let arrived = 0;
+        const onArr = () => { if (++arrived === 2) arriveStage(c); };
+        walkPath(c.groom, [{ x: 47, y: stageY + 7 }, tgt(c.groom)], 'toStage', onArr);
+        walkPath(c.bride, [{ x: 53, y: stageY + 7 }, tgt(c.bride)], 'toStage', onArr);
+        syncPairSpeed(c.groom, c.bride);
+      }, 1400);
     };
-    walkPath(pose.leftP, [{ x: 47, y: 90 }], 'toStage', onGather);
-    walkPath(pose.rightP, [{ x: 53, y: 90 }], 'toStage', onGather);
+    walkPath(c.groom, [{ x: 47, y: REVEAL_Y }], 'toStage', onGather);
+    walkPath(c.bride, [{ x: 53, y: REVEAL_Y }], 'toStage', onGather);
     if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
   }
 }
