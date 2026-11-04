@@ -421,6 +421,21 @@ function makeEl(user) {
   el.innerHTML = `<div class="figwrap"></div><div class="chip">${av}<span class="nm">${esc(user.nickname)}</span></div>`;
   return el;
 }
+/* Bong chat tren dau nhan vat: main.js da loc noi dung truoc khi goi.
+   Comment moi ghi de comment cu va dem lai thoi gian an. */
+P.say = function (id, text, sec) {
+  const p = people.get(id);
+  if (!p || !p.el || !text) return;
+  if (!p.bubbleEl) {
+    p.bubbleEl = document.createElement('div');
+    p.bubbleEl.className = 'bubble';
+    p.el.appendChild(p.bubbleEl);
+  }
+  p.bubbleEl.textContent = text;
+  p.bubbleEl.classList.add('on');
+  clearTimeout(p.bubbleT);
+  p.bubbleT = setTimeout(() => { if (p.bubbleEl) p.bubbleEl.classList.remove('on'); }, (sec || 4) * 1000);
+};
 P.spawn = function (user) {
   if (!user || !user.id) return null;
   const old = people.get(user.id);

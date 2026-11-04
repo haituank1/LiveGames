@@ -401,6 +401,54 @@ function parseTag(text, self) {
   }
   return { id: 'tag:' + name.toLocaleLowerCase('vi').replace(/\s+/g, '-'), nickname: name, avatar: '' };
 }
+/* ===== Bong chat + san loc comment =====
+   Nguyen chot cach loc (2026-11-04): tu cam thi CHE bang dau * (giu nguyen do
+   dai, cau van hien — vi du "vui vl chung may a" -> "vui ** chung may a");
+   comment chua QUA NHIEU tu cam (config bongChatAnKhiTuCamQua) thi AN HAN;
+   text qua dai thi cat bot + "...". Danh sach tu cam sua trong config
+   (tuCamComment), tat ca deu co config rieng.
+   Cach khop tu (tranh che nham tu vo toi): tu CO DAU chi khop nguyen van voi
+   danh sach (nen "lon" trong "sanh lon" khong bi che); tu KHONG DAU (go nhanh
+   khong dau) khop theo dang bo dau — danh sach tu an toan (tuAnToanComment,
+   dang bo dau) duoc mien tru, vd "cac" trong "cac ban". */
+const FOLD_GROUPS = { a: 'àáảãạăằắẳẵặâầấẩẫậ', e: 'èéẻẽẹêềếểễệ', i: 'ìíỉĩị', o: 'òóỏõọôồốổỗộơờớởỡợ', u: 'ùúủũụưừứửữự', y: 'ỳýỷỹỵ', d: 'đ' };
+const FOLD_MAP = {};
+for (const base in FOLD_GROUPS) for (const ch of FOLD_GROUPS[base]) FOLD_MAP[ch] = base;
+function foldWord(s) {
+  return String(s).toLowerCase().split('').map(ch => FOLD_MAP[ch] || ch).join('').replace(/(.)\1+/g, '$1');
+}
+let banExact = new Set(), banFold = new Set(), safeFold = new Set(['cac']);
+function buildBanSets() {
+  banExact = new Set(); banFold = new Set();
+  for (const w of cfg.tuCamComment || []) {
+    const t = String(w).trim().toLowerCase();
+    if (!t) continue;
+    banExact.add(t); banFold.add(foldWord(t));
+  }
+  safeFold = new Set((cfg.tuAnToanComment || ['cac']).map(w => foldWord(String(w).trim())));
+}
+function chatFilter(raw) {
+  const text = String(raw || '').trim().replace(/\s+/g, ' ');
+  if (!text) return null;
+  let hits = 0;
+  const shown = text.split(' ').map(tok => {
+    const m = tok.match(/^([^\p{L}\p{N}]*)([\p{L}\p{N}]+)([^\p{L}\p{N}]*)$/u);
+    if (!m) return tok;
+    const core = m[2], low = core.toLowerCase();
+    let bad = /[^\x00-\x7F]/.test(core) ? banExact.has(low) : (banFold.has(foldWord(core)) && !safeFold.has(foldWord(core)));
+    if (!bad) return tok;
+    hits++;
+    return m[1] + '*'.repeat(Math.min(core.length, 12)) + m[3];
+  }).join(' ');
+  if (hits > (cfg.bongChatAnKhiTuCamQua != null ? cfg.bongChatAnKhiTuCamQua : 2)) return null; // nhieu tu cam qua -> an han
+  const max = cfg.bongChatMaxKyTu || 60;
+  return shown.length > max ? shown.slice(0, max - 1).trimEnd() + '…' : shown;
+}
+function showBubble(user, text) {
+  if (cfg.hienBongChat === false) return;
+  const shown = chatFilter(text);
+  if (shown) P.say(user.id, shown, cfg.bongChatGiay || 4);
+}
 function randomSingle(except) {
   const singles = [];
   for (const u of known.values()) {
@@ -507,6 +555,7 @@ function onChat(m) {
   if (!m.user) return;
   ensureGuest(m.user);
   const text = String(m.text || '');
+  showBubble(m.user, text);
   const partner = parseTag(text, m.user);
   if (partner) {
     /* Người được tag CHƯA HỀ có mặt trong game (parseTag trả về "bóng ma"
@@ -584,6 +633,7 @@ function applyConfig(c) {
   MC.lines = cfg.mcLines || []; MC.funny = cfg.mcFunny || []; MC.couple = cfg.mcCouple || [];
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
   MC.tagVang = cfg.mcTagVang || [];
+  buildBanSets();
   MC.milestone = cfg.mcMilestone || [];
   if (window.NpcVoice) NpcVoice.setConfig(cfg);
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
@@ -701,6 +751,9 @@ if (isDemo) {
     mcGreet: ['Chào mừng {ten} đã đến dự đám cưới online của chúng ta!', 'Khách quý {ten} vừa đến! Mời bạn vào khuôn viên chọn chỗ đẹp nhé!'],
     mcFollowLines: ['Cảm ơn {ten} đã follow! MC se duyên cho bạn ngay đây!'],
     ghepDoiNgauNhien: true,
+    hienBongChat: true, bongChatGiay: 4, bongChatMaxKyTu: 60, bongChatAnKhiTuCamQua: 2,
+    tuCamComment: ['vl', 'vcl', 'vkl', 'vãi', 'địt', 'đụ', 'đéo', 'cặc', 'lồn', 'buồi', 'đĩ', 'đm', 'dm', 'đmm', 'dcm', 'đcm', 'cave', 'loz'],
+    tuAnToanComment: ['cac'],
     mcTagVang: ['{a} gọi {ten} mà {ten} chưa có trong phòng — MC ghép tạm {a} với {b} cho đỡ trống nhé! {a} ơi, mau nhắn {ten} vào live để hai bạn được làm lễ cùng nhau!', '{ten} ơi, {a} đang chờ bạn trong phòng cưới đó! MC se duyên tạm cho {a} với {b} trong lúc chờ — {ten} vào nhanh kẻo mất lượt nha!'],
     mcMilestone: ['CẢ NHÀ ƠI! Sảnh cưới đã nâng cấp lên mốc {moc} nhờ tổng lượt xem tăng vọt!'],
     musicOn: true, musicVolume: 0.5, sfxOn: true, sfxVolume: 0.8,

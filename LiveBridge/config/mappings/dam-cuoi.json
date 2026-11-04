@@ -142,6 +142,33 @@
       "{a} gọi {ten} mà {ten} chưa có trong phòng — MC ghép tạm {a} với {b} cho đỡ trống nhé! {a} ơi, mau nhắn {ten} vào live để hai bạn được làm lễ cùng nhau!",
       "{ten} ơi, {a} đang chờ bạn trong phòng cưới đó! MC se duyên tạm cho {a} với {b} trong lúc chờ — {ten} vào nhanh kẻo mất lượt nha!",
       "Người thương {ten} của {a} chưa xuất hiện — MC đành ghép tạm {a} với bạn {b} đang độc thân. {a} nhớ rủ {ten} vào live để được ghép đúng đôi nhé!"
+    ],
+    "hienBongChat": true,
+    "bongChatGiay": 4,
+    "bongChatMaxKyTu": 60,
+    "bongChatAnKhiTuCamQua": 2,
+    "tuCamComment": [
+      "vl",
+      "vcl",
+      "vkl",
+      "vãi",
+      "địt",
+      "đụ",
+      "đéo",
+      "cặc",
+      "lồn",
+      "buồi",
+      "đĩ",
+      "đm",
+      "dm",
+      "đmm",
+      "dcm",
+      "đcm",
+      "cave",
+      "loz"
+    ],
+    "tuAnToanComment": [
+      "cac"
     ]
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
