@@ -95,6 +95,20 @@ Kết quả test tự động trên nền mới: 90 người vào phòng, 88 ng�
 chụp kết quả, 0 cặp đứng gần như trùng, 0/40 vòng lấy mẫu có chân trong ellipse
 bàn; cặp đôi lên được sân khấu và chân ở y = 42.6–43.1%.
 
+## Vùng cấm đứng — bậc thang (keepClear, theo yêu cầu chủ phòng 2026-11-04)
+
+Mỗi hồ sơ khung có thêm `keepClear`: các ellipse mà nhân vật chỉ ĐI QUA, tuyệt
+đối không được cấp vị trí đứng (cả ghế quanh bàn lẫn điểm đứng tự do đều bị
+loại nếu rơi vào). Khách trước đây hay đứng sát bậc thang trông rất vướng.
+
+- `mac-dinh`: ellipse tâm (50, 44), rx 11, ry 2.6 — bậc thang giữa của sảnh cũ.
+- `bg-sanh-moi.webp`: ellipse tâm (50, 44), rx 40, ry 6.5 — phủ toàn bộ vòng
+  bậc thang của bục tròn + thang đỏ giữa của sảnh mới.
+
+Kiểm chứng: cấp 260 vị trí ở mỗi khung — 0 vị trí trên bàn, 0 vị trí trong
+vùng bậc thang; ảnh trong game cho thấy khách đứng trên sàn đá hai bên, bậc
+thang và thảm đỏ trống hoàn toàn.
+
 ## Luật đứng của nhân vật (đã cài trong js/people.js — TABLE_FRAMES / inTable)
 
 - Ghế quanh bàn: chân đứng NGOÀI ellipse mặt bàn, cộng lề an toàn 1.7% ngang /

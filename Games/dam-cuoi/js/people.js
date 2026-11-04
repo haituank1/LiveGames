@@ -145,6 +145,7 @@ let freePool = [];
 const TABLE_FRAMES = {
   'mac-dinh': {
     stageY: 37.2, floorY: 44, seatTop: 43.5,
+    keepClear: [{ x: 50, y: 44, rx: 11, ry: 2.6 }],   // bậc thang giữa: chỉ đi qua, không đứng
     rows: [
       { y: 42.8, rx: 2.6, ry: 1.4, xs: [16.5, 23.5, 30.5, 35.5, 64.5, 69.5, 76.5, 83.5] },
       { y: 46.3, rx: 3.0, ry: 1.6, xs: [12.3, 20.5, 28.5, 71.5, 79.5, 87.7] },
@@ -158,6 +159,7 @@ const TABLE_FRAMES = {
   },
   'bg-sanh-moi.webp': {
     stageY: 42.6, floorY: 50, seatTop: 47.5,
+    keepClear: [{ x: 50, y: 44, rx: 40, ry: 6.5 }],   // toàn bộ vòng bậc thang của bục tròn + thang đỏ giữa: chỉ đi qua, không đứng
     rows: [
       { y: 48.5, rx: 3.6, ry: 1.6, xs: [2.5, 13, 76, 87, 97.5] },
       { y: 50.3, rx: 3.7, ry: 1.7, xs: [24, 32.5, 67.5] },
@@ -171,11 +173,22 @@ const TABLE_FRAMES = {
 };
 let frameId = 'mac-dinh';
 let PAINTED_TABLES = [];
+let KEEP_CLEAR = [];
 function applyFrameTables() {
   PAINTED_TABLES = [];
   for (const r of TABLE_FRAMES[frameId].rows) for (const x of r.xs) PAINTED_TABLES.push({ x, y: r.y, rx: r.rx, ry: r.ry });
+  KEEP_CLEAR = TABLE_FRAMES[frameId].keepClear || [];
 }
 applyFrameTables();
+/* Vùng cấm đứng (bậc thang / vòng bậc của bục): nhân vật chỉ ĐI QUA, không
+   được cấp vị trí đứng ở đó — chủ phòng không muốn ai đứng gần bậc thang */
+function inKeepClear(x, y) {
+  for (const z of KEEP_CLEAR) {
+    const dx = (x - z.x) / z.rx, dy = (y - z.y) / z.ry;
+    if (dx * dx + dy * dy < 1) return true;
+  }
+  return false;
+}
 /* Điểm (x,y) có rơi vào ellipse của bàn nào không (phồng thêm mx/my %)? self = bàn được bỏ qua */
 function inTable(x, y, mx, my, self) {
   for (const t of PAINTED_TABLES) {
@@ -205,6 +218,7 @@ function buildPositions() {
       const ownX = (sx - t.x) / (t.rx + 0.9), ownY = (sy - t.y) / (t.ry + 0.7);
       if (ownX * ownX + ownY * ownY < 1) continue;   // SEAT_TOP kéo ghế lọt vào chính bàn của nó -> bỏ
       if (inTable(sx, sy, 0.9, 0.7, t)) continue;   // ghế này lại chui vào bàn bên cạnh -> bỏ
+      if (inKeepClear(sx, sy)) continue;            // ghế rơi vào vùng bậc thang -> bỏ
       if (!farEnough(sx, sy)) continue;             // ghế này đè lên ghế đã nhận -> bỏ
       positions.push({ x: sx, y: sy, kind: 'seat', taken: null, frame: frameId });
     }
@@ -217,6 +231,7 @@ function buildPositions() {
     for (let gx = 3.6 + (grow % 2 ? 1.3 : 0); gx <= 96.5; gx += 2.55) {
       const x = gx + rand(-0.5, 0.5), y = gy + rand(-0.35, 0.35);
       if (inTable(x, y, 1.8, 1.4, null)) continue;   // điểm đứng cũng né mặt bàn + lề
+      if (inKeepClear(x, y)) continue;              // điểm đứng cũng né vùng bậc thang
       if (!farEnough(x, y)) continue;               // quá sát ghế/điểm đã nhận -> bỏ
       positions.push({ x, y, kind: 'stand', taken: null, frame: frameId });
     }
@@ -679,7 +694,7 @@ P.setBgFile = function (file) {
   buildPositions();
   for (const p of people.values()) {
     if (p.couple || p.state !== 'home') continue;
-    if (inTable(p.home.x, p.home.y, 0.2, 0.15, null)) {
+    if (inTable(p.home.x, p.home.y, 0.2, 0.15, null) || inKeepClear(p.home.x, p.home.y)) {
       const np = takePosition();
       if (np) { p.home.taken = null; np.taken = p; p.home = np; walkTo(p, { x: np.x, y: np.y }, 'walk', () => { p.state = 'home'; }); }
     }
