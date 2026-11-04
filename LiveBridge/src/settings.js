@@ -17,6 +17,8 @@ const GAME_DEFAULTS = {
   pointsPerTick: 1, tickSec: 5, pointsPerDiamond: 50, pointsPerChat: 5,
   musicOn: true, musicVolume: 37, musicShuffle: true, sfxOn: true, sfxVolume: 11, chantOn: true,
   chantMinDiamonds: 1, chantGap: 6, duckPercent: 90,    // niệm khi quà từ N xu; mỗi lần niệm cách nhau ≥ N giây; nhạc nền còn N% lúc niệm
+  npcVoiceOn: false, npcVoice: 'vi-VN-HoaiMyNeural', npcVoiceRate: 0, npcVoiceVolume: 90,   // giọng NPC (MC/thầy) do LiveBridge chuyển sẵn; bật theo từng game trong defaults của mapping
+  npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6, npcVoiceRandomOn: true, npcVoiceWaitMs: 4000,   // tần suất voice NPC: cách nhau ≥ N giây, tối đa N câu/phút, câu ngẫu nhiên có tiếng?, chờ voice tối đa N ms rồi hiện chữ luôn
   monkOn: true, monkMinSec: 20, monkMaxSec: 25,         // thầy hiện lên nói: ngẫu nhiên mỗi monkMinSec..monkMaxSec giây
   monkGreetOn: true, monkGreetGap: 10,                  // thầy chào người mới vào / cảm ơn quà, follow theo tên; chào cách nhau ≥ N giây
   pointsPerFollow: 100,                                 // follow: + điểm (mỗi người 1 lần) và được đặt pháp danh
@@ -84,6 +86,15 @@ class Settings {
     if (cfg.chantMinDiamonds != null) clean.chantMinDiamonds = num(cfg.chantMinDiamonds, 0, 100000, 10);
     if (cfg.chantGap != null) clean.chantGap = num(cfg.chantGap, 0, 600, 6);
     if (cfg.duckPercent != null) clean.duckPercent = num(cfg.duckPercent, 0, 100, 70);
+    // giọng NPC (MC / thầy nói thành tiếng, LiveBridge chuyển sẵn qua /api/tts)
+    if (cfg.npcVoiceOn != null) clean.npcVoiceOn = !!cfg.npcVoiceOn;
+    if (cfg.npcVoice != null) clean.npcVoice = ['vi-VN-HoaiMyNeural', 'vi-VN-NamMinhNeural'].includes(cfg.npcVoice) ? cfg.npcVoice : 'vi-VN-HoaiMyNeural';
+    if (cfg.npcVoiceRate != null) clean.npcVoiceRate = num(cfg.npcVoiceRate, -50, 50, 0);
+    if (cfg.npcVoiceVolume != null) clean.npcVoiceVolume = num(cfg.npcVoiceVolume, 0, 100, 90);
+    if (cfg.npcVoiceMinGapSec != null) clean.npcVoiceMinGapSec = num(cfg.npcVoiceMinGapSec, 0, 300, 8);
+    if (cfg.npcVoiceMaxPerMin != null) clean.npcVoiceMaxPerMin = Math.round(num(cfg.npcVoiceMaxPerMin, 1, 60, 6));
+    if (cfg.npcVoiceRandomOn != null) clean.npcVoiceRandomOn = !!cfg.npcVoiceRandomOn;
+    if (cfg.npcVoiceWaitMs != null) clean.npcVoiceWaitMs = num(cfg.npcVoiceWaitMs, 500, 10000, 4000);
     // thầy hiện lên nói
     if (cfg.monkOn != null) clean.monkOn = !!cfg.monkOn;
     if (cfg.monkMinSec != null) clean.monkMinSec = num(cfg.monkMinSec, 15, 7200, 120);

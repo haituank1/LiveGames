@@ -13,6 +13,26 @@ const { TikTokSource } = require('./src/tiktok');
 const { Mapper, editable } = require('./src/mapper');
 const { Settings } = require('./src/settings');
 const { serveStatic, listMedia, listBackgrounds } = require('./src/static');
+const { TtsEngine } = require('./src/tts');
+
+const tts = new TtsEngine(path.join(__dirname, 'voice-cache'));
+/* Trạng thái "NPC đang nói" — cổng ưu tiên voice dùng chung: game báo start/end
+   qua WS, server phát cho MỌI client (kể cả ToolVoiceTikTok nối role=voice-monitor)
+   để các voice khác tự tắt tiếng/ giữ hàng chờ trong lúc NPC nói. */
+let npcVoice = { speaking: false, game: '', text: '', since: 0 };
+let npcVoiceTimer = null;
+function setNpcVoice(state, info = {}) {
+  if (state === 'start') {
+    npcVoice = { speaking: true, game: info.game || '', text: String(info.text || '').slice(0, 200), since: Date.now() };
+    clearTimeout(npcVoiceTimer);
+    npcVoiceTimer = setTimeout(() => setNpcVoice('end', { auto: true }), 45000);   // chốt an toàn: game treo thì tự nhả sau 45s
+  } else {
+    if (!npcVoice.speaking) return;
+    npcVoice = { speaking: false, game: '', text: '', since: 0 };
+    clearTimeout(npcVoiceTimer);
+  }
+  broadcast({ type: 'npc-voice', state, game: npcVoice.game, text: npcVoice.text });
+}
 
 const ROOT = path.resolve(__dirname, '..');                 // C:\TestGameAI
 const GAMES_DIR = path.join(ROOT, 'Games');
@@ -211,7 +231,23 @@ const server = http.createServer(async (req, res) => {
   try {
     if (url.pathname === '/') { res.writeHead(302, { Location: '/LiveBridge/public/admin.html' }); return res.end(); }
     if (url.pathname === '/api/games') return json(res, mapper.list());
-    if (url.pathname === '/api/status') return json(res, { tiktok: tiktok.status, room, clients: clients.size });
+    if (url.pathname === '/api/status') return json(res, { tiktok: tiktok.status, room, clients: clients.size, npcVoice, tts: tts.stats });
+    if (url.pathname === '/api/voice/state') return json(res, { npcVoice });
+    if (url.pathname === '/api/tts' && req.method === 'POST') {
+      try {
+        const body = JSON.parse(await readBody(req) || '{}');
+        const t0 = Date.now();
+        const r = await tts.prepare(String(body.text || ''), { voice: body.voice, rate: body.rate, prio: body.prio });
+        return json(res, { ok: true, id: r.id, url: `/api/tts/audio/${r.id}.mp3`, cached: r.cached, ms: Date.now() - t0 });
+      } catch (e) { return json(res, { ok: false, error: e.message }, 502); }
+    }
+    const ttsAudio = url.pathname.match(/^\/api\/tts\/audio\/([a-f0-9]{32})\.mp3$/);
+    if (ttsAudio && req.method === 'GET') {
+      const buf = tts.audio(ttsAudio[1]);
+      if (!buf) return json(res, { ok: false, error: 'Chưa có audio này' }, 404);
+      res.writeHead(200, { 'Content-Type': 'audio/mpeg', 'Content-Length': buf.length, 'Cache-Control': 'public, max-age=86400' });
+      return res.end(buf);
+    }
     if (url.pathname === '/api/simulate' && req.method === 'POST') {
       try { injectRaw(JSON.parse(await readBody(req))); return json(res, { ok: true }); }
       catch (e) { return json(res, { ok: false, error: e.message }, 400); }
@@ -240,6 +276,7 @@ wss.on('connection', (ws, req) => {
     let m;
     try { m = JSON.parse(buf); } catch (_) { return; }
     if (m.type === 'hello') { c.game = m.game || c.game; c.role = m.role || c.role; sendHello(c); return; }
+    if (m.type === 'npc-voice') { setNpcVoice(m.state === 'start' ? 'start' : 'end', { game: c.game || m.game, text: m.text }); return; }
     if (m.type === 'simulate') { try { injectRaw(m.event); } catch (e) { send(c, { type: 'error', message: e.message }); } return; }
     if (c.role === 'admin' || c.role === 'monitor') onAdmin(c, m);
   });

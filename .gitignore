@@ -1,6 +1,8 @@
 node_modules/
 # cài đặt chỉnh từ trang quản trị (có thể chứa API key)
 LiveBridge/config/settings.json
+# voice NPC đã chuyển sẵn (tự tạo lại được từ câu chữ, không commit)
+LiveBridge/voice-cache/
 # bản đóng gói (dong-goi.bat) và node.exe đi kèm
 dist/
 runtime/

@@ -409,6 +409,20 @@ function buildGame(g) {
   const sfxNames = { chant: 'niem', bell: 'chuong', bigbell: 'chuong-lon', mo: 'mo' };
   G.note('🔔 Hiệu ứng: ' + Object.entries(sfxNames).map(([k, n]) => media.sfx[k] ? `${media.sfx[k]} ✓` : `${n}.* (âm tự tạo)`).join(' · '));
 
+  /* 8b. giọng NPC (MC / thầy nói thành tiếng) */
+  G = add('Giọng NPC — MC / thầy nói thành tiếng');
+  I.npcVoiceOn = chkIn(c.npcVoiceOn === true, 'Bật giọng NPC (LiveBridge chuyển giọng sẵn, chữ hiện lên là nói luôn)'); G.node(I.npcVoiceOn.el, true);
+  const voiceSel = el('select');
+  voiceSel.append(new Option('Nữ — HoaiMy', 'vi-VN-HoaiMyNeural'), new Option('Nam — NamMinh', 'vi-VN-NamMinhNeural'));
+  voiceSel.value = c.npcVoice || 'vi-VN-HoaiMyNeural';
+  I.npcVoice = G.field('Giọng NPC', voiceSel);
+  I.npcVoiceRate = G.field('Tốc độ đọc (% , -50..50)', numIn(c.npcVoiceRate != null ? c.npcVoiceRate : 0, -50, 50, 5));
+  I.npcVoiceVolume = G.field('Âm lượng voice NPC', sliderIn(c.npcVoiceVolume != null ? c.npcVoiceVolume : 90));
+  I.npcVoiceMinGapSec = G.field('Hai câu NPC cách nhau ít nhất (giây)', numIn(c.npcVoiceMinGapSec != null ? c.npcVoiceMinGapSec : 8, 0, 300));
+  I.npcVoiceMaxPerMin = G.field('Tối đa câu NPC có tiếng mỗi phút', numIn(c.npcVoiceMaxPerMin != null ? c.npcVoiceMaxPerMin : 6, 1, 60));
+  I.npcVoiceRandomOn = chkIn(c.npcVoiceRandomOn !== false, 'Câu ngẫu nhiên cũng có tiếng (tắt = chỉ câu sự kiện: cặp đôi, cảm ơn quà, mốc...)'); G.node(I.npcVoiceRandomOn.el, true);
+  G.note('Khi NPC nói, voice khán giả (ToolVoice) tự tắt tiếng và nhạc nền game nhỏ lại; NPC nói xong tự bật lại. Câu vướng tần suất thì chỉ hiện chữ.');
+
   /* 9. màn hình trên điện thoại */
   G = add('Màn hình trên điện thoại');
   I.safeTop = G.field('Chừa phía trên cho TikTok (%)', numIn(c.safeTop != null ? c.safeTop : 13, 0));
@@ -467,6 +481,8 @@ function buildGame(g) {
     musicOn: I.musicOn.input.checked, musicShuffle: I.musicShuffle.input.checked, sfxOn: I.sfxOn.input.checked, chantOn: I.chantOn.input.checked,
     musicVolume: +I.musicVolume.value, sfxVolume: +I.sfxVolume.value,
     chantMinDiamonds: +I.chantMinDiamonds.value, chantGap: +I.chantGap.value, duckPercent: +I.duckPercent.value,
+    npcVoiceOn: I.npcVoiceOn.input.checked, npcVoice: I.npcVoice.value, npcVoiceRate: +I.npcVoiceRate.value, npcVoiceVolume: +I.npcVoiceVolume.value,
+    npcVoiceMinGapSec: +I.npcVoiceMinGapSec.value, npcVoiceMaxPerMin: +I.npcVoiceMaxPerMin.value, npcVoiceRandomOn: I.npcVoiceRandomOn.input.checked,
     safeTop: +I.safeTop.value, safeSide: +I.safeSide.value, uiScale: +I.uiScale.value, nameScale: +I.nameScale.value,
     walkSpeed: +I.walkSpeed.value, actSpeed: +I.actSpeed.value,
     show: Object.fromEntries(Object.entries(showBox).map(([k, x]) => [k, x.checked])),
@@ -488,6 +504,13 @@ function buildGame(g) {
     musicVolume: +I.musicVolume.value, sfxVolume: +I.sfxVolume.value, chantMinDiamonds: +I.chantMinDiamonds.value, chantGap: +I.chantGap.value, duckPercent: +I.duckPercent.value,
   } });
   for (const x of [I.musicOn.input, I.musicShuffle.input, I.sfxOn.input, I.chantOn.input, I.musicVolume, I.sfxVolume, I.chantMinDiamonds, I.chantGap, I.duckPercent]) x.onchange = sendSound;
+
+  /* chỉnh giọng NPC: game đổi ngay, không cần bấm lưu */
+  const sendVoice = () => bridge.send({ type: 'game.config', game: g.id, config: {
+    npcVoiceOn: I.npcVoiceOn.input.checked, npcVoice: I.npcVoice.value, npcVoiceRate: +I.npcVoiceRate.value, npcVoiceVolume: +I.npcVoiceVolume.value,
+    npcVoiceMinGapSec: +I.npcVoiceMinGapSec.value, npcVoiceMaxPerMin: +I.npcVoiceMaxPerMin.value, npcVoiceRandomOn: I.npcVoiceRandomOn.input.checked,
+  } });
+  for (const x of [I.npcVoiceOn.input, I.npcVoice, I.npcVoiceRate, I.npcVoiceVolume, I.npcVoiceMinGapSec, I.npcVoiceMaxPerMin, I.npcVoiceRandomOn.input]) x.onchange = sendVoice;
 
   return panel;
 }

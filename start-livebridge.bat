@@ -37,6 +37,10 @@ if not exist node_modules (
   echo Dang cai thu vien lan dau...
   call npm install
 )
+if not exist node_modules\node-edge-tts (
+  echo Dang cai them thu vien giong noi NPC ^(node-edge-tts^)...
+  call npm install
+)
 start "" http://localhost:8787/
 "%NODE%" server.js
 pause

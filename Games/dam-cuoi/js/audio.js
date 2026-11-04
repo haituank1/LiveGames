@@ -44,12 +44,15 @@ A.setConfig = function (c) {
   if (!cfg.musicOn) { if (bgm) bgm.pause(); ambientStop(); }
   else startMusic();
 };
+let npcDuck = 1;   // NPC (MC) đang nói -> nhạc nền chỉ còn 22%
+addEventListener('npcvoice:start', () => { npcDuck = 0.22; applyVolumes(); });
+addEventListener('npcvoice:end', () => { npcDuck = 1; applyVolumes(); });
 function applyVolumes() {
-  if (bgm) bgm.volume = Math.min(1, (cfg.musicVolume / 100) ** 2);
+  if (bgm) bgm.volume = Math.min(1, (cfg.musicVolume / 100) ** 2 * npcDuck);
   if (!ctx) return;
   const t = ctx.currentTime;
   sfxBus.gain.setTargetAtTime(cfg.sfxOn ? (cfg.sfxVolume / 100) ** 1.5 : 0, t, 0.1);
-  musicBus.gain.setTargetAtTime(cfg.musicOn ? (cfg.musicVolume / 100) ** 2 * 0.9 : 0, t, 0.3);
+  musicBus.gain.setTargetAtTime(cfg.musicOn ? (cfg.musicVolume / 100) ** 2 * 0.9 * npcDuck : 0, t, 0.3);
 }
 
 /* ---------- Nhạc nền từ file ---------- */
@@ -69,7 +72,7 @@ function nextTrack() {
   else track = (track + 1) % playlist.length;
   bgm.loop = playlist.length === 1;
   bgm.src = 'audio/' + encodeURIComponent(playlist[track]);
-  bgm.volume = Math.min(1, (cfg.musicVolume / 100) ** 2);
+  bgm.volume = Math.min(1, (cfg.musicVolume / 100) ** 2 * npcDuck);
   bgm.play().then(() => { bgmBlocked = false; notify(); }).catch(e => { if (e && e.name === 'NotAllowedError') { bgmBlocked = true; notify(); } });
 }
 

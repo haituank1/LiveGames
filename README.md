@@ -322,6 +322,25 @@ Game có thể gửi lên `{ "type": "simulate", "event": { "kind": "gift", "use
 - Chỉ nhận sự kiện khi tài khoản **đang LIVE**.
 - LiveBridge mặc định chỉ nghe trên `127.0.0.1`. Muốn máy khác trong mạng LAN truy cập thì đổi `host` thành `0.0.0.0`.
 
+## Giọng NPC — MC / thầy nói thành tiếng (LiveBridge/public/npc-voice.js + src/tts.js)
+
+NPC của mọi game (MC đám cưới, thầy chùa) nói thành tiếng bằng chính engine của
+ToolVoiceTikTok (Microsoft HoaiMy/NamMinh -> dự phòng Google), nay nằm trong LiveBridge:
+
+- **Chuẩn bị trước**: câu vừa vào hàng chờ nói là game gọi `NpcVoice.prefetch(câu)` — LiveBridge
+  chuyển giọng sẵn và cache xuống đĩa (`LiveBridge/voice-cache/`, không commit). Tới lượt hiện
+  chữ thì tiếng đã sẵn sàng: **chữ hiện lên là NPC nói luôn**, không trễ.
+- **Ưu tiên tuyệt đối**: NPC bắt đầu nói -> nhạc nền game nhỏ lại, và LiveBridge phát tín hiệu
+  `npc-voice` cho mọi client; ToolVoiceTikTok (từ bản có `npcMute`) tự **tắt tiếng voice khán
+  giả đang phát + giữ hàng chờ**, NPC nói xong mới phát tiếp.
+- **Tần suất** chỉnh ở trang quản trị -> nhóm "Giọng NPC" (áp dụng ngay, không cần tải lại):
+  bật/tắt, giọng nam/nữ, tốc độ, âm lượng, hai câu cách nhau ít nhất N giây, tối đa N câu/phút,
+  câu ngẫu nhiên có tiếng hay chỉ câu sự kiện (cặp đôi, cảm ơn quà, mốc). Câu vướng tần suất
+  hoặc voice lỗi/chậm quá 4 giây thì chỉ hiện chữ, game không bao giờ kẹt vì chờ tiếng.
+- Mặc định: đám cưới bật (nữ HoaiMy, cách >= 8s, <= 6 câu/phút), chùa bật (nam NamMinh,
+  cách >= 10s, <= 5 câu/phút), sàn nhảy tắt. Lần chạy đầu cần `node_modules/node-edge-tts` —
+  `start-livebridge.bat` tự `npm install` khi thiếu.
+
 ## Game đám cưới online (Games/dam-cuoi)
 
 Game thứ hai, dùng chung LiveBridge: người xem bình luận `@tên người thương` thì cả hai cùng lên

@@ -181,6 +181,7 @@ function applyConfig(c) {
   if (c.actSpeed != null) T.params.actSpeed = Math.max(0.3, c.actSpeed / 100);
   if (c.guideOn != null || c.guideLines) U.guide(fillTim(Array.isArray(c.guideLines) && c.guideLines.length ? c.guideLines : GUIDE), c.guideOn !== false);
   S.setConfig(c);   // musicVolume, sfxVolume, musicOn, sfxOn, chantOn, chantGap, duckPercent
+  if (window.NpcVoice) NpcVoice.setConfig(c);   // giọng thầy: npcVoiceOn / npcVoice / tần suất
   if (c.chantMinDiamonds != null) SOUND.chantMinDiamonds = c.chantMinDiamonds;
   setMonk(c);   // thầy hiện lên nói: bật/tắt, mỗi bao nhiêu phút
   // mốc & định kỳ (trang quản trị → Game): timedRules, personalRules, globalRules
@@ -563,7 +564,9 @@ if (cfg.demo) {
   startDemo();
 } else if (window.LiveBridgeClient) {
   status('Đang kết nối LiveBridge…', 'warn');
-  new LiveBridgeClient({ url: cfg.bridge, game: GAME_ID })
+  const lbClient = new LiveBridgeClient({ url: cfg.bridge, game: GAME_ID });
+  if (window.NpcVoice) NpcVoice.attach(lbClient);   // thầy nói -> báo LiveBridge để voice khán giả tự tắt tiếng
+  lbClient
     .on('event', handle)
     .on('chat', onChat)
     .on('block', onBlock)
@@ -642,7 +645,9 @@ function monkReact(pri, lines, user, sec) {
   if (!MONK.greetOn || !lines || !lines.length) return;
   const i = monkQ.findIndex(m => m.uid === user.id && Math.floor(m.pri) === Math.floor(pri));
   if (i >= 0) monkQ.splice(i, 1);   // cùng người, cùng loại: chỉ giữ câu mới nhất
-  monkQ.push({ pri, uid: user.id, text: fillLine(pick(lines), user), sec, at: performance.now() });
+  const reactText = fillLine(pick(lines), user);
+  if (window.NpcVoice) NpcVoice.prefetch(reactText);   // chuyển giọng trước, tới lượt thầy hiện chữ là nói luôn
+  monkQ.push({ pri, uid: user.id, text: reactText, sec, at: performance.now() });
   monkQ.sort((a, b) => b.pri - a.pri || a.at - b.at);
   if (monkQ.length > 4) monkQ.length = 4;
   monkNext();
@@ -655,11 +660,26 @@ function monkNext() {
   for (let i = monkQ.length - 1; i >= 0; i--) if (now - monkQ[i].at > (monkQ[i].pri < 2 ? 15000 : 40000)) monkQ.splice(i, 1);
   const m = monkQ.shift();
   if (!m) return;
-  monkShow(m.text, m.sec);
+  monkShow(m.text, m.sec, 'event');
   if (m.pri >= 3) S.play('bell');
   if (monkQ.length) monkQTimer = setTimeout(monkNext, m.sec * 1000 + 600);
 }
-function monkShow(text, sec = 8) {
+function monkShow(text, sec = 8, kind = 'event') {
+  if (window.NpcVoice && NpcVoice.enabled()) {
+    monkBusyUntil = performance.now() + (sec + 8) * 1000;   // giữ hàng chờ trong lúc chờ tiếng sẵn sàng
+    const fallback = () => {
+      U.monk(text, 'Thầy', sec);
+      monkBusyUntil = performance.now() + sec * 1000 + 600;
+      if (monkQ.length) { clearTimeout(monkQTimer); monkQTimer = setTimeout(monkNext, sec * 1000 + 600); }
+    };
+    NpcVoice.speak(text, { kind, onStart: ({ durationMs }) => {
+      const showSec = Math.max(sec, Math.ceil((durationMs || 0) / 1000) + 1);
+      U.monk(text, 'Thầy', showSec);   // chữ hiện đúng lúc thầy bắt đầu nói
+      monkBusyUntil = performance.now() + showSec * 1000 + 600;
+      if (monkQ.length) { clearTimeout(monkQTimer); monkQTimer = setTimeout(monkNext, showSec * 1000 + 600); }
+    } }).then(r => { if (!r.played) fallback(); }).catch(fallback);
+    return;
+  }
   U.monk(text, 'Thầy', sec);
   monkBusyUntil = performance.now() + sec * 1000 + 600;
 }
@@ -686,7 +706,8 @@ function monkSay() {
   }
   if (!line) return scheduleMonk();
   monkLast = line;
-  monkShow(line);
+  if (window.NpcVoice) NpcVoice.prefetch(line);
+  monkShow(line, 8, 'random');
   S.play('bell');
   scheduleMonk();
 }

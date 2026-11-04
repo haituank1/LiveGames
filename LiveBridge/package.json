@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "tiktok-live-connector": "^2.0.0",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "node-edge-tts": "^1.2.12"
   }
 }

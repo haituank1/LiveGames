@@ -232,4 +232,7 @@ A.chant = function () {
   setTimeout(() => setDuck(1), dur * 1000);
   return true;
 };
+/* Thầy (NPC) đang nói thành tiếng -> nhạc nền nhỏ hẳn xuống, nói xong to lại */
+addEventListener('npcvoice:start', () => setDuck(0.15));
+addEventListener('npcvoice:end', () => setDuck(1));
 })();

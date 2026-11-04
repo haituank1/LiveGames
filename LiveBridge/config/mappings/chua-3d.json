@@ -12,6 +12,10 @@
     "glow": "Ánh vàng quanh thân nhân vật (không lạy)"
   },
   "defaults": {
+    "npcVoiceOn": true,
+    "npcVoice": "vi-VN-NamMinhNeural",
+    "npcVoiceMinGapSec": 10,
+    "npcVoiceMaxPerMin": 5,
     "cushions": [
       [
         50,
