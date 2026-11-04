@@ -26,17 +26,17 @@
   .ghead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
   .gname{font-size:16px;color:var(--acc)}
   .gacts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;align-items:start}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;align-items:start}
   .cards > .wide{grid-column:1/-1}
   /* nhóm config: gập / mở được, xếp lưới cho đầy khung ngang */
-  .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:12px;align-items:start}
-  .grp{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+  .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;align-items:start}
+  .grp{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
   .grp.wide{grid-column:1/-1}
   .grp > summary{cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;list-style:none}
   .grp > summary::-webkit-details-marker{display:none}
   .grp > summary::before{content:'▾ ';color:var(--mut)}
   .grp:not([open]) > summary::before{content:'▸ '}
-  .g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px 12px;margin-top:8px}
+  .g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px 10px;margin-top:8px}
   .g2 .full{grid-column:1/-1}
   .fld label{display:block;font-size:12px;color:var(--mut);margin:0 0 3px}
   .chk{display:flex;gap:6px;align-items:center;color:var(--tx);font-size:13px}
@@ -253,7 +253,7 @@ function renderGames() {
   if (!state.games.length) { panels.append(el('div', 'empty', 'Chưa có game trong thư mục Games')); return; }
   if (!state.games.some(g => g.id === activeGame)) activeGame = state.games[0].id;
   for (const g of state.games) {
-    const t = el('button', 'subtab', g.id); t.dataset.game = g.id;
+    const t = el('button', 'subtab', GAME_NAMES[g.id] || g.id); t.dataset.game = g.id;
     t.onclick = () => showGame(g.id);
     tabs.append(t);
     panels.append(buildGame(g));
@@ -275,8 +275,8 @@ const sliderIn = v => { const r = el('input'); r.type = 'range'; r.min = 0; r.ma
 const linesOf = t => t.value.split('\n');
 
 /* nhóm config: khung gập/mở được, bên trong là lưới 2 cột (ô "full" chiếm cả hàng) */
-function grp(title, wide) {
-  const d = el('details', 'grp' + (wide ? ' wide' : '')); d.open = true;
+function grp(title, wide, open) {
+  const d = el('details', 'grp' + (wide ? ' wide' : '')); d.open = !!open;
   const s = el('summary'); s.textContent = title; d.append(s);
   const body = el('div', 'g2'); d.append(body);
   return {
@@ -292,6 +292,8 @@ function grp(title, wide) {
   };
 }
 
+const GAME_NAMES = { 'chua-3d': '⛩️ Chùa 3D', 'dam-cuoi': '💍 Đám cưới online', 'san-nhay': '🪩 Sàn nhảy' };
+
 /* ---- Một game: thanh lưu ghim + các nhóm config ---- */
 function buildGame(g) {
   const c = g.config, A = g.rules ? g.rules.actions : {};
@@ -300,7 +302,7 @@ function buildGame(g) {
   /* thanh ghim trên cùng: tên game, nút lưu (đi theo game), liên kết */
   const bar = el('div', 'gbar');
   const head = el('div', 'ghead');
-  head.append(el('span', 'gname', g.id), el('span', 'muted', g.description || ''));
+  head.append(el('span', 'gname', GAME_NAMES[g.id] || g.id), el('span', 'muted', g.description || ''));
   const conn = el('span', 'muted'); conn.dataset.conn = g.id; conn.textContent = connText(g); head.append(conn);
   const acts = el('div', 'gacts');
   const save = el('button', 'pri', '💾 Lưu config'); save.title = 'Lưu toàn bộ cấu hình của game này (cả gói quà)';
@@ -320,7 +322,10 @@ function buildGame(g) {
   const I = {};   // ô nhập → đọc lại khi lưu
   const body = el('div', 'groups');
   panel.append(body);
-  const add = (title, wide) => { const x = grp(title, wide); body.append(x.box); return x; };
+  let grpNo = 0;
+  const add = (title, wide, open) => { const x = grp(title, wide, open != null ? open : grpNo++ === 0); body.append(x.box); return x; };
+
+  if (g.id === 'chua-3d') {
 
   /* 1. nhân vật & vào chùa */
   let G = add('Nhân vật & vào chùa');
@@ -511,8 +516,262 @@ function buildGame(g) {
     npcVoiceMinGapSec: +I.npcVoiceMinGapSec.value, npcVoiceMaxPerMin: +I.npcVoiceMaxPerMin.value, npcVoiceRandomOn: I.npcVoiceRandomOn.input.checked,
   } });
   for (const x of [I.npcVoiceOn.input, I.npcVoice, I.npcVoiceRate, I.npcVoiceVolume, I.npcVoiceMinGapSec, I.npcVoiceMaxPerMin, I.npcVoiceRandomOn.input]) x.onchange = sendVoice;
+  } else {
+    buildSchema(g, add, save, saveDef);
+  }
 
   return panel;
+}
+
+/* ---- Config RIÊNG theo từng game (đám cưới, sàn nhảy...): dựng form từ SCHEMA ----
+   Trước đây buildGame() dùng chung một bộ ô của game chùa cho MỌI game nên bấm sang
+   đám cưới vẫn thấy "vào chùa / thầy / đệm". Nay mỗi game có bộ ô riêng đúng với
+   các key mà game đó thật sự đọc (trong defaults của file mapping của nó);
+   game chưa có schema thì chỉ hiện các nhóm dùng chung + gói quà. */
+const GAME_SCHEMAS = {
+  'dam-cuoi': [
+    { title: '💒 Sân khấu & camera', fields: [
+      { k: 'coupleSec', l: 'Mỗi cặp trên sân khấu (giây)', t: 'num', min: 5, max: 600 },
+      { k: 'soCapToiDa', l: 'Số cặp tối đa cùng lúc trên sân khấu', t: 'num', min: 1, max: 10, step: 1 },
+      { k: 'phongToGoiTen', l: 'Phóng to khi gọi tên (x)', t: 'num', min: 1, max: 2, step: 0.01 },
+      { k: 'zoomGoiTen', l: 'Zoom camera khi gọi tên (x)', t: 'num', min: 1, max: 2, step: 0.01 },
+      { k: 'zoomBamTheo', l: 'Zoom camera bám theo cặp (x)', t: 'num', min: 1, max: 2, step: 0.01 },
+      { k: 'coCapGiua', l: 'Cỡ cặp giữa (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'coCapBen', l: 'Cỡ cặp bên (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'lechCapGiua', l: 'Lệch cặp giữa', t: 'num', min: 0, max: 10, step: 0.1 },
+      { k: 'lechCapBen', l: 'Lệch cặp bên', t: 'num', min: 0, max: 10, step: 0.1 },
+      { k: 'tamCapBen', l: 'Tâm cặp bên (%)', t: 'num', min: 0, max: 100 },
+      { k: 'bannerY', l: 'Banner "Lễ thành hôn" — cao từ mép trên (%)', t: 'num', min: 0, max: 60 },
+    ] },
+    { title: '🎤 MC & câu thoại', wide: true, fields: [
+      { k: 'mcName', l: 'Tên MC', t: 'txt' },
+      { k: 'mcMinSec', l: 'MC nói cách nhau từ (giây)', t: 'num', min: 5, max: 3600 },
+      { k: 'mcMaxSec', l: 'đến (giây)', t: 'num', min: 5, max: 3600 },
+      { k: 'mcLines', l: 'Câu MC nói ngẫu nhiên ({ten} = tên khách)', t: 'lines', rows: 6 },
+      { k: 'mcGreet', l: 'Câu chào khách mới ({ten})', t: 'lines', rows: 4 },
+      { k: 'mcCouple', l: 'Câu giới thiệu cặp đôi ({a}, {b})', t: 'lines', rows: 4 },
+      { k: 'mcThank', l: 'Câu cảm ơn khi tặng quà ({ten})', t: 'lines', rows: 4 },
+      { k: 'mcFollowLines', l: 'Câu khi có người follow ({ten})', t: 'lines', rows: 3 },
+      { k: 'mcFunny', l: 'Câu hài hước của MC', t: 'lines', rows: 4 },
+      { k: 'mcMilestone', l: 'Câu khi sảnh nâng cấp mốc ({moc})', t: 'lines', rows: 3 },
+      { k: 'mcTagVang', l: 'Câu khi tag người vắng mặt ({a} gọi, {ten} vắng, {b} ghép tạm)', t: 'lines', rows: 3 },
+      { k: 'mcGuide', l: 'Dòng MC hướng dẫn cách chơi', t: 'lines', rows: 4 },
+    ] },
+    { title: '💌 Ghép đôi & hàng chờ', fields: [
+      { k: 'ghepDoiNgauNhien', l: 'Tag người vắng → ghép tạm với khách độc thân khác giới', t: 'chk', defTrue: true },
+      { k: 'uuTienQuaTang', l: 'Người tặng quà được ưu tiên lên trước', t: 'chk', defTrue: true },
+      { k: 'uuTienChoTrong', l: 'Ưu tiên cặp chờ lâu khi vắng', t: 'chk', defTrue: true },
+      { k: 'hangChoToiDa', l: 'Số cặp hiện trong khung hàng chờ', t: 'num', min: 0, max: 20, step: 1 },
+      { k: 'nguongDongNguoi', l: 'Ngưỡng "đông người" (số khách)', t: 'num', min: 0, max: 10000 },
+      { k: 'phutImMatCho', l: 'Im lặng bao lâu thì ưu tiên cặp chờ (phút)', t: 'num', min: 0, max: 120, step: 0.5 },
+      { k: 'tyLeChoTrong', l: 'Tỉ lệ giữ chỗ khi vắng (0–1)', t: 'num', min: 0, max: 1, step: 0.05 },
+    ] },
+    { title: '⏳ Chờ lên sân khấu (chống spam)', note: 'Mỗi người làm lễ xong phải chờ một lúc mới lên lại được. Bật tự động thì thời gian chờ tự tăng khi đông mắt xem / nhiều cặp chờ, giảm khi vắng.', fields: [
+      { k: 'choTuDong', l: 'Tự động chỉnh thời gian chờ theo lượng mắt xem', t: 'chk', defTrue: true },
+      { k: 'choLenSanKhauCoBan', l: 'Thời gian chờ cơ bản (giây)', t: 'num', min: 0, max: 3600 },
+      { k: 'choLenSanKhauMin', l: 'Chờ tối thiểu (giây)', t: 'num', min: 0, max: 3600 },
+      { k: 'choLenSanKhauMax', l: 'Chờ tối đa (giây)', t: 'num', min: 0, max: 7200 },
+      { k: 'choCongMoiCapCho', l: 'Cộng thêm mỗi cặp đang chờ (giây)', t: 'num', min: 0, max: 600 },
+      { k: 'choCongMoiCapGhep', l: 'Cộng thêm mỗi lượt ghép (giây)', t: 'num', min: 0, max: 600 },
+      { k: 'choMienGhep', l: 'Miễn chờ cho N lượt ghép đầu', t: 'num', min: 0, max: 100, step: 1 },
+      { k: 'choNguongVang', l: 'Dưới N mắt xem = vắng', t: 'num', min: 0, max: 100000 },
+      { k: 'choHeSoVang', l: 'Hệ số chờ khi vắng (x)', t: 'num', min: 0, max: 2, step: 0.1 },
+      { k: 'choNguongDong', l: 'Trên N mắt xem = đông', t: 'num', min: 0, max: 1000000 },
+      { k: 'choHeSoDong', l: 'Hệ số chờ khi đông (x)', t: 'num', min: 0, max: 3, step: 0.1 },
+    ] },
+    { title: '✨ Hiệu ứng & lệnh chat', fields: [
+      { k: 'hieuUngNgauNhien', l: 'Tự bắn hiệu ứng ngẫu nhiên cho sảnh luôn sống', t: 'chk', defTrue: true },
+      { k: 'hieuUngNgauNhienTuGiay', l: 'Hiệu ứng ngẫu nhiên mỗi từ (giây)', t: 'num', min: 1, max: 3600 },
+      { k: 'hieuUngNgauNhienDenGiay', l: 'đến (giây)', t: 'num', min: 1, max: 3600 },
+      { k: 'lenhDoiGioiTinh', l: 'Lệnh chat "nam" / "nữ" tự khai giới tính', t: 'chk', defTrue: true },
+      { k: 'lenhDoiTrangPhuc', l: 'Lệnh chat "đổi đồ" đổi trang phục', t: 'chk', defTrue: true },
+      { k: 'doiTrangPhucChoGiay', l: 'Đổi đồ cách nhau (giây)', t: 'num', min: 0, max: 120 },
+      { k: 'hienBongChat', l: 'Hiện bong bóng chat trên đầu nhân vật', t: 'chk', defTrue: true },
+      { k: 'bongChatGiay', l: 'Bong bóng chat hiện (giây)', t: 'num', min: 1, max: 30 },
+      { k: 'bongChatMaxKyTu', l: 'Bong bóng chat tối đa (ký tự)', t: 'num', min: 10, max: 200 },
+      { k: 'bongChatAnKhiTuCamQua', l: 'Ẩn bong bóng khi quá N từ cấm', t: 'num', min: 0, max: 20, step: 1 },
+      { k: 'tuCamComment', l: 'Từ cấm trong bình luận (mỗi dòng một từ)', t: 'words', rows: 5 },
+      { k: 'tuAnToanComment', l: 'Từ an toàn — giống từ cấm nhưng được phép (mỗi dòng một từ)', t: 'words', rows: 2 },
+    ] },
+    { title: '🖼 Vị trí các khung (lệch % khung hình)', note: 'X dương = dịch phải, Y dương = dịch xuống. Chỉnh khi khung bị TikTok che trên điện thoại.', fields: [
+      { k: 'khungTraiX', l: 'Khung trái — lệch X (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+      { k: 'khungTraiY', l: 'Khung trái — lệch Y (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+      { k: 'khungPhaiX', l: 'Khung phải — lệch X (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+      { k: 'khungPhaiY', l: 'Khung phải — lệch Y (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+      { k: 'khungHangChoX', l: 'Khung hàng chờ — lệch X (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+      { k: 'khungHangChoY', l: 'Khung hàng chờ — lệch Y (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+      { k: 'khungMcX', l: 'Khung MC — lệch X (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+      { k: 'khungMcY', l: 'Khung MC — lệch Y (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+    ] },
+    { title: '🌸 Nền sảnh theo tổng lượt xem', wide: true, fields: [
+      { k: 'bgRules', l: '', t: 'bgWedding' },
+    ] },
+    { title: '📜 Luật & hướng dẫn hiện trong game', wide: true, fields: [
+      { k: 'rulesLines', l: 'Dòng luật chơi (khung trái)', t: 'lines', rows: 4 },
+      { k: 'guideLines', l: 'Dòng hướng dẫn xoay vòng', t: 'lines', rows: 5 },
+    ] },
+  ],
+  'san-nhay': [
+    { title: '⭐ Cấp độ & XP', fields: [
+      { k: 'xpPerComment', l: 'Bình luận + XP', t: 'num', min: 0, max: 1000 },
+      { k: 'xpPerGiftCoin', l: 'Mỗi 1 xu quà + XP', t: 'num', min: 0, max: 100, step: 0.5 },
+      { k: 'xpPerFollow', l: 'Follow + XP', t: 'num', min: 0, max: 1000 },
+      { k: 'xpPer100Likes', l: 'Mỗi 100 tim + XP', t: 'num', min: 0, max: 1000 },
+      { k: 'pairXp', l: 'Nhảy đôi + XP', t: 'num', min: 0, max: 1000 },
+      { k: 'soloXpDiv', l: 'Điểm solo ÷ N = XP', t: 'num', min: 1, max: 1000 },
+      { k: 'levelXp', l: 'Mốc XP của LV1→LV20 (cách nhau dấu phẩy)', t: 'nums' },
+      { k: 'retentionDays', l: 'Nhớ người chơi (ngày)', t: 'num', min: 1, max: 30, step: 1 },
+      { k: 'resetDay', l: 'Ngày reset bảng tuần', t: 'sel', opts: [[0, 'Chủ nhật'], [1, 'Thứ 2'], [2, 'Thứ 3'], [3, 'Thứ 4'], [4, 'Thứ 5'], [5, 'Thứ 6'], [6, 'Thứ 7']] },
+      { k: 'lvScaleMax', l: 'Cỡ nhân vật ở LV cao nhất (x)', t: 'num', min: 1, max: 2, step: 0.05 },
+    ] },
+    { title: '🎥 Camera & đạo diễn', fields: [
+      { k: 'camHomeZoom', l: 'Zoom toàn cảnh (x)', t: 'num', min: 0.3, max: 1.5, step: 0.01 },
+      { k: 'directorMinHoldSec', l: 'Giữ cảnh tối thiểu trước khi bị chen (giây)', t: 'num', min: 0, max: 10, step: 0.1 },
+      { k: 'lamMoKhiLia', l: 'Làm mờ người còn lại khi lia cận cảnh', t: 'chk', defTrue: true },
+      { k: 'doMoPhanConLai', l: 'Độ mờ phần còn lại (0–1)', t: 'num', min: 0, max: 1, step: 0.05 },
+      { k: 'liaCamLenTrenCung', l: 'Cho phép lia camera lên trên cùng', t: 'chk', defTrue: true },
+      { k: 'durEntry', l: 'Cảnh người mới vào (giây)', t: 'num', min: 0, max: 30, step: 0.5 },
+      { k: 'durGiftMid', l: 'Cảnh quà vừa (giây)', t: 'num', min: 0, max: 30, step: 0.5 },
+      { k: 'durGiftBig', l: 'Cảnh quà lớn (giây)', t: 'num', min: 0, max: 30, step: 0.5 },
+      { k: 'durGiftHuge', l: 'Cảnh quà siêu lớn (giây)', t: 'num', min: 0, max: 30, step: 0.5 },
+      { k: 'durLevelup', l: 'Cảnh lên cấp (giây)', t: 'num', min: 0, max: 30, step: 0.5 },
+      { k: 'zoomEntry', l: 'Zoom người mới vào (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'zoomEntryVip', l: 'Zoom người mới VIP (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'zoomGiftMid', l: 'Zoom quà vừa (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'zoomGiftBig', l: 'Zoom quà lớn (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'zoomGiftHuge', l: 'Zoom quà siêu lớn (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'zoomLevelup', l: 'Zoom lên cấp (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'zoomSolo', l: 'Zoom solo (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+      { k: 'zoomPairMax', l: 'Zoom nhảy đôi (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
+    ] },
+    { title: '🕺 Vào sàn & nhảy', fields: [
+      { k: 'dropHeight', l: 'Độ cao rơi vào sàn (% khung)', t: 'num', min: 0, max: 100 },
+      { k: 'dropHeightVip', l: 'Độ cao rơi VIP (% khung)', t: 'num', min: 0, max: 100 },
+      { k: 'entryFlairLv', l: 'Từ LV mấy rơi có vệt lửa', t: 'num', min: 1, max: 20, step: 1 },
+      { k: 'entryFlairLv2', l: 'Từ LV mấy rơi có vệt vàng', t: 'num', min: 1, max: 20, step: 1 },
+      { k: 'staffThreshold', l: 'Dưới N khách thật thì nhân viên lấp sàn', t: 'num', min: 0, max: 100, step: 1 },
+      { k: 'tocDoNhay', l: 'Tốc độ nhảy', t: 'sel', opts: [['cham', 'Chậm'], ['thuong', 'Thường'], ['nhanh', 'Nhanh']] },
+      { k: 'soloSoPhim', l: 'Số phím mỗi lượt solo', t: 'num', min: 1, max: 20, step: 1 },
+      { k: 'soloSec', l: 'Thời gian solo (giây)', t: 'num', min: 1, max: 30, step: 0.1 },
+      { k: 'pairSec', l: 'Thời gian nhảy đôi (giây)', t: 'num', min: 5, max: 120 },
+      { k: 'anticsIntervalSec', l: 'Hành động vui cách nhau (giây)', t: 'num', min: 1, max: 120 },
+      { k: 'djDoiSauGiay', l: 'DJ đổi bài sau (giây)', t: 'num', min: 5, max: 600 },
+      { k: 'khuayDong', l: 'Nhân vật tự khuấy động khi vắng', t: 'chk', defTrue: true },
+      { k: 'funnyLines', l: 'Câu thoại vui của khách (mỗi dòng một câu)', t: 'lines', rows: 4 },
+      { k: 'guideLines', l: 'Dòng hướng dẫn xoay vòng', t: 'lines', rows: 5 },
+    ] },
+    { title: '💡 Hiệu ứng sàn', fields: [
+      { k: 'hieuUngDen', l: 'Bật hiệu ứng đèn sàn', t: 'chk', defTrue: true },
+      { k: 'doRucDen', l: 'Độ rực của đèn (x)', t: 'num', min: 0, max: 2, step: 0.1 },
+      { k: 'hieuUngManHinh', l: 'Kiểu màn LED sau DJ', t: 'sel', opts: [['song', 'Sóng nhạc'], ['vong', 'Vòng phổ'], ['led', 'Lưới LED']] },
+      { k: 'phuKienQua', l: 'Quà lớn tặng phụ kiện cho nhân vật', t: 'chk', defTrue: true },
+      { k: 'phuKienGiuGio', l: 'Phụ kiện giữ (giờ)', t: 'num', min: 0, max: 24, step: 0.5 },
+      { k: 'partyMaxNhanhHon', l: 'Party Max nhảy nhanh hơn', t: 'chk', defTrue: true },
+    ] },
+  ],
+};
+/* nhóm dùng chung cho mọi game ngoài chùa: âm thanh (không có niệm), giọng NPC, màn hình */
+const COMMON_GROUPS = [
+  { title: '🔊 Âm thanh', live: 'sound', fields: [
+    { k: 'musicOn', l: 'Nhạc nền', t: 'chk', defTrue: true },
+    { k: 'musicShuffle', l: 'Phát ngẫu nhiên', t: 'chk' },
+    { k: 'sfxOn', l: 'Hiệu ứng âm thanh', t: 'chk', defTrue: true },
+    { k: 'musicVolume', l: 'Âm lượng nhạc nền', t: 'slider' },
+    { k: 'sfxVolume', l: 'Âm lượng hiệu ứng', t: 'slider' },
+  ] },
+  { title: '🗣 Giọng NPC — MC nói thành tiếng', live: 'voice', note: 'Khi NPC nói, voice khán giả (ToolVoice) tự tắt tiếng và nhạc nền game nhỏ lại. Câu vướng tần suất thì chỉ hiện chữ.', fields: [
+    { k: 'npcVoiceOn', l: 'Bật giọng NPC (chữ hiện lên là nói luôn)', t: 'chk' },
+    { k: 'npcVoice', l: 'Giọng NPC', t: 'sel', opts: [['vi-VN-HoaiMyNeural', 'Nữ — HoaiMy'], ['vi-VN-NamMinhNeural', 'Nam — NamMinh']] },
+    { k: 'npcVoiceRate', l: 'Tốc độ đọc (%, -50..50)', t: 'num', min: -50, max: 50, step: 5 },
+    { k: 'npcVoiceVolume', l: 'Âm lượng voice NPC', t: 'slider' },
+    { k: 'npcVoiceMinGapSec', l: 'Hai câu NPC cách nhau ít nhất (giây)', t: 'num', min: 0, max: 300 },
+    { k: 'npcVoiceMaxPerMin', l: 'Tối đa câu NPC có tiếng mỗi phút', t: 'num', min: 1, max: 60 },
+    { k: 'npcVoiceRandomOn', l: 'Câu ngẫu nhiên cũng có tiếng (tắt = chỉ câu sự kiện)', t: 'chk', defTrue: true },
+  ] },
+  { title: '📱 Màn hình trên điện thoại', note: 'TikTok đè avatar chủ kênh / nút Follow lên phần trên và cắt hai mép trên điện thoại cao.', fields: [
+    { k: 'safeTop', l: 'Chừa phía trên cho TikTok (%)', t: 'num', min: 0, max: 40 },
+    { k: 'safeSide', l: 'Chừa hai bên (%)', t: 'num', min: 0, max: 25 },
+    { k: 'uiScale', l: 'Cỡ chữ (%)', t: 'num', min: 60, max: 200, step: 5 },
+  ] },
+];
+
+function buildSchema(g, add, save, saveDef) {
+  const c = g.config;
+  const F = {};   // key → { kind, input } hoặc { kind:'read', read }
+  const mkField = (G, f) => {
+    if (f.t === 'chk') {
+      const x = chkIn(f.defTrue ? c[f.k] !== false : c[f.k] === true, f.l);
+      G.node(x.el, false); F[f.k] = { kind: 'chk', input: x.input };
+    } else if (f.t === 'lines' || f.t === 'words') {
+      F[f.k] = { kind: f.t, input: G.field(f.l, areaIn(c[f.k], f.rows || 4), true) };
+    } else if (f.t === 'sel') {
+      const s = el('select');
+      for (const [v, text] of f.opts) s.append(new Option(text, v));
+      if (c[f.k] != null) s.value = String(c[f.k]);
+      F[f.k] = { kind: 'sel', input: G.field(f.l, s) };
+    } else if (f.t === 'slider') {
+      F[f.k] = { kind: 'num', input: G.field(f.l, sliderIn(c[f.k] != null ? c[f.k] : 50)) };
+    } else if (f.t === 'nums') {
+      F[f.k] = { kind: 'nums', input: G.field(f.l, txtIn((c[f.k] || []).join(', ')), true) };
+    } else if (f.t === 'txt') {
+      F[f.k] = { kind: 'txt', input: G.field(f.l, txtIn(c[f.k], f.ph), f.full) };
+    } else if (f.t === 'bgWedding') {
+      const bgOpts = (g.backgrounds || []).map(x => [x, x]);
+      const items = (c.bgRules || []).map(r => ({ viewers: r.viewers != null ? r.viewers : r.views, file: r.file || r.bg || '' }));
+      const L = ruleList('Mốc tổng lượt xem → ảnh sảnh', 'Dùng mốc cao nhất đang đạt; chưa đạt mốc nào thì dùng sảnh mặc định. Ảnh lấy từ mọi file bg*.webp trong Games/' + g.id + '.',
+        [{ key: 'viewers', kind: 'num', cap: 'Khi đạt (lượt xem)', w: 140 }, { key: 'file', kind: 'opt', cap: 'Ảnh nền', options: bgOpts }],
+        items, null, { viewers: 1000, file: bgOpts.length ? bgOpts[0][0] : '' });
+      G.node(L.el); F[f.k] = { kind: 'read', read: () => L.read().filter(r => r.file && r.viewers != null) };
+      if (!bgOpts.length) G.note('Chưa thấy file bg*.webp nào trong Games/' + g.id + '.');
+    } else {
+      F[f.k] = { kind: 'num', input: G.field(f.l, numIn(c[f.k], f.min, f.max, f.step)) };
+    }
+  };
+  const groups = [...(GAME_SCHEMAS[g.id] || []), ...COMMON_GROUPS];
+  if (!GAME_SCHEMAS[g.id]) {
+    const G0 = add('⚙️ Cấu hình game', true, true);
+    G0.note('Game "' + g.id + '" chưa có bộ config riêng — hiện chỉ chỉnh được các nhóm dùng chung bên dưới và gói quà. Các thông số riêng của game này đang nằm trong file mapping của nó.');
+  }
+  for (const gr of groups) {
+    const G = add(gr.title, gr.wide);
+    for (const f of gr.fields) mkField(G, f);
+    if (gr.note) G.note(gr.note);
+    if (gr.live) {
+      const keys = gr.fields.map(f => f.k);
+      const send = () => {
+        const cfg = {};
+        for (const k of keys) { const x = F[k]; if (x) cfg[k] = x.kind === 'chk' ? x.input.checked : x.kind === 'sel' || x.kind === 'txt' ? x.input.value : +x.input.value; }
+        bridge.send({ type: 'game.config', game: g.id, config: cfg });
+      };
+      for (const k of keys) if (F[k] && F[k].input) F[k].input.onchange = send;
+    }
+  }
+  /* gói quà & hành động — dùng chung mọi game */
+  let mapRead = null;
+  const GM = add('🎁 Gói quà & hành động', true);
+  if (g.rules) { const m = buildMapGroup(g); GM.node(m.node); mapRead = m.read; }
+  else GM.note('Game này chưa có file mapping trong LiveBridge/config/mappings.');
+
+  const readCfg = () => {
+    const out = {};
+    for (const [k, x] of Object.entries(F)) {
+      if (x.kind === 'read') out[k] = x.read();
+      else if (x.kind === 'chk') out[k] = x.input.checked;
+      else if (x.kind === 'sel' || x.kind === 'txt') out[k] = x.input.value;
+      else if (x.kind === 'lines') out[k] = linesOf(x.input);
+      else if (x.kind === 'words') out[k] = x.input.value.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+      else if (x.kind === 'nums') out[k] = x.input.value.split(/[,\s]+/).filter(Boolean).map(Number).filter(Number.isFinite);
+      else if (x.input.value !== '') out[k] = +x.input.value;
+    }
+    return out;
+  };
+  const doSave = asDefault => {
+    beginSave(g.id, mapRead ? ['cfg', 'map'] : ['cfg'], asDefault);
+    bridge.send({ type: 'game.config', game: g.id, config: readCfg(), asDefault: !!asDefault });
+    if (mapRead) bridge.send({ type: 'mapping.save', game: g.id, rules: mapRead() });
+  };
+  save.onclick = () => doSave(false);
+  saveDef.onclick = () => doSave(true);
 }
 
 /* ---- Luật lặp lại: thêm / xoá dòng ---- */

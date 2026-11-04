@@ -40,7 +40,8 @@ const GAME_DEFAULTS = {
 const SHOW_KEYS = ['feedChat', 'feedGift', 'feedJoin', 'feedFollow', 'feedLike', 'feedShare',
   'bubbleChat', 'floatPoints', 'nameTags', 'rulesBox', 'boardTop10', 'toastTop', 'liveLabel', 'monkGreet', 'monkThank', 'monkFollow'];
 // các ô "mỗi dòng một câu": để trống = dùng câu mặc định (defaults trong file mapping)
-const LINE_KEYS = ['monkLines', 'monkGreet', 'monkThank', 'monkFollowThanks', 'guideLines', 'rulesLines'];
+const LINE_KEYS = ['monkLines', 'monkGreet', 'monkThank', 'monkFollowThanks', 'guideLines', 'rulesLines',
+  'mcLines', 'mcGreet', 'mcCouple', 'mcThank', 'mcFollowLines', 'mcFunny', 'mcMilestone', 'mcTagVang', 'mcGuide', 'funnyLines'];
 const num = (v, min, max, def) => { const n = Number(v); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def; };
 
 class Settings {
@@ -156,10 +157,59 @@ class Settings {
         .map(l => String(l).trim().slice(0, 200)).filter(Boolean).slice(0, 100);
       if (lines.length) clean[k] = lines; else drop.push(k);
     }
-    // đổi nền theo số người xem: [{ views, bg }], bg phải là tên file bg*.webp
+    // config RIÊNG của đám cưới / sàn nhảy: trước đây setGame chỉ hiểu key của chùa nên mọi
+    // key riêng đều bị bỏ qua (trang quản trị báo "chưa hiểu"). [min, max, mặc định] cho số.
+    const NUM_BY_GAME = {
+      'dam-cuoi': { coupleSec: [5, 600, 22], soCapToiDa: [1, 10, 3], phongToGoiTen: [1, 2, 1.32], zoomGoiTen: [1, 2, 1.18], zoomBamTheo: [1, 2, 1.08],
+        coCapGiua: [0.5, 2, 1.22], coCapBen: [0.5, 2, 1.22], lechCapGiua: [0, 10, 1.8], lechCapBen: [0, 10, 1.7], tamCapBen: [0, 100, 42], bannerY: [0, 60, 30],
+        mcMinSec: [5, 3600, 18], mcMaxSec: [5, 3600, 26], hangChoToiDa: [0, 20, 4], nguongDongNguoi: [0, 10000, 70], phutImMatCho: [0, 120, 4], tyLeChoTrong: [0, 1, 0.45],
+        choLenSanKhauCoBan: [0, 3600, 90], choLenSanKhauMin: [0, 3600, 20], choLenSanKhauMax: [0, 7200, 600], choCongMoiCapCho: [0, 600, 15],
+        choCongMoiCapGhep: [0, 600, 8], choMienGhep: [0, 100, 2], choNguongVang: [0, 100000, 300], choHeSoVang: [0, 2, 0.6],
+        choNguongDong: [0, 1000000, 1500], choHeSoDong: [0, 3, 1.3], hieuUngNgauNhienTuGiay: [1, 3600, 12], hieuUngNgauNhienDenGiay: [1, 3600, 25],
+        doiTrangPhucChoGiay: [0, 120, 5], bongChatGiay: [1, 30, 4], bongChatMaxKyTu: [10, 200, 60], bongChatAnKhiTuCamQua: [0, 20, 2],
+        khungTraiX: [-20, 20, 0], khungTraiY: [-20, 20, 0], khungPhaiX: [-20, 20, 0], khungPhaiY: [-20, 20, 0],
+        khungHangChoX: [-20, 20, 0], khungHangChoY: [-20, 20, 0], khungMcX: [-20, 20, 0], khungMcY: [-20, 20, 0] },
+      'san-nhay': { anticsIntervalSec: [1, 120, 7], camHomeZoom: [0.3, 1.5, 0.62], directorMinHoldSec: [0, 10, 1.2], djDoiSauGiay: [5, 600, 24],
+        doMoPhanConLai: [0, 1, 0.55], doRucDen: [0, 2, 1], dropHeight: [0, 100, 40], dropHeightVip: [0, 100, 48],
+        durEntry: [0, 30, 3.6], durGiftMid: [0, 30, 5], durGiftBig: [0, 30, 7], durGiftHuge: [0, 30, 8.5], durLevelup: [0, 30, 6],
+        entryFlairLv: [1, 20, 5], entryFlairLv2: [1, 20, 10], lvScaleMax: [1, 2, 1.25], pairSec: [5, 120, 20], pairXp: [0, 1000, 15],
+        phuKienGiuGio: [0, 24, 6], resetDay: [0, 6, 5], retentionDays: [1, 30, 7], soloSec: [1, 30, 5.2], soloSoPhim: [1, 20, 6],
+        soloXpDiv: [1, 1000, 15], staffThreshold: [0, 100, 14], xpPer100Likes: [0, 1000, 5], xpPerComment: [0, 1000, 2],
+        xpPerFollow: [0, 1000, 5], xpPerGiftCoin: [0, 100, 2], zoomEntry: [0.5, 2, 1.02], zoomEntryVip: [0.5, 2, 1.15],
+        zoomGiftMid: [0.5, 2, 1.08], zoomGiftBig: [0.5, 2, 1.18], zoomGiftHuge: [0.5, 2, 1.32], zoomLevelup: [0.5, 2, 1.18],
+        zoomPairMax: [0.5, 2, 1.1], zoomSolo: [0.5, 2, 1.12] },
+    };
+    const BOOL_BY_GAME = {
+      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat'],
+      'san-nhay': ['hieuUngDen', 'khuayDong', 'lamMoKhiLia', 'liaCamLenTrenCung', 'partyMaxNhanhHon', 'phuKienQua'],
+    };
+    const CHOICE_BY_GAME = {   // key: [các giá trị cho phép, mặc định]
+      'san-nhay': { tocDoNhay: [['cham', 'thuong', 'nhanh'], 'thuong'], hieuUngManHinh: [['song', 'vong', 'led'], 'vong'] },
+    };
+    for (const [k, [mn, mx, def]] of Object.entries(NUM_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = num(cfg[k], mn, mx, def);
+    for (const k of ['soCapToiDa', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])
+      if (clean[k] != null) clean[k] = Math.round(clean[k]);
+    for (const k of BOOL_BY_GAME[id] || []) if (cfg[k] != null) clean[k] = !!cfg[k];
+    for (const [k, [opts, def]] of Object.entries(CHOICE_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = opts.includes(cfg[k]) ? cfg[k] : def;
+    if (id === 'dam-cuoi' && cfg.mcName != null) clean.mcName = String(cfg.mcName).trim().slice(0, 60) || 'MC Anh Tú';
+    // mốc XP từng LV của sàn nhảy: dãy số, tối thiểu 2 mốc
+    if (id === 'san-nhay' && Array.isArray(cfg.levelXp)) {
+      const xs = cfg.levelXp.map(Number).filter(n => Number.isFinite(n) && n >= 0).slice(0, 30);
+      if (xs.length >= 2) clean.levelXp = xs; else drop.push('levelXp');
+    }
+    // danh sách từ (từ cấm / từ an toàn của đám cưới): để trống = dùng mặc định trong mapping
+    for (const k of ['tuCamComment', 'tuAnToanComment']) {
+      if (cfg[k] == null) continue;
+      const words = (Array.isArray(cfg[k]) ? cfg[k] : String(cfg[k]).split(/[\n,;]+/))
+        .map(w => String(w).trim().slice(0, 30)).filter(Boolean).slice(0, 100);
+      if (words.length) clean[k] = words; else drop.push(k);
+    }
+    // đổi nền theo số người xem, bg phải là tên file bg*.webp; chùa dùng { views, bg },
+    // đám cưới dùng { viewers, file } — giữ đúng định dạng mà từng game đọc
     if (Array.isArray(cfg.bgRules)) clean.bgRules = cfg.bgRules.map(r => {
-      const bg = String((r && r.bg) || '').trim(), views = need(r && r.views, 0, 1e9);
-      return /^bg[\w.-]*\.webp$/i.test(bg) && views != null ? { views, bg } : null;
+      const bg = String((r && (r.bg || r.file)) || '').trim(), views = need(r && (r.views != null ? r.views : r.viewers), 0, 1e9);
+      if (!/^bg[\w.-]*\.webp$/i.test(bg) || views == null) return null;
+      return id === 'dam-cuoi' ? { viewers: views, file: bg } : { views, bg };
     }).filter(Boolean).slice(0, 50);
     const cur = { ...(this.data.games[id] || {}), ...clean };
     for (const k of drop) delete cur[k];
