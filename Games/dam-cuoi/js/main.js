@@ -991,13 +991,22 @@ function resize() {
   const compact = navigator.webdriver || /live|obs/i.test(navigator.userAgent) || q.has('compact') ? 0 : 1;
   stageEl.style.width = sw + 'px'; stageEl.style.height = sh + 'px';
   if (compact) {
-    const fitW = Math.max(0, (Wpx - sw) / 2), top = Math.max(0, innerHeight * 0.10);
+    const top = Math.max(0, innerHeight * 0.10);
     root.setProperty('--k', u0 < 2.8 && Hpx > Wpx ? '1.55' : '1');
     root.setProperty('--safe', top + 'px');
-    root.setProperty('--side', fitW + 'px');
   } else {
-    root.setProperty('--k', '1.2'); root.setProperty('--safe', '0px'); root.setProperty('--side', '0px');
+    root.setProperty('--k', '1.2'); root.setProperty('--safe', '0px');
   }
+  /* --side LUÔN = 0: các khung nằm TRONG #stage nên chỉ được bám mép sân
+     khấu. Trước đây nhánh compact gán --side = fitW (khoảng trống NGOÀI sân
+     khấu khi cửa sổ trình duyệt rộng hơn 9:16) — trên Chrome desktop cửa sổ
+     landscape, fitW vài trăm px cộng vào left/right của khung làm khung bị
+     đẩy văng hẳn khỏi sân khấu (và max-width của #left âm -> co còn ~18px):
+     game chạy đúng hết (DOM/config/BXH đều sẵn) mà không thấy khung nào.
+     LIVE Studio và bản test tự động vừa khung 9:16 (fitW = 0) nên không lộ.
+     Đã tái hiện bằng cửa sổ 1600x900 giả lập Chrome thật: khung trái x=1099
+     trong khi sân khấu chỉ tới 1053, BXH bị đẩy sang trái khỏi sân khấu. */
+  root.setProperty('--side', '0px');
   FX.resize(sw, sh, Math.min(2, window.devicePixelRatio || 1));
   SW = sw; SH = sh; WW = Math.round(sw * 3.2); WH = Math.round(sh * 2.2);
   applyPanelPos();
