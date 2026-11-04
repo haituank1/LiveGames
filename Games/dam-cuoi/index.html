@@ -164,6 +164,16 @@ window.__diag = { build: '9c58afe-d3', stage: 'html', errs: [], uiErr: '' };
   #board li{display:flex;justify-content:space-between;gap:calc(var(--u)*2)}
   #board li span{max-width:calc(var(--u)*19);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #board em{font-style:normal;color:#ffd76a}
+  #ledger{background:rgba(60,10,32,.58);color:#ffe3ef;border:1px solid rgba(255,180,210,.38);border-radius:calc(var(--u)*1.6);
+    padding:calc(var(--u)*.7) calc(var(--u)*1.5);font-size:calc(var(--u)*1.85);min-width:calc(var(--u)*24)}
+  #ledger h4{margin:0 0 calc(var(--u)*.4);font-size:calc(var(--u)*2.2);color:#ffd9e8}
+  #ledger ul{margin:0;padding:0;list-style:none}
+  #ledger li{display:flex;justify-content:space-between;gap:calc(var(--u)*2);padding:calc(var(--u)*.15) 0}
+  #ledger li span{max-width:calc(var(--u)*19);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #ledger li em{font-style:normal;color:#ffd76a;white-space:nowrap}
+  #ledger li.new{animation:lednew 1.6s ease}
+  @keyframes lednew{0%{background:rgba(255,215,106,.4)}100%{background:transparent}}
+  #couplecount{color:#ffd76a;font-size:calc(var(--u)*2.1);font-weight:800;text-shadow:0 1px 3px #0009}
   #toasts{display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1);width:calc(var(--u)*35)}
   .toast{position:relative;overflow:hidden;display:flex;align-items:center;gap:calc(var(--u)*1.2);width:100%;box-sizing:border-box;
     background:linear-gradient(100deg,rgba(150,25,90,.92),rgba(220,60,130,.88));border:1px solid rgba(255,190,220,.8);
@@ -212,9 +222,11 @@ window.__diag = { build: '9c58afe-d3', stage: 'html', errs: [], uiErr: '' };
     <div id="rules"></div>
     <div id="guide"></div>
     <div id="goal" style="display:none"><span id="goaltext"></span><div class="bar"><i id="goalbar"></i></div></div>
+    <div id="couplecount" style="display:none"></div>
   </div>
   <div id="side">
     <div id="board" style="display:none"><h4>💞 Cặp đôi được yêu thích</h4><ol></ol></div>
+    <div id="ledger" style="display:none"><h4>🧧 Sổ mừng cưới</h4><ul></ul></div>
     <div id="toasts"></div>
   </div>
   <div id="queue"></div>

@@ -55,6 +55,34 @@ function countView(user) {
   refreshBg(false);
 }
 
+/* BỘ ĐẾM CẶP ĐÔI (học theo live đối thủ "CẶP ĐÔI #161" — Nguyen duyệt
+   2026-11-04 18:08): đếm số LỄ THÀNH HÔN đã diễn ra — mỗi lần một cặp
+   đặt chân lên sân khấu tính một lễ. Lưu bền qua các phiên như tổng
+   lượt xem; nút Reset ở trang quản trị xoá cả số này. */
+const LS_COUPLLES = isDemo ? 'damcuoi.couples.demo' : 'damcuoi.couples';
+let couplesDone = parseInt(localStorage.getItem(LS_COUPLLES) || '0', 10) || 0;
+function renderCoupleCount() {
+  const el = $('couplecount');
+  if (!el) return;
+  el.style.display = couplesDone > 0 ? '' : 'none';
+  if (couplesDone > 0) el.textContent = `💒 CẶP ĐÔI THỨ ${fmtNum(couplesDone)}`;
+}
+
+/* SỔ MỪNG CƯỚI (học theo live đối thủ — Nguyen duyệt 2026-11-04 18:08):
+   sổ chạy các món quà gần nhất, nằm dưới bảng cặp đôi được yêu thích —
+   người tặng được ghi danh công khai thì càng muốn tặng tiếp. Chỉ giữ
+   trong phiên live hiện tại, tối đa 5 dòng, mới nhất lên đầu. */
+const giftLedger = [];
+function addLedger(user, giftName, dia) {
+  giftLedger.unshift({ ten: user ? user.nickname : 'Khách', gift: giftName || 'quà', dia: dia || 0 });
+  if (giftLedger.length > 5) giftLedger.length = 5;
+  const box = $('ledger');
+  if (!box) return;
+  box.style.display = '';
+  box.querySelector('ul').innerHTML = giftLedger.map((g, i) =>
+    `<li${i === 0 ? ' class="new"' : ''}><span>🎁 ${escapeHtml(g.ten)}</span><em>${escapeHtml(g.gift)}${g.dia > 0 ? ' · ' + fmtNum(g.dia) + ' xu' : ''}</em></li>`).join('');
+}
+
 /* ============ Trạng thái ============ */
 let cfg = {};
 const known = new Map();       // user.id -> user (để parse tag theo tên)
@@ -129,6 +157,9 @@ function coupleScore(c, pts) {
    trong phòng giữ nguyên; số liệu tích luỹ về 0, sảnh quay lại mốc đầu. */
 function resetAll() {
   scores = {}; saveScores(); renderBoard();
+  couplesDone = 0;
+  try { localStorage.setItem(LS_COUPLLES, '0'); } catch (e) {}
+  renderCoupleCount();
   totalBase = 0; counted.clear(); demoExtra = 0;
   clearTimeout(saveTimer);
   try { localStorage.setItem(LS_TOTAL, '0'); } catch (e) {}
@@ -305,6 +336,11 @@ function startGuide() {
   /* Cả luật lẫn hướng dẫn đều rỗng (config hỏng/trống) -> dùng 3 dòng mặc
      định trong code để khung trái không bao giờ nằm chết trống. */
   if (!lines.length) lines = ['💌 Comment tag tên người thương để ghép đôi lên sân khấu', '🎁 Tặng quà để cặp của bạn được ưu tiên lên sân khấu', '👗 Gõ "nam" / "nữ" / "đổi đồ" để đổi nhân vật, trang phục'];
+  /* THỰC ĐƠN QUÀ (học theo live đối thủ — Nguyen duyệt 2026-11-04 18:08):
+     3 dòng quà -> hiệu ứng viết cứng trong code, khớp đúng GIFT_TIERS +
+     cách tính điểm, để luôn có mặt trong vòng xoay dù danh sách hướng
+     dẫn trong config có bị sửa thế nào. */
+  lines.push('🎁 Tặng quà → mưa hoa, pháo hoa chúc phúc cặp đôi', '🎆 Quà từ 99 xu → pháo hoa lớn + banner mừng cưới', '💞 Quà cộng điểm cho cặp đang làm lễ — nhất bảng đội vương miện 👑');
   const show = () => { el.classList.remove('out'); el.textContent = lines[guideIdx++ % lines.length]; };
   show();
   clearInterval(guideTimer);
@@ -830,12 +866,15 @@ function requestCouple(a, b, viaTag) {
   return c;
 }
 P.onCoupleStage = function (c) {
+  couplesDone++;
+  try { localStorage.setItem(LS_COUPLLES, String(couplesDone)); } catch (e) {}
+  renderCoupleCount();
   coupleScore(c, 30);
   if (BG.tier >= 4) P.setCrown(c);   // từ mốc Đại Tiệc Vàng (600+): cặp nào lên bục cũng đội vương miện
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 9000;
   Cam.stage();
-  showBanner(`💍 LỄ THÀNH HÔN · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
+  showBanner(`💍 LỄ THÀNH HÔN #${couplesDone} · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
   const sp = Cam.toScreen(c.a.x, c.a.y);
   if (FX.cannon) FX.cannon();
   if (FX.butterflies) FX.butterflies(2);   // bướm phát sáng bay ra mừng lễ thành hôn
@@ -1011,6 +1050,7 @@ function handle(ev) {
     A.bell(dia >= 30 ? 3 : 1);
     mcReact(giftVoicePrio(dia), MC.thank, { ten: ev.user ? ev.user.nickname : 'Bạn' });
     toast(`🎁 ${ev.user ? ev.user.nickname : 'Khách'} tặng ${src.giftName || 'quà'}${dia >= 99 ? ' — pháo hoa rực trời!' : ''}`, dia >= 30);
+    addLedger(ev.user, src.giftName, dia);
     if (cfg.uuTienQuaTang !== false) giftPriority(ev.user);
   }
   refreshBg(false);
@@ -1116,7 +1156,7 @@ function applyConfig(c) {
   /* Hàng UI chạy SAU và TỪNG BƯỚC RIÊNG: dù bất kỳ bước cấu hình nào ở trên
      còn vấp, các khung luật/hướng dẫn/BXH/nền VẪN phải hiện — test giả lập
      hay live thật đều thấy UI như nhau. */
-  for (const fn of [renderRules, startGuide, renderBoard, () => refreshBg(false)]) {
+  for (const fn of [renderRules, startGuide, renderBoard, renderCoupleCount, () => refreshBg(false)]) {
     try { fn(); } catch (e) { console.error('[dam-cuoi] loi ve UI:', e); if (window.__diag) window.__diag.uiErr = String((e && e.message) || e); }
   }
   if (window.__diag) window.__diag.stage = 'config-ok';   // mốc cho hộp tự chẩn đoán ở index.html
