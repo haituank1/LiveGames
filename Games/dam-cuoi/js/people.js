@@ -212,8 +212,24 @@ function stepPerson(p, dt) {
     return;
   }
   const step = Math.min(dist, p.speedPx * dt);
-  p.x += dxPx / dist * step / Ww * 100;
-  p.y += dyPx / dist * step / Hw * 100;
+  let nx = p.x + dxPx / dist * step / Ww * 100;
+  let ny = p.y + dyPx / dist * step / Hw * 100;
+  /* Né mặt bàn khi ĐI: đường đi thẳng từ cửa/ghế này sang ghế khác dễ cắt ngang
+     qua bàn vẽ sẵn — nếu điểm tới lọt vào ellipse bàn (đã phồng lề an toàn) thì
+     đẩy ra ngoài theo hướng tâm, nhân vật tự lướt vòng quanh mép bàn. Chỉ áp
+     dụng ở sàn tiệc (phía trên là sân khấu, không có bàn). Ghế ngồi nằm ở vòng
+     ngoài (rx+1.7) nên vẫn tới nơi bình thường. */
+  if (ny > FLOOR_Y - 2) {
+    for (let pass = 0; pass < 2; pass++) {
+      for (const t of PAINTED_TABLES) {
+        const ex = t.rx + 1.15, ey = t.ry + 0.85;
+        const qx = (nx - t.x) / ex, qy = (ny - t.y) / ey;
+        const q = qx * qx + qy * qy;
+        if (q < 1 && q > 1e-6) { const s = 1 / Math.sqrt(q); nx = t.x + qx * s * ex; ny = t.y + qy * s * ey; }
+      }
+    }
+  }
+  p.x = nx; p.y = ny;
   p.faceLeft = dxPx < -4 ? true : dxPx > 4 ? false : p.faceLeft;
   p.dirty = true;
 }
