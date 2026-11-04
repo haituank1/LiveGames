@@ -61,7 +61,11 @@ Bàn tròn phủ khăn, tâm có hoa trang trí. Bàn xa nhỏ, bàn gần to (p
 bảng). Bàn ở mép (x 0.8/99.2, 1.5/98.5) bị cắt nửa ngoài khung — vẫn phải có
 mặt trong bảng để chặn đường đi và tính ghế.
 
-## Hồ sơ riêng: `bg-sanh-moi.webp` — sảnh vàng mẫu mới
+## Hồ sơ riêng: `bg-sanh-moi.webp` — sảnh vàng mẫu mới (ĐÃ GÁN: mốc 20.000)
+
+Chủ phòng chốt 2026-11-04: sảnh này là nền của mốc cao nhất **20.000 — Đám
+Cưới Hoàng Gia** (TIERS trong main.js + bgRules ở mapping + demo đều trỏ về
+`bg-sanh-moi.webp`; file `bg-20000.webp` cũ không còn được dùng).
 
 Đã đo trực tiếp trên tranh 1440×1760 bằng lưới tọa độ % và kiểm phủ
 ellipse + điểm ghế. Đây là bố cục khác nền cũ nên có khung riêng:

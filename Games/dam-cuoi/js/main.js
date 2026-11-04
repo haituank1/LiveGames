@@ -26,7 +26,7 @@ const TIERS = [
   { at: 2000,  name: 'Kim Tuyến',           file: 'bg-2000.webp', royal: 0 },
   { at: 5000,  name: 'Lung Linh',           file: 'bg-5000.webp', royal: 0 },
   { at: 10000, name: 'Đại Tiệc Vàng',       file: 'bg-10000.webp', royal: 1 },
-  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-20000.webp', royal: 2 },
+  { at: 20000, name: 'Đám Cưới Hoàng Gia',  file: 'bg-sanh-moi.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
 /* Góc máy theo từng nền (nền nào sân khấu nằm chỗ khác thì khung hình bám theo).
@@ -630,7 +630,7 @@ if (isDemo) {
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
       { viewers: 500, file: 'bg-500.webp' }, { viewers: 2000, file: 'bg-2000.webp' },
-      { viewers: 5000, file: 'bg-5000.webp' }, { viewers: 10000, file: 'bg-10000.webp' }, { viewers: 20000, file: 'bg-20000.webp' },
+      { viewers: 5000, file: 'bg-5000.webp' }, { viewers: 10000, file: 'bg-10000.webp' }, { viewers: 20000, file: 'bg-sanh-moi.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
     guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],
