@@ -512,6 +512,36 @@ function randomSingleOpp(except) {
   const pool = strict.length ? strict : loose;
   return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 }
+/* ===== Chong spam len san khau: so giay nghi TU DONG (Nguyen chot) =====
+   Cong thuc (moi tham so deu o config): giay nghi = co ban
+   + (so cap dang cho x congMoiCapCho) + (so cap ghep thua trong 3 phut
+   x congMoiCapGhep), roi nhan he so theo TONG LUOT XEM (vang nguoi < nguong
+   -> giam, dong > nguong -> tang) va kep trong [min, max]. Phong vang thi
+   nghi ngan (cap len lai nhanh cho co khong khi), phong dong thi nghi dai
+   (chia san khau deu cho moi nguoi). Tat tu dong bang choTuDong: false thi
+   dung co dinh choLenSanKhauCoBan giay. */
+const coupleFormTimes = [];
+let lastQueueLen = 0;
+function computeStageCooldown() {
+  const base = cfg.choLenSanKhauCoBan != null ? cfg.choLenSanKhauCoBan : 90;
+  if (cfg.choTuDong === false) return base;
+  const now = Date.now();
+  while (coupleFormTimes.length && now - coupleFormTimes[0] > 180000) coupleFormTimes.shift();
+  const extra = Math.max(0, coupleFormTimes.length - (cfg.choMienGhep != null ? cfg.choMienGhep : 2));
+  let sec = base
+    + lastQueueLen * (cfg.choCongMoiCapCho != null ? cfg.choCongMoiCapCho : 15)
+    + extra * (cfg.choCongMoiCapGhep != null ? cfg.choCongMoiCapGhep : 8);
+  const views = totalBase + counted.size;
+  if (views < (cfg.choNguongVang != null ? cfg.choNguongVang : 300)) sec *= (cfg.choHeSoVang != null ? cfg.choHeSoVang : 0.6);
+  else if (views > (cfg.choNguongDong != null ? cfg.choNguongDong : 1500)) sec *= (cfg.choHeSoDong != null ? cfg.choHeSoDong : 1.3);
+  const min = cfg.choLenSanKhauMin != null ? cfg.choLenSanKhauMin : 20;
+  const max = cfg.choLenSanKhauMax != null ? cfg.choLenSanKhauMax : 600;
+  return Math.round(Math.min(max, Math.max(min, sec)));
+}
+setInterval(() => { P.setStageCooldown(computeStageCooldown()); }, 5000);
+P.onStageSkipped = function (c) {
+  toast(`⏳ ${c.a.user.nickname} ❤ ${c.b.user.nickname} vừa làm lễ xong — ${P.stageCooldownRemain(c)}s nữa mới lên lại được`, false);
+};
 function requestCouple(a, b, viaTag) {
   const ua = register(a), ub = register(b);
   if (!ua || !ub || ua.id === ub.id) return null;
@@ -520,12 +550,35 @@ function requestCouple(a, b, viaTag) {
     if (now - (tagCooldown.has(ua.id) ? tagCooldown.get(ua.id) : -1e9) < 20000) return null;
     tagCooldown.set(ua.id, now);
   }
+  const before = P.coupleOf(ua.id);
+  const wasPair = !!(before && ((before.a.user.id === ua.id && before.b.user.id === ub.id) || (before.a.user.id === ub.id && before.b.user.id === ua.id)));
   const c = P.makeCouple(ua, ub);
   if (!c) {
     mcSay(`Ôi, một trong hai bạn đã có đôi rồi, MC không phá hạnh phúc nhà người ta được đâu nha!`, 2);
     return null;
   }
   coupleByKey.set(c.key, c);
+  if (wasPair) {
+    /* Cap da ton tai: dang trong quy trinh len san khau (gioi thieu / hang
+       cho / dang dien) thi bo qua — comment them KHONG them trung vao danh
+       sach cho. Da lam le xong va o nha thi xet dem nguoc de len LAN NUA. */
+    if (c.state === 'court') {
+      /* Khong doi ca hai phai ve toi nha: walkPath thay duong di + callback
+         cu nen ke ca dang di ve cung re len san khau sach se duoc. */
+      const remain = P.stageCooldownRemain(c);
+      if (remain > 0) {
+        toast(`⏳ ${ua.nickname} ❤ ${ub.nickname} vừa làm lễ xong — ${remain}s nữa mới lên lại được`, false);
+        return c;
+      }
+      if (P.requeueCouple(c)) {
+        coupleFormTimes.push(Date.now());
+        if (P.onPairFocus) P.onPairFocus(c);
+        toast(`${ua.nickname} ❤ ${ub.nickname} — lên sân khấu lần nữa!`, false);
+      }
+    }
+    return c;
+  }
+  coupleFormTimes.push(Date.now());
   toast(`${ua.nickname} ❤ ${ub.nickname} — đang lên sân khấu!`, false);
   return c;
 }
@@ -538,6 +591,7 @@ P.onCoupleStage = function (c) {
   showBanner(`💍 LỄ THÀNH HÔN · ${c.a.user.nickname} ❤ ${c.b.user.nickname}`);
   const sp = Cam.toScreen(c.a.x, c.a.y);
   if (FX.cannon) FX.cannon();
+  if (FX.butterflies) FX.butterflies(2);   // bướm phát sáng bay ra mừng lễ thành hôn
   FX.petals(60);
   if (FX.petalBurst) FX.petalBurst(sp.fx, sp.fy);
   if (FX.ringHearts) FX.ringHearts(sp.fx, sp.fy - 0.09);
@@ -545,6 +599,7 @@ P.onCoupleStage = function (c) {
   const spot = $('spot'); if (spot) spot.classList.add('on');
 };
 P.onQueueChange = function (names) {
+  lastQueueLen = names.length;
   const el = $('queue');
   if (!names.length) { el.innerHTML = ''; return; }
   /* Chi hien toi da hangChoToiDa cap (mac dinh 4) cho gon khung hinh —
@@ -692,6 +747,7 @@ function applyConfig(c) {
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
   MC.tagVang = cfg.mcTagVang || [];
   buildBanSets();
+  P.setStageCooldown(computeStageCooldown());
   MC.milestone = cfg.mcMilestone || [];
   if (window.NpcVoice) NpcVoice.setConfig(cfg);
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
@@ -812,6 +868,9 @@ if (isDemo) {
     mcFollowLines: ['Cảm ơn {ten} đã follow! MC se duyên cho bạn ngay đây!'],
     ghepDoiNgauNhien: true,
     uuTienQuaTang: true,
+    choLenSanKhauCoBan: 90, choTuDong: true, choLenSanKhauMin: 20, choLenSanKhauMax: 600,
+    choCongMoiCapCho: 15, choCongMoiCapGhep: 8, choMienGhep: 2,
+    choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
     hangChoToiDa: 4,
     bannerY: 30,
     khungTraiX: 0, khungTraiY: 0, khungPhaiX: 0, khungPhaiY: 0, khungHangChoX: 0, khungHangChoY: 0, khungMcX: 0, khungMcY: 0,

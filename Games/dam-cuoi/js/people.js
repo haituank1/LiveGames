@@ -589,6 +589,15 @@ P.makeCouple = function (userA, userB) {
   setTimeout(() => {                                      // rồi nắm tay nhau ra thảm đỏ lên sân khấu
     if (!couples.includes(c)) return;
     a.boost = b.boost = 1; a.dirty = b.dirty = true;
+    if (P.stageCooldownRemain(c) > 0) {                   // một trong hai còn đang nghỉ sau lần lên trước -> KHÔNG vào hàng chờ
+      c.state = 'court';
+      for (const p of [a, b]) {
+        p.el.classList.remove('pairfx');
+        walkTo(p, { x: p.home.x, y: p.home.y }, 'walk', () => { p.state = 'home'; });
+      }
+      if (P.onStageSkipped) P.onStageSkipped(c);
+      return;
+    }
     c.state = 'queue';
     if (c.giftPriority) stageQueue.unshift(c); else stageQueue.push(c);
     notifyQueue();
@@ -634,7 +643,30 @@ function arriveStage(c) {
   c.a.el.classList.remove('pairfx'); c.b.el.classList.remove('pairfx');
   if (P.onCoupleStage) P.onCoupleStage(c);
 }
+/* ===== Chong spam len san khau (Nguyen chot 2026-11-04) =====
+   Moi nguoi xuong san khau xong la bat dau DEM NGUOC (stageCdUntil): trong
+   thoi gian nghi, cap khong duoc vao lai hang cho. So giay nghi do main.js
+   tinh va day xuong qua P.setStageCooldown (co che tu dong theo luot xem /
+   hang cho / tan suat ghep cap nam o main.js, tat bang config choTuDong). */
+P.stageCooldownSec = 90;
+P.setStageCooldown = function (sec) { P.stageCooldownSec = Math.max(0, Math.round(Number(sec) || 0)); };
+P.stageCooldownRemain = function (c) {
+  if (!c) return 0;
+  const now = Date.now();
+  return Math.max(0, Math.ceil(Math.max((c.a.stageCdUntil || 0) - now, (c.b.stageCdUntil || 0) - now) / 1000));
+};
+/* Dua 1 cap DA LAM LE XONG (dang o nha) vao lai hang cho san khau */
+P.requeueCouple = function (c) {
+  if (!c || c.state !== 'court') return false;
+  c.state = 'queue';
+  if (c.giftPriority) stageQueue.unshift(c); else stageQueue.push(c);
+  notifyQueue();
+  promoteStage();
+  return true;
+};
 function leaveStage(c) {
+  const cdUntil = Date.now() + (P.stageCooldownSec || 0) * 1000;
+  c.a.stageCdUntil = cdUntil; c.b.stageCdUntil = cdUntil;   // xuong san khau -> bat dau dem nguoc
   if (c.spot >= 0) stageSlots[c.spot] = null;
   c.spot = -1; c.state = 'court';
   c.a.spotScale = c.b.spotScale = 1;

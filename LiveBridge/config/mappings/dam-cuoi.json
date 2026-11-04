@@ -180,7 +180,18 @@
     "khungHangChoY": 0,
     "khungMcX": 0,
     "khungMcY": 0,
-    "bannerY": 30
+    "bannerY": 30,
+    "choLenSanKhauCoBan": 90,
+    "choTuDong": true,
+    "choLenSanKhauMin": 20,
+    "choLenSanKhauMax": 600,
+    "choCongMoiCapCho": 15,
+    "choCongMoiCapGhep": 8,
+    "choMienGhep": 2,
+    "choNguongVang": 300,
+    "choHeSoVang": 0.6,
+    "choNguongDong": 1500,
+    "choHeSoDong": 1.3
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {
