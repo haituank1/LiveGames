@@ -25,11 +25,11 @@ const say = () => {};
 /* ============ Mốc sảnh theo TỔNG lượt view tích lũy ============ */
 const TIERS = [
   { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg-full.webp', royal: 0 },
-  { at: 50,    name: 'Hoa Khai',            file: 'bg-500.webp', royal: 0 },
-  { at: 150,   name: 'Kim Tuyến',           file: 'bg-2000.webp', royal: 0 },
-  { at: 300,   name: 'Lung Linh',           file: 'bg-5000.webp', royal: 0 },
-  { at: 600,   name: 'Đại Tiệc Vàng',       file: 'bg-10000.webp', royal: 1 },
-  { at: 1000,  name: 'Đám Cưới Hoàng Gia',  file: 'bg-sanh-moi.webp', royal: 2 },
+  { at: 10,    name: 'Hoa Khai',            file: 'bg-500.webp', royal: 0 },
+  { at: 30,    name: 'Kim Tuyến',           file: 'bg-2000.webp', royal: 0 },
+  { at: 50,    name: 'Lung Linh',           file: 'bg-5000.webp', royal: 0 },
+  { at: 100,   name: 'Đại Tiệc Vàng',       file: 'bg-10000.webp', royal: 1 },
+  { at: 200,   name: 'Đám Cưới Hoàng Gia',  file: 'bg-sanh-moi.webp', royal: 2 },
 ];
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
 /* Góc máy theo từng nền (nền nào sân khấu nằm chỗ khác thì khung hình bám theo).
@@ -1363,8 +1363,8 @@ if (isDemo) {
     uuTienChoTrong: true, nguongDongNguoi: 70, phutImMatCho: 4, tyLeChoTrong: 0.45,
     mcMinSec: 16, mcMaxSec: 24,
     bgRules: [
-      { viewers: 50, file: 'bg-500.webp' }, { viewers: 150, file: 'bg-2000.webp' },
-      { viewers: 300, file: 'bg-5000.webp' }, { viewers: 600, file: 'bg-10000.webp' }, { viewers: 1000, file: 'bg-sanh-moi.webp' },
+      { viewers: 10, file: 'bg-500.webp' }, { viewers: 30, file: 'bg-2000.webp' },
+      { viewers: 50, file: 'bg-5000.webp' }, { viewers: 100, file: 'bg-10000.webp' }, { viewers: 200, file: 'bg-sanh-moi.webp' },
     ],
     rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
     guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👗 Gõ "nam" / "nữ" / "đổi đồ" → đổi nhân vật, trang phục', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],

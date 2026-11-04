@@ -34,27 +34,12 @@
     "npcVoiceMinGapSec": 8,
     "npcVoiceMaxPerMin": 6,
     "bgRules": [
-      {
-        "viewers": 50,
-        "file": "bg-500.webp"
-      },
-      {
-        "viewers": 150,
-        "file": "bg-2000.webp"
-      },
-      {
-        "viewers": 300,
-        "file": "bg-5000.webp"
-      },
-      {
-        "viewers": 600,
-        "file": "bg-10000.webp"
-      },
-      {
-        "viewers": 1000,
-        "file": "bg-sanh-moi.webp"
-      }
-    ],
+        { "viewers": 10, "file": "bg-500.webp" },
+        { "viewers": 30, "file": "bg-2000.webp" },
+        { "viewers": 50, "file": "bg-5000.webp" },
+        { "viewers": 100, "file": "bg-10000.webp" },
+        { "viewers": 200, "file": "bg-sanh-moi.webp" }
+      ],
     "coupleSec": 9,
     "nhaCapTiepSauGiay": 6,
     "mcCouple": [
