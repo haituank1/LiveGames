@@ -1253,10 +1253,10 @@ function stemList(v) {
   if (Array.isArray(v)) v.forEach(push); else if (v != null) push(v);
   return out;
 }
-function stemHit(tokens, stem) {
+function stemHit(tokens, stem, fuzzy) {
   const st = foldCmd(stem).split(' ').filter(Boolean);
   if (!st.length) return false;
-  return st.every(w => tokens.some(tk => tk === w || (w.length >= 4 && levRatio(tk, w) >= 0.75)));
+  return st.every(w => tokens.some(tk => tk === w || (fuzzy && w.length >= 4 && levRatio(tk, w) >= 0.8)));
 }
 function chatFx(user, text) {
   if (cfg.hieuUngChat === false) return;
@@ -1269,8 +1269,15 @@ function chatFx(user, text) {
     { list: cfg.lenhPhaoHoa, go: () => { FX.fireworks(3); toast('🎆 ' + user.nickname + ' bắn pháo hoa!', false); } },
     { list: cfg.lenhHoaRoi, go: () => { FX.petals(120); toast('🌸 ' + user.nickname + ' gọi hoa rơi!', false); } },
   ];
-  for (const r of rules) {
-    if (stemList(r.list).some(st => stemHit(tokens, st))) { fxCmdAt.set(user.id, now); r.go(); return; }
+  /* Hai vòng: vòng 1 khớp ĐÚNG từ — ý định rõ ràng thắng mọi suy đoán
+     (vd "chúc mừng": pháo hoa có từ đúng 'chuc'/'mung' phải thắng pháo
+     giấy dù 'chuc' gần giống 'phuc'); vòng 2 mới tới gần đúng (giống
+     >= 80%) cho lỗi gõ như 'phaoo', 'giaay'. Nhờ vậy "xin chào" cũng
+     không bị nhận nhầm thành 'phao' (giống 75%). */
+  for (const fuzzy of [false, true]) {
+    for (const r of rules) {
+      if (stemList(r.list).some(st => stemHit(tokens, st, fuzzy))) { fxCmdAt.set(user.id, now); r.go(); return; }
+    }
   }
 }
 function greet(user) {
@@ -1613,7 +1620,7 @@ if (isDemo) {
     npcTuDong: true, npcNguongVang: 6, npcMoiBaoLauGiay: 25, npcNghiGiay: 60,
     npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
     hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
-    lenhHoaRoi: 'hoa, roi, tung', lenhPhaoHoa: 'phao', lenhPhaoGiay: 'giay',
+    lenhHoaRoi: 'hoa,roi,tung,vui', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
     bgRules: [
       { viewers: 10, file: 'bg-500.webp' }, { viewers: 30, file: 'bg-2000.webp' },
       { viewers: 50, file: 'bg-5000.webp' }, { viewers: 100, file: 'bg-10000.webp' }, { viewers: 200, file: 'bg-sanh-moi.webp' },

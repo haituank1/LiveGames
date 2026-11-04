@@ -242,9 +242,9 @@
     "hieuUngChat": true,
     "hienBangLenh": true,
     "lenhHieuUngChoGiay": 8,
-    "lenhHoaRoi": "hoa, roi, tung",
-    "lenhPhaoHoa": "phao",
-    "lenhPhaoGiay": "giay",
+    "lenhHoaRoi": "hoa,roi,tung,vui",
+    "lenhPhaoHoa": "phao,chuc,mung",
+    "lenhPhaoGiay": "giay,hanh,phuc,ve",
     "npcDanhSach": [
       "Ngọc Linh",
       "Tuấn Kiệt",
