@@ -974,9 +974,13 @@ setInterval(() => { P.setStageCooldown(computeStageCooldown()); }, 5000);
    lua chon cang phong phu. Tat bang hieuUngNgauNhien: false. */
 let nextRandomFxAt = 0;
 function fireRandomFx() {
+  /* Kênh "gia vị" ngẫu nhiên: CHỈ còn kim tuyến / tim bay / bokeh /
+     đèn lồng. Hoa rơi + pháo hoa + pháo giấy đã tách ra kênh ĐỊNH KỲ
+     riêng bên dưới (mỗi loại một nhịp giây do Nguyen đặt) để không
+     giành nhịp của nhau. */
   const tier = BG.tier;
-  const pool = ['petals', 'glitter', 'hearts', 'confetti', 'fireworks'];
-  if (tier >= 2) pool.push('petals', 'bokeh', 'fireworks');
+  const pool = ['glitter', 'hearts'];
+  if (tier >= 2) pool.push('bokeh', 'glitter');
   if (tier >= 3) pool.push('lanterns');
   const pick = pool[Math.floor(Math.random() * pool.length)];
   const R = (a, b) => a + Math.random() * (b - a);
@@ -997,9 +1001,31 @@ function fireRandomFx() {
     FX.stageSparkle(sp2.fx, sp2.fy - 0.05);
   }
 }
+/* ===== Hiệu ứng ĐỊNH KỲ theo từng loại (Nguyen yêu cầu 2026-11-05,
+   tham khảo nhịp hiệu ứng bên game chùa: "mỗi X giây làm một hành
+   động") — mỗi loại một đồng hồ riêng, tới giờ là bắn, số lượng giữ
+   như mức ngẫu nhiên cũ cho khỏi khác hình. Đặt 0 = tắt riêng loại
+   đó; tắt hieuUngNgauNhien là tắt tất cả. ===== */
+const fxDue = { petals: 0, fireworks: 0, confetti: 0 };
+function fireTimedFx(kind) {
+  const R = (a, b) => a + Math.random() * (b - a);
+  if (kind === 'petals') FX.petals(Math.round(R(45, 95)));
+  else if (kind === 'fireworks') FX.fireworksShow(Math.round(R(1, 3.4)), 320);
+  else if (kind === 'confetti') FX.confetti(Math.round(R(30, 60)));
+}
 setInterval(() => {
   if (cfg.hieuUngNgauNhien === false) return;
   const now = performance.now();
+  const timed = [
+    ['petals', cfg.fxHoaRoiMoiGiay != null ? cfg.fxHoaRoiMoiGiay : 10],
+    ['fireworks', cfg.fxPhaoHoaMoiGiay != null ? cfg.fxPhaoHoaMoiGiay : 20],
+    ['confetti', cfg.fxPhaoGiayMoiGiay != null ? cfg.fxPhaoGiayMoiGiay : 20],
+  ];
+  for (const [kind, sec] of timed) {
+    if (!(sec > 0)) { fxDue[kind] = 0; continue; }
+    if (!fxDue[kind]) { fxDue[kind] = now + sec * 1000; continue; }
+    if (now >= fxDue[kind]) { fxDue[kind] = now + sec * 1000; fireTimedFx(kind); }
+  }
   const lo = (cfg.hieuUngNgauNhienTuGiay != null ? cfg.hieuUngNgauNhienTuGiay : 12) * 1000;
   const hi = Math.max(lo, (cfg.hieuUngNgauNhienDenGiay != null ? cfg.hieuUngNgauNhienDenGiay : 25) * 1000);
   if (!nextRandomFxAt) { nextRandomFxAt = now + lo + Math.random() * (hi - lo); return; }
@@ -1698,6 +1724,7 @@ if (isDemo) {
     choCongMoiCapCho: 15, choCongMoiCapGhep: 8, choMienGhep: 2,
     choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
     hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,
+    fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20,
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4,
     bannerY: 30,

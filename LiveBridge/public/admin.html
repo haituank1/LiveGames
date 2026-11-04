@@ -588,6 +588,9 @@ const GAME_SCHEMAS = {
     ] },
     { title: '✨ Hiệu ứng & lệnh chat', fields: [
       { k: 'hieuUngNgauNhien', l: 'Tự bắn hiệu ứng ngẫu nhiên cho sảnh luôn sống', t: 'chk', defTrue: true },
+      { k: 'fxHoaRoiMoiGiay', l: '🌸 Hoa rơi tự động — mỗi (giây), 0 = tắt', t: 'num', min: 0, max: 3600, step: 1 },
+      { k: 'fxPhaoHoaMoiGiay', l: '🎆 Pháo hoa tự động — mỗi (giây), 0 = tắt', t: 'num', min: 0, max: 3600, step: 1 },
+      { k: 'fxPhaoGiayMoiGiay', l: '🎉 Pháo giấy tự động — mỗi (giây), 0 = tắt', t: 'num', min: 0, max: 3600, step: 1 },
       { k: 'hieuUngNgauNhienTuGiay', l: 'Hiệu ứng ngẫu nhiên mỗi từ (giây)', t: 'num', min: 1, max: 3600 },
       { k: 'hieuUngNgauNhienDenGiay', l: 'đến (giây)', t: 'num', min: 1, max: 3600 },
       { k: 'lenhDoiGioiTinh', l: 'Lệnh chat "nam" / "nữ" tự khai giới tính', t: 'chk', defTrue: true },
