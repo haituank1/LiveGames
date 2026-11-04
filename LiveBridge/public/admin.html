@@ -533,9 +533,7 @@ const GAME_SCHEMAS = {
     { title: '💒 Sân khấu & camera', fields: [
       { k: 'coupleSec', l: 'Đứng trên sân khấu (giây) — chỉ tính lúc đứng diễn, không tính đi lên/xuống', t: 'num', min: 5, max: 600 },
       { k: 'nhaCapTiepSauGiay', l: 'Cặp đang diễn đứng đủ (giây) mới bắt đầu cặp tiếp theo (nhịp lia cam)', t: 'num', min: 1, max: 60, step: 1 },
-      { k: 'boQuaLiaCamKhiChoTren', l: 'Bỏ nhịp lia cam khi hàng chờ trên (cặp) — cho lên ngay cho kịp', t: 'num', min: 2, max: 100, step: 1 },
       { k: 'soCapToiDa', l: 'Số cặp tối đa cùng lúc trên sân khấu (trần cứng)', t: 'num', min: 1, max: 10, step: 1 },
-      { k: 'hangChoDongThiThemCap', l: 'Hàng chờ từ mấy cặp trở lên thì mở 2 cặp cùng lúc (thường chỉ 1)', t: 'num', min: 2, max: 50, step: 1 },
       { k: 'phongToGoiTen', l: 'Phóng to khi gọi tên (x)', t: 'num', min: 1, max: 2, step: 0.01 },
       { k: 'zoomGoiTen', l: 'Zoom camera khi gọi tên (x)', t: 'num', min: 1, max: 2, step: 0.01 },
       { k: 'zoomBamTheo', l: 'Zoom camera bám theo cặp (x)', t: 'num', min: 1, max: 2, step: 0.01 },

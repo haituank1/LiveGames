@@ -598,7 +598,17 @@ function loop(t) {
   }
   for (const c of couples) {
     if (c.state !== 'stage' || c.hold) continue;
+    const total = P.coupleSec || 25;
+    const perfBefore = total - Math.max(0, c.timer);
     c.timer -= dt;
+    /* Vừa chạm mốc đứng đủ releaseSec -> gọi promoteStage NGAY trong
+       nhịp đồng hồ game. Trước đây chỉ trông vào setTimeout ở
+       arriveStage (chạy theo giờ tường): khi máy bận, dt của game bị
+       kẹp nên đồng hồ game chậm hơn giờ tường, hẹn giờ gọi tới mà cặp
+       đang diễn mới đứng được <6s theo giờ game -> bị cổng nhịp chặn,
+       và không còn ai gọi lại cho tới lúc cặp đó xuống hẳn (bắt gặp ở
+       testpacing: cặp sau phải chờ đủ 15s thay vì được nhả ở 6s). */
+    if (perfBefore < (P.releaseSec || 6) && total - Math.max(0, c.timer) >= (P.releaseSec || 6)) promoteStage();
     if (c.timer <= 0) {
       /* Hết giờ đứng (coupleSec) nhưng phòng đang TRỐNG LỊCH — không cặp
          nào đang chờ, cũng không cặp nào đang đi lên: cho cặp này ĐỨNG
@@ -866,31 +876,23 @@ function moveCoupleToSlot(c, i) {
 }
 
 function promoteStage() {
-  /* Số cặp lên cùng lúc (Nguyen chốt lại 2026-11-04 17:02): bình thường
-     CHỈ 1 CẶP trên sân khấu cho thoáng và tập trung; chỉ khi hàng chờ
-     THỰC SỰ đông (từ tune.crowdQueue cặp đang chờ trở lên, mặc định 4 —
-     config hangChoDongThiThemCap) mới mở thêm cặp thứ 2. Trần cứng là
-     soCapToiDa (nay để 2) và sức chứa vẫn kẹp theo tổng cặp đang có mặt.
-     Cặp đang diễn không bị đụng: cap co lại thì chỉ ngừng cho cặp mới
-     lên, các cặp trên sân khấu diễn hết lượt của mình. */
+  /* CỔNG NHỊP THỐNG NHẤT (Nguyen chốt lại 2026-11-04 18:46, thay cho
+     cơ chế 2 chế độ vắng/đông trước đây): dù hàng chờ ít hay đông, cặp
+     tiếp theo chỉ được BẮT ĐẦU DI CHUYỂN khi (a) không có hành trình
+     nào đang chạy — không bao giờ 2 cặp cùng đi lên, và (b) mọi cặp
+     đang diễn đã ĐỨNG ĐỦ releaseSec giây (mặc định 6 — config
+     nhaCapTiepSauGiay). Di chuyển và lia cam dùng CHUNG một mốc này:
+     hết khóa tâm điểm ở sân khấu thì cặp sau mới bước đi, camera bám
+     theo ngay — không còn cảnh cặp sau lén đi trước trong lúc camera
+     còn khóa. Sân khấu đang trống (chưa ai diễn / cặp trước đã xuống)
+     thì cặp đầu hàng chờ đi ngay. Chưa tới nhịp thì DỪNG ở đây; hẹn
+     giờ ở arriveStage sẽ gọi lại đúng mốc nhả. Trần đứng cùng lúc vẫn
+     là soCapToiDa (mặc định 2): 1 cặp diễn + 1 cặp đang trên đường lên
+     trong lúc cặp trước sắp hết lượt. */
   const staged = stageSlots.filter(Boolean).length;
   const hardMax = Math.max(1, P.tune.maxStage || 2);
-  const pacingMode = stageQueue.length < (P.crowdSkip || 12);
-  let cap;
-  if (!pacingMode) {
-    /* ĐÔNG QUÁ NGƯỠNG (config boQuaLiaCamKhiChoTren, mặc định 12 cặp
-       đang chờ): BỎ NHỊP lia cam cho kịp lượt — cho lên ngay theo sức
-       chứa như trước (tối đa 2 cặp khi hàng chờ đông). */
-    const want = stageQueue.length >= (P.tune.crowdQueue || 4) ? Math.min(2, hardMax) : Math.min(1, hardMax);
-    cap = Math.max(1, Math.min(want, staged + stageQueue.length));
-  } else {
-    /* NHỊP LIA CAM (Nguyen chốt 2026-11-04 17:45): hàng chờ còn ít thì
-       các cặp lên THEO NHỊP cho đẹp — cặp tiếp theo chỉ BẮT ĐẦU (khoảnh
-       khắc lia cam tới 2 nhân vật, tức lúc promote này) khi cặp đang
-       diễn đã ĐỨNG ĐỦ releaseSec giây trên sân khấu (mặc định 6 —
-       config nhaCapTiepSauGiay), và không bao giờ có 2 hành trình lên
-       sân khấu chạy song song. Chưa tới nhịp thì DỪNG ở đây; hẹn giờ
-       đặt ở arriveStage sẽ gọi lại promoteStage đúng mốc nhả. */
+  const cap = Math.max(1, Math.min(2, hardMax, staged + stageQueue.length));
+  if (stageQueue.length) {
     let journeying = false, freshPerforming = false;
     for (const c of couples) {
       if (c.state === 'toStage') journeying = true;
@@ -899,8 +901,7 @@ function promoteStage() {
         if (performed < (P.releaseSec || 6)) freshPerforming = true;
       }
     }
-    if (stageQueue.length && (journeying || freshPerforming)) return;
-    cap = Math.max(1, Math.min(2, hardMax, staged + stageQueue.length));
+    if (journeying || freshPerforming) return;
   }
   /* NHƯỜNG GIỮA CHO CẶP LÊN SAU (Nguyen chốt 2026-11-04 17:18): nếu ô
      giữa đang có cặp diễn và sắp có cặp mới được lên (còn ô bên trống,
@@ -962,13 +963,13 @@ function promoteStage() {
     walkPath(c.groom, [{ x: 47, y: REVEAL_Y }], 'toStage', onGather);
     walkPath(c.bride, [{ x: 53, y: REVEAL_Y }], 'toStage', onGather);
     if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
-    /* Đang ở NHỊP LIA CAM thì mỗi lần gọi chỉ nhả ĐÚNG 1 cặp — nếu
+    /* Mỗi lần gọi chỉ nhả ĐÚNG 1 cặp — nếu
        không, lúc sân khấu vừa trống mà hàng chờ có sẵn 2+ cặp, vòng lặp
        này sẽ nhả 2 cặp đi lên CÙNG LÚC (bắt gặp ở ảnh chụp test bộ ba
        tính năng 2026-11-04 18:14: 2 cặp quà cùng đi thảm song song),
        trái hẳn quy tắc 'không 2 hành trình song song'. Cặp kế tiếp sẽ
        được nhả bởi hẹn giờ arriveStage / leaveStage như thường. */
-    if (pacingMode) break;
+    break;
   }
 }
 function arriveStage(c) {
@@ -1132,4 +1133,3 @@ P.setBgFile = function (file) {
 };
 P.coupleSec = 25;
 P.releaseSec = 6;    // nhịp lia cam: cặp đang diễn ĐỨNG ĐỦ từng này giây mới bắt đầu cặp tiếp theo (config nhaCapTiepSauGiay)
-P.crowdSkip = 12;    // hàng chờ từ từng này cặp trở lên thì bỏ nhịp lia cam, cho lên ngay (config boQuaLiaCamKhiChoTren)
