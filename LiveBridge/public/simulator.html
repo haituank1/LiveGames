@@ -96,7 +96,14 @@ const NAMES = ['Xuân Maii', 'Nguyễn Hà Vy', 'Lê Minh Nhựt', 'hieuhocxay',
   'Trường', 'Bánh Ú', 'Xấu ngủ', 'Tâm An', 'Diệu Hiền', 'Ngọc Lan', 'Bảo Ngọc', 'Thiện Tâm', 'Như Ý', 'Quang Huy', 'An Nhiên',
   'Gia Hân', 'Khang', 'Ti Na', 'Mít', 'Lan Anh', 'Hoàng', 'Tuấn', 'Vân', 'Phúc', 'Thảo'];
 const users = NAMES.map((n, i) => ({ id: 'sim_' + i, uniqueId: 'sim_' + i, nickname: n, avatar: '' }));
-let extra = 0, mapping = null, bridge = null;
+let extra = 0, mapping = null, bridge = null, curGame = '';
+/* Những người game ĐÃ biết mặt (đã gửi bất kỳ sự kiện nào) — để giả lập tag
+   trúng người đang có mặt, đúng như live thật khán giả tag nhau. */
+const known = new Map();
+function noteUser(u) { if (u && u.id) known.set(u.id, u); }
+function rndUser() { return users[Math.floor(Math.random() * users.length)]; }
+function mintUser() { const n = 'Khách ' + (++extra); return { id: 'sim_k' + extra, uniqueId: 'sim_k' + extra, nickname: n, avatar: '' }; }
+function otherKnown(u) { const arr = [...known.values()].filter(x => x.id !== (u && u.id)); return arr.length ? arr[Math.floor(Math.random() * arr.length)] : null; }
 
 for (const u of [{ id: '', nickname: '🎲 Ngẫu nhiên' }, ...users]) {
   const o = document.createElement('option'); o.value = u.id; o.textContent = u.nickname; $('who').appendChild(o);
@@ -114,7 +121,7 @@ function log(cls, text) {
   while (L.childNodes.length > 300) L.lastChild.remove();
 }
 
-function sim(ev) { if (!bridge || !bridge.simulate(ev)) log('raw', '⚠ Chưa kết nối LiveBridge'); }
+function sim(ev) { if (ev && ev.user) noteUser(ev.user); if (!bridge || !bridge.simulate(ev)) log('raw', '⚠ Chưa kết nối LiveBridge'); }
 
 function renderMapping() {
   $('tiers').innerHTML = ''; $('named').innerHTML = ''; $('chatChips').innerHTML = '';
@@ -131,14 +138,23 @@ function renderMapping() {
     b.onclick = () => sim({ kind: 'gift', user: pickUser(), giftId: g.id, giftName: g.name, diamonds: g.diamonds || 1, count: g.combo || 1 });
     $('named').appendChild(b);
   }
-  for (const w of ['nam mô a di đà phật', 'thắp nhang', 'đi', 'hello']) {
+  const chips = curGame === 'dam-cuoi'
+    ? ['pháo hoa', 'hoa rơi', 'đổi đồ', 'tôi là nữ', 'mình là nam', 'đẹp quá', 'chúc mừng hai bạn']
+    : ['nam mô a di đà phật', 'thắp nhang', 'đi', 'hello'];
+  for (const w of chips) {
     const b = document.createElement('button'); b.textContent = w;
     b.onclick = () => sim({ kind: 'chat', user: pickUser(), text: w });
+    $('chatChips').appendChild(b);
+  }
+  if (curGame === 'dam-cuoi') {
+    const b = document.createElement('button'); b.textContent = '💌 Tag ngẫu nhiên';
+    b.onclick = () => { const u = pickUser(); const o = otherKnown(u); sim({ kind: 'chat', user: u, text: o ? '@' + o.nickname : '@Người Thương' }); };
     $('chatChips').appendChild(b);
   }
 }
 
 function connect(game) {
+  curGame = game;
   if (bridge) bridge.close();
   bridge = new LiveBridgeClient({ url: `ws://${location.host}`, game, role: 'monitor' })
     .on('open', () => { $('wsSt').textContent = 'WS: đã kết nối'; $('wsSt').className = 'pill ok'; })
@@ -176,6 +192,7 @@ $('clear').onclick = () => { $('log').innerHTML = ''; };
 
 let autoTimer = null;
 function autoTick() {
+  if (curGame === 'dam-cuoi') return autoTickWedding();
   const u = users[Math.floor(Math.random() * users.length)];
   const r = Math.random();
   const tiers = (mapping && mapping.giftTiers) || [{ minDiamonds: 1 }];
@@ -187,6 +204,43 @@ function autoTick() {
     sim({ kind: 'gift', user: u, giftName: `Quà ${t.minDiamonds} xu`, diamonds: t.minDiamonds, count: 1 + Math.floor(Math.random() * 3) });
   }
   autoTimer = setTimeout(autoTick, Math.max(50, +$('autoMs').value || 600));
+}
+/* Tự động kiểu LIVE ĐÁM CƯỚI: live thật của game này sống bằng TAG GHÉP ĐÔI —
+   bản cũ chỉ chat chay (câu của game chùa) + quà nên không bao giờ có cặp nào
+   thành hình, BXH/trình diễn không chạy được. Bản này mô phỏng đúng nhịp live:
+   người mới vào liên tục, chat có tag người đang có mặt (ghép đôi thật), thỉnh
+   thoảng tag người vắng (test ghép tạm), follow, lệnh chat của game, quà đủ
+   mọi mốc xu. */
+const WED_CHAT = ['đẹp quá', 'sảnh xịn quá trời', 'chúc mừng chúc mừng', 'hóng cặp mới quá', 'cưới online vui ghê', 'thả tim cho cô dâu chú rể', 'nhìn mà muốn cưới theo', 'iu quá đi'];
+const WED_ABSENT = ['Anh Crush', 'Bé Yêu', 'Người Thương', 'Chồng Tương Lai', 'Vợ Tương Lai'];
+const WED_CMD = ['pháo hoa', 'hoa rơi', 'đổi đồ', 'tôi là nữ', 'mình là nam', 'nam', 'nữ'];
+function autoTickWedding() {
+  const tiers = (mapping && mapping.giftTiers) || [{ minDiamonds: 1 }];
+  const r = Math.random();
+  if (r < 0.20) {
+    sim({ kind: 'join', user: Math.random() < 0.35 ? mintUser() : rndUser() });   // phòng luôn có người mới như live thật
+  } else if (r < 0.32) {
+    sim({ kind: 'like', user: rndUser(), count: 10 + Math.floor(Math.random() * 40) });
+  } else if (r < 0.40) {
+    sim({ kind: 'follow', user: rndUser() });
+  } else if (r < 0.68) {
+    const u = Math.random() < 0.85 ? rndUser() : mintUser();
+    const c = Math.random();
+    if (c < 0.42) {
+      const o = otherKnown(u);
+      sim({ kind: 'chat', user: u, text: o ? (Math.random() < 0.5 ? '@' + o.nickname : '@' + o.nickname + ' cưới thôi') : '@' + WED_ABSENT[0] });
+    } else if (c < 0.52) {
+      sim({ kind: 'chat', user: u, text: '@' + WED_ABSENT[Math.floor(Math.random() * WED_ABSENT.length)] + ' vào cưới với mình nè' });
+    } else if (c < 0.66) {
+      sim({ kind: 'chat', user: u, text: WED_CMD[Math.floor(Math.random() * WED_CMD.length)] });
+    } else {
+      sim({ kind: 'chat', user: u, text: WED_CHAT[Math.floor(Math.random() * WED_CHAT.length)] });
+    }
+  } else {
+    const t = tiers[Math.floor(Math.random() * tiers.length)];
+    sim({ kind: 'gift', user: rndUser(), giftName: `Quà ${t.minDiamonds} xu`, diamonds: t.minDiamonds, count: 1 + Math.floor(Math.random() * 3) });
+  }
+  autoTimer = setTimeout(autoTickWedding, Math.max(50, +$('autoMs').value || 600));
 }
 $('auto').onchange = e => { clearTimeout(autoTimer); if (e.target.checked) autoTick(); };
 </script>
