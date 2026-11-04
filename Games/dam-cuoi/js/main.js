@@ -148,6 +148,7 @@ async function mcPump() {
     el.querySelector('.say b').textContent = MC.name;
     el.querySelector('.say span').textContent = m.text;
     el.classList.add('on');
+    placeBanner();   // MC vua hien: day banner xuong duoi bong MC neu dang trung
     if (voiceDurMs) dur = Math.min(14000, Math.max(dur, voiceDurMs + 700));
     MC.busyUntil = performance.now() + dur;
     setTimeout(() => { el.classList.remove('on'); mcSpeaking = false; setTimeout(mcPump, 350); }, dur);
@@ -371,8 +372,26 @@ function showBanner(text, ms = 4600) {
   if (!el) return;
   el.textContent = text;
   el.classList.add('on');
+  placeBanner();
   clearTimeout(bannerTimer);
   bannerTimer = setTimeout(() => el.classList.remove('on'), ms);
+}
+/* Can vi tri banner cho vua ca hai phia (Nguyen chot 2026-11-04): mac dinh o
+   bannerY (30%) — nhung khi bong MC dang hien thi phai dat banner NGAY DUOI
+   bong MC, vi bong MC cao/thap theo do dai cau noi va z-index cua MC nam
+   tren banner nen de co dinh se bi che chu. Van kep tran 36% de day banner
+   khong vuot xuong che dau cap doi tren san khau (dau o ~39%). */
+function placeBanner() {
+  const el = $('banner');
+  if (!el || !el.classList.contains('on')) return;
+  let center = cfg.bannerY != null ? cfg.bannerY : 30;
+  const mc = $('mc');
+  if (mc && mc.classList.contains('on')) {
+    const stg = stageEl.getBoundingClientRect();
+    const mcBottom = (mc.getBoundingClientRect().bottom - stg.top) / stg.height * 100;
+    center = Math.min(Math.max(center, mcBottom + 2.3), 36);
+  }
+  el.style.top = center + '%';
 }
 
 /* ============ Ghép đôi ============ */
