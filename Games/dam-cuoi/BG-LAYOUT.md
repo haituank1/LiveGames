@@ -118,3 +118,18 @@ thang và thảm đỏ trống hoàn toàn.
 - Khi đổi nền giữa phiên, `P.setBgFile` dựng lại bàn, lưới tìm đường và pool vị
   trí theo đúng hồ sơ của file đang hiển thị; vị trí thuộc khung cũ không được
   tái sử dụng. Người đang đứng lọt vào bàn theo khung mới sẽ được dời đi.
+
+## Bổ sung 2026-11-04 (theo yêu cầu chủ phòng): thảm đỏ giữa + thứ tự cấp chỗ
+
+- **Thảm đỏ giữa là vùng CẤM ĐỨNG** (cả 2 khung): `frame.aisle = { y0, hw, slope }`
+  trong `js/people.js` — nửa bề rộng thảm ở độ cao y là `hw + (y − y0) × slope`
+  (mở rộng dần xuống dưới theo phối cảnh; khung mặc định y0=43, hw=7.5,
+  slope=0.13 — khớp dải 43→57% ở trên; sảnh mới y0=46, hw=8.5, slope=0.10).
+  Ghế và điểm đứng rơi vào thảm đều bị loại khi dựng pool; người đang đứng
+  lọt vào thảm khi đổi nền cũng bị dời đi. Thảm chỉ để ĐI QUA (lưới tìm
+  đường không cấm).
+- **Thứ tự cấp chỗ**: theo khoảng cách tới điểm ngay dưới sân khấu
+  (trọng số dọc ×1.5); ghế quanh bàn chỉ hơn điểm đứng tự do +5, jitter
+  0..3. Hệ quả: vùng trọng tâm hai bên thảm + gần sảnh cưới đầy trước,
+  phòng đông mới tràn xuống dưới/xa. Chỗ "trọng tâm" khi phòng vắng
+  (`takeCentralPosition`) cũng là 2 điểm hai bên thảm ngay dưới sân khấu.

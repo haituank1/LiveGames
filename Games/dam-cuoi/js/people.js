@@ -224,6 +224,7 @@ const TABLE_FRAMES = {
   'mac-dinh': {
     stageY: 37.2, floorY: 44, seatTop: 43.5,
     keepClear: [{ x: 50, y: 44, rx: 11, ry: 2.6 }],   // bậc thang giữa: chỉ đi qua, không đứng
+    aisle: { y0: 43, hw: 7.5, slope: 0.13 },   // THẢM ĐỎ GIỮA: dải cấm đứng, mở rộng dần xuống dưới (phối cảnh) — Nguyen yêu cầu 2026-11-04: không ai đứng giữa thảm, chỉ đứng hai bên
     rows: [
       { y: 42.8, rx: 2.6, ry: 1.4, xs: [16.5, 23.5, 30.5, 35.5, 64.5, 69.5, 76.5, 83.5] },
       { y: 46.3, rx: 3.0, ry: 1.6, xs: [12.3, 20.5, 28.5, 71.5, 79.5, 87.7] },
@@ -238,6 +239,7 @@ const TABLE_FRAMES = {
   'bg-sanh-moi.webp': {
     stageY: 42.6, floorY: 50, seatTop: 47.5,
     keepClear: [{ x: 50, y: 44, rx: 40, ry: 6.5 }],   // toàn bộ vòng bậc thang của bục tròn + thang đỏ giữa: chỉ đi qua, không đứng
+    aisle: { y0: 46, hw: 8.5, slope: 0.10 },   // THẢM ĐỎ GIỮA của sảnh hoàng gia: cấm đứng, chỉ đứng hai bên thảm
     rows: [
       { y: 48.5, rx: 3.6, ry: 1.6, xs: [2.5, 13, 76, 87, 97.5] },
       { y: 50.3, rx: 3.7, ry: 1.7, xs: [24, 32.5, 67.5] },
@@ -252,10 +254,21 @@ const TABLE_FRAMES = {
 let frameId = 'mac-dinh';
 let PAINTED_TABLES = [];
 let KEEP_CLEAR = [];
+let AISLE = null;
 function applyFrameTables() {
   PAINTED_TABLES = [];
   for (const r of TABLE_FRAMES[frameId].rows) for (const x of r.xs) PAINTED_TABLES.push({ x, y: r.y, rx: r.rx, ry: r.ry });
   KEEP_CLEAR = TABLE_FRAMES[frameId].keepClear || [];
+  AISLE = TABLE_FRAMES[frameId].aisle || null;
+}
+/* Nửa bề rộng thảm đỏ giữa ở độ cao y (mở rộng dần khi xuống thấp — phối cảnh) */
+function aisleHW(y) { return AISLE ? AISLE.hw + Math.max(0, y - AISLE.y0) * AISLE.slope : 0; }
+/* (x,y) có nằm TRÊN thảm đỏ giữa không — vùng này chỉ để đi qua/làm lối lên
+   sân khấu, tuyệt đối không cấp chỗ đứng (Nguyen vẽ 2 vòng đen ở hai dải thảm
+   bên và yêu cầu ưu tiên đứng ở đó, thảm giữa để trống). */
+function inAisle(x, y) {
+  if (!AISLE || y < AISLE.y0) return false;
+  return Math.abs(x - 50) < aisleHW(y);
 }
 applyFrameTables();
 /* Vùng cấm đứng (bậc thang / vòng bậc của bục): nhân vật chỉ ĐI QUA, không
@@ -297,6 +310,7 @@ function buildPositions() {
       if (ownX * ownX + ownY * ownY < 1) continue;   // SEAT_TOP kéo ghế lọt vào chính bàn của nó -> bỏ
       if (inTable(sx, sy, 0.9, 0.7, t)) continue;   // ghế này lại chui vào bàn bên cạnh -> bỏ
       if (inKeepClear(sx, sy)) continue;            // ghế rơi vào vùng bậc thang -> bỏ
+      if (inAisle(sx, sy)) continue;                // ghế rơi lên thảm đỏ giữa -> bỏ (thảm giữa để trống)
       if (!farEnough(sx, sy)) continue;             // ghế này đè lên ghế đã nhận -> bỏ
       positions.push({ x: sx, y: sy, kind: 'seat', taken: null, frame: frameId });
     }
@@ -310,12 +324,19 @@ function buildPositions() {
       const x = gx + rand(-0.5, 0.5), y = gy + rand(-0.35, 0.35);
       if (inTable(x, y, 1.8, 1.4, null)) continue;   // điểm đứng cũng né mặt bàn + lề
       if (inKeepClear(x, y)) continue;              // điểm đứng cũng né vùng bậc thang
+      if (inAisle(x, y)) continue;                  // điểm đứng cũng né thảm đỏ giữa — chỉ đi qua
       if (!farEnough(x, y)) continue;               // quá sát ghế/điểm đã nhận -> bỏ
       positions.push({ x, y, kind: 'stand', taken: null, frame: frameId });
     }
-  // Ưu tiên: GHẾ QUANH BÀN trước (đúng chất tiệc cưới), từ gần sân khấu ra xa;
-  // điểm đứng tự do chỉ dùng khi hết ghế — tránh khách dồn cục giữa thảm đỏ
-  const fillKey = p => (p.kind === 'seat' ? 0 : 1000) + Math.hypot(p.x - 50, (p.y - 52) * 1.35) + rand(0, 14);
+  // Ưu tiên THEO Ý CHỦ PHÒNG (2026-11-04): gần SÂN KHẤU/SẢNH nhất trước —
+  // vùng trọng tâm là hai dải hai bên thảm đỏ giữa (chỗ Nguyen khoanh vòng
+  // đen), khách mới đứng ở TRÊN cho khỏi lia cam xa; chỉ khi phòng đông,
+  // hết chỗ gần mới tràn xuống dưới và ra xa. Trước đây ghế quanh bàn được
+  // ưu tiên tuyệt đối (+0/+1000) cộng jitter lớn (0..14) nên khách bị rải
+  // xuống tận bàn cuối phòng dù phía trên còn trống. Nay: khoảng cách tới
+  // điểm ngay dưới sân khấu là chính (trọng số dọc 1.5), ghế chỉ hơn điểm
+  // đứng tự do một chút (+5), jitter nhỏ (0..3) cho thứ tự khỏi méo.
+  const fillKey = p => Math.hypot(p.x - 50, (p.y - (FLOOR_Y + 1)) * 1.5) + (p.kind === 'seat' ? 0 : 5) + rand(0, 3);
   for (const p of positions) p.key = fillKey(p);
   freePool = positions.slice().sort((p1, p2) => p1.key - p2.key);
   freePool.forEach((p, i) => { p.rank = i; });   // rank 0 = chỗ đẹp nhất (trong cùng, gần sân khấu)
@@ -330,12 +351,16 @@ function takePosition() {
    ngay trên hình, thay vì lấy theo thứ tự gần-sân-khấu có thể lệch sang hai
    bên cánh. Chỉ dùng khi tổng số khách < tune.quietMax. */
 function takeCentralPosition() {
-  const fx = 50, fy = (typeof FLOOR_Y === 'number' ? FLOOR_Y : 44) + 4;
+  const fy = (typeof FLOOR_Y === 'number' ? FLOOR_Y : 44) + 4;
+  // Tâm ưu tiên KHÔNG nằm trên thảm đỏ giữa (đã cấm đứng) mà là 2 điểm hai
+  // bên thảm, ngay dưới sân khấu — đúng vùng trọng tâm chủ phòng khoanh.
+  const off = aisleHW(fy) + 5;
+  const fxs = [50 - off, 50 + off];
   let bi = -1, bd = Infinity;
   for (let i = 0; i < freePool.length; i++) {
     const pos = freePool[i];
     if (pos.taken) continue;
-    const d = (pos.x - fx) * (pos.x - fx) + (pos.y - fy) * (pos.y - fy);
+    const d = Math.min((pos.x - fxs[0]) * (pos.x - fxs[0]), (pos.x - fxs[1]) * (pos.x - fxs[1])) + (pos.y - fy) * (pos.y - fy);
     if (d < bd) { bd = d; bi = i; }
   }
   return bi < 0 ? null : freePool.splice(bi, 1)[0];
@@ -892,7 +917,7 @@ P.setBgFile = function (file) {
   buildPositions();
   for (const p of people.values()) {
     if (p.couple || p.state !== 'home') continue;
-    if (inTable(p.home.x, p.home.y, 0.2, 0.15, null) || inKeepClear(p.home.x, p.home.y)) {
+    if (inTable(p.home.x, p.home.y, 0.2, 0.15, null) || inKeepClear(p.home.x, p.home.y) || inAisle(p.home.x, p.home.y)) {
       const np = takePosition();
       if (np) { p.home.taken = null; np.taken = p; p.home = np; walkTo(p, { x: np.x, y: np.y }, 'walk', () => { p.state = 'home'; }); }
     }
