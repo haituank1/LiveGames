@@ -658,7 +658,8 @@ P.makeCouple = function (userA, userB) {
   a.couple = c; b.couple = c;
   couples.push(c);
   for (const p of [a, b]) { p.target = null; p.path = []; p.done = null; p.state = 'focus'; p.dirty = true; }  // đứng yên tại chỗ cho camera lia tới
-  if (P.onPairFocus) P.onPairFocus(c);                    // main lia camera tới vị trí 2 người
+  /* KHÔNG lia camera lúc ghép đôi (Nguyen chot 2026-11-04): camera chỉ di
+     chuyển khi tới lượt cặp thay đồ lên sân khấu (onPairWalk ở promoteStage). */
   setTimeout(() => {                                      // camera tới nơi: chỉ phóng to gây chú ý — CHƯA thay đồ
     if (!couples.includes(c)) return;
     a.boost = b.boost = P.tune.boost; a.dirty = b.dirty = true;

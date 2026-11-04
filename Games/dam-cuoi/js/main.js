@@ -293,6 +293,8 @@ function camLoop(t) {
   if (t - camCullT > 220) { camCullT = t; Cam.cullNow(); }
 }
 requestAnimationFrame(camLoop);
+/* onPairFocus: GIỮ LẠI nhưng không còn chỗ nào gọi — ghép đôi/xếp lại hàng
+   không lia cam nữa (Nguyen chot 2026-11-04), camera chỉ bám lúc lên sân khấu. */
 P.onPairFocus = function (c) {
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 11000;
@@ -621,7 +623,7 @@ function requestCouple(a, b, viaTag) {
       }
       if (P.requeueCouple(c)) {
         coupleFormTimes.push(Date.now());
-        if (P.onPairFocus) P.onPairFocus(c);
+        /* không lia cam khi xếp lại hàng — tới lượt lên sân khấu camera mới bám theo */
         toast(`${ua.nickname} ❤ ${ub.nickname} — lên sân khấu lần nữa!`, false);
       }
     }
