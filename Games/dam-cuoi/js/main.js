@@ -152,7 +152,7 @@ function escapeHtml(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp
 const MC = {
   name: 'MC',
   queue: [], busyUntil: 0, timer: null, lastLine: '',
-  lines: [], funny: [], couple: [], thank: [], greet: [], follow: [], milestone: [], tagVang: [], tagDaCoDoi: [],
+  lines: [], funny: [], couple: [], thank: [], greet: [], follow: [], milestone: [], tagVang: [], tagDaCoDoi: [], sapMoc: [],
 };
 function fill(tpl, vars) {
   return String(tpl).replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
@@ -455,7 +455,19 @@ function refreshBg(announce) {
     $('goaltext').innerHTML = `👑 <span class="tiername">${cur.name}</span> · 👁 tổng ${fmtNum(total)} lượt xem — cảm ơn cả nhà!`;
     $('goalbar').style.width = '100%';
   }
+  /* SẮP ĐẠT MỐC (Nguyen yêu cầu 2026-11-04): còn cách mốc kế tiếp không xa
+     (<= mcSapMocConLai lượt, mặc định 20) thì MC hô hào cả phòng chia sẻ /
+     rủ thêm người vào xem để mở sảnh mới — mỗi mốc chỉ hô 1 lần trong phiên.
+     Biến: {moc} = mốc sắp đạt, {con} = số lượt còn thiếu, {sanh} = tên sảnh mới. */
+  if (next && MC.sapMoc && MC.sapMoc.length) {
+    const conLai = next.at - total, nguong = Number(cfg.mcSapMocConLai) || 20;
+    if (conLai > 0 && conLai <= nguong && !sapMocDaBao.has(next.at)) {
+      sapMocDaBao.add(next.at);
+      mcReact(2.4, MC.sapMoc, { moc: String(next.at), con: String(conLai), sanh: next.name });
+    }
+  }
 }
+const sapMocDaBao = new Set();
 
 /* ============ Banner nghi thức giữa sân khấu ============ */
 let bannerTimer = 0;
@@ -966,7 +978,7 @@ function applyConfig(c) {
      chứng các bản admin cũ) — asList ép hết về mảng chuỗi sạch. 1 key sai
      kiểu không được phép giết cả quá trình áp config/UI (lỗi 2026-11-04:
      màn hình mất hết khung/BXH/MC dù sự kiện vẫn chạy). */
-  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'rulesLines', 'guideLines']) {
+  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'rulesLines', 'guideLines']) {
     cfg[k] = asList(cfg[k]).filter(x => typeof x === 'string');
   }
   if (cfg.mcName) MC.name = cfg.mcName;
@@ -980,13 +992,14 @@ function applyConfig(c) {
   buildBanSets();
   P.setStageCooldown(computeStageCooldown());
   MC.milestone = cfg.mcMilestone || [];
+  MC.sapMoc = (cfg.mcSapMoc && cfg.mcSapMoc.length) ? cfg.mcSapMoc : ['Cả nhà ơi, chỉ còn {con} lượt xem nữa là chạm mốc {moc} — sảnh {sanh} sắp mở rồi! Mọi người chia sẻ live giúp MC nhé!', 'Sắp rồi, sắp rồi! Còn đúng {con} lượt xem nữa là lên mốc {moc} — ai chưa vào thì vào nhanh nào!', 'Mốc {moc} lượt xem ở ngay trước mắt, chỉ thiếu {con} nữa thôi! Cả nhà thả tim và chia sẻ để mở sảnh {sanh} nhé!'];
   if (window.NpcVoice) NpcVoice.setConfig(cfg);
   if (window.NpcVoice && NpcVoice.enabled()) {
     /* LÀM NÓNG voice ngay lúc setup (Nguyen chot): tổng hợp sẵn các ĐOẠN
        TĨNH duy nhất của mọi câu mẫu MC vào cache — về sau mỗi câu chỉ tốn
        tổng hợp đoạn tên ngắn. prefetch đã cache theo text nên gọi lại rẻ. */
     const seenSeg = new Set();
-    for (const pool of [MC.lines, MC.funny, MC.greet, MC.follow, MC.thank, MC.milestone, MC.tagVang, MC.tagDaCoDoi, MC.couple]) {
+    for (const pool of [MC.lines, MC.funny, MC.greet, MC.follow, MC.thank, MC.milestone, MC.tagVang, MC.tagDaCoDoi, MC.sapMoc, MC.couple]) {
       for (const tpl of pool || []) for (const seg of staticSegmentsOf(tpl)) {
         if (!seenSeg.has(seg)) { seenSeg.add(seg); NpcVoice.prefetch(seg); }
       }
@@ -1143,6 +1156,17 @@ if (isDemo) {
     tuAnToanComment: ['cac'],
     mcTagVang: ['{a} gọi {ten} mà {ten} chưa có trong phòng — MC ghép tạm {a} với {b} cho đỡ trống nhé! {a} ơi, mau nhắn {ten} vào live để hai bạn được làm lễ cùng nhau!', '{ten} ơi, {a} đang chờ bạn trong phòng cưới đó! MC se duyên tạm cho {a} với {b} trong lúc chờ — {ten} vào nhanh kẻo mất lượt nha!'],
     mcMilestone: ['CẢ NHÀ ƠI! Sảnh cưới đã nâng cấp lên mốc {moc} nhờ tổng lượt xem tăng vọt!'],
+    mcSapMoc: [
+      'Cả nhà ơi, chỉ còn {con} lượt xem nữa là chạm mốc {moc} — sảnh {sanh} sắp mở rồi! Mọi người chia sẻ live giúp MC nhé!',
+      'Sắp rồi, sắp rồi! Còn đúng {con} lượt xem nữa là lên mốc {moc}, sảnh mới sắp xuất hiện — ai chưa vào thì vào nhanh nào!',
+      'Mốc {moc} lượt xem ở ngay trước mắt rồi, chỉ thiếu {con} nữa thôi! Cả nhà thả tim và chia sẻ để mở sảnh {sanh} nhé!',
+      'Nghe MC nói này: thêm {con} lượt xem nữa là đám cưới mình được lên sảnh {sanh} đó! Rủ bạn bè vào xem chung cho vui nào!',
+      'Chuẩn bị đếm ngược nào cả nhà — còn {con} lượt xem nữa là đạt mốc {moc}! Chia sẻ ngay kẻo lỡ khoảnh khắc đổi sảnh nhé!',
+      'Sảnh {sanh} đang chờ mở khóa, chỉ còn cách {con} lượt xem nữa thôi! Mỗi người một lượt chia sẻ là tới nơi luôn đó!',
+      'Tin vui đây: nhà mình sắp chạm mốc {moc} lượt xem rồi, còn đúng {con} nữa! Người xem càng đông, sảnh càng đẹp — rủ thêm bạn vào nhé!',
+      'Còn {con} lượt xem nữa thôi là bùng nổ mốc {moc} — lên sảnh {sanh} lộng lẫy hơn hẳn! Cả nhà cùng đẩy view nào!',
+    ],
+    mcSapMocConLai: 20,
     mcCheGheuChoGiay: 20,
     mcTagDaCoDoi: [
       'ê {a}, {b} đã có đôi rồi, mình không nên phá hoại gia đình nhà người khác nhá!',

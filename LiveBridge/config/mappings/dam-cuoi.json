@@ -97,6 +97,17 @@
       "🎉 Sảnh cưới vừa nâng cấp lên {moc}! Càng đông càng đẹp — cảm ơn cả nhà đã tới chung vui!",
       "Không khí quá tuyệt vời! Chúng ta đã chạm mốc {moc} rồi mọi người ơi!"
     ],
+    "mcSapMoc": [
+      "Cả nhà ơi, chỉ còn {con} lượt xem nữa là chạm mốc {moc} — sảnh {sanh} sắp mở rồi! Mọi người chia sẻ live giúp MC nhé!",
+      "Sắp rồi, sắp rồi! Còn đúng {con} lượt xem nữa là lên mốc {moc}, sảnh mới sắp xuất hiện — ai chưa vào thì vào nhanh nào!",
+      "Mốc {moc} lượt xem ở ngay trước mắt rồi, chỉ thiếu {con} nữa thôi! Cả nhà thả tim và chia sẻ để mở sảnh {sanh} nhé!",
+      "Nghe MC nói này: thêm {con} lượt xem nữa là đám cưới mình được lên sảnh {sanh} đó! Rủ bạn bè vào xem chung cho vui nào!",
+      "Chuẩn bị đếm ngược nào cả nhà — còn {con} lượt xem nữa là đạt mốc {moc}! Chia sẻ ngay kẻo lỡ khoảnh khắc đổi sảnh nhé!",
+      "Sảnh {sanh} đang chờ mở khóa, chỉ còn cách {con} lượt xem nữa thôi! Mỗi người một lượt chia sẻ là tới nơi luôn đó!",
+      "Tin vui đây: nhà mình sắp chạm mốc {moc} lượt xem rồi, còn đúng {con} nữa! Người xem càng đông, sảnh càng đẹp — rủ thêm bạn vào nhé!",
+      "Còn {con} lượt xem nữa thôi là bùng nổ mốc {moc} — lên sảnh {sanh} lộng lẫy hơn hẳn! Cả nhà cùng đẩy view nào!"
+    ],
+    "mcSapMocConLai": 20,
     "mcMinSec": 18,
     "mcName": "MC Anh Tú",
     "mcOn": true,
