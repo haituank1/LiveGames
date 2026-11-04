@@ -44,6 +44,7 @@
  "defaults": {
   "camHomeZoom": 0.62,
   "directorMinHoldSec": 1.2,
+  "djDoiSauGiay": 24,
   "doMoPhanConLai": 0.55,
   "dropHeight": 40,
   "dropHeightVip": 48,

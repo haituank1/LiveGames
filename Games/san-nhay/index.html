@@ -94,6 +94,33 @@
   #screenDJwrap .djimg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transform:translateX(7%);
     transition:opacity .45s ease,transform .45s ease;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
   #screenDJwrap .djimg.on{opacity:1;transform:translateX(0)}
+  /* Hiệu ứng ĐỔI DJ: DJ mới nảy vào lấp lánh (.pre = đặt sẵn ngoài khung, .pop = nảy vào), DJ cũ trượt ra (.out) */
+  #screenDJwrap .djimg.pre{transition:none;transform:translateX(24%) scale(.66);opacity:0}
+  #screenDJwrap .djimg.pop{transition:opacity .45s ease,transform .6s cubic-bezier(.2,1.5,.35,1);filter:brightness(1.3) drop-shadow(0 0 14px rgba(255,255,255,.75))}
+  #screenDJwrap .djimg.out{transform:translateX(-22%) scale(.9);opacity:0}
+  /* Lớp hiệu ứng đổi DJ phủ trong màn: chớp sáng quét + tia laser tỏa + bảng tên */
+  #screenSwapFx{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;--swapCol:#ff5ce1}
+  #screenSwapFx.on{opacity:1}
+  #screenSwapFx .flash{position:absolute;inset:0;mix-blend-mode:screen;opacity:0;
+    background:linear-gradient(100deg,transparent 18%,rgba(255,255,255,.95) 48%,var(--swapCol) 62%,transparent 86%);transform:translateX(-115%)}
+  #screenSwapFx.on .flash{animation:swapFlash .9s ease-out forwards}
+  @keyframes swapFlash{0%{transform:translateX(-115%);opacity:0}16%{opacity:1}55%{transform:translateX(0);opacity:.95}100%{transform:translateX(115%);opacity:0}}
+  #screenSwapFx .burst{position:absolute;inset:-32%;mix-blend-mode:screen;opacity:0;
+    background:repeating-conic-gradient(from 0deg at 50% 50%,var(--swapCol) 0 5deg,transparent 5deg 17deg)}
+  #screenSwapFx.on .burst{animation:swapBurst .9s ease-out forwards}
+  @keyframes swapBurst{0%{opacity:0;transform:scale(.55) rotate(0deg)}25%{opacity:.55}100%{opacity:0;transform:scale(1.18) rotate(26deg)}}
+  #swapTag{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%) scale(.55);opacity:0;text-align:center;
+    background:rgba(8,2,24,.92);border:2px solid var(--swapCol);border-radius:999px;padding:1px 14px 3px;
+    box-shadow:0 0 18px var(--swapCol),0 4px 10px rgba(0,0,0,.6)}
+  #screenSwapFx.on #swapTag{animation:swapTagA .9s cubic-bezier(.2,1.4,.4,1) forwards}
+  @keyframes swapTagA{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.07)}
+    38%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-62%) scale(1)}}
+  #swapTag .st1{font-weight:900;font-size:calc(var(--u0)*2.4);letter-spacing:.6px;color:#fff}
+  #swapTag .st2{font-weight:900;font-size:calc(var(--u0)*3.3);color:var(--swapCol);text-shadow:0 0 8px var(--swapCol);line-height:1.05}
+  /* rung/glitch nhẹ của cả nội dung màn trong lúc đổi DJ (thay nhịp zoom punch ~0.9s) */
+  #screenInner.glitching{animation:djGlitch .45s steps(2,end) 2}
+  @keyframes djGlitch{0%{transform:translate(0) scale(1.03)}25%{transform:translate(-4px,1px) scale(1.05)}
+    50%{transform:translate(3px,-1px) scale(1.02)}75%{transform:translate(-2px,0) scale(1.06)}100%{transform:translate(0) scale(1)}}
   /* bóng quầy DJ ở mép dưới màn — DJ đứng sau quầy */
   #screenBooth{position:absolute;right:0.5%;bottom:12.5%;width:38%;height:19%;z-index:3;
     background:linear-gradient(180deg,#2a1250,#070313 80%);clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);
@@ -330,11 +357,12 @@
         <div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         <div class="beam b1"></div>
         <div class="beam b2"></div>
-        <div id="screenDJwrap"><img class="djimg on" id="screenDJimgA" src="img/nv03-dj-headspin.gif" alt=""><img class="djimg" id="screenDJimgB" src="img/nv03-dj-scratch.gif" alt=""></div>
+        <div id="screenDJwrap"><img class="djimg on" id="screenDJimgA" src="img/nv16-mix.gif" alt=""><img class="djimg" id="screenDJimgB" src="img/nv16-hype.gif" alt=""></div>
         <div id="screenBooth"></div>
-        <div class="live">🔴 DJ CAM</div>
+        <div class="live" id="djCamTag">🔴 DJ CAM · MILA</div>
         <div class="title">DJ SÀN NHẢY</div>
       </div>
+      <div id="screenSwapFx"><div class="burst"></div><div class="flash"></div><div id="swapTag"><div class="st1">🔄 ĐỔI DJ!</div><div class="st2" id="swapName">DJ KAI</div></div></div>
       <div id="screenScan"></div>
       <div id="screenFocus"><img id="sfImg" src="img/nv03-dj-headspin.gif" alt=""><div><div class="sf-name" id="sfName"></div><div class="sf-sub" id="sfSub"></div></div></div>
       <div id="screenTicker"><div class="tk"><span id="tk1"></span><span id="tk2"></span></div></div>

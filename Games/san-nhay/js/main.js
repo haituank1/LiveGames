@@ -43,7 +43,7 @@ const DEFAULTS = {
   xpPerComment: 2, xpPerGiftCoin: 2, xpPerFollow: 5, xpPer100Likes: 5, soloXpDiv: 15, pairXp: 15,
   levelXp: [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200, 4000, 5000, 6200, 7600, 9200, 11000, 13000, 15500, 18500, 22000],
   lvScaleMax: 1.25, entryFlairLv: 5, entryFlairLv2: 10, dropHeight: 40, dropHeightVip: 48,
-  lamMoKhiLia: true, doMoPhanConLai: 0.55, tocDoNhay: 'thuong', partyMaxNhanhHon: true,
+  lamMoKhiLia: true, doMoPhanConLai: 0.55, tocDoNhay: 'thuong', partyMaxNhanhHon: true, djDoiSauGiay: 24,
   guideLines: [], funnyLines: [],
 };
 let cfg = { ...DEFAULTS };
@@ -523,29 +523,37 @@ function screenShowFocus(f) {
 }
 function screenUpdateSub(txt) { if (screenFocusName) $('sfSub').textContent = txt; }
 
-/* ============ DJ CAM — DJ NV03 "sống" trên màn LED ============
-   Chế độ thường: DJ lớn sau quầy, LUÂN PHIÊN động tác headspin <-> scratch mỗi ~4s
-   (crossfade 2 lớp img, không cắt cứng). Chế độ cao trào KHÔNG có máy trạng thái riêng —
-   một tick 400ms ĐỌC trạng thái đạo diễn / Party Max sẵn có:
-     Party Max đang chạy hoặc cảnh QUÀ >=299 (prio >=100) -> bản xung-dai
-     cảnh QUÀ KHỦNG >=1000 (prio >=120)                    -> bản spotlight-dai
-   hết cao trào thì tự về luân phiên. Khi màn đang chiếu cận cảnh dancer
-   (screenShowFocus) thì việc LUÂN PHIÊN tạm dừng — hết focus tự chạy tiếp;
-   trạng thái cao trào vẫn được áp bên dưới lớp focus để nhả focus là đúng hình.
+/* ============ DJ CAM — HAI DJ màn hình NV16 (DJ MILA) / NV17 (DJ KAI) ============
+   Hai DJ chuyên trách màn LED (không xuống sàn), thay nhau theo CA: mỗi ca dài
+   cfg.djDoiSauGiay giây (mặc định 24s). Trong một ca, DJ đang trực LUÂN PHIÊN
+   mix <-> hype mỗi ~4s (crossfade 2 lớp img, không cắt cứng). Chế độ cao trào
+   KHÔNG có máy trạng thái riêng — tick 400ms ĐỌC trạng thái đạo diễn / Party Max:
+     Party Max đang chạy hoặc cảnh QUÀ >=299 (prio >=100) -> bản hype của DJ đang trực
+     cảnh QUÀ KHỦNG >=1000 (prio >=120)                    -> bản spot của DJ đang trực
+   hết cao trào thì tự về luân phiên. HẾT CA -> HIỆU ỨNG ĐỔI DJ (~0.9s, chỉ trong
+   màn): chớp sáng quét + tia laser + rung/glitch nhẹ + bảng "🔄 ĐỔI DJ!" + tên DJ
+   mới; DJ mới trượt/nảy vào kèm phát sáng, DJ cũ trượt ra. Khi màn đang chiếu cận
+   cảnh dancer (screenShowFocus) thì luân phiên VÀ đồng hồ ca đều tạm dừng — việc
+   đổi DJ bị HOÃN tới khi hết focus (không bao giờ chen ngang lớp focus); trạng
+   thái cao trào vẫn được áp bên dưới lớp focus để nhả focus là đúng hình.
    Mọi ảnh qua P.sped() nên tocDoNhay áp dụng cho cả DJ trên màn. */
-const DJ_FILES = {
-  rot: ['img/nv03-dj-headspin.gif', 'img/nv03-dj-scratch.gif'],
-  xung: 'img/nv03-dj-xung-dai.gif',
-  spot: 'img/nv03-dj-spotlight-dai.gif',
-};
-let djCur = { file: DJ_FILES.rot[0], mode: 'rot' }, djRotIdx = 0, djFrontA = true;
+const SCREEN_DJS = [
+  { code: 'nv16', name: 'MILA', full: 'DJ MILA', color: '#ff5ce1',
+    rot: ['img/nv16-mix.gif', 'img/nv16-hype.gif'], hype: 'img/nv16-hype.gif', spot: 'img/nv16-spot.gif' },
+  { code: 'nv17', name: 'KAI', full: 'DJ KAI', color: '#54f0ff',
+    rot: ['img/nv17-mix.gif', 'img/nv17-hype.gif'], hype: 'img/nv17-hype.gif', spot: 'img/nv17-spot.gif' },
+];
+const djNow = () => SCREEN_DJS[djIdx];
+let djIdx = 0, djShiftMs = 0;
+let djCur = { file: SCREEN_DJS[0].rot[0], mode: 'rot' }, djRotIdx = 0, djFrontA = true;
 let djLastSwap = Date.now(), djPreloadSig = null;
 function djPreload() {
-  const sig = P.sped(DJ_FILES.rot[0]);
+  const sig = P.sped(SCREEN_DJS[0].rot[0]);
   if (djPreloadSig === sig) return;
   djPreloadSig = sig;
-  for (const f of [...DJ_FILES.rot, DJ_FILES.xung, DJ_FILES.spot]) { const im = new Image(); im.src = P.sped(f); }
+  for (const dj of SCREEN_DJS) for (const f of [...dj.rot, dj.hype, dj.spot]) { const im = new Image(); im.src = P.sped(f); }
 }
+function djTag() { $('djCamTag').textContent = '🔴 DJ CAM · ' + djNow().name; }
 function djShow(file, mode) {
   if (djCur.file === file && djCur.mode === mode) return;
   djCur = { file, mode };
@@ -557,11 +565,46 @@ function djShow(file, mode) {
   if (back.getAttribute('src') === src) swap();
   else { const im = new Image(); im.onload = swap; im.onerror = swap; im.src = src; }
 }
+function djSwapShow(file) {   // DJ mới nảy/trượt vào lấp lánh, DJ cũ trượt ra (dùng lúc đổi ca)
+  const a = $('screenDJimgA'), b = $('screenDJimgB');
+  const front = djFrontA ? a : b, back = djFrontA ? b : a;
+  const src = P.sped(file);
+  const go = () => {
+    back.classList.add('pre');                       // đặt sẵn ngoài khung, không transition
+    back.src = src;
+    void back.offsetWidth;                           // ép trình duyệt ghi nhận vị trí bắt đầu
+    back.classList.remove('pre');
+    back.classList.add('pop', 'on');
+    front.classList.add('out'); front.classList.remove('on');
+    djFrontA = !djFrontA;
+    setTimeout(() => { back.classList.remove('pop'); front.classList.remove('out'); }, 750);
+  };
+  if (back.getAttribute('src') === src) go();
+  else { const im = new Image(); im.onload = go; im.onerror = go; im.src = src; }
+}
+function doDjSwap() {         // HẾT CA: chuyển DJ + chạy hiệu ứng đổi DJ ~0.9s trong màn
+  djShiftMs = 0;
+  djIdx = (djIdx + 1) % SCREEN_DJS.length;
+  djRotIdx = 0;
+  const dj = djNow();
+  djTag();
+  const fx = $('screenSwapFx');
+  fx.style.setProperty('--swapCol', dj.color);
+  $('swapName').textContent = dj.full;
+  fx.classList.remove('on'); void fx.offsetWidth; fx.classList.add('on');
+  $('screenInner').classList.add('glitching');
+  setTimeout(() => { fx.classList.remove('on'); $('screenInner').classList.remove('glitching'); }, 950);
+  djSwapShow(dj.rot[0]);
+  djCur = { file: dj.rot[0], mode: 'rot' };
+  djLastSwap = Date.now();
+  screenPush(`🔄 Đổi DJ — ${dj.full} lên sóng!`);
+}
 function djDesired() {   // suy trạng thái cao trào từ đạo diễn / Party Max — null = luân phiên thường
-  if (nowMs() < partyUntil) return { file: DJ_FILES.xung, mode: 'xung' };
+  const dj = djNow();
+  if (nowMs() < partyUntil) return { file: dj.hype, mode: 'xung' };
   const cur = Dir.cur;
-  if (cur && cur.gift && cur.prio >= 120) return { file: DJ_FILES.spot, mode: 'spot' };
-  if (cur && cur.gift && cur.prio >= 100) return { file: DJ_FILES.xung, mode: 'xung' };
+  if (cur && cur.gift && cur.prio >= 120) return { file: dj.spot, mode: 'spot' };
+  if (cur && cur.gift && cur.prio >= 100) return { file: dj.hype, mode: 'xung' };
   return null;
 }
 setInterval(() => {
@@ -569,9 +612,12 @@ setInterval(() => {
   const d = djDesired();
   $('screen').classList.toggle('hype', !!d);
   if (d) { djShow(d.file, d.mode); return; }
-  if (screenFocusName) return;                       // đang chiếu dancer cận cảnh -> DJ CAM nghỉ luân phiên
-  if (djCur.mode !== 'rot') djShow(DJ_FILES.rot[djRotIdx], 'rot');
-  else if (Date.now() - djLastSwap >= 4000) { djRotIdx = (djRotIdx + 1) % DJ_FILES.rot.length; djShow(DJ_FILES.rot[djRotIdx], 'rot'); }
+  if (screenFocusName) return;                       // đang chiếu dancer cận cảnh -> luân phiên + đồng hồ ca đều dừng, đổi DJ bị hoãn
+  const dj = djNow();
+  if (djCur.mode !== 'rot') djShow(dj.rot[djRotIdx], 'rot');
+  else if (Date.now() - djLastSwap >= 4000) { djRotIdx = (djRotIdx + 1) % dj.rot.length; djShow(dj.rot[djRotIdx], 'rot'); }
+  djShiftMs += 400;                                  // đồng hồ ca chỉ chạy khi không focus / không cao trào
+  if (djShiftMs >= Math.max(4, cfg.djDoiSauGiay || 24) * 1000) doDjSwap();
 }, 400);
 function djCamSpeedRefresh() {   // applySpeed gọi mỗi khi tocDoNhay đổi: nạp lại đúng bộ tốc độ
   djPreloadSig = null; djPreload();
@@ -1268,6 +1314,8 @@ W.test = {   // móc kiểm chứng / chụp ảnh demo
   soloNow: () => { const f = P.all().filter(p => !p.staff && !P.busy(p)); if (f.length) startSolo(f[0]); },
   pairNow: () => { const f = P.all().filter(p => !p.staff && !P.busy(p)); return f.length >= 2 ? startPair(f[0], f[1]) : false; },
   party: () => partyMax(),
+  djSwap: () => doDjSwap(),
+  dj: () => ({ idx: djIdx, name: djNow().full, file: djCur.file, mode: djCur.mode, shiftMs: djShiftMs, tag: $('djCamTag').textContent }),
   resetScores: () => resetScores(),
   clearFloor: () => { for (const p of P.all().filter(p => !p.staff)) P.removeUser(p.user.id); },
   fall: name => ensureDancer({ id: 'test-' + Date.now(), nickname: name || 'Khách Mới', avatar: '' }),
