@@ -94,9 +94,14 @@ function coupleScore(c, pts) {
 function renderBoard() {
   const top = Object.entries(scores).map(([key, s]) => ({ key, ...s })).sort((x, y) => y.score - x.score).slice(0, 3);
   const board = $('board');
-  board.style.display = top.length ? '' : 'none';
-  board.querySelector('ol').innerHTML = top.map((s, i) =>
-    `<li><span>${i === 0 ? '👑 ' : ''}${escapeHtml(s.a)} ❤ ${escapeHtml(s.b)}</span><em>${fmtNum(s.score)}</em></li>`).join('');
+  /* Bang LUON hien: chua co cap nao ghi diem thi hien dong moi choi thay vi
+     an han bang — truoc day an khi rong nen nhin nhu bang "bi mat" luc moi
+     mo game/chua co cap len san khau (Nguyen bao 2026-11-04). */
+  board.style.display = '';
+  board.querySelector('ol').innerHTML = top.length
+    ? top.map((s, i) =>
+      `<li><span>${i === 0 ? '👑 ' : ''}${escapeHtml(s.a)} ❤ ${escapeHtml(s.b)}</span><em>${fmtNum(s.score)}</em></li>`).join('')
+    : '<li><span>💌 Chưa có cặp nào — tag người thương để mở màn!</span></li>';
   P.setCrown(top.length ? coupleByKey.get(top[0].key) : null);
   if (top.length && top[0].key !== lastLeaderKey) {
     const first = lastLeaderKey === null;
@@ -170,15 +175,15 @@ async function mcPump() {
 function mcReact(prio, tplArr, vars) {
   mcSay(fill(pick(tplArr), vars || {}), prio);
 }
-function mcRandomLoop() {
+function mcRandomLoop(first) {
   const lo = (cfg.mcMinSec || 18) * 1000, hi = (cfg.mcMaxSec || 26) * 1000;
   setTimeout(() => {
     const funny = Math.random() < 0.45;
     const line = pick(funny ? MC.funny : MC.lines, MC.lastLine);
     MC.lastLine = line;
     if (line) mcSay(line, 1, 'random');
-    mcRandomLoop();
-  }, lo + Math.random() * Math.max(0, hi - lo));
+    mcRandomLoop(false);
+  }, first ? 5000 : lo + Math.random() * Math.max(0, hi - lo));   // câu đầu sau ~5s: mở game là thấy MC ngay, khỏi tưởng MC bị lỗi khi phòng đang vắng
 }
 
 /* ============ Bảng hướng dẫn / luật chơi ============ */
@@ -829,7 +834,9 @@ function applyPanelPos() {
 function applyConfig(c) {
   cfg = c || {};
   if (cfg.mcName) MC.name = cfg.mcName;
-  MC.lines = cfg.mcLines || []; MC.funny = cfg.mcFunny || []; MC.couple = cfg.mcCouple || [];
+  MC.lines = (cfg.mcLines && cfg.mcLines.length) ? cfg.mcLines : ['Một đám cưới vui là khi khách mời cười nhiều hơn cô dâu chú rể.', 'Tình yêu không cần hoàn hảo, chỉ cần hai người cùng tag nhau lên sân khấu là đủ.', 'Cả nhà thả tim thật nhiều để chúc phúc cho các cặp đôi nhé!'];
+  MC.funny = (cfg.mcFunny && cfg.mcFunny.length) ? cfg.mcFunny : ['MC dặn nhỏ: tag người yêu cũ vào đây MC tính phí gấp đôi nhé!', 'Ai còn độc thân giơ tay, MC nhìn thấy hết đấy, đừng trốn sau hàng ghế nữa!', 'Đi ăn cưới online mà không mất tiền mừng, thời đại này sướng thật!'];
+  MC.couple = cfg.mcCouple || [];
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
   MC.tagVang = cfg.mcTagVang || [];
   buildBanSets();
@@ -997,7 +1004,7 @@ if (isDemo) {
     .connect();
   setTimeout(initAudio, 300);
 }
-mcRandomLoop();
+mcRandomLoop(true);
 
 /* ============ Demo ============ */
 function startDemo() {
