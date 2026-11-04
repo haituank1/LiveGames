@@ -68,6 +68,8 @@ function preloadOne(file) {
     const attempt = () => {
       const img = new Image();
       img.onload = () => {
+        // "Tải xong" mà VẼ KHÔNG RA (file bị cắt cụt giữa chừng) cũng là hỏng -> đi ngả thử lại như lỗi
+        if (P.imgPaintOk && !P.imgPaintOk(img)) { img.onerror(); return; }
         assetState[file] = 'ok';
         if (window.__diag) (window.__diag.assets = window.__diag.assets || {})[file] = 'ok';
         if (img.decode) img.decode().catch(() => {});   // giải mã sẵn để lúc áp CSS hiện ngay, không chớp trắng
@@ -432,7 +434,11 @@ function bgRescue(file, tk, el) {
     if (tk !== bgToken) return;
     const url = n ? f + '?r=' + n : f;
     const img = new Image();
-    img.onload = () => { if (tk === bgToken) el.style.backgroundImage = `url("${url}")`; };
+    img.onload = () => {
+      if (tk !== bgToken) return;
+      if (P.imgPaintOk && !P.imgPaintOk(img)) { img.onerror(); return; }   // nền cụt: báo xong mà vẽ không ra -> đi tiếp chuỗi cứu hộ
+      el.style.backgroundImage = `url("${url}")`;
+    };
     img.onerror = () => {
       if (tk !== bgToken) return;
       if (n < 2) { setTimeout(() => probe(f, n + 1), 700); return; }

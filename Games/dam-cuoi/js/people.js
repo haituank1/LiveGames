@@ -204,23 +204,73 @@ function figHTML(p) {
 function setFigure(p) {
   const fw = p.el.querySelector('.figwrap');
   fw.innerHTML = figHTML(p);
-  watchFigure(fw.querySelector('img.chibi'));
+  watchFigure(fw.querySelector('img.chibi'), p);
 }
-function watchFigure(img) {
+/* KIỂM TRA HÌNH CÓ THẬT SỰ VẼ RA ĐƯỢC KHÔNG — gốc của lỗi "cặp lên sân
+   khấu chỉ thấy chip tên + vương miện, không thấy người" (Nguyen chụp
+   2026-11-04 19:58, tái hiện trúng phóc trong test): một file PNG bị
+   CẮT CỤT giữa chừng lúc tải (bridge/mạng nghẽn giữa buổi live, sprite
+   cô dâu/chú rể lại là file nặng nhất 350-630KB) vẫn còn header nguyên
+   vẹn nên trình duyệt báo complete + naturalWidth > 0 — cách kiểm tra
+   cũ tưởng hình ổn nên KHÔNG BAO GIỜ chữa, nhân vật tàng hình cả buổi
+   lễ dù file thử lại là có. Nay vẽ thử hình lên canvas nhỏ rồi soi
+   điểm ảnh nửa dưới: hình nguyên vẹn thì nửa dưới luôn có điểm đặc
+   (váy/thân/chân); hình cụt chỉ giải mã được vài dòng trên cùng, nửa
+   dưới trong suốt -> lộ ngay. main.js dùng chung hàm này qua
+   P.imgPaintOk cho preload + dò nền. */
+const _paintCv = document.createElement('canvas');
+function imgPaintOk(img) {
+  try {
+    if (!img.naturalWidth || !img.naturalHeight) return false;
+    const w = 48, h = Math.max(8, Math.round(48 * img.naturalHeight / img.naturalWidth));
+    _paintCv.width = w; _paintCv.height = h;
+    const ctx = _paintCv.getContext('2d', { willReadFrequently: true });
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    const d = ctx.getImageData(0, (h / 2) | 0, w, h - ((h / 2) | 0)).data;
+    for (let i = 3; i < d.length; i += 4) if (d[i] > 12) return true;
+    return false;
+  } catch (e) { return true; }   // chính khâu kiểm tra mà lỗi -> đừng kết tội hình đang tốt
+}
+P.imgPaintOk = imgPaintOk;
+/* Canh hỏng hình 2.0: ngoài lỗi hẳn (naturalWidth 0) còn bắt cả hình
+   CẮT CỤT (vẽ không ra) nhờ imgPaintOk. Chữa theo nấc: tải lại kèm
+   ?r= tối đa 2 lần -> vẫn hỏng thì ĐỔI SANG FILE DỰ PHÒNG (cô dâu/chú
+   rể dùng bộ flagship SETS_BASE[0] — hai người cùng lùi về một bộ nên
+   vẫn khớp nhau; khách dùng file khách khác) -> file dự phòng cũng
+   hỏng nốt mới ghi hộp chẩn đoán. Mục tiêu: nhân vật LUÔN có người,
+   thà mặc bộ dự phòng còn hơn tàng hình. */
+function watchFigure(img, p) {
   if (!img) return;
   const file = img.getAttribute('src');
-  let busts = 0, waits = 0;
+  let cur = file, busts = 0, waits = 0, swapped = false;
+  const fallbackFile = () => {
+    if (!p) return null;
+    if (p.outfit === 'bride') return SETS_BASE[0].bride;
+    if (p.outfit === 'groom') return SETS_BASE[0].groom;
+    const pool = isGirlFigure(p) ? GUEST_GIRLS : GUEST_BOYS;
+    return pool.find(f => f !== cur) || null;
+  };
+  const heal = () => {
+    if (busts < 2) { busts++; waits = 0; img.src = cur + (cur.includes('?') ? '&' : '?') + 'r=' + busts; setTimeout(check, 1500); return; }
+    const fb = fallbackFile();
+    if (!swapped && fb && fb !== cur) {
+      swapped = true; busts = 0; cur = fb;
+      if (window.__diag) window.__diag.errs.push('mat hinh ' + file + ' -> doi du phong ' + fb);
+      img.src = fb; setTimeout(check, 1500); return;
+    }
+    if (window.__diag) { window.__diag.errs.push('mat hinh: ' + file); window.__diag.uiErr = 'Nhân vật mất hình (' + file + ') — thử Ctrl+F5'; }
+  };
   const check = () => {
     if (!img.isConnected) return;                        // đã thay hình khác
-    if (img.complete && img.naturalWidth > 0) return;    // hình ổn
-    const broken = img.complete && img.naturalWidth === 0;
-    if (broken || waits >= 3) {
-      if (busts < 2) { busts++; waits = 0; img.src = file + (file.includes('?') ? '&' : '?') + 'r=' + busts; setTimeout(check, 1500); }
-      else if (window.__diag) { window.__diag.errs.push('mat hinh: ' + file); window.__diag.uiErr = 'Nhân vật mất hình (' + file + ') — thử Ctrl+F5'; }
-    } else { waits++; setTimeout(check, 1800); }
+    if (img.complete) {
+      if (img.naturalWidth > 0 && imgPaintOk(img)) return;   // hình ổn THẬT (vẽ ra được, không chỉ có header)
+      heal();                                                // complete nhưng hỏng hẳn hoặc bị cắt cụt
+    } else if (waits >= 3) heal();
+    else { waits++; setTimeout(check, 1800); }
   };
   img.onerror = () => { waits = 3; setTimeout(check, 250); };
-  setTimeout(check, 1800);
+  setTimeout(check, 1200);
 }
 function setOutfit(p, outfit) {
   p.outfit = outfit;
