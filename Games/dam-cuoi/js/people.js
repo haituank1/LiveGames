@@ -61,8 +61,8 @@ const SETS_ROYAL = [
   { name: 'Hoàng gia vàng', bride: 'img/royal-bride1.png', groom: 'img/royal-groom1.png' },
   { name: 'Hoàng gia phượng', bride: 'img/royal-bride2.png', groom: 'img/royal-groom2.png' },
 ];
-const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png'];
-const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png'];
+const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png', 'img/guest-girl3.png', 'img/guest-girl4.png'];
+const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.png', 'img/guest-boy4.png'];
 [...SETS_BASE, ...SETS_ROYAL].forEach(s => { for (const src of [s.bride, s.groom]) { const im = new Image(); im.src = src; } });
 [...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; });
 let tierLevel = 0;
@@ -132,14 +132,22 @@ let freePool = [];
    QUY TẮC CỨNG: nhân vật CHỈ đứng NGOÀI ellipse mặt bàn (ghế quanh bàn đặt chân
    ngoài mép bàn + lề an toàn; lưới điểm đứng cũng né ellipse phồng to) —
    TUYỆT ĐỐI không để chân nhân vật rơi lên mặt bàn. */
+/* Khung bàn ĐO TRỰC TIẾP trên tranh (lưới tọa độ % phủ lên cả 6 nền, 2026-11-04):
+   42 bàn / 8 hàng. Khung cũ 54 bàn/7 hàng là ước lượng — có bàn "ma" ở cột giữa
+   các hàng dưới (trên tranh là sàn đá/thảm) và lệch tâm tới ~3% ở nhiều bàn thật,
+   khiến ghế vòng quanh bàn ma lại rơi đúng lên mặt bàn thật = lỗi đứng trên bàn
+   mãi không hết. Cả 6 nền dùng CHUNG khung này (đã kiểm: hình học lệch nhau
+   không quá ±0.5%). Bàn ở mép (x 0.8/99.2, 1.5/98.5) bị cắt nửa ngoài khung —
+   vẫn phải có mặt để chặn đường đi. */
 const TABLE_ROWS = [
-  { y: 45, rx: 2.8, ry: 1.6, xs: [17, 24, 30, 36, 64, 70, 77, 84] },
-  { y: 50, rx: 3.3, ry: 1.9, xs: [14, 22, 29, 36, 64, 71, 78, 86] },
-  { y: 56, rx: 3.8, ry: 2.2, xs: [11, 20, 29, 37, 63, 71, 80, 89] },
-  { y: 63, rx: 4.3, ry: 2.5, xs: [8, 18, 28, 38, 62, 72, 82, 92] },
-  { y: 71, rx: 4.8, ry: 2.8, xs: [6, 16, 27, 38, 62, 73, 84, 94] },
-  { y: 80, rx: 5.5, ry: 3.2, xs: [4, 14, 26, 38, 62, 74, 86, 96] },
-  { y: 90, rx: 6.3, ry: 3.7, xs: [10, 24, 38, 62, 76, 90] },
+  { y: 42.8, rx: 2.6, ry: 1.4, xs: [16.5, 23.5, 30.5, 35.5, 64.5, 69.5, 76.5, 83.5] },
+  { y: 46.3, rx: 3.0, ry: 1.6, xs: [12.3, 20.5, 28.5, 71.5, 79.5, 87.7] },
+  { y: 50.3, rx: 3.5, ry: 1.9, xs: [9.3, 18.8, 28.3, 71.7, 81.2, 90.7] },
+  { y: 54.5, rx: 4.0, ry: 2.2, xs: [4.8, 15.8, 26.3, 73.7, 84.2, 95.2] },
+  { y: 59.8, rx: 4.6, ry: 2.6, xs: [0.8, 11.8, 24.3, 75.7, 88.2, 99.2] },
+  { y: 67.8, rx: 5.3, ry: 3.0, xs: [5.8, 21, 79, 94.2] },
+  { y: 78, rx: 6.1, ry: 3.5, xs: [1.5, 16.5, 83.5, 98.5] },
+  { y: 92.3, rx: 7.0, ry: 4.0, xs: [8.3, 91.7] },
 ];
 const PAINTED_TABLES = [];
 for (const r of TABLE_ROWS) for (const x of r.xs) PAINTED_TABLES.push({ x, y: r.y, rx: r.rx, ry: r.ry });

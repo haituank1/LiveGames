@@ -4,7 +4,13 @@
    - ĐẠO DIỄN CAMERA (ưu tiên cao nhất theo yêu cầu): hàng đợi có điểm ưu tiên —
      quà càng to điểm càng cao, lên LV ngang hàng quà lớn. Điểm: quà ≥1000: 120 · ≥299: 100 ·
      LÊN LV: 95 · quà ≥99: 85 · solo AU: 70 · quà ≥10: 65 · nhảy đôi: 60 · người mới rơi vào: 55 · tour: 10.
-     Cảnh mới điểm cao hơn được CHÈN sau thời gian giữ tối thiểu của cảnh hiện tại (directorMinHoldSec).
+     LUẬT LIA CAM (Nguyen chốt lại 2026-11-04): dancer đang được lia là ƯU TIÊN SỐ 1 — cảnh của họ
+     chạy TRỌN thời lượng; sự kiện khác xếp hàng theo điểm. NGOẠI LỆ DUY NHẤT: cảnh QUÀ có điểm
+     CAO HƠN HẲN được chen ngang sau thời gian giữ tối thiểu directorMinHoldSec (người tặng quà to
+     đã ủng hộ game) — cảnh bị chen bị huỷ, dancer của cảnh đó trở lại bình thường ngay.
+     Sự kiện mới cho CHÍNH dancer đang lia thì NÂNG CẤP cảnh tại chỗ (hình/zoom/lý do + kéo dài giờ kết thúc).
+     Party Max cũng xếp hàng (ưu tiên cao nhất, 200) sau cảnh đang lia. Chỉ cảnh đệm không có dancer đích
+     (tour ngắm sàn / toàn cảnh trực thăng) mới nhường đường ngay. Hết cảnh, dancer trở lại bình thường.
    - Vào phòng = RƠI TỪ TRÊN CAO xuống ô cố định (js/dancers.js), camera bám theo cú rơi.
    - Lưu trữ localStorage theo id TikTok: GIỮ 7 NGÀY (quá hạn tự xoá), tiến trình TUẦN
      (điểm bảng vàng / quà tuần / XP tuần) RESET MỖI THỨ 6 (resetDay cấu hình được). LV tính từ XP tích lũy.
@@ -29,7 +35,7 @@ const nowMs = () => performance.now();
 /* ============ Cấu hình: mặc định tại máy (khớp mapping) — LiveBridge config ghi đè ============ */
 const DEFAULTS = {
   musicOn: true, musicShuffle: true, musicVolume: 40, sfxOn: true, sfxVolume: 70,
-  soloSec: 20, pairSec: 20,
+  soloSec: 5.2, soloSoPhim: 6, pairSec: 20,
   camHomeZoom: 0.62, zoomEntry: 1.02, zoomEntryVip: 1.15, zoomGiftMid: 1.08, zoomGiftBig: 1.18,
   zoomGiftHuge: 1.32, zoomLevelup: 1.18, zoomSolo: 1.12, zoomPairMax: 1.1,
   durEntry: 3.6, durGiftMid: 5, durGiftBig: 7, durGiftHuge: 8.5, durLevelup: 6, directorMinHoldSec: 1.2,
@@ -158,6 +164,7 @@ function levelUp(user, rec, lv) {
     refreshVis(p);
     FX.ring(p.x / 100, p.y / 100, '#ffd76a');
     FX.burstAt(p.x / 100, (p.y - 6) / 100, '#ffd76a', 36);
+    FX.burstRainbow(p.x / 100, (p.y - 9) / 100, 18);
     FX.hearts(8, p.x / 100, (p.y - 12) / 100);
     P.sayBubble(p, `Mình lên cấp ${lv} rồi nè!`);
     Dir.request({
@@ -312,30 +319,73 @@ requestAnimationFrame(camLoop);
 
 /* ================================================================
    ĐẠO DIỄN CAMERA – hàng đợi ưu tiên (quà to > lên LV > quà vừa > solo > đôi > vào phòng > tour)
+   KHÓA LIA CAM: cảnh có dancer đích chạy trọn thời lượng — NGOẠI TRỪ cảnh QUÀ điểm cao hơn hẳn
+   được chen ngang sau directorMinHoldSec (người tặng quà to được ưu tiên — xem Dir.request).
    ================================================================ */
+let pendingParty = false;   // Party Max đã được gọi nhưng phải chờ cảnh lia cam hiện tại kết thúc
 const Dir = {
   cur: null, queue: [], locked: false, lastEndAt: 0,
   request(item) {
     if (camLockMode) return;
-    if (this.locked) return;                                   // Party Max đang giữ toàn cảnh
     item.startedAt = 0; item.endAt = 0;
-    if (!this.cur) { this.start(item); return; }
-    const held = nowMs() - this.cur.startedAt;
-    if (item.prio > this.cur.prio && held >= (cfg.directorMinHoldSec || 1.2) * 1000) {
-      this.end(this.cur);
-      this.start(item);
+    if (this.cur) {
+      // Sự kiện mới cho CHÍNH dancer đang được lia -> NÂNG CẤP cảnh tại chỗ (không xếp hàng cảnh thứ 2)
+      if (this.cur.kind === 'focus' && item.p && this.cur.p === item.p) { this.upgrade(item); return; }
+      // Cảnh hiện tại là cảnh ĐỆM (tour ngắm sàn noDim / toàn cảnh trực thăng — không có dancer đích)
+      // thì nhường đường ngay cho cảnh thật.
+      const curFiller = this.cur.noDim || !itemDancers(this.cur).length;
+      if (curFiller && !item.noDim) { this.end(this.cur); this.start(item); return; }
+      // CHEN NGANG DUY NHẤT CHO QUÀ (Nguyen chốt lại 2026-11-04): cảnh QUÀ có điểm CAO HƠN HẲN
+      // cảnh đang chạy thì được chen ngang sau thời gian giữ tối thiểu directorMinHoldSec —
+      // người tặng quà to đã ủng hộ game nên được ưu tiên. Cảnh bị chen bị HUỶ (không xếp hàng lại),
+      // dancer của cảnh đó trở lại bình thường qua Dir.end như thường lệ.
+      if (item.gift && item.prio > this.cur.prio && nowMs() - this.cur.startedAt >= (cfg.directorMinHoldSec || 1.2) * 1000) {
+        this.end(this.cur);
+        this.start(item);
+        return;
+      }
+      if (item.noDim) return;                                // tour là cảnh đệm: không bao giờ xếp hàng chờ
+      // Còn lại (mọi cảnh KHÔNG phải quà: lên LV / solo / nhảy đôi / vào phòng...): XẾP HÀNG theo điểm,
+      // chờ cảnh đang lia chạy trọn thời lượng — không bao giờ chen ngang.
+      this.enqueue(item);
       return;
     }
-    // xếp hàng: bỏ cảnh trùng người + trùng loại, giữ tối đa 6 cảnh điểm cao nhất
-    this.queue = this.queue.filter(x => !(x.p && item.p && x.p === item.p && x.prio === item.prio));
+    if (!this.locked) { this.start(item); return; }
+    this.enqueue(item);                                      // Party Max đang chạy: xếp hàng, chạy sau
+  },
+  enqueue(item) {
+    // Khử trùng theo dancer: mỗi người chỉ giữ 1 cảnh điểm cao nhất trong hàng đợi.
+    if (item.p) {
+      const ex = this.queue.findIndex(x => x.p === item.p);
+      if (ex >= 0) {
+        if (this.queue[ex].prio >= item.prio) return;        // cảnh đã chờ còn điểm cao hơn -> bỏ cảnh mới
+        this.queue.splice(ex, 1);
+      }
+    }
     this.queue.push(item);
-    this.queue.sort((a, b) => b.prio - a.prio);
+    this.queue.sort((a, b) => b.prio - a.prio);              // sort ổn định: điểm bằng nhau -> cảnh vào trước chạy trước
     if (this.queue.length > 6) this.queue.length = 6;
+  },
+  upgrade(item) {
+    // Nâng cấp cảnh đang lia của chính dancer đó: hình đẹp hơn / zoom của sự kiện lớn hơn,
+    // lý do trên lower-third đổi sang sự kiện mới, giờ kết thúc kéo dài (tổng cảnh tối đa 15s).
+    const cur = this.cur, t = nowMs();
+    const rank = v => v === 'spot' ? 2 : v === 'xung' ? 1 : 0;
+    if (rank(item.vis || 'xung') > rank(cur.vis || 'xung')) cur.vis = item.vis;
+    if ((item.prio || 0) > (cur.prio || 0)) { cur.prio = item.prio; if (item.zoom) cur.zoom = item.zoom; }
+    if (item.follow) cur.follow = true;
+    cur.endAt = Math.max(cur.endAt, Math.min(t + (item.dur || 6) * 1000, cur.startedAt + 15000));
+    if (item.reason) cur.reason = item.reason;
+    if (item.name) cur.name = item.name;
+    refreshVis(cur.p);
+    showCamtab({ ...cur, dur: Math.max(2.5, (cur.endAt - t) / 1000) });
   },
   start(item) {
     item.startedAt = nowMs();
     item.endAt = item.startedAt + (item.dur || 6) * 1000;
     this.cur = item;
+    // Cảnh của dancer này đã lên sóng -> mọi cảnh chờ khác của CHÍNH họ bị thay thế, xoá khỏi hàng đợi.
+    if (item.p) this.queue = this.queue.filter(x => x.p !== item.p);
     if (item.kind === 'overview') { Cam.overview(); }
     else if (item.kind === 'stage') { Cam.panTo(50, 47, 0.85); }
     else if (item.kind === 'pair' && item.pair) {
@@ -368,20 +418,29 @@ const Dir = {
   tick() {
     if (camLockMode || this.locked) return;
     const t = nowMs();
-    // cảnh điểm cao trong hàng đợi được chèn khi cảnh hiện tại đã giữ đủ lâu
+    // Cảnh QUÀ điểm cao hơn hẳn đến lúc cảnh hiện tại chưa giữ đủ min-hold thì nằm chờ ở đầu hàng đợi;
+    // vừa đủ min-hold là chen ngang ngay tại tick này (cảnh bị chen bị huỷ, không xếp hàng lại).
     if (this.cur && this.queue.length) {
       const head = this.queue[0];
-      if (head.prio > this.cur.prio && t - this.cur.startedAt >= (cfg.directorMinHoldSec || 1.2) * 1000) {
+      const headOk = (!head.expires || t < head.expires)
+        && !(head.p && !P.get(head.p.user.id))
+        && !(head.pair && (!P.get(head.pair[0].user.id) || !P.get(head.pair[1].user.id)));
+      if (headOk && head.gift && head.prio > this.cur.prio && t - this.cur.startedAt >= (cfg.directorMinHoldSec || 1.2) * 1000) {
         this.queue.shift();
-        if (!head.expires || t < head.expires) { this.end(this.cur); this.start(head); return; }
+        this.end(this.cur);
+        this.start(head);
+        return;
       }
     }
+    // Ngoài đường chen ngang cho quà ở trên: cảnh hiện tại chỉ kết thúc khi chạy TRỌN thời lượng (endAt).
     if (this.cur && t >= this.cur.endAt) this.end(this.cur);
     if (!this.cur) {
+      if (pendingParty) { pendingParty = false; startPartyMax(); return; }   // Party Max chờ sẵn: chạy ngay khi cảnh lia vừa kết thúc
       while (this.queue.length) {
         const s = this.queue.shift();
-        if (s.expires && t > s.expires) continue;
-        if (s.p && !P.get(s.p.user.id)) continue;
+        if (s.expires && t > s.expires) continue;                             // cảnh quá hạn chờ -> bỏ
+        if (s.p && !P.get(s.p.user.id)) continue;                             // dancer đã rời sàn -> bỏ
+        if (s.pair && (!P.get(s.pair[0].user.id) || !P.get(s.pair[1].user.id))) continue;
         this.start(s);
         return;
       }
@@ -477,12 +536,20 @@ function addEnergy(n) {
   if (energy >= 100) partyMax();
 }
 function partyMax() {
+  // Party Max cũng TÔN TRỌNG luật khóa lia cam: nếu đang có cảnh lia 1 dancer, nó xếp hàng
+  // với ưu tiên cao nhất và chỉ bắt đầu ngay khi cảnh đó kết thúc (Dir.tick kích hoạt).
+  // Không có cảnh lia (hoặc chỉ là cảnh đệm tour/toàn cảnh) thì bắt đầu ngay như trước.
+  if (Dir.locked || pendingParty) return;                    // đang Party Max / đã hẹn rồi
+  if (Dir.cur && itemDancers(Dir.cur).length) { pendingParty = true; return; }
+  startPartyMax();
+}
+function startPartyMax() {
   energy = 100; renderEnergy();
   partyUntil = nowMs() + 10000;
   Dir.locked = true;
   if (cfg.partyMaxNhanhHon && (cfg.tocDoNhay || 'thuong') !== 'nhanh') { speedOverride = 'nhanh'; applySpeed(); }
-  if (Dir.cur) Dir.end(Dir.cur);
-  Dir.queue.length = 0;
+  if (Dir.cur) Dir.end(Dir.cur);                             // lúc này chỉ có thể là cảnh đệm (tour/toàn cảnh)
+  // Hàng đợi KHÔNG bị xoá nữa: các cảnh nhân vật chờ sẽ chạy tiếp sau Party Max.
   Cam.overview();
   stageEl.classList.add('partymax');
   $('beams').classList.add('on');
@@ -504,9 +571,10 @@ function partyMax() {
     clearInterval(partyFxTimer);
     if (speedOverride) { speedOverride = null; applySpeed(); }
     Dir.locked = false;
+    Dir.lastEndAt = nowMs();
     energy = 30; renderEnergy();
     for (const p of P.all()) refreshVis(p);
-    Cam.home();
+    if (!Dir.queue.length) Cam.home();                       // còn cảnh chờ thì Dir.tick sẽ lia tới ngay, khỏi về home
   }, 10000);
 }
 W.onBeat = function () {
@@ -561,6 +629,19 @@ function judge(res) {
   else { solo.combo++; solo.best = Math.max(solo.best, solo.combo); A.good(); }
   showJudge(res);
   renderAU();
+  // Hiệu ứng theo nấc chấm tại vị trí dancer: PERFECT = nổ cầu vồng · GREAT = vàng · COOL = cyan
+  const p = solo.p, fxX = p.x / 100, fxY = (p.y - 7) / 100;
+  if (res === 'PERFECT') FX.burstRainbow(fxX, fxY, 24);
+  else if (res === 'GREAT') FX.burstAt(fxX, fxY, '#ffd76a', 16);
+  else if (res === 'COOL') FX.burstAt(fxX, fxY, '#7ed6ff', 12);
+  // Mốc combo: x3 pháo giấy nhỏ · x5 pháo giấy lớn + viền màn hình chớp màu
+  if (solo.combo === 3) FX.confetti(18);
+  if (solo.combo > 0 && solo.combo % 5 === 0) { FX.confetti(42); edgeGlow(); }
+}
+function edgeGlow() {
+  const el = $('edgeglow');
+  if (!el) return;
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
 }
 function advanceStep() {
   if (!solo) return;
@@ -576,7 +657,8 @@ function autoJudge() {
 }
 function startSolo(p) {
   if (!p || solo || p.paired || p.staff) return;
-  const len = 12;
+  const len = Math.max(4, cfg.soloSoPhim || 6);                       // số phím mỗi lượt (config soloSoPhim, mặc định 6)
+  const stepMs = Math.max(600, Math.round((cfg.soloSec || 5.2) * 1000 / len));   // nhịp mỗi phím (~0.87s): tổng lượt ≈ soloSec (~5.2s) + nhịp FINISH
   solo = { p, seq: Array.from({ length: len }, () => Math.floor(Math.random() * 4)), marks: {}, tally: {}, idx: 0, score: 0, combo: 0, best: 0, judged: false };
   P.setFocus(p, true);
   refreshVis(p);
@@ -586,7 +668,7 @@ function startSolo(p) {
     if (Math.random() < 0.4) P.sayBubble(nb, ['Cố lên!', 'Quẩy đi bạn ơi!', 'Đỉnh quá!'][Math.floor(Math.random() * 3)]);
   }
   Dir.request({
-    kind: 'focus', p, prio: 70, dur: (cfg.soloSec || 20) + 4, zoom: cfg.zoomSolo, follow: true, vis: 'xung',
+    kind: 'focus', p, prio: 70, dur: (cfg.soloSec || 5.2) + 0.8, zoom: cfg.zoomSolo, follow: true, vis: 'xung',
     reason: '🎤 SOLO AU', name: p.user.nickname,
   });
   screenPush(`🎤 ${p.user.nickname} solo tại ô ${p.home ? p.home.id : '?'}`);
@@ -597,8 +679,8 @@ function startSolo(p) {
     if (!solo) return;
     if (!solo.judged) judge(autoJudge());
     setTimeout(advanceStep, 240);
-  }, 980);
-  setTimeout(() => { if (solo === mySolo) endSolo(); }, (cfg.soloSec || 20) * 1000 + 4000);
+  }, stepMs);
+  setTimeout(() => { if (solo === mySolo) endSolo(); }, (cfg.soloSec || 5.2) * 1000 + 1500);
 }
 function endSolo() {
   if (!solo) return;
@@ -654,7 +736,10 @@ setInterval(() => {
   if (pair) { push(pair[0]); push(pair[1]); }
   if (Dir.cur) itemDancers(Dir.cur).forEach(push);
   const all = P.all();
-  for (let i = 0; i < 6 && all.length; i++) push(all[(ambCursor + i) % all.length]);
+  // Hào quang ưu tiên dancer ĐANG TRONG/GẦN khung camera (cull đã ẩn dancer ngoài khung bằng display:none)
+  const inView = all.filter(p => p.el.style.display !== 'none');
+  const pool = inView.length ? inView : all;
+  for (let i = 0; i < 6 && pool.length; i++) push(pool[(ambCursor + i) % pool.length]);
   ambCursor += 3;
   for (const p of emitters) FX.ambient(P.charOf(p).fx, p.x / 100, p.y / 100);
 }, 950);
@@ -726,11 +811,12 @@ function grandArrival(user) {   // quà ≥99: đổ bộ ngay tại ô — cán
   showBanner(`👑 ${user.nickname} ĐỔ BỘ SÀN NHẢY!`, 5600);
   screenPush(`👑 ${user.nickname} đổ bộ sàn nhảy!`);
   Dir.request({
-    kind: 'focus', p, prio: 85, dur: cfg.durGiftBig, zoom: cfg.zoomGiftBig, follow: true, vis: 'xung',
+    kind: 'focus', p, prio: 85, dur: cfg.durGiftBig, zoom: cfg.zoomGiftBig, follow: true, vis: 'xung', gift: true,
     reason: '🎁 QUÀ LỚN · ĐỔ BỘ', name: user.nickname,
   });
   FX.fireworks(4); FX.moneyRain(70); FX.confetti(80);
   FX.burstAt(p.x / 100, (p.y - 10) / 100, '#ffd76a', 34);
+  FX.burstRainbow(p.x / 100, (p.y - 12) / 100, 16);
   A.fanfare();
 }
 let vipBusy = false;
@@ -741,7 +827,7 @@ function vipArrival(user) {   // quà ≥299: trực thăng bay ngang, camera to
   showBanner(`🚁 VIP ${user.nickname} ĐANG ĐÁP XUỐNG SÀN NHẢY!`, 5000);
   toast(`🚁 VIP ${user.nickname} tới bằng trực thăng!`, true);
   screenPush(`🚁 VIP ${user.nickname} đáp trực thăng xuống sàn!`);
-  Dir.request({ kind: 'overview', prio: 100, dur: 3.4, reason: '🚁 VIP ĐÁP TRỰC THĂNG', name: user.nickname });
+  Dir.request({ kind: 'overview', prio: 100, dur: 3.4, gift: true, reason: '🚁 VIP ĐÁP TRỰC THĂNG', name: user.nickname });
   const heli = $('heli');
   heli.classList.remove('fly'); void heli.offsetWidth; heli.classList.add('fly');
   A.fanfare();
@@ -751,7 +837,7 @@ function vipArrival(user) {   // quà ≥299: trực thăng bay ngang, camera to
     refreshVis(p);
     P.grandEntrance(p, 7);
     Dir.request({
-      kind: 'focus', p, prio: 100, dur: cfg.durGiftBig, zoom: cfg.zoomGiftBig, follow: true, vis: 'spot',
+      kind: 'focus', p, prio: 100, dur: cfg.durGiftBig, zoom: cfg.zoomGiftBig, follow: true, vis: 'spot', gift: true,
       reason: '🎁 VIP · SPOTLIGHT', name: user.nickname,
     });
     FX.fireworks(5); FX.moneyRain(90);
@@ -771,9 +857,10 @@ function hugeCelebration(user) {   // quà ≥1000: ăn mừng toàn sàn + focu
   A.fanfare(); A.cheer();
   p.spotUntil = nowMs() + (cfg.durGiftHuge || 8.5) * 1000;
   refreshVis(p);
+  FX.burstRainbow(p.x / 100, (p.y - 12) / 100, 22);
   P.grandEntrance(p, 8);
   Dir.request({
-    kind: 'focus', p, prio: 120, dur: cfg.durGiftHuge, zoom: cfg.zoomGiftHuge, follow: true, vis: 'spot',
+    kind: 'focus', p, prio: 120, dur: cfg.durGiftHuge, zoom: cfg.zoomGiftHuge, follow: true, vis: 'spot', gift: true,
     reason: '💎 QUÀ KHỦNG ≥1000 XU', name: user.nickname,
   });
 }
@@ -797,7 +884,7 @@ function giftFx(user, dia, giftName) {
     FX.moneyRain(24);
     toast(`💰 ${user ? user.nickname : 'Khách'} làm NỔ HŨ VÀNG!`, true);
     if (p) Dir.request({
-      kind: 'focus', p, prio: 65, dur: cfg.durGiftMid, zoom: cfg.zoomGiftMid, follow: true, vis: 'xung',
+      kind: 'focus', p, prio: 65, dur: cfg.durGiftMid, zoom: cfg.zoomGiftMid, follow: true, vis: 'xung', gift: true,
       reason: '💰 NỔ HŨ VÀNG', name: user.nickname,
     });
     return;
@@ -1119,13 +1206,14 @@ function startDemo() {
 
 W.handle = handle; W.chat = onChat;
 W.energy = { add: addEnergy, party: partyMax, get: () => energy };
-W.dir = { state: () => ({ cur: Dir.cur ? { prio: Dir.cur.prio, kind: Dir.cur.kind, name: Dir.cur.name } : null, queue: Dir.queue.length, locked: Dir.locked }) };
+W.dir = { state: () => ({ cur: Dir.cur ? { prio: Dir.cur.prio, kind: Dir.cur.kind, name: Dir.cur.name, pId: Dir.cur.p ? Dir.cur.p.user.id : (Dir.cur.pair ? Dir.cur.pair.map(p => p.user.id).join('+') : null), remainMs: Math.max(0, Math.round(Dir.cur.endAt - nowMs())) } : null, queue: Dir.queue.length, queueDetail: Dir.queue.map(x => ({ prio: x.prio, name: x.name || null, pId: x.p ? x.p.user.id : null })), locked: Dir.locked, pendingParty }) };
 W.test = {   // móc kiểm chứng / chụp ảnh demo
   gift: (dia, idx) => { const all = P.all().filter(p => !p.staff); const p = all[idx || 0]; if (p) giftFx(p.user, dia, 'Quà test'); },
   lvup: () => { const all = P.all().filter(p => !p.staff); if (!all.length) return; const u = all[0].user; const rec = recordOf(u); const cur = lvOf(rec.xp); addXP(u, (cfg.levelXp[cur] || 1e9) - rec.xp + 1); },
   soloNow: () => { const f = P.all().filter(p => !p.staff && !P.busy(p)); if (f.length) startSolo(f[0]); },
   pairNow: () => { const f = P.all().filter(p => !p.staff && !P.busy(p)); return f.length >= 2 ? startPair(f[0], f[1]) : false; },
   party: () => partyMax(),
+  resetScores: () => resetScores(),
   clearFloor: () => { for (const p of P.all().filter(p => !p.staff)) P.removeUser(p.user.id); },
   fall: name => ensureDancer({ id: 'test-' + Date.now(), nickname: name || 'Khách Mới', avatar: '' }),
   state: () => ({ dancers: P.count(), real: P.realCount(), staff: P.all().filter(p => p.staff).length, stage: stageIds, pair: !!pair, solo: !!solo, dir: W.dir.state(), dim: worldEl.classList.contains('focusing'), spd: document.documentElement.style.getPropertyValue('--spd') }),

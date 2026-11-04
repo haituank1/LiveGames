@@ -21,12 +21,23 @@
   #bstage{position:absolute;left:50%;top:56.5%;transform:translate(-50%,-50%);width:46%;height:5%;z-index:2;pointer-events:none;transition:filter .12s;
     background:radial-gradient(ellipse at 50% 50%,rgba(255,190,120,.34),rgba(255,110,60,.12) 55%,transparent 75%)}
   #stage.beat #bstage{filter:brightness(1.6)}
-  /* chùm đèn quét (Party Max / khoảnh khắc lớn) */
-  #beams{position:absolute;inset:-18% -6%;z-index:6;opacity:0;transition:opacity 1.2s;pointer-events:none;
+  /* chùm đèn quét — LUÔN quét nhẹ + tự đổi màu (hue) cho sàn lúc nào cũng sống; khoảnh khắc lớn thì rực hẳn */
+  #beams{position:absolute;inset:-18% -6%;z-index:6;opacity:.34;transition:opacity 1.2s;pointer-events:none;
     background:conic-gradient(from 180deg at 50% -10%,transparent 0deg,rgba(255,80,200,.20) 12deg,transparent 26deg,rgba(80,200,255,.18) 44deg,transparent 60deg,rgba(255,230,120,.2) 84deg,transparent 100deg,rgba(255,80,200,.18) 128deg,transparent 146deg,rgba(80,200,255,.2) 172deg,transparent 190deg,rgba(255,230,120,.18) 214deg,transparent 232deg,rgba(255,80,200,.2) 258deg,transparent 276deg,rgba(80,200,255,.18) 300deg,transparent 318deg,rgba(255,230,120,.2) 342deg,transparent 360deg);
-    animation:beams 18s linear infinite}
+    animation:beams 18s linear infinite,beamsHue 26s linear infinite}
   #beams.on{opacity:1}
   @keyframes beams{to{transform:rotate(360deg)}}
+  @keyframes beamsHue{to{filter:hue-rotate(360deg)}}
+  /* quầng sáng sàn đổi màu luân phiên (phủ cả khung hình, blend screen) — sàn "thở" theo nhạc */
+  #floorglow{position:absolute;inset:0;z-index:3;pointer-events:none;mix-blend-mode:screen;opacity:.5;transition:filter .12s;
+    background:radial-gradient(ellipse 90% 42% at 50% 88%,rgba(255,90,180,.20),transparent 65%),radial-gradient(ellipse 70% 34% at 22% 96%,rgba(70,190,255,.16),transparent 65%),radial-gradient(ellipse 70% 34% at 78% 96%,rgba(255,200,80,.15),transparent 65%);
+    animation:floorHue 19s linear infinite}
+  #stage.beat #floorglow{filter:brightness(1.55)}
+  @keyframes floorHue{to{filter:hue-rotate(360deg)}}
+  /* viền sáng 4 cạnh chớp màu khi đạt mốc combo solo */
+  #edgeglow{position:absolute;inset:0;z-index:1640;pointer-events:none;opacity:0}
+  #edgeglow.pop{animation:edgeFlash .75s ease-out}
+  @keyframes edgeFlash{0%{opacity:0;box-shadow:inset 0 0 0 3px rgba(255,255,255,.9),inset 0 0 42px 10px rgba(255,120,220,.55)}35%{opacity:1}100%{opacity:0;box-shadow:inset 0 0 0 3px rgba(255,255,255,0),inset 0 0 60px 18px rgba(120,200,255,.35)}}
   /* chùm đèn bám theo dancer ĐANG RƠI */
   #fallcone{position:absolute;width:17%;height:46%;z-index:8;pointer-events:none;opacity:0;transition:opacity .35s;
     transform:translateX(-50%);clip-path:polygon(43% 0,57% 0,100% 100%,0 100%);mix-blend-mode:screen;
@@ -299,6 +310,8 @@
     <canvas id="fx"></canvas>
     <img id="heli" src="img/heli.png" alt="">
   </div>
+  <div id="floorglow"></div>
+  <div id="edgeglow"></div>
   <div id="judge"></div>
   <div id="bigtext"></div>
   <div id="banner"></div>

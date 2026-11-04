@@ -29,10 +29,23 @@ Kiến trúc phòng + camera port từ game đám cưới (1 ảnh phòng lớn,
   trước podium — xong đều quay về đúng ô nhà.
 - **ĐẠO DIỄN CAMERA theo điểm ưu tiên** (yêu cầu trọng tâm của V4): hàng đợi cảnh có điểm —
   **quà ≥1000 xu: 120 · quà ≥299: 100 · LÊN LV: 95 · quà ≥99: 85 · solo AU: 70 · quà ≥10: 65 ·
-  nhảy đôi: 60 · người mới rơi vào: 55 · tour ngắm sàn: 10**. Quà càng to càng ưu tiên;
-  cảnh điểm cao hơn được chèn sau thời gian giữ tối thiểu `directorMinHoldSec` (mặc định 1.2s).
+  nhảy đôi: 60 · người mới rơi vào: 55 · tour ngắm sàn: 10**. Quà càng to càng ưu tiên khi XẾP HÀNG.
+  **LUẬT LIA CAM** (Nguyen chốt lại 2026-11-04): dancer đang được lia là **ưu tiên số 1** — cảnh của họ
+  chạy **TRỌN thời lượng cấu hình**. Sự kiện khác xếp hàng, điểm cao chạy trước (điểm bằng nhau
+  thì cảnh vào trước chạy trước); mỗi dancer chỉ giữ 1 cảnh chờ điểm cao nhất. **Ngoại lệ duy nhất —
+  QUÀ LỚN CHEN NGANG:** cảnh **quà** (cờ `gift` trong code: ≥10 xu = 65 · ≥99 = 85 · ≥299 = 100 ·
+  ≥1000 = 120) có điểm **cao hơn hẳn** cảnh đang chạy thì được chen ngang sau thời gian giữ tối thiểu
+  `directorMinHoldSec` (mặc định 1.2s) — vì người tặng quà to đã ủng hộ game. Cảnh bị chen bị **huỷ hẳn**
+  (không xếp hàng lại), dancer của cảnh đó trở lại bình thường ngay. Mọi cảnh **không phải quà**
+  (lên LV 95 · solo 70 · nhảy đôi 60 · vào phòng 55) **không bao giờ chen ngang**, chỉ xếp hàng.
+  Sự kiện mới cho **chính dancer đang lia** không tạo cảnh 2 mà **nâng cấp cảnh tại chỗ**: hình/zoom theo
+  sự kiện lớn hơn, lý do lower-third cập nhật, giờ kết thúc kéo dài (tổng cảnh tối đa 15s).
+  **Party Max xếp hàng với ưu tiên cao nhất (200)** sau cảnh lia đang chạy (bắt đầu ngay khi cảnh đó kết
+  thúc) và 10s Party Max cũng không bị cảnh nhân vật chen ngang (chúng xếp hàng chạy tiếp sau). Chỉ cảnh
+  đệm không có dancer đích — **tour ngắm sàn / toàn cảnh trực thăng** — mới nhường đường ngay cho cảnh
+  thật. Hết cảnh, dancer **trở lại bình thường**: GIF chữ ký tại ô, tắt vòng focus, bỏ làm mờ phần còn lại.
   Mỗi cảnh có thời lượng + mức zoom riêng trong config. Có **lower-third** hiện tên + lý do
-  (🎁 QUÀ / ⬆ LÊN CẤP / 👋 MỚI VÀO…). Party Max **khóa đạo diễn**, ép camera về toàn cảnh rồi mới nhả.
+  (🎁 QUÀ / ⬆ LÊN CẤP / 👋 MỚI VÀO…).
   Camera chạy 1 vòng `requestAnimationFrame` duy nhất với **lò xo smooth-damp** (vị trí 0.55s, zoom 0.75s,
   chống vọt đích) + `clampXY` không bao giờ lia ra ngoài phòng + **culling** ẩn dancer ngoài khung mỗi ~220ms.
 - **Nhân vật = GIF động thật theo roster** (`img/`, nguồn `~/workspace/san-nhay-anim`): 11 nhân vật người chơi
@@ -58,8 +71,10 @@ Kiến trúc phòng + camera port từ game đám cưới (1 ảnh phòng lớn,
 - **XP / lên LV:** bình luận +2 XP (tối đa 1 lần/10s), quà +2 XP/xu, follow +5, mỗi 100 tim +5,
   solo được điểm/15, nhảy đôi +15. Đủ ngưỡng `levelXp` (LV1→LV20) thì **LÊN CẤP**: banner + fanfare +
   camera cận cảnh chúc mừng (ưu tiên 95) + GIF spotlight 4 giây.
-- **Solo AU tại ô:** dancer solo theo vòng (gõ `solo` / `lên bục` để ưu tiên), dãy 12 phím ← ↑ ↓ →,
-  chấm **PERFECT / GREAT / COOL / BAD / MISS**, COMBO, bảng tally dọc bên phải, banner FINISH (~20s/lượt).
+- **Solo AU tại ô:** dancer solo theo vòng (gõ `solo` / `lên bục` để ưu tiên), dãy **6 phím** ← ↑ ↓ →
+  (config `soloSoPhim`), nhịp mỗi phím = `soloSec`/`soloSoPhim` ≈ 0.87s nên cả lượt chỉ ~**5–6 giây**
+  (config `soloSec`, mặc định 5.2) — cảnh camera solo cũng dài đúng bằng lượt solo, nhả camera ngay khi FINISH.
+  Chấm **PERFECT / GREAT / COOL / BAD / MISS**, COMBO, bảng tally dọc bên phải, banner FINISH.
   Khán giả giúp bằng cách bình luận đúng phím `trái / lên / xuống / phải`.
 - **Nhảy đôi:** bình luận `nhảy đôi` (+ tag tên bạn nhảy) → cặp ra 2 điểm trước podium, tim bay,
   camera bám theo cặp, xong ai về ô nấy (+15 XP mỗi người).
@@ -103,3 +118,11 @@ Kiến trúc phòng + camera port từ game đám cưới (1 ảnh phòng lớn,
   Game đổi tốc độ = đổi thư mục ảnh (dancers.js `sped()`), đồng thời nhân thời lượng animation hào
   quang/bob qua biến CSS `--spd` (1.25 / 1 / 0.77). `partyMaxNhanhHon` = true: trong Party Max cả
   sàn tạm nhảy bản `nhanh`, hết Party Max trả về tốc độ config.
+- **Hiệu ứng luôn màu mè** (yêu cầu 2026-11-04: "màu mè hoa hoè luôn luôn", không chỉ lúc có sự kiện lớn):
+  chùm đèn `#beams` **luôn quét nhẹ + tự xoay hue**, quầng sáng sàn `#floorglow` đổi màu luân phiên và
+  bừng sáng theo phách nhạc, **mưa kim tuyến** canvas rơi thường trực, hào quang theo nhân vật ưu tiên
+  dancer **đang trong khung camera**. Chấm solo có hiệu ứng riêng theo nấc: **PERFECT = nổ cầu vồng
+  (`FX.burstRainbow`) · GREAT = vàng · COOL = cyan**, mốc combo x3/x5 có pháo giấy (+ chớp viền màn
+  hình `#edgeglow` ở x5). Sự kiện (lên cấp / đổ bộ / quà khủng / đáp đất LV cao) đều thêm điểm nhấn
+  cầu vồng đa hue; pháo hoa 2 tông màu. Trần hạt canvas giữ nguyên (1500) và culling không đổi nên
+  hiệu năng không đổi.

@@ -251,6 +251,8 @@ function land(p) {
   if (fx) {
     fx.ring(p.x / 100, p.y / 100, p.flair >= 1 ? '#ffd76a' : charById(p.cls).color);
     fx.burstAt(p.x / 100, (p.y - 4) / 100, charById(p.cls).color, p.flair >= 2 ? 34 : p.flair >= 1 ? 24 : 15);
+    fx.burstAt(p.x / 100, (p.y - 4) / 100, '#ffffff', 5);                       // tia trắng điểm xuyết cho cú đáp thêm màu
+    if (p.flair >= 1 && fx.burstRainbow) fx.burstRainbow(p.x / 100, (p.y - 5) / 100, 14);   // khách LV cao đáp đất nổ cầu vồng
     if (p.flair >= 2) { fx.ring(p.x / 100, p.y / 100, '#ffffff'); fx.twinkleAt(p.x / 100, (p.y - 12) / 100, '#ffd76a', 6); }
   }
   const chip = p.el.querySelector('.chip');

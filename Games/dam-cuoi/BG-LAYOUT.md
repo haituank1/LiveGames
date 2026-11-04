@@ -35,19 +35,28 @@ Vùng CẤM đứng (phải vẽ trống, nhân vật không bao giờ đặt ch
 - **2 cột vòm hoa:** x 26–33% và 67–74% ở ngang mặt bục.
 - **Bậc thang giữa:** x 40–60%, y 42–46% — chỉ đi qua khi lên/xuống, không đứng lại.
 
-## Bàn tiệc — 54 bàn, ellipse theo hàng (tâm y, bán kính rx × ry, các tâm x)
+## Bàn tiệc — 42 bàn, ellipse theo hàng (tâm y, bán kính rx × ry, các tâm x)
+
+ĐO TRỰC TIẾP trên tranh bằng lưới tọa độ % (2026-11-04), CẢ 6 nền dùng chung
+khung này (đã phủ lưới kiểm từng nền: hình học lệch nhau không quá ±0.5%).
+Khung cũ 54 bàn/7 hàng là ước lượng và SAI: có bàn "ma" ở cột giữa các hàng
+dưới (trên tranh là sàn đá/thảm) và lệch tâm tới ~3% ở nhiều bàn thật — ghế
+vòng quanh bàn ma rơi đúng lên mặt bàn thật, đó là gốc của lỗi "đứng trên bàn".
 
 | Hàng y% | rx% | ry% | Tâm x% |
 |---|---|---|---|
-| 45 | 2.8 | 1.6 | 17, 24, 30, 36 · 64, 70, 77, 84 |
-| 50 | 3.3 | 1.9 | 14, 22, 29, 36 · 64, 71, 78, 86 |
-| 56 | 3.8 | 2.2 | 11, 20, 29, 37 · 63, 71, 80, 89 |
-| 63 | 4.3 | 2.5 | 8, 18, 28, 38 · 62, 72, 82, 92 |
-| 71 | 4.8 | 2.8 | 6, 16, 27, 38 · 62, 73, 84, 94 |
-| 80 | 5.5 | 3.2 | 4, 14, 26, 38 · 62, 74, 86, 96 |
-| 90 | 6.3 | 3.7 | 10, 24, 38 · 62, 76, 90 |
+| 42.8 | 2.6 | 1.4 | 16.5, 23.5, 30.5, 35.5 · 64.5, 69.5, 76.5, 83.5 |
+| 46.3 | 3.0 | 1.6 | 12.3, 20.5, 28.5 · 71.5, 79.5, 87.7 |
+| 50.3 | 3.5 | 1.9 | 9.3, 18.8, 28.3 · 71.7, 81.2, 90.7 |
+| 54.5 | 4.0 | 2.2 | 4.8, 15.8, 26.3 · 73.7, 84.2, 95.2 |
+| 59.8 | 4.6 | 2.6 | 0.8, 11.8, 24.3 · 75.7, 88.2, 99.2 |
+| 67.8 | 5.3 | 3.0 | 5.8, 21 · 79, 94.2 |
+| 78 | 6.1 | 3.5 | 1.5, 16.5 · 83.5, 98.5 |
+| 92.3 | 7.0 | 4.0 | 8.3 · 91.7 |
 
-Bàn tròn phủ khăn, tâm có hoa trang trí. Bàn xa nhỏ, bàn gần to (phối cảnh như bảng).
+Bàn tròn phủ khăn, tâm có hoa trang trí. Bàn xa nhỏ, bàn gần to (phối cảnh như
+bảng). Bàn ở mép (x 0.8/99.2, 1.5/98.5) bị cắt nửa ngoài khung — vẫn phải có
+mặt trong bảng để chặn đường đi và tính ghế.
 
 ## Luật đứng của nhân vật (đã cài trong js/people.js — TABLE_ROWS / inTable)
 

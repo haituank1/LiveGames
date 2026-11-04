@@ -26,12 +26,13 @@ E.firework = function (x, y, color) {
   const cx = x != null ? x * w : rand(w * 0.15, w * 0.85);
   const cy = y != null ? y * h : rand(h * 0.1, h * 0.34);
   const col = color || FW_COLORS[Math.floor(Math.random() * FW_COLORS.length)];
+  const col2 = FW_COLORS[Math.floor(Math.random() * FW_COLORS.length)];   // tông phụ cho pháo hoa 2 màu
   const n = 44 + Math.floor(rand(0, 24));
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2 + rand(-0.08, 0.08);
     const sp = rand(90, 250) * (h / 800);
     add({ kind: 'spark', x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-      life: 0, max: rand(0.7, 1.3), size: rand(1.6, 3.2), color: col, grav: 60, drag: 1.6 });
+      life: 0, max: rand(0.7, 1.3), size: rand(1.6, 3.2), color: Math.random() < 0.24 ? col2 : col, grav: 60, drag: 1.6 });
   }
   add({ kind: 'flash', x: cx, y: cy, vx: 0, vy: 0, life: 0, max: 0.35, size: rand(26, 40), color: col, grav: 0, drag: 0 });
   if (W.audio) W.audio.boom();
@@ -78,6 +79,15 @@ E.burstAt = function (x, y, color, n = 16) {   // tia màu lớp nhân vật khi
     add({ kind: 'spark', x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
       life: 0, max: rand(0.5, 0.9), size: rand(1.6, 3), color, grav: 30, drag: 1.8 });
   }
+};
+E.burstRainbow = function (x, y, n = 22) {   // bùng nổ cầu vồng: tia đủ màu + chớp trắng ở tâm
+  const cx = x * w, cy = y * h;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + rand(-0.15, 0.15), sp = rand(60, 160) * (h / 800);
+    add({ kind: 'spark', x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      life: 0, max: rand(0.55, 1), size: rand(1.8, 3.4), color: FW_COLORS[i % FW_COLORS.length], grav: 30, drag: 1.8 });
+  }
+  add({ kind: 'flash', x: cx, y: cy, vx: 0, vy: 0, life: 0, max: 0.32, size: rand(20, 28), color: '#ffffff', grav: 0, drag: 0 });
 };
 
 /* ---------- Hiệu ứng ambient theo lớp (v3) ----------
@@ -141,11 +151,12 @@ function loop(t) {
   requestAnimationFrame(loop);
   const dt = Math.min(0.05, lastT ? (t - lastT) / 1000 : 0.016); lastT = t;
   ctx.clearRect(0, 0, w, h);
-  sparkleAcc += dt * (disco ? 6 : 1.2);
+  sparkleAcc += dt * (disco ? 9 : 2.6);   // lấp lánh thường trực khắp sàn (mưa kim tuyến nhẹ, luôn có)
   while (sparkleAcc >= 1) {
     sparkleAcc--;
-    add({ kind: 'twinkle', x: rand(0, w), y: rand(h * 0.04, h * 0.55), vx: 0, vy: rand(-4, 2),
-      life: 0, max: rand(1, 2), size: rand(1.4, 3), color: FW_COLORS[Math.floor(Math.random() * FW_COLORS.length)], grav: 0, drag: 0 });
+    const falling = Math.random() < 0.45;   // một phần là kim tuyến RƠI xuống chậm, phần còn lại nhấp nháy tại chỗ
+    add({ kind: 'twinkle', x: rand(0, w), y: rand(h * 0.03, h * 0.8), vx: 0, vy: falling ? rand(9, 22) : rand(-4, 2),
+      life: 0, max: rand(1, 2.1), size: rand(1.4, 3.1), color: FW_COLORS[Math.floor(Math.random() * FW_COLORS.length)], grav: 0, drag: 0 });
   }
   for (let i = P.length - 1; i >= 0; i--) {
     const p = P[i];
