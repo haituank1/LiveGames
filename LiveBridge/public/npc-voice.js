@@ -191,7 +191,7 @@
        dòng thời gian chung — mối nối gần như không còn khoảng lặng, khác
        hẳn cách phát từng thẻ Audio nối đuôi. Mọi lỗi/không hỗ trợ -> trả
        null để speakParts lùi về cách phát Audio thường. */
-    async _playPartsWA(readies, text, opts, token) {
+    async _playPartsWA(readies, text, opts, token, onStarted) {
       const AC = global.AudioContext || global.webkitAudioContext;
       if (!AC) return null;
       let segs = null;
@@ -229,6 +229,9 @@
           off += s.dur;
         }
       } catch (_) { /* đã báo start rồi thì cứ coi như đã phát, tránh phát đúp bằng đường dự phòng */ }
+      // Đã xếp lịch phát = ĐÃ BẮT ĐẦU: báo cho speakParts ngay tại đây để
+      // nó chốt đi đường WebAudio và chờ phát hết, không lùi về dự phòng.
+      if (onStarted) { try { onStarted(); } catch (_) {} }
       const endAt = Date.now() + totalMs + 150;
       while (this._playing && Date.now() < endAt) await new Promise(r => setTimeout(r, 90));
       for (const s of srcs) { try { s.stop(); } catch (_) {} }
@@ -251,14 +254,27 @@
       ]);
       if (!readies || readies.some(e => !e || !e.url)) return { played: false, reason: 'not-ready' };
       // Đường chính: WebAudio cắt lặng đầu/cuối mỗi đoạn + xếp liền mạch.
-      // Bọc race waitMs: bất kỳ kẹt nào trong đường WebAudio cũng không
-      // được giữ câu quá hạn — quá hạn thì hủy (token) và lùi về dự phòng.
+      // Race waitMs CHỈ bao giai đoạn KHỞI ĐỘNG (giải mã + xếp lịch phát):
+      // lỗi cũ là race bao cả thời gian PHÁT — _playPartsWA chỉ resolve
+      // khi phát XONG nên mọi câu dài hơn waitMs (4s) đều bị tính là
+      // "quá hạn" giữa chừng, đường dự phòng liền phát LẠI câu đó đè lên
+      // bản WebAudio đang nói (Nguyen phản ánh 2026-11-04 23:14: voice
+      // chưa nói xong đã có bản copy nói lại, chậm hơn mấy giây). Nay:
+      // WA hễ đã bắt đầu (onStarted) là chốt đi đường WA và chờ phát
+      // hết; quá hạn mà CHƯA bắt đầu mới hủy (token chặn start muộn —
+      // kiểm tra token nằm ngay trước khối xếp lịch đồng bộ nên không
+      // lọt khe) và lùi về dự phòng.
       const waToken = {};
-      const wa = await Promise.race([
-        this._playPartsWA(readies, text, opts, waToken),
-        new Promise(r => setTimeout(() => { waToken.aborted = true; r(null); }, this.cfg.waitMs)),
+      let markStarted = null;
+      const startedP = new Promise(r => { markStarted = r; });
+      const waP = this._playPartsWA(readies, text, opts, waToken, () => markStarted('started'));
+      const which = await Promise.race([
+        startedP,
+        waP.then(v => (v ? 'started' : 'failed'), () => 'failed'),
+        new Promise(r => setTimeout(() => r('timeout'), this.cfg.waitMs)),
       ]);
-      if (wa) return wa;
+      if (which === 'started') { const wa = await waP; if (wa) return wa; }
+      else waToken.aborted = true;   // chặn WA start muộn sau khi đã lùi về dự phòng
       /* Đường dự phòng — Nạp đệm MỌI đoạn SONG SONG tới mức 'canplay' TRƯỚC khi phát đoạn đầu:
          bản cũ chờ metadata TỪNG đoạn theo thứ tự (mỗi đoạn tối đa 1200ms)
          rồi mới phát, và play() trên đoạn chưa có dữ liệu lại phải chờ nạp
