@@ -238,9 +238,11 @@ function mcRandomLoop(first) {
 /* ============ Bảng hướng dẫn / luật chơi ============ */
 let guideIdx = 0, guideTimer = null;
 function startGuide() {
-  const lines = [...(cfg.rulesLines || []), ...(cfg.guideLines || [])].filter(Boolean);
+  let lines = [...(cfg.rulesLines || []), ...(cfg.guideLines || [])].filter(Boolean);
   const el = $('guide');
-  if (!lines.length) { el.textContent = ''; return; }
+  /* Cả luật lẫn hướng dẫn đều rỗng (config hỏng/trống) -> dùng 3 dòng mặc
+     định trong code để khung trái không bao giờ nằm chết trống. */
+  if (!lines.length) lines = ['💌 Comment tag tên người thương để ghép đôi lên sân khấu', '🎁 Tặng quà để cặp của bạn được ưu tiên lên sân khấu', '👗 Gõ "nam" / "nữ" / "đổi đồ" để đổi nhân vật, trang phục'];
   const show = () => { el.classList.remove('out'); el.textContent = lines[guideIdx++ % lines.length]; };
   show();
   clearInterval(guideTimer);
@@ -928,11 +930,13 @@ function applyPanelPos() {
 /* ============ Cấu hình ============ */
 function applyConfig(c) {
   cfg = c || {};
-  /* Chuẩn hoá MỌI key danh sách ngay đầu vào: key nào đang là chuỗi (do
-     settings.json lưu thô) thì tách thành mảng — 1 key sai kiểu không được
-     phép giết cả quá trình áp config/UI như lỗi 2026-11-04. */
+  /* Chuẩn hoá MỌI key danh sách ngay đầu vào, VÔ ĐIỀU KIỆN: settings.json
+     trên máy người dùng có thể lưu key dạng chuỗi thô, object hoặc số (di
+     chứng các bản admin cũ) — asList ép hết về mảng chuỗi sạch. 1 key sai
+     kiểu không được phép giết cả quá trình áp config/UI (lỗi 2026-11-04:
+     màn hình mất hết khung/BXH/MC dù sự kiện vẫn chạy). */
   for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'rulesLines', 'guideLines']) {
-    if (typeof cfg[k] === 'string') cfg[k] = asList(cfg[k]);
+    cfg[k] = asList(cfg[k]).filter(x => typeof x === 'string');
   }
   if (cfg.mcName) MC.name = cfg.mcName;
   MC.lines = (cfg.mcLines && cfg.mcLines.length) ? cfg.mcLines : ['Một đám cưới vui là khi khách mời cười nhiều hơn cô dâu chú rể.', 'Tình yêu không cần hoàn hảo, chỉ cần hai người cùng tag nhau lên sân khấu là đủ.', 'Cả nhà thả tim thật nhiều để chúc phúc cho các cặp đôi nhé!'];
@@ -941,6 +945,7 @@ function applyConfig(c) {
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
   MC.tagVang = cfg.mcTagVang || [];
   MC.tagDaCoDoi = (cfg.mcTagDaCoDoi && cfg.mcTagDaCoDoi.length) ? cfg.mcTagDaCoDoi : ['ê {a}, {b} đã có đôi rồi, mình không nên phá hoại gia đình nhà người khác nhá!', '{a} à, {b} đã có gia đình rồi, bạn nên chọn người khác đi nhé!', '{b} là của {c} rồi {a} ơi, chen vào là MC không cứu được đâu!', 'Thôi {a} ơi, {b} với {c} đang hạnh phúc, mình đừng làm kỳ đà cản mũi nha!'];
+  try {
   buildBanSets();
   P.setStageCooldown(computeStageCooldown());
   MC.milestone = cfg.mcMilestone || [];
@@ -961,7 +966,13 @@ function applyConfig(c) {
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
   applyPanelPos();
   A.setConfig(cfg);
-  renderRules(); startGuide(); renderBoard(); refreshBg(false);
+  } catch (e) { console.error('[dam-cuoi] applyConfig loi o phan cau hinh:', e); }
+  /* Hàng UI chạy SAU và TỪNG BƯỚC RIÊNG: dù bất kỳ bước cấu hình nào ở trên
+     còn vấp, các khung luật/hướng dẫn/BXH/nền VẪN phải hiện — test giả lập
+     hay live thật đều thấy UI như nhau. */
+  for (const fn of [renderRules, startGuide, renderBoard, () => refreshBg(false)]) {
+    try { fn(); } catch (e) { console.error('[dam-cuoi] loi ve UI:', e); }
+  }
 }
 
 /* ============ Khung hình 9:16 ============ */
