@@ -854,8 +854,9 @@ function promoteStage() {
      lên, các cặp trên sân khấu diễn hết lượt của mình. */
   const staged = stageSlots.filter(Boolean).length;
   const hardMax = Math.max(1, P.tune.maxStage || 2);
+  const pacingMode = stageQueue.length < (P.crowdSkip || 12);
   let cap;
-  if (stageQueue.length >= (P.crowdSkip || 12)) {
+  if (!pacingMode) {
     /* ĐÔNG QUÁ NGƯỠNG (config boQuaLiaCamKhiChoTren, mặc định 12 cặp
        đang chờ): BỎ NHỊP lia cam cho kịp lượt — cho lên ngay theo sức
        chứa như trước (tối đa 2 cặp khi hàng chờ đông). */
@@ -940,6 +941,13 @@ function promoteStage() {
     walkPath(c.groom, [{ x: 47, y: REVEAL_Y }], 'toStage', onGather);
     walkPath(c.bride, [{ x: 53, y: REVEAL_Y }], 'toStage', onGather);
     if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
+    /* Đang ở NHỊP LIA CAM thì mỗi lần gọi chỉ nhả ĐÚNG 1 cặp — nếu
+       không, lúc sân khấu vừa trống mà hàng chờ có sẵn 2+ cặp, vòng lặp
+       này sẽ nhả 2 cặp đi lên CÙNG LÚC (bắt gặp ở ảnh chụp test bộ ba
+       tính năng 2026-11-04 18:14: 2 cặp quà cùng đi thảm song song),
+       trái hẳn quy tắc 'không 2 hành trình song song'. Cặp kế tiếp sẽ
+       được nhả bởi hẹn giờ arriveStage / leaveStage như thường. */
+    if (pacingMode) break;
   }
 }
 function arriveStage(c) {
