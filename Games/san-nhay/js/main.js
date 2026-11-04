@@ -43,7 +43,7 @@ const DEFAULTS = {
   xpPerComment: 2, xpPerGiftCoin: 2, xpPerFollow: 5, xpPer100Likes: 5, soloXpDiv: 15, pairXp: 15,
   levelXp: [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200, 4000, 5000, 6200, 7600, 9200, 11000, 13000, 15500, 18500, 22000],
   lvScaleMax: 1.25, entryFlairLv: 5, entryFlairLv2: 10, dropHeight: 40, dropHeightVip: 48,
-  lamMoKhiLia: true, doMoPhanConLai: 0.55, tocDoNhay: 'thuong', partyMaxNhanhHon: true, djDoiSauGiay: 24, hieuUngManHinh: 'vong', hieuUngDen: true, doRucDen: 1, phuKienQua: true, phuKienGiuGio: 6, khuayDong: true, anticsIntervalSec: 7,
+  lamMoKhiLia: true, doMoPhanConLai: 0.55, liaCamLenTrenCung: true, tocDoNhay: 'thuong', partyMaxNhanhHon: true, djDoiSauGiay: 24, hieuUngManHinh: 'vong', hieuUngDen: true, doRucDen: 1, phuKienQua: true, phuKienGiuGio: 6, khuayDong: true, anticsIntervalSec: 7,
   guideLines: [], funnyLines: [],
 };
 let cfg = { ...DEFAULTS };
@@ -406,6 +406,7 @@ const Dir = {
     }
     if (item.name || item.reason) showCamtab(item);
     syncDim();
+    syncTop();
   },
   end(item) {
     if (item.p) P.setFocus(item.p, false);
@@ -416,6 +417,7 @@ const Dir = {
     hideCamtab();
     screenShowDJ();
     syncDim();
+    syncTop();
   },
   tick() {
     if (camLockMode || this.locked) return;
@@ -470,6 +472,23 @@ function syncDim() {
   for (const p of dimSet) if (!next.has(p)) p.el.classList.remove('is-focus');
   for (const p of next) if (!dimSet.has(p)) p.el.classList.add('is-focus');
   dimSet = next;
+}
+/* ===== DANCER ĐƯỢC LIA CAM NỔI TRÊN CÙNG (config: liaCamLenTrenCung) =====
+   Đi cặp với syncDim: dancer của cảnh lia hiện tại (quà / lên LV / solo / nhảy đôi /
+   người mới rơi xuống — nhảy đôi: CẢ HAI) được P.setOnTop đưa lên z 3000, CHE mọi
+   dancer khác kể cả hàng trước (z hàng tối đa ~1070, người đang rơi 2400) — tâm điểm
+   không bao giờ bị ai che khuất. Cảnh đệm (noDim: tour / toàn cảnh) và Party Max
+   (Dir.locked) = không ai ở trên cùng. Mọi đường ra đều qua Dir.start/end nên luôn
+   khớp: hết cảnh -> trả z theo hàng; quà chen ngang -> end() trả người cũ, start()
+   nâng người mới; nâng cấp cảnh cùng người -> không qua start/end, giữ nguyên trên cùng. */
+let topSet = new Set();
+function syncTop() {
+  const item = (cfg.liaCamLenTrenCung && !Dir.locked && Dir.cur && !Dir.cur.noDim) ? Dir.cur : null;
+  const targets = item ? itemDancers(item) : [];
+  const next = new Set(targets);
+  for (const p of topSet) if (!next.has(p)) P.setOnTop(p, false);
+  for (const p of next) if (!topSet.has(p)) P.setOnTop(p, true);
+  topSet = next;
 }
 let camtabTimer = 0;
 function showCamtab(item) {
@@ -1507,6 +1526,7 @@ function applyConfig(c) {
   screenFxSetStyle(cfg.hieuUngManHinh);
   rigApplyConfig();
   syncDim();
+  syncTop();
   storeInit();
   startGuide();
   renderBoard();

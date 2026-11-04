@@ -140,7 +140,7 @@ function scaleFor(p) {
 function render(p) {
   p.el.style.setProperty('--fh', scaleFor(p) + 'px');
   p.el.style.transform = `translate(${p.x / 100 * Wpx}px, ${p.y / 100 * Hpx}px) translate(-50%,-100%)`;
-  p.el.style.zIndex = String(p.falling ? 2400 : p.onStage ? 500 + p.stageIdx : p.paired ? 940 : p.focused ? 930 : 100 + Math.round(p.y * 10));
+  p.el.style.zIndex = String(p.onTop ? 3000 : p.falling ? 2400 : p.onStage ? 500 + p.stageIdx : p.paired ? 940 : p.focused ? 930 : 100 + Math.round(p.y * 10));
 }
 function freeSlot(p) { if (p.slot) { p.slot.by = null; p.slot = null; } }
 function randomFreeSlot() {
@@ -187,6 +187,14 @@ P.setFocus = function (p, on) {   // vòng sáng dưới chân khi được chú
   if (!p) return;
   p.focused = !!on;
   p.el.classList.toggle('focused', !!on);
+  render(p);
+};
+/* Đưa dancer LÊN TRÊN CÙNG (z 3000, cao hơn mọi hàng ghế kể cả người đang rơi 2400):
+   main.js bật cho dancer đang được lia cam để không ai che mất tâm điểm; tắt = render()
+   tự trả về z theo hàng như cũ. */
+P.setOnTop = function (p, on) {
+  if (!p) return;
+  p.onTop = !!on;
   render(p);
 };
 function clearSpecial(p) {

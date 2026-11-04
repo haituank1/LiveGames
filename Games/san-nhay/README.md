@@ -158,6 +158,10 @@ Kiến trúc phòng + camera port từ game đám cưới (1 ảnh phòng lớn,
   bão hoà + hơi trong để nhân vật chính nổi bật (CSS `#world.focusing .dancer` + `.is-focus`, chuyển
   mượt 0.45s, main.js `syncDim()` gọi theo Dir.start/end). Party Max / toàn cảnh / tour ngắm sàn
   thì không mờ. Đặt `lamMoKhiLia: false` để tắt hẳn.
+- **Dancer lia cam nổi trên cùng** (`liaCamLenTrenCung` = true): đi cặp với làm mờ — dancer đang
+  được lia cam (nhảy đôi: cả hai) được nâng z-index lên trên mọi dancer khác (kể cả hàng trước)
+  trong suốt cảnh, không bị ai che khuất; hết cảnh tự trả về thứ tự theo hàng (main.js `syncTop()`
+  gọi theo Dir.start/end như `syncDim()`). Đặt `false` để tắt.
 - **Tốc độ nhảy** (`tocDoNhay`: `cham` | `thuong` | `nhanh`): trình duyệt không đổi được tốc độ GIF
   đang chạy, nên mỗi GIF trong `img/` có sẵn 2 bộ biến thể delay trong `img/cham/` (0.8x) và
   `img/nhanh/` (1.3x) — sinh bằng cách vá trường delay của từng frame, dung lượng không đổi.

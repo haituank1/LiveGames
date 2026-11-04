@@ -82,6 +82,7 @@
   "hieuUngManHinh": "vong",
   "khuayDong": true,
   "lamMoKhiLia": true,
+  "liaCamLenTrenCung": true,
   "levelXp": [
    0,
    100,
