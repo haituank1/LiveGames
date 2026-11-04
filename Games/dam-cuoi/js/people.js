@@ -427,6 +427,19 @@ P.stageBusy = function () {
   }
   return false;
 };
+/* Cặp đang diễn "non" nhất đã đứng được bao nhiêu giây (Infinity nếu
+   không có cặp nào trên sân khấu) — main.js dùng để KHÓA TÂM ĐIỂM
+   camera: chưa đứng đủ 5-6s thì camera không được rời sân khấu. Cặp
+   đang "đứng chờ" (hold, timer = 0) tính như đã đứng đủ lâu. */
+P.stageFreshSec = function () {
+  let m = Infinity;
+  for (const c of couples) {
+    if (c.state !== 'stage') continue;
+    const performed = (P.coupleSec || 25) - Math.max(0, c.timer != null ? c.timer : 0);
+    if (performed < m) m = performed;
+  }
+  return m;
+};
 /* Trả chỗ về pool theo ĐÚNG thứ tự ưu tiên (chèn nhị phân theo key) — chỗ trong
    vừa trống ra phải được khách tới sau lấy trước, không chìm xuống cuối hàng. */
 function freePosition(pos) {
@@ -584,9 +597,17 @@ function loop(t) {
     if (p.dirty || p.target) render(p);
   }
   for (const c of couples) {
-    if (c.state === 'stage') {
-      c.timer -= dt;
-      if (c.timer <= 0) leaveStage(c);
+    if (c.state !== 'stage' || c.hold) continue;
+    c.timer -= dt;
+    if (c.timer <= 0) {
+      /* Hết giờ đứng (coupleSec) nhưng phòng đang TRỐNG LỊCH — không cặp
+         nào đang chờ, cũng không cặp nào đang đi lên: cho cặp này ĐỨNG
+         TIẾP trên sân khấu thay vì bắt xuống (Nguyen chốt 2026-11-04
+         18:31) — sân khấu không bị bỏ trống vô ích; họ chỉ đi xuống khi
+         có cặp khác LÊN TỚI NƠI (xem arriveStage). */
+      const anyWaiting = stageQueue.length > 0 || couples.some(o => o !== c && o.state === 'toStage');
+      if (anyWaiting) leaveStage(c);
+      else { c.hold = true; c.timer = 0; }
     }
   }
 }
@@ -953,6 +974,7 @@ function promoteStage() {
 function arriveStage(c) {
   if (c.state !== 'toStage') return;
   c.state = 'stage';
+  c.hold = false;
   c.timer = P.coupleSec || 25;
   c.a.state = 'stage'; c.b.state = 'stage';
   c.a.el.classList.remove('pairfx'); c.b.el.classList.remove('pairfx');
@@ -961,6 +983,10 @@ function arriveStage(c) {
      cam ở promoteStage): tới giờ gọi lại promoteStage, cổng nhịp ở đó
      tự quyết có nhả hay chưa (hàng chờ có thể đã đổi khác lúc đó). */
   setTimeout(() => promoteStage(), (P.releaseSec || 6) * 1000);
+  /* Cặp nào đang "đứng chờ" (hết giờ nhưng phòng trống lịch nên được
+     đứng tiếp) thì giờ mới đi xuống, nhường sân khấu cho cặp vừa lên
+     tới nơi — đúng ý chủ phòng: có cặp khác lên thì họ mới xuống. */
+  for (const o of couples) if (o !== c && o.state === 'stage' && o.hold) leaveStage(o);
 }
 /* ===== Chong spam len san khau (Nguyen chot 2026-11-04) =====
    Moi nguoi xuong san khau xong la bat dau DEM NGUOC (stageCdUntil): trong
@@ -984,6 +1010,7 @@ P.requeueCouple = function (c) {
   return true;
 };
 function leaveStage(c) {
+  c.hold = false;
   const cdUntil = Date.now() + (P.stageCooldownSec || 0) * 1000;
   c.a.stageCdUntil = cdUntil; c.b.stageCdUntil = cdUntil;   // xuong san khau -> bat dau dem nguoc
   if (c.spot >= 0) stageSlots[c.spot] = null;

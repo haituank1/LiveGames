@@ -396,6 +396,14 @@ function setBackground(file) {
 
 /* ============ Camera lia trong phòng rộng ============ */
 let SW = 0, SH = 0, WW = 0, WH = 0;
+/* KHÓA TÂM ĐIỂM SÂN KHẤU (Nguyen chốt 2026-11-04 18:31): cặp đang diễn
+   là ưu tiên tuyệt đối — phải để họ ĐỨNG ĐỦ 5-6 giây (đúng mốc
+   nhaCapTiepSauGiay) camera mới được lia đi chỗ khác. Hàm này trả số
+   giây khóa còn lại (0 = hết khóa / không có cặp nào đang diễn). */
+function stageLockRemain() {
+  if (!P.stageFreshSec) return 0;
+  return Math.max(0, (P.releaseSec || 6) - P.stageFreshSec());
+}
 const Cam = {
   cx: 50, cy: 36, z: 0.63, tx: 50, ty: 36, tz: 0.63, busyUntil: 0,
   apply() {
@@ -420,9 +428,32 @@ const Cam = {
     this.tx = x; this.ty = y; this.tz = z;
   },
   snap() { this.cx = this.tx; this.cy = this.ty; this.z = this.tz; this.apply(); this.cullNow(); },
-  followC: null, farPair: null,
-  follow(couple) { this.followC = couple; this.busyUntil = 0; },
-  unfollow() { this.followC = null; this.farPair = null; },
+  followC: null, farPair: null, pendingFollow: null, _pendT: 0,
+  follow(couple) {
+    /* ƯU TIÊN CAMERA (Nguyen chốt 2026-11-04 18:31):
+       (a) Cặp đang ĐI LÊN giữ camera trước cặp đang ĐI XUỐNG — không để
+           cảnh đi về cướp khung hình của cặp đang lên sân khấu.
+       (b) Cặp đang DIỄN chưa đứng đủ 5-6s (khóa tâm điểm còn) thì chưa
+           bám cặp khác: cặp đang đi lên được GHI NHỚ, hết khóa sẽ tự
+           bám nếu còn đang đi lên; cặp đang đi xuống thì BỎ QUA luôn,
+           giữ nguyên camera ở sân khấu cho cặp đang diễn. */
+    if (couple && this.followC && this.followC.state === 'toStage' && couple.state !== 'toStage') return;
+    const remain = stageLockRemain();
+    if (couple && couple.state !== 'stage' && remain > 0) {
+      if (couple.state === 'toStage') {
+        this.pendingFollow = couple;
+        clearTimeout(this._pendT);
+        this._pendT = setTimeout(() => {
+          const c = this.pendingFollow; this.pendingFollow = null;
+          if (c && c.state === 'toStage' && !this.followC) { this.followC = c; this.busyUntil = 0; }
+        }, remain * 1000 + 120);
+      }
+      return;
+    }
+    this.pendingFollow = null;
+    this.followC = couple; this.busyUntil = 0;
+  },
+  unfollow() { this.followC = null; this.farPair = null; this.pendingFollow = null; clearTimeout(this._pendT); },
   home() { const v = (curView && curView.home) || [50, 36, 0.63]; this.panTo(v[0], v[1], v[2]); },
   stage() { const v = (curView && curView.stage) || [50, 34, 1.02]; this.panTo(v[0], v[1], v[2]); },
   toScreen(x, y) {
@@ -1250,7 +1281,7 @@ Cam.home();
 refreshBg(false);
 /* Rảnh rỗi lâu thì camera tự lia đi ngắm khách một vòng rồi về sân khấu */
 setInterval(() => {
-  if (Date.now() < Cam.busyUntil || P.featured() || Cam.followC) return;
+  if (Date.now() < Cam.busyUntil || P.featured() || Cam.followC || stageLockRemain() > 0) return;
   const t = P.tourTarget && P.tourTarget();
   if (t && Math.random() < 0.75) {
     Cam.busyUntil = Date.now() + 13000;
