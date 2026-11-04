@@ -122,6 +122,19 @@ function coupleScore(c, pts) {
   s.score += pts;
   saveScores(); renderBoard();
 }
+/* RESET TOÀN BỘ từ trang quản trị (nút "Reset điểm" của LiveBridge gửi
+   lệnh 'reset-scores'): với game đám cưới, reset = xoá CẢ bảng xếp hạng +
+   điểm hạnh phúc + TỔNG LƯỢT XEM (Nguyen hỏi 2026-11-04 — trước đây game
+   không hề nghe lệnh này nên bấm reset chẳng có tác dụng gì). Khách đang
+   trong phòng giữ nguyên; số liệu tích luỹ về 0, sảnh quay lại mốc đầu. */
+function resetAll() {
+  scores = {}; saveScores(); renderBoard();
+  totalBase = 0; counted.clear(); demoExtra = 0;
+  clearTimeout(saveTimer);
+  try { localStorage.setItem(LS_TOTAL, '0'); } catch (e) {}
+  refreshBg(false);
+  showBanner('🔄 ĐÃ RESET TOÀN BỘ · Bảng xếp hạng, điểm hạnh phúc và tổng lượt xem đã về 0', 5200);
+}
 function renderBoard() {
   const top = Object.entries(scores).map(([key, s]) => ({ key, a: String((s && s.a) || ''), b: String((s && s.b) || ''), score: Number(s && s.score) || 0 })).filter(s => s.a && s.b).sort((x, y) => y.score - x.score).slice(0, 3);
   const board = $('board');
@@ -153,6 +166,7 @@ const MC = {
   name: 'MC',
   queue: [], busyUntil: 0, timer: null, lastLine: '',
   lines: [], funny: [], couple: [], thank: [], greet: [], follow: [], milestone: [], tagVang: [], tagDaCoDoi: [], sapMoc: [],
+  personas: null, _lastPersona: -1, _streak: 0,   // 2 MC luân phiên (nam/nữ) — dựng trong applyConfig
 };
 function fill(tpl, vars) {
   return String(tpl).replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
@@ -200,16 +214,30 @@ function pick(arr, avoid) {
   while (s === avoid && arr.length > 1 && n++ < 6) s = arr[Math.floor(Math.random() * arr.length)];
   return s;
 }
+/* Chọn MC cho câu sắp nói: NGẪU NHIÊN nam/nữ (đúng ý chủ phòng — luân
+   phiên kiểu random, không phải nam rồi nữ rồi nam cứng nhắc), chỉ tránh
+   để 1 người nói 3 câu liên tiếp kẻo nhìn như chỉ có 1 MC. */
+function pickPersona() {
+  if (!MC.personas || !MC.personas.length) return null;
+  if (MC.personas.length === 1) return MC.personas[0];
+  let i = Math.random() < 0.5 ? 0 : 1;
+  if (i === MC._lastPersona) { MC._streak++; if (MC._streak >= 3) { i = 1 - i; MC._streak = 1; } }
+  else MC._streak = 1;
+  MC._lastPersona = i;
+  return MC.personas[i];
+}
 function mcSay(text, prio, kind, parts) {
   if (!text) return;
-  MC.queue.push({ text, prio: prio || 1, kind: kind || ((prio || 1) >= 2 ? 'event' : 'random'), at: performance.now(), parts: parts || null });
+  const persona = pickPersona();   // chốt người nói NGAY khi câu vào hàng chờ — để chuyển giọng đúng giọng của người đó
+  MC.queue.push({ text, prio: prio || 1, kind: kind || ((prio || 1) >= 2 ? 'event' : 'random'), at: performance.now(), parts: parts || null, persona });
   MC.queue.sort((a, b) => b.prio - a.prio);
   if (MC.queue.length > 4) MC.queue.length = 4;
   if (window.NpcVoice) {
     // chuyển giọng TRƯỚC ngay khi câu vào hàng chờ: có parts thì prefetch
     // từng đoạn (đoạn tĩnh thường đã nóng sẵn), không thì cả câu như cũ
-    if (parts && parts.length >= 2) { for (const p of parts) NpcVoice.prefetch(p); }
-    else NpcVoice.prefetch(text);
+    const pv = persona && persona.voice ? persona.voice : undefined;
+    if (parts && parts.length >= 2) { for (const p of parts) NpcVoice.prefetch(p, pv); }
+    else NpcVoice.prefetch(text, pv);
   }
   mcPump();
 }
@@ -226,7 +254,9 @@ async function mcPump() {
   let shown = false, dur = Math.min(9000, Math.max(3400, m.text.length * 95));
   const show = voiceDurMs => {
     if (shown) return; shown = true;
-    el.querySelector('.say b').textContent = MC.name;
+    el.querySelector('.say b').textContent = m.persona ? m.persona.name : MC.name;
+    const pic = el.querySelector('.pic img');
+    if (pic && m.persona && m.persona.img && !pic.src.endsWith(m.persona.img)) pic.src = m.persona.img;
     el.querySelector('.say span').textContent = m.text;
     el.classList.add('on');
     placeBanner();   // MC vua hien: day banner xuong duoi bong MC neu dang trung
@@ -240,8 +270,9 @@ async function mcPump() {
     // voice bị chặn tần suất / lỗi / chậm quá thì hiện chữ luôn, không kẹt game.
     // Câu có parts (>=2 đoạn) thì phát theo đoạn: tĩnh đã cache + tên riêng.
     try {
-      if (m.parts && m.parts.length >= 2 && NpcVoice.speakParts) r = await NpcVoice.speakParts(m.parts, { kind: m.kind, onStart: ({ durationMs }) => show(durationMs) });
-      else r = await NpcVoice.speak(m.text, { kind: m.kind, onStart: ({ durationMs }) => show(durationMs) });
+      const pv = m.persona && m.persona.voice ? m.persona.voice : undefined;   // MC nam đọc giọng nam, MC nữ giọng mặc định (nữ)
+      if (m.parts && m.parts.length >= 2 && NpcVoice.speakParts) r = await NpcVoice.speakParts(m.parts, { kind: m.kind, voice: pv, onStart: ({ durationMs }) => show(durationMs) });
+      else r = await NpcVoice.speak(m.text, { kind: m.kind, voice: pv, onStart: ({ durationMs }) => show(durationMs) });
     } catch (_) { /* rơi xuống hiện chữ */ }
   }
   if (!r.played && !shown) show(0);
@@ -292,12 +323,33 @@ function setBackground(file) {
   P.setBgFile(file);   // nạp khung vị trí khớp với tranh của nền này
   curView = BG_VIEW[file] || null;
   const tk = ++bgToken;
-  const img = new Image();
-  img.onload = () => {
-    if (tk !== bgToken) return;   // đã có nền mới hơn đang tải — bỏ qua ảnh cũ về muộn
-    $('bgfull').style.backgroundImage = `url("${file}")`;
+  /* Bản cũ: tải 1 lần, KHÔNG có onerror — chỉ cần 1 lần tải hụt (mạng/đĩa
+     chập chờn lúc mở game, đúng lúc bridge đang bận làm nóng ~130 đoạn
+     voice) là nền KHÔNG bao giờ hiện, sảnh trống trơn màu đỏ sẫm cả buổi
+     (Nguyen phản ánh 2026-11-04 "mở lại game hay bị lỗi không load được
+     background"). Bản mới: thử lại tối đa 2 lần (lần sau thêm ?r= để né
+     cache hỏng), vẫn hỏng thì lùi về nền gốc bg-full.webp và ghi vào hộp
+     chẩn đoán; quá 6 giây không xong thì cứ áp nền để trình duyệt tự tải
+     tiếp — thà nền về chậm còn hơn sảnh trống. */
+  let applied = false;
+  const apply = url => { if (tk === bgToken && !applied) { applied = true; $('bgfull').style.backgroundImage = `url("${url}")`; } };
+  const attempt = (f, n) => {
+    if (tk !== bgToken) return;
+    const url = n ? f + '?r=' + n : f;
+    const img = new Image();
+    img.onload = () => apply(url);
+    img.onerror = () => {
+      if (tk !== bgToken) return;
+      if (n < 2) { setTimeout(() => attempt(f, n + 1), 700); return; }
+      if (f !== 'bg-full.webp') {
+        if (window.__diag) { window.__diag.errs.push('bg fail: ' + f); window.__diag.uiErr = 'Không tải được nền ' + f + ' — đã lùi về nền gốc'; }
+        attempt('bg-full.webp', 2);
+      } else if (window.__diag) { window.__diag.errs.push('bg fail ca nen goc'); }
+    };
+    img.src = url;
   };
-  img.src = file;
+  attempt(file, 0);
+  setTimeout(() => apply(file), 6000);
 }
 
 /* ============ Camera lia trong phòng rộng ============ */
@@ -820,6 +872,19 @@ const GIFT_TIERS = [
   { min: 5, petals: 55, confetti: 0, fw: 0 },
   { min: 1, petals: 30, confetti: 0, fw: 0 },
 ];
+/* Ưu tiên VOICE cho người tặng quà (Nguyen yêu cầu 2026-11-04): hàng chờ
+   MC vốn đã sắp xếp theo prio giảm dần và chen lên trước được — nên chỉ
+   cần cho câu cảm ơn quà một prio TĂNG THEO GIÁ TRỊ QUÀ: quà càng lớn
+   càng nói trước; quà nhỏ nhất (3.0) vẫn trên follow (2.9); mốc sảnh
+   nâng cấp giữ 4.0, chỉ quà ≥299 mới vượt qua. */
+function giftVoicePrio(dia) {
+  if (dia >= 1000) return 4.8;
+  if (dia >= 299) return 4.4;
+  if (dia >= 99) return 4.0;
+  if (dia >= 30) return 3.6;
+  if (dia >= 10) return 3.3;
+  return 3.0;
+}
 function giftFx(diamonds) {
   const t = GIFT_TIERS.find(x => diamonds >= x.min) || GIFT_TIERS[GIFT_TIERS.length - 1];
   if (t.petals) FX.petals(t.petals);
@@ -920,7 +985,7 @@ function handle(ev) {
     const partner = randomSingle(ev.user);
     if (partner) requestCouple(ev.user, partner, false);
     else FX.hearts(12, 0.5, 0.6);
-    mcReact(3.2, MC.follow, { ten: ev.user.nickname });
+    mcReact(2.9, MC.follow, { ten: ev.user.nickname });   // follow xếp SAU mọi câu cảm ơn quà (Nguyen yêu cầu 2026-11-04)
   } else if (ev.action === 'dance') {
     P.danceAll(5);
   } else if (ev.action === 'fireworks') {
@@ -938,7 +1003,7 @@ function handle(ev) {
     giftFx(dia);
     if (dia >= 99) showBanner(`🎁 ${ev.user ? ev.user.nickname : 'Khách quý'} VỪA MỪNG CƯỚI LỚN!`, 5200);
     A.bell(dia >= 30 ? 3 : 1);
-    mcReact(3, MC.thank, { ten: ev.user ? ev.user.nickname : 'Bạn' });
+    mcReact(giftVoicePrio(dia), MC.thank, { ten: ev.user ? ev.user.nickname : 'Bạn' });
     toast(`🎁 ${ev.user ? ev.user.nickname : 'Khách'} tặng ${src.giftName || 'quà'}${dia >= 99 ? ' — pháo hoa rực trời!' : ''}`, dia >= 30);
     if (cfg.uuTienQuaTang !== false) giftPriority(ev.user);
   }
@@ -982,6 +1047,16 @@ function applyConfig(c) {
     cfg[k] = asList(cfg[k]).filter(x => typeof x === 'string');
   }
   if (cfg.mcName) MC.name = cfg.mcName;
+  /* HAI MC LUÂN PHIÊN (Nguyen yêu cầu 2026-11-04): 1 nam + 1 nữ, hiện lên
+     kiểu NGẪU NHIÊN (không phải nam-nữ-nam cứng nhắc — chỉ tránh 1 người
+     nói 3 câu liên tiếp). MC nữ dùng giọng mặc định của game (ô "Giọng
+     NPC" trong admin, mặc định Hoài My); MC nam dùng npcVoiceNam (mặc
+     định Nam Minh). Nhân vật được chốt ngay khi câu vào hàng chờ để khâu
+     chuyển giọng chuẩn bị đúng giọng của người sắp nói. */
+  MC.personas = [
+    { name: cfg.mcName || 'MC Anh Tú', img: 'img/mc.png', voice: cfg.npcVoiceNam || 'vi-VN-NamMinhNeural' },
+    { name: cfg.mcNameNu || 'MC Ngọc Trâm', img: 'img/mc-nu.png', voice: null },
+  ];
   MC.lines = (cfg.mcLines && cfg.mcLines.length) ? cfg.mcLines : ['Một đám cưới vui là khi khách mời cười nhiều hơn cô dâu chú rể.', 'Tình yêu không cần hoàn hảo, chỉ cần hai người cùng tag nhau lên sân khấu là đủ.', 'Cả nhà thả tim thật nhiều để chúc phúc cho các cặp đôi nhé!'];
   MC.funny = (cfg.mcFunny && cfg.mcFunny.length) ? cfg.mcFunny : ['MC dặn nhỏ: tag người yêu cũ vào đây MC tính phí gấp đôi nhé!', 'Ai còn độc thân giơ tay, MC nhìn thấy hết đấy, đừng trốn sau hàng ghế nữa!', 'Đi ăn cưới online mà không mất tiền mừng, thời đại này sướng thật!'];
   MC.couple = cfg.mcCouple || [];
@@ -1001,7 +1076,12 @@ function applyConfig(c) {
     const seenSeg = new Set();
     for (const pool of [MC.lines, MC.funny, MC.greet, MC.follow, MC.thank, MC.milestone, MC.tagVang, MC.tagDaCoDoi, MC.sapMoc, MC.couple]) {
       for (const tpl of pool || []) for (const seg of staticSegmentsOf(tpl)) {
-        if (!seenSeg.has(seg)) { seenSeg.add(seg); NpcVoice.prefetch(seg); }
+        if (!seenSeg.has(seg)) {
+          seenSeg.add(seg);
+          NpcVoice.prefetch(seg);   // giọng mặc định (MC nữ)
+          const mv = MC.personas && MC.personas[0] && MC.personas[0].voice;
+          if (mv) NpcVoice.prefetch(seg, mv);   // cả giọng MC nam — làm nóng 2 giọng để MC nào lên tiếng cũng nói ngay, không chờ tổng hợp
+        }
       }
     }
   }
@@ -1122,7 +1202,8 @@ if (isDemo) {
   say('<span style="color:#ffd76a">● CHẾ ĐỘ DEMO</span> — xem thử, không cần LIVE thật', 'demo');
   applyConfig({
     mcName: 'MC Anh Tú',
-    npcVoiceOn: true, npcVoice: 'vi-VN-HoaiMyNeural', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
+    mcNameNu: 'MC Ngọc Trâm',
+    npcVoiceOn: true, npcVoice: 'vi-VN-HoaiMyNeural', npcVoiceNam: 'vi-VN-NamMinhNeural', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
     coupleSec: 25,
     phongToGoiTen: 1.32, coCapGiua: 1.22, coCapBen: 1.22, soCapToiDa: 3,
     phongVangDuoi: 15, liaCamNguoiMoiKhiVang: true, liaCamNguoiMoiGiay: 4,
@@ -1201,6 +1282,7 @@ if (isDemo) {
     .on('hello', h => { if (h && h.config) applyConfig(h.config); })
     .on('open', () => { if (window.__diag && window.__diag.stage !== 'config-ok') window.__diag.stage = 'ws-ok'; })
     .on('seen', m => { if (m && m.user) ensureGuest(m.user); })   // thả tim cũng tính là khách đến dự
+    .on('reset-scores', resetAll)   // nút "Reset điểm" ở trang quản trị LiveBridge
     .on('status', m => {
       const st = (m && m.tiktok) || {};
       if (st.state === 'live') { say('● LIVE — ' + (st.username ? '@' + st.username : ''), 'ok'); refreshBg(false); }

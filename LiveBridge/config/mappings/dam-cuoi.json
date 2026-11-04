@@ -270,7 +270,9 @@
     "hieuUngNgauNhienDenGiay": 25,
     "lenhDoiGioiTinh": true,
     "lenhDoiTrangPhuc": true,
-    "doiTrangPhucChoGiay": 5
+    "doiTrangPhucChoGiay": 5,
+    "mcNameNu": "MC Ngọc Trâm",
+    "npcVoiceNam": "vi-VN-NamMinhNeural"
   },
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {
