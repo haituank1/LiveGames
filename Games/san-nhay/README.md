@@ -61,8 +61,15 @@ Kiến trúc phòng + camera port từ game đám cưới (1 ảnh phòng lớn,
   LV hiện tại thể hiện bằng: **huy hiệu LV trên thẻ tên**, **vòng hào quang dưới chân theo bậc**
   (LV5+ đồng · LV10+ bạc + vương miện nhỏ · LV15+ vàng · LV20+ cầu vồng), **cỡ người lớn dần theo LV**
   (tối đa `lvScaleMax` 1.25×).
-- **Màn LED trên sân khấu** là phần tử DOM phủ **đúng khung màn vẽ sẵn** trong tranh: mặc định chiếu DJ + EQ +
-  ticker sự kiện; khi camera cận cảnh ai thì chiếu chính người đó (GIF xung + tên + lý do/điểm trực tiếp).
+- **Màn LED trên sân khấu** là phần tử DOM phủ **đúng khung màn vẽ sẵn** trong tranh: mặc định là **DJ CAM** —
+  DJ NV03 hiện **lớn gần kín chiều cao màn**, đứng sau **bóng quầy DJ**, **luân phiên động tác headspin <-> scratch
+  mỗi ~4 giây** (crossfade 2 lớp ảnh, không cắt cứng); sau lưng là **EQ 14 cột** nhảy theo thời lượng phách
+  116 BPM, **2 chùm đèn quét** trong màn, lớp **lưới chấm LED + scanline**, thẻ **🔴 DJ CAM** và cả màn
+  **"zoom punch" theo phách** (scale 1<->1.05, cao trào 1.09). **Cao trào:** Party Max hoặc cảnh quà >=299 xu
+  -> DJ chuyển **bản xung-dai**; cảnh **quà khủng >=1000 xu** -> **bản spotlight-dai** (trạng thái suy ra từ
+  đạo diễn/Party Max sẵn có, hết cao trào tự về luân phiên). Khi camera cận cảnh ai thì màn chiếu chính người đó
+  (GIF xung + tên + lý do/điểm trực tiếp) — DJ CAM tạm dừng luân phiên, hết focus tự chạy tiếp. Ticker sự kiện
+  chạy ở mép dưới màn như cũ. Ảnh DJ cũng qua `sped()` nên `tocDoNhay` áp dụng cho cả DJ trên màn.
 
 ## Cách chơi
 

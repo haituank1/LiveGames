@@ -523,6 +523,61 @@ function screenShowFocus(f) {
 }
 function screenUpdateSub(txt) { if (screenFocusName) $('sfSub').textContent = txt; }
 
+/* ============ DJ CAM — DJ NV03 "sống" trên màn LED ============
+   Chế độ thường: DJ lớn sau quầy, LUÂN PHIÊN động tác headspin <-> scratch mỗi ~4s
+   (crossfade 2 lớp img, không cắt cứng). Chế độ cao trào KHÔNG có máy trạng thái riêng —
+   một tick 400ms ĐỌC trạng thái đạo diễn / Party Max sẵn có:
+     Party Max đang chạy hoặc cảnh QUÀ >=299 (prio >=100) -> bản xung-dai
+     cảnh QUÀ KHỦNG >=1000 (prio >=120)                    -> bản spotlight-dai
+   hết cao trào thì tự về luân phiên. Khi màn đang chiếu cận cảnh dancer
+   (screenShowFocus) thì việc LUÂN PHIÊN tạm dừng — hết focus tự chạy tiếp;
+   trạng thái cao trào vẫn được áp bên dưới lớp focus để nhả focus là đúng hình.
+   Mọi ảnh qua P.sped() nên tocDoNhay áp dụng cho cả DJ trên màn. */
+const DJ_FILES = {
+  rot: ['img/nv03-dj-headspin.gif', 'img/nv03-dj-scratch.gif'],
+  xung: 'img/nv03-dj-xung-dai.gif',
+  spot: 'img/nv03-dj-spotlight-dai.gif',
+};
+let djCur = { file: DJ_FILES.rot[0], mode: 'rot' }, djRotIdx = 0, djFrontA = true;
+let djLastSwap = Date.now(), djPreloadSig = null;
+function djPreload() {
+  const sig = P.sped(DJ_FILES.rot[0]);
+  if (djPreloadSig === sig) return;
+  djPreloadSig = sig;
+  for (const f of [...DJ_FILES.rot, DJ_FILES.xung, DJ_FILES.spot]) { const im = new Image(); im.src = P.sped(f); }
+}
+function djShow(file, mode) {
+  if (djCur.file === file && djCur.mode === mode) return;
+  djCur = { file, mode };
+  djLastSwap = Date.now();
+  const a = $('screenDJimgA'), b = $('screenDJimgB');
+  const front = djFrontA ? a : b, back = djFrontA ? b : a;
+  const src = P.sped(file);
+  const swap = () => { back.src = src; back.classList.add('on'); front.classList.remove('on'); djFrontA = !djFrontA; };
+  if (back.getAttribute('src') === src) swap();
+  else { const im = new Image(); im.onload = swap; im.onerror = swap; im.src = src; }
+}
+function djDesired() {   // suy trạng thái cao trào từ đạo diễn / Party Max — null = luân phiên thường
+  if (nowMs() < partyUntil) return { file: DJ_FILES.xung, mode: 'xung' };
+  const cur = Dir.cur;
+  if (cur && cur.gift && cur.prio >= 120) return { file: DJ_FILES.spot, mode: 'spot' };
+  if (cur && cur.gift && cur.prio >= 100) return { file: DJ_FILES.xung, mode: 'xung' };
+  return null;
+}
+setInterval(() => {
+  djPreload();
+  const d = djDesired();
+  $('screen').classList.toggle('hype', !!d);
+  if (d) { djShow(d.file, d.mode); return; }
+  if (screenFocusName) return;                       // đang chiếu dancer cận cảnh -> DJ CAM nghỉ luân phiên
+  if (djCur.mode !== 'rot') djShow(DJ_FILES.rot[djRotIdx], 'rot');
+  else if (Date.now() - djLastSwap >= 4000) { djRotIdx = (djRotIdx + 1) % DJ_FILES.rot.length; djShow(DJ_FILES.rot[djRotIdx], 'rot'); }
+}, 400);
+function djCamSpeedRefresh() {   // applySpeed gọi mỗi khi tocDoNhay đổi: nạp lại đúng bộ tốc độ
+  djPreloadSig = null; djPreload();
+  djCur = { file: '', mode: '' };                    // ép tick DJ CAM vẽ lại đúng file + tốc độ
+}
+
 /* ============ Party Energy / PARTY MAX ============ */
 let energy = 12, partyFxTimer = null;
 function renderEnergy() {
@@ -1024,7 +1079,7 @@ function applySpeed() {
   P.setSpeedDir(SPEED_DIR[want] != null ? SPEED_DIR[want] : '');
   P.refreshImgs();
   document.documentElement.style.setProperty('--spd', SPEED_SPD[want] || 1);
-  $('screenDJimg').src = P.sped('img/nv03-dj-headspin.gif');
+  djCamSpeedRefresh();
 }
 
 /* ============ Cấu hình ============ */

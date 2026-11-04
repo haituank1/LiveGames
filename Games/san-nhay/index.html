@@ -70,15 +70,46 @@
   #screen{position:absolute;left:19.2%;top:19.4%;width:61.6%;height:11.2%;z-index:4;overflow:hidden;border-radius:6px;
     background:radial-gradient(130% 130% at 50% 0%,#2c1160,#0d0522 72%);
     box-shadow:inset 0 0 0 2px rgba(0,0,0,.65),inset 0 0 34px rgba(120,60,255,.35),0 0 22px rgba(90,140,255,.35)}
-  #screen .eq{position:absolute;left:3%;bottom:15%;display:flex;align-items:flex-end;gap:2.2%;height:56%;width:47%}
-  #screen .eq i{flex:1;background:linear-gradient(180deg,#ff2eaa,#39b9ff);border-radius:2px;animation:eqB .9s ease-in-out infinite alternate;min-height:12%}
-  #screen .eq i:nth-child(3n){animation-duration:.67s}#screen .eq i:nth-child(4n){animation-duration:1.13s}#screen .eq i:nth-child(5n){animation-duration:.78s}
-  @keyframes eqB{from{height:14%}to{height:96%}}
-  #screen .live{position:absolute;left:3%;top:5%;z-index:3;background:#e01b1b;color:#fff;font-weight:800;
+  /* DJ CAM: lớp trong của màn — "zoom punch" theo phách 116 BPM (0.5172s/phách) */
+  #screenInner{position:absolute;inset:0;z-index:1;transform-origin:50% 62%;animation:djPunch .5172s ease-out infinite}
+  @keyframes djPunch{0%{transform:scale(1.05)}22%{transform:scale(1.012)}100%{transform:scale(1)}}
+  #screen.hype #screenInner{animation-name:djPunchBig}
+  @keyframes djPunchBig{0%{transform:scale(1.09)}22%{transform:scale(1.02)}100%{transform:scale(1)}}
+  #screen .eq{position:absolute;left:2%;bottom:15%;display:flex;align-items:flex-end;gap:1.4%;height:64%;width:60%}
+  #screen .eq i{flex:1;background:linear-gradient(180deg,#ff2eaa,#39b9ff);border-radius:2px;animation:eqB 1.0344s ease-in-out infinite alternate;min-height:10%}
+  #screen .eq i:nth-child(2n){animation-duration:.5172s}
+  #screen .eq i:nth-child(3n){animation-duration:1.5516s;animation-delay:-.4s}
+  #screen .eq i:nth-child(4n){animation-duration:.7758s;animation-delay:-.2s}
+  #screen .eq i:nth-child(5n){animation-duration:1.293s;animation-delay:-.7s}
+  #screen .eq i:nth-child(7n){animation-duration:.5172s;animation-delay:-.31s}
+  @keyframes eqB{from{height:12%}to{height:97%}}
+  /* 2 chùm đèn quét qua lại bên trong màn */
+  #screen .beam{position:absolute;top:-38%;width:30%;height:185%;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:.55;transform-origin:50% 0}
+  #screen .beam.b1{left:9%;background:linear-gradient(90deg,transparent,rgba(70,190,255,.55),transparent);animation:beamSw1 5.17s ease-in-out infinite alternate}
+  #screen .beam.b2{right:9%;background:linear-gradient(90deg,transparent,rgba(255,46,170,.55),transparent);animation:beamSw2 6.21s ease-in-out infinite alternate}
+  @keyframes beamSw1{from{transform:rotate(-17deg)}to{transform:rotate(15deg)}}
+  @keyframes beamSw2{from{transform:rotate(16deg)}to{transform:rotate(-15deg)}}
+  /* DJ lớn đứng sau quầy — 2 lớp img chồng nhau để crossfade khi đổi động tác */
+  #screenDJwrap{position:absolute;right:3%;bottom:10.5%;height:99%;aspect-ratio:1;z-index:2}
+  #screenDJwrap .djimg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transform:translateX(7%);
+    transition:opacity .45s ease,transform .45s ease;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+  #screenDJwrap .djimg.on{opacity:1;transform:translateX(0)}
+  /* bóng quầy DJ ở mép dưới màn — DJ đứng sau quầy */
+  #screenBooth{position:absolute;right:0.5%;bottom:12.5%;width:38%;height:19%;z-index:3;
+    background:linear-gradient(180deg,#2a1250,#070313 80%);clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);
+    border-top:2px solid rgba(255,120,230,.6)}
+  #screenBooth::before,#screenBooth::after{content:'';position:absolute;top:24%;width:6%;aspect-ratio:1;border-radius:50%;
+    background:#54f0ff;box-shadow:0 0 8px #54f0ff;animation:pulse 1.0344s infinite}
+  #screenBooth::before{left:15%}#screenBooth::after{right:15%;background:#ff5ce1;box-shadow:0 0 8px #ff5ce1}
+  #screen .live{position:absolute;left:3%;top:5%;z-index:4;background:#e01b1b;color:#fff;font-weight:800;
     font-size:calc(var(--u0)*2);padding:1px 7px;border-radius:5px;letter-spacing:.6px;animation:pulse 1.6s infinite}
-  #screen .title{position:absolute;left:3%;top:19%;z-index:3;color:#ffe9ff;font-weight:900;font-size:calc(var(--u0)*3.1);
+  #screen .title{position:absolute;left:3%;top:19%;z-index:4;color:#ffe9ff;font-weight:900;font-size:calc(var(--u0)*3.1);
     text-shadow:0 0 10px #ff2eaa,0 2px 4px #000;letter-spacing:.5px}
-  #screenDJimg{position:absolute;right:1.5%;bottom:14%;height:88%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+  /* lưới chấm LED + scanline phủ lên nội dung màn cho ra chất màn hình thật */
+  #screenScan{position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:radial-gradient(rgba(0,0,0,.20) 1px,transparent 1.4px),repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 1px,transparent 1px 3px);
+    background-size:4px 4px,100% 100%;animation:scanFlk 3.4s ease-in-out infinite}
+  @keyframes scanFlk{0%,100%{opacity:.85}50%{opacity:1}}
   #screenFocus{position:absolute;inset:0;z-index:4;display:flex;align-items:center;gap:4%;padding:2.5% 4% 13%;box-sizing:border-box;
     background:radial-gradient(120% 120% at 50% 0%,#5b1a86,#1c0636 78%);opacity:0;pointer-events:none;transition:opacity .4s}
   #screenFocus.on{opacity:1}
@@ -295,10 +326,16 @@
     <div id="scene"></div>
     <div id="bstage"></div>
     <div id="screen">
-      <div class="live">🔴 LIVE</div>
-      <div class="title">DJ SÀN NHẢY</div>
-      <div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <img id="screenDJimg" src="img/nv03-dj-headspin.gif" alt="">
+      <div id="screenInner">
+        <div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="beam b1"></div>
+        <div class="beam b2"></div>
+        <div id="screenDJwrap"><img class="djimg on" id="screenDJimgA" src="img/nv03-dj-headspin.gif" alt=""><img class="djimg" id="screenDJimgB" src="img/nv03-dj-scratch.gif" alt=""></div>
+        <div id="screenBooth"></div>
+        <div class="live">🔴 DJ CAM</div>
+        <div class="title">DJ SÀN NHẢY</div>
+      </div>
+      <div id="screenScan"></div>
       <div id="screenFocus"><img id="sfImg" src="img/nv03-dj-headspin.gif" alt=""><div><div class="sf-name" id="sfName"></div><div class="sf-sub" id="sfSub"></div></div></div>
       <div id="screenTicker"><div class="tk"><span id="tk1"></span><span id="tk2"></span></div></div>
     </div>
