@@ -971,7 +971,7 @@ function applyConfig(c) {
      còn vấp, các khung luật/hướng dẫn/BXH/nền VẪN phải hiện — test giả lập
      hay live thật đều thấy UI như nhau. */
   for (const fn of [renderRules, startGuide, renderBoard, () => refreshBg(false)]) {
-    try { fn(); } catch (e) { console.error('[dam-cuoi] loi ve UI:', e); }
+    try { fn(); } catch (e) { console.error('[dam-cuoi] loi ve UI:', e); if (window.__diag) window.__diag.uiErr = String((e && e.message) || e); }
   }
   if (window.__diag) window.__diag.stage = 'config-ok';   // mốc cho hộp tự chẩn đoán ở index.html
 }
