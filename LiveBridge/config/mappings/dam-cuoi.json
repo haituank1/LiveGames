@@ -144,6 +144,21 @@
       "{ten} ơi, {a} đang chờ bạn trong phòng cưới đó! MC se duyên tạm cho {a} với {b} trong lúc chờ — {ten} vào nhanh kẻo mất lượt nha!",
       "Người thương {ten} của {a} chưa xuất hiện — MC đành ghép tạm {a} với bạn {b} đang độc thân. {a} nhớ rủ {ten} vào live để được ghép đúng đôi nhé!"
     ],
+    "mcCheGheuChoGiay": 20,
+    "mcTagDaCoDoi": [
+      "ê {a}, {b} đã có đôi rồi, mình không nên phá hoại gia đình nhà người khác nhá!",
+      "{a} à, {b} đã có gia đình rồi, bạn nên chọn người khác đi nhé!",
+      "{b} là của {c} rồi {a} ơi, chen vào là MC không cứu được đâu!",
+      "Ối {a} ơi, {b} đang tay trong tay với {c} kìa, mình chậm chân mất rồi!",
+      "{a} dũng cảm thật, dám tag cả {b} — mà {b} là hoa đã có chủ {c} rồi nhé!",
+      "Thôi {a} ơi, {b} với {c} đang hạnh phúc, mình đừng làm kỳ đà cản mũi nha!",
+      "{a} ơi là {a}, {b} đã yên bề gia thất với {c} rồi, đổi mục tiêu đi nè!",
+      "MC nhắc nhẹ {a} nè: chuyện của {b} và {c} đang đẹp, mình đừng chen ngang nha!",
+      "Hụt rồi {a} ơi! {b} đã về chung một nhà với {c} rồi, cả nhà tag người khác cho {a} đi!",
+      "{a} tag {b} là có gu đấy, tiếc là {b} thuộc về {c} mất rồi!",
+      "Ê {a}, {c} đang nhìn kìa! Còn tag {b} nữa là tối nay có người ngủ sofa đó!",
+      "{b} đã có đôi rồi, {a} đừng buồn — sảnh cưới còn bao nhiêu người độc thân đang chờ {a} kìa!"
+    ],
     "hienBongChat": true,
     "bongChatGiay": 4,
     "bongChatMaxKyTu": 60,

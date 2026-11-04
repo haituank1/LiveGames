@@ -121,10 +121,47 @@ function escapeHtml(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp
 const MC = {
   name: 'MC',
   queue: [], busyUntil: 0, timer: null, lastLine: '',
-  lines: [], funny: [], couple: [], thank: [], greet: [], follow: [], milestone: [], tagVang: [],
+  lines: [], funny: [], couple: [], thank: [], greet: [], follow: [], milestone: [], tagVang: [], tagDaCoDoi: [],
 };
 function fill(tpl, vars) {
   return String(tpl).replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
+}
+/* ===== Voice theo ĐOẠN (Nguyen chot): câu mẫu tách thành đoạn TĨNH + đoạn
+   TÊN riêng. Đoạn tĩnh tổng hợp 1 lần rồi cache mãi (làm nóng sẵn lúc nhận
+   config); mỗi sự kiện chỉ tốn tổng hợp tiếng của cái tên ngắn, phát nối
+   tiếp [tĩnh][tên][tĩnh]... thay vì tổng hợp cả câu dài không bao giờ
+   trúng cache. Chữ hiển thị vẫn là câu đầy đủ như cũ. ===== */
+function splitTpl(tpl) {
+  const raw = String(tpl).split(/\{(\w+)\}/);
+  const toks = [];
+  for (let i = 0; i < raw.length; i++) toks.push(i % 2 ? { ph: raw[i] } : { tx: raw[i] });
+  return toks;
+}
+const HAS_WORD = /[\p{L}\p{N}]/u;
+function buildParts(tpl, vars) {
+  if (!/\{(\w+)\}/.test(tpl)) return null;   // không placeholder -> đi đường speak() cả câu như cũ
+  vars = vars || {};
+  const parts = [];
+  let buf = '';
+  const flush = () => { const s = buf.trim(); buf = ''; if (s && HAS_WORD.test(s)) parts.push(s); };
+  for (const t of splitTpl(tpl)) {
+    if (t.tx != null) { buf += t.tx; continue; }
+    const v = vars[t.ph];
+    if (v == null || v === '') { buf += '{' + t.ph + '}'; continue; }   // thiếu biến: giữ nguyên token trong đoạn tĩnh
+    flush();
+    parts.push(String(v));
+  }
+  flush();
+  return parts.length ? parts : null;
+}
+function staticSegmentsOf(tpl) {
+  const out = [];
+  for (const t of splitTpl(tpl)) {
+    if (t.tx == null) continue;
+    const s = t.tx.trim();
+    if (s && HAS_WORD.test(s)) out.push(s);
+  }
+  return out;
 }
 function pick(arr, avoid) {
   if (!arr || !arr.length) return '';
@@ -132,12 +169,17 @@ function pick(arr, avoid) {
   while (s === avoid && arr.length > 1 && n++ < 6) s = arr[Math.floor(Math.random() * arr.length)];
   return s;
 }
-function mcSay(text, prio, kind) {
+function mcSay(text, prio, kind, parts) {
   if (!text) return;
-  MC.queue.push({ text, prio: prio || 1, kind: kind || ((prio || 1) >= 2 ? 'event' : 'random'), at: performance.now() });
+  MC.queue.push({ text, prio: prio || 1, kind: kind || ((prio || 1) >= 2 ? 'event' : 'random'), at: performance.now(), parts: parts || null });
   MC.queue.sort((a, b) => b.prio - a.prio);
   if (MC.queue.length > 4) MC.queue.length = 4;
-  if (window.NpcVoice) NpcVoice.prefetch(text);   // chuyển giọng TRƯỚC ngay khi câu vào hàng chờ: tới lượt hiện chữ là tiếng sẵn sàng
+  if (window.NpcVoice) {
+    // chuyển giọng TRƯỚC ngay khi câu vào hàng chờ: có parts thì prefetch
+    // từng đoạn (đoạn tĩnh thường đã nóng sẵn), không thì cả câu như cũ
+    if (parts && parts.length >= 2) { for (const p of parts) NpcVoice.prefetch(p); }
+    else NpcVoice.prefetch(text);
+  }
   mcPump();
 }
 let mcSpeaking = false;
@@ -164,8 +206,12 @@ async function mcPump() {
   let r = { played: false };
   if (window.NpcVoice && NpcVoice.enabled()) {
     // chữ chỉ hiện khi voice bắt đầu phát (onStart) — chữ và tiếng khớp nhau;
-    // voice bị chặn tần suất / lỗi / chậm quá thì hiện chữ luôn, không kẹt game
-    try { r = await NpcVoice.speak(m.text, { kind: m.kind, onStart: ({ durationMs }) => show(durationMs) }); } catch (_) { /* rơi xuống hiện chữ */ }
+    // voice bị chặn tần suất / lỗi / chậm quá thì hiện chữ luôn, không kẹt game.
+    // Câu có parts (>=2 đoạn) thì phát theo đoạn: tĩnh đã cache + tên riêng.
+    try {
+      if (m.parts && m.parts.length >= 2 && NpcVoice.speakParts) r = await NpcVoice.speakParts(m.parts, { kind: m.kind, onStart: ({ durationMs }) => show(durationMs) });
+      else r = await NpcVoice.speak(m.text, { kind: m.kind, onStart: ({ durationMs }) => show(durationMs) });
+    } catch (_) { /* rơi xuống hiện chữ */ }
   }
   if (!r.played && !shown) show(0);
   if (!r.played && shown) { /* onStart đã hiện + đã hẹn giờ ẩn */ }
@@ -173,7 +219,10 @@ async function mcPump() {
   if (!shown) { mcSpeaking = false; }
 }
 function mcReact(prio, tplArr, vars) {
-  mcSay(fill(pick(tplArr), vars || {}), prio);
+  const tpl = pick(tplArr);
+  if (!tpl) return;
+  vars = vars || {};
+  mcSay(fill(tpl, vars), prio, undefined, buildParts(tpl, vars));
 }
 function mcRandomLoop(first) {
   const lo = (cfg.mcMinSec || 18) * 1000, hi = (cfg.mcMaxSec || 26) * 1000;
@@ -593,6 +642,35 @@ setInterval(() => {
 P.onStageSkipped = function (c) {
   toast(`⏳ ${c.a.user.nickname} ❤ ${c.b.user.nickname} vừa làm lễ xong — ${P.stageCooldownRemain(c)}s nữa mới lên lại được`, false);
 };
+/* ===== MC chế giễu khi tag trúng người ĐÃ CÓ ĐÔI (Nguyen chot) =====
+   Trước đây tag hụt kiểu này chỉ có 1 câu cứng không tên tuổi. Nay dùng
+   pool mcTagDaCoDoi trong config (nhiều biến thể hài, chèn tên {a} người
+   tag, {b} người bị tag, {c} bạn đời hiện tại của phía đã có đôi) +
+   cooldown theo người tag (mcCheGheuChoGiay) và tối thiểu 6s toàn cục. */
+const cheGheuCd = new Map();
+let lastCheGheuAt = -1e9;
+function cheGheuTag(ua, ub) {
+  const pool = MC.tagDaCoDoi || [];
+  if (!pool.length) return;
+  const now = performance.now();
+  const cdMs = (cfg.mcCheGheuChoGiay != null ? cfg.mcCheGheuChoGiay : 20) * 1000;
+  if (now - (cheGheuCd.get(ua.id) || -1e9) < cdMs) return;
+  if (now - lastCheGheuAt < 6000) return;
+  let partner = null;
+  const cplB = P.coupleOf(ub.id);
+  if (cplB && cplB.a.user.id !== ua.id && cplB.b.user.id !== ua.id) {
+    partner = cplB.a.user.id === ub.id ? cplB.b.user : cplB.a.user;   // B đã có đôi với người khác
+  } else {
+    const cplA = P.coupleOf(ua.id);
+    if (cplA && cplA.a.user.id !== ub.id && cplA.b.user.id !== ub.id) {
+      partner = cplA.a.user.id === ua.id ? cplA.b.user : cplA.a.user; // ngược lại: A đã có đôi với người khác
+    }
+  }
+  if (!partner) return;
+  cheGheuCd.set(ua.id, now);
+  lastCheGheuAt = now;
+  mcReact(2.2, pool, { a: ua.nickname, b: ub.nickname, c: partner.nickname });
+}
 function requestCouple(a, b, viaTag) {
   const ua = register(a), ub = register(b);
   if (!ua || !ub || ua.id === ub.id) return null;
@@ -605,7 +683,7 @@ function requestCouple(a, b, viaTag) {
   const wasPair = !!(before && ((before.a.user.id === ua.id && before.b.user.id === ub.id) || (before.a.user.id === ub.id && before.b.user.id === ua.id)));
   const c = P.makeCouple(ua, ub);
   if (!c) {
-    mcSay(`Ôi, một trong hai bạn đã có đôi rồi, MC không phá hạnh phúc nhà người ta được đâu nha!`, 2);
+    cheGheuTag(ua, ub);   // một trong hai đã có đôi khác -> MC chế giễu có tên tuổi theo pool config
     return null;
   }
   coupleByKey.set(c.key, c);
@@ -846,10 +924,22 @@ function applyConfig(c) {
   MC.couple = cfg.mcCouple || [];
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
   MC.tagVang = cfg.mcTagVang || [];
+  MC.tagDaCoDoi = (cfg.mcTagDaCoDoi && cfg.mcTagDaCoDoi.length) ? cfg.mcTagDaCoDoi : ['ê {a}, {b} đã có đôi rồi, mình không nên phá hoại gia đình nhà người khác nhá!', '{a} à, {b} đã có gia đình rồi, bạn nên chọn người khác đi nhé!', '{b} là của {c} rồi {a} ơi, chen vào là MC không cứu được đâu!', 'Thôi {a} ơi, {b} với {c} đang hạnh phúc, mình đừng làm kỳ đà cản mũi nha!'];
   buildBanSets();
   P.setStageCooldown(computeStageCooldown());
   MC.milestone = cfg.mcMilestone || [];
   if (window.NpcVoice) NpcVoice.setConfig(cfg);
+  if (window.NpcVoice && NpcVoice.enabled()) {
+    /* LÀM NÓNG voice ngay lúc setup (Nguyen chot): tổng hợp sẵn các ĐOẠN
+       TĨNH duy nhất của mọi câu mẫu MC vào cache — về sau mỗi câu chỉ tốn
+       tổng hợp đoạn tên ngắn. prefetch đã cache theo text nên gọi lại rẻ. */
+    const seenSeg = new Set();
+    for (const pool of [MC.lines, MC.funny, MC.greet, MC.follow, MC.thank, MC.milestone, MC.tagVang, MC.tagDaCoDoi, MC.couple]) {
+      for (const tpl of pool || []) for (const seg of staticSegmentsOf(tpl)) {
+        if (!seenSeg.has(seg)) { seenSeg.add(seg); NpcVoice.prefetch(seg); }
+      }
+    }
+  }
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
   P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
@@ -984,6 +1074,21 @@ if (isDemo) {
     tuAnToanComment: ['cac'],
     mcTagVang: ['{a} gọi {ten} mà {ten} chưa có trong phòng — MC ghép tạm {a} với {b} cho đỡ trống nhé! {a} ơi, mau nhắn {ten} vào live để hai bạn được làm lễ cùng nhau!', '{ten} ơi, {a} đang chờ bạn trong phòng cưới đó! MC se duyên tạm cho {a} với {b} trong lúc chờ — {ten} vào nhanh kẻo mất lượt nha!'],
     mcMilestone: ['CẢ NHÀ ƠI! Sảnh cưới đã nâng cấp lên mốc {moc} nhờ tổng lượt xem tăng vọt!'],
+    mcCheGheuChoGiay: 20,
+    mcTagDaCoDoi: [
+      'ê {a}, {b} đã có đôi rồi, mình không nên phá hoại gia đình nhà người khác nhá!',
+      '{a} à, {b} đã có gia đình rồi, bạn nên chọn người khác đi nhé!',
+      '{b} là của {c} rồi {a} ơi, chen vào là MC không cứu được đâu!',
+      'Ối {a} ơi, {b} đang tay trong tay với {c} kìa, mình chậm chân mất rồi!',
+      '{a} dũng cảm thật, dám tag cả {b} — mà {b} là hoa đã có chủ {c} rồi nhé!',
+      'Thôi {a} ơi, {b} với {c} đang hạnh phúc, mình đừng làm kỳ đà cản mũi nha!',
+      '{a} ơi là {a}, {b} đã yên bề gia thất với {c} rồi, đổi mục tiêu đi nè!',
+      'MC nhắc nhẹ {a} nè: chuyện của {b} và {c} đang đẹp, mình đừng chen ngang nha!',
+      'Hụt rồi {a} ơi! {b} đã về chung một nhà với {c} rồi, cả nhà tag người khác cho {a} đi!',
+      '{a} tag {b} là có gu đấy, tiếc là {b} thuộc về {c} mất rồi!',
+      'Ê {a}, {c} đang nhìn kìa! Còn tag {b} nữa là tối nay có người ngủ sofa đó!',
+      '{b} đã có đôi rồi, {a} đừng buồn — sảnh cưới còn bao nhiêu người độc thân đang chờ {a} kìa!',
+    ],
     musicOn: true, musicVolume: 0.5, sfxOn: true, sfxVolume: 0.8,
   });
   initAudio();
