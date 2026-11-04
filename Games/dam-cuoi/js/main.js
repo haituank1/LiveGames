@@ -323,33 +323,39 @@ function setBackground(file) {
   P.setBgFile(file);   // nạp khung vị trí khớp với tranh của nền này
   curView = BG_VIEW[file] || null;
   const tk = ++bgToken;
-  /* Bản cũ: tải 1 lần, KHÔNG có onerror — chỉ cần 1 lần tải hụt (mạng/đĩa
-     chập chờn lúc mở game, đúng lúc bridge đang bận làm nóng ~130 đoạn
-     voice) là nền KHÔNG bao giờ hiện, sảnh trống trơn màu đỏ sẫm cả buổi
-     (Nguyen phản ánh 2026-11-04 "mở lại game hay bị lỗi không load được
-     background"). Bản mới: thử lại tối đa 2 lần (lần sau thêm ?r= để né
-     cache hỏng), vẫn hỏng thì lùi về nền gốc bg-full.webp và ghi vào hộp
-     chẩn đoán; quá 6 giây không xong thì cứ áp nền để trình duyệt tự tải
-     tiếp — thà nền về chậm còn hơn sảnh trống. */
-  let applied = false;
-  const apply = url => { if (tk === bgToken && !applied) { applied = true; $('bgfull').style.backgroundImage = `url("${url}")`; } };
-  const attempt = (f, n) => {
+  const el = $('bgfull');
+  /* ÁP CSS NGAY khi biết file nền, KHÔNG cổng qua Image() nữa: bản cổng
+     qua Image chờ ảnh tải xong mới hiện — mà lúc mới mở game, khâu làm
+     nóng voice bắn hàng trăm request tổng hợp cùng lúc (Chrome chỉ cho
+     ~6 kết nối/host, bridge lại tổng hợp TUẦN TỰ) nên request ảnh nền bị
+     kẹt sau hàng chờ cả phút: sảnh trống đỏ dù file nền hoàn toàn bình
+     thường (đúng lỗi Nguyen chụp 2026-11-04 16:18, vẫn tái diễn sau bản
+     vá retry trước). Nay CSS áp ngay (trình duyệt tự xếp hàng tải như
+     mọi tài nguyên khác, và khâu làm nóng voice đã bơm nhỏ giọt — xem
+     applyConfig), song song dùng Image() DÒ LỖI: file hỏng thật thì thử
+     lại 2 lần rồi lùi dần bg-full -> bg-500, mọi lần lùi đều ghi vào hộp
+     chẩn đoán để lần sau nhìn là biết file nào chết. */
+  el.style.backgroundImage = `url("${file}")`;
+  const chain = [file, 'bg-full.webp', 'bg-500.webp'].filter((v, i, a) => a.indexOf(v) === i);
+  let ci = 0;
+  const probe = (f, n) => {
     if (tk !== bgToken) return;
     const url = n ? f + '?r=' + n : f;
     const img = new Image();
-    img.onload = () => apply(url);
+    img.onload = () => { if (tk === bgToken) el.style.backgroundImage = `url("${url}")`; };
     img.onerror = () => {
       if (tk !== bgToken) return;
-      if (n < 2) { setTimeout(() => attempt(f, n + 1), 700); return; }
-      if (f !== 'bg-full.webp') {
-        if (window.__diag) { window.__diag.errs.push('bg fail: ' + f); window.__diag.uiErr = 'Không tải được nền ' + f + ' — đã lùi về nền gốc'; }
-        attempt('bg-full.webp', 2);
-      } else if (window.__diag) { window.__diag.errs.push('bg fail ca nen goc'); }
+      if (n < 2) { setTimeout(() => probe(f, n + 1), 700); return; }
+      ci++;
+      if (ci < chain.length) {
+        if (window.__diag) { window.__diag.errs.push('bg fail: ' + f); window.__diag.uiErr = 'Không tải được nền ' + f + ' — đã lùi về ' + chain[ci]; }
+        el.style.backgroundImage = `url("${chain[ci]}")`;
+        probe(chain[ci], 0);
+      } else if (window.__diag) { window.__diag.errs.push('bg fail tat ca'); window.__diag.uiErr = 'Không tải được bất kỳ nền nào — kiểm tra LiveBridge có đang chạy không'; }
     };
     img.src = url;
   };
-  attempt(file, 0);
-  setTimeout(() => apply(file), 6000);
+  probe(file, 0);
 }
 
 /* ============ Camera lia trong phòng rộng ============ */
@@ -1070,20 +1076,34 @@ function applyConfig(c) {
   MC.sapMoc = (cfg.mcSapMoc && cfg.mcSapMoc.length) ? cfg.mcSapMoc : ['Cả nhà ơi, chỉ còn {con} lượt xem nữa là chạm mốc {moc} — sảnh {sanh} sắp mở rồi! Mọi người chia sẻ live giúp MC nhé!', 'Sắp rồi, sắp rồi! Còn đúng {con} lượt xem nữa là lên mốc {moc} — ai chưa vào thì vào nhanh nào!', 'Mốc {moc} lượt xem ở ngay trước mắt, chỉ thiếu {con} nữa thôi! Cả nhà thả tim và chia sẻ để mở sảnh {sanh} nhé!'];
   if (window.NpcVoice) NpcVoice.setConfig(cfg);
   if (window.NpcVoice && NpcVoice.enabled()) {
-    /* LÀM NÓNG voice ngay lúc setup (Nguyen chot): tổng hợp sẵn các ĐOẠN
-       TĨNH duy nhất của mọi câu mẫu MC vào cache — về sau mỗi câu chỉ tốn
-       tổng hợp đoạn tên ngắn. prefetch đã cache theo text nên gọi lại rẻ. */
+    /* LÀM NÓNG voice — nhưng PHẢI NHƯỜNG ĐƯỜNG lúc mới mở game: bản cũ
+       bắn ~260 request tổng hợp CÙNG LÚC (2 giọng × ~130 đoạn tĩnh) ngay
+       khi nhận config; Chrome chỉ cho ~6 kết nối/host và bridge tổng hợp
+       TUẦN TỰ, nên ảnh nền/ảnh nhân vật bị kẹt sau hàng chờ voice cả
+       phút — sảnh trống đỏ khi mới mở game (Nguyen chụp 2026-11-04
+       16:18). Nay: chờ 2.5s cho nền và khung ổn định, rồi bơm NHỎ GIỌT
+       2 đoạn (×2 giọng) mỗi 300ms; voice vẫn nóng dần trong ~1 phút đầu
+       mà không nghẽn mạng. Câu nào cần nói trước khi nóng kịp thì khâu
+       prefetch lúc vào hàng chờ vẫn lo như cũ. */
+    const jobs = [];
     const seenSeg = new Set();
     for (const pool of [MC.lines, MC.funny, MC.greet, MC.follow, MC.thank, MC.milestone, MC.tagVang, MC.tagDaCoDoi, MC.sapMoc, MC.couple]) {
       for (const tpl of pool || []) for (const seg of staticSegmentsOf(tpl)) {
-        if (!seenSeg.has(seg)) {
-          seenSeg.add(seg);
-          NpcVoice.prefetch(seg);   // giọng mặc định (MC nữ)
-          const mv = MC.personas && MC.personas[0] && MC.personas[0].voice;
-          if (mv) NpcVoice.prefetch(seg, mv);   // cả giọng MC nam — làm nóng 2 giọng để MC nào lên tiếng cũng nói ngay, không chờ tổng hợp
-        }
+        if (!seenSeg.has(seg)) { seenSeg.add(seg); jobs.push(seg); }
       }
     }
+    const mv = MC.personas && MC.personas[0] && MC.personas[0].voice;
+    if (MC._warmTimer) clearTimeout(MC._warmTimer);
+    let ji = 0;
+    const pumpWarm = () => {
+      for (let n = 0; n < 2 && ji < jobs.length; n++) {
+        const seg = jobs[ji++];
+        NpcVoice.prefetch(seg);          // giọng mặc định (MC nữ)
+        if (mv) NpcVoice.prefetch(seg, mv);   // cả giọng MC nam
+      }
+      if (ji < jobs.length) MC._warmTimer = setTimeout(pumpWarm, 300);
+    };
+    MC._warmTimer = setTimeout(pumpWarm, 2500);
   }
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
   P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, scaleS: cfg.coCapBen, maxStage: cfg.soCapToiDa, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong, quietMax: cfg.phongVangDuoi });
