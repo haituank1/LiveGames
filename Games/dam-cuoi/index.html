@@ -11,7 +11,7 @@
    chưa sẵn sàng thì TỰ hiện hộp báo ngay trên màn hình game — đang dừng ở
    bước nào, lỗi gì — để chụp gửi là biết ngay nguyên nhân. Game khỏe thì
    hộp không bao giờ hiện. Mở ?diag=1 để xem hộp bất cứ lúc nào. */
-window.__diag = { build: 'ghep-lai-b10', stage: 'html', errs: [], uiErr: '' };
+window.__diag = { build: 'tag-lenh-b11', stage: 'html', errs: [], uiErr: '' };
 (function () {
   var D = window.__diag;
   function rec(s) { D.errs.push(String(s).slice(0, 200)); if (D.errs.length > 4) D.errs.shift(); }
@@ -173,6 +173,13 @@ window.__diag = { build: 'ghep-lai-b10', stage: 'html', errs: [], uiErr: '' };
   #ledger li em{font-style:normal;color:#ffd76a;white-space:nowrap}
   #ledger li.new{animation:lednew 1.6s ease}
   @keyframes lednew{0%{background:rgba(255,215,106,.4)}100%{background:transparent}}
+  #cmdboard{position:absolute;right:calc(var(--side) + var(--u)*1);bottom:calc(var(--u)*2);z-index:2000;background:rgba(60,10,32,.58);color:#ffe3ef;border:1px solid rgba(255,180,210,.38);border-radius:calc(var(--u)*1.6);
+    padding:calc(var(--u)*.7) calc(var(--u)*1.5);font-size:calc(var(--u)*1.85);min-width:calc(var(--u)*24)}
+  #cmdboard h4{margin:0 0 calc(var(--u)*.4);font-size:calc(var(--u)*2.2);color:#ffd9e8}
+  #cmdboard ul{margin:0;padding:0;list-style:none}
+  #cmdboard li{display:flex;justify-content:space-between;gap:calc(var(--u)*2);padding:calc(var(--u)*.15) 0}
+  #cmdboard li span{white-space:nowrap}
+  #cmdboard li em{font-style:normal;color:#ffd76a;white-space:nowrap}
   #couplecount{color:#ffd76a;font-size:calc(var(--u)*2.1);font-weight:800;text-shadow:0 1px 3px #0009}
   #toasts{display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1);width:calc(var(--u)*35)}
   .toast{position:relative;overflow:hidden;display:flex;align-items:center;gap:calc(var(--u)*1.2);width:100%;box-sizing:border-box;
@@ -230,6 +237,7 @@ window.__diag = { build: 'ghep-lai-b10', stage: 'html', errs: [], uiErr: '' };
     <div id="toasts"></div>
   </div>
   <div id="queue"></div>
+  <div id="cmdboard" style="display:none"><h4>💬 Lệnh chat</h4><ul></ul></div>
   <div id="mc">
     <div class="pic">
       <img src="img/mc.png" alt="MC">

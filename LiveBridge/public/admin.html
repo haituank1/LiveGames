@@ -599,6 +599,12 @@ const GAME_SCHEMAS = {
       { k: 'bongChatAnKhiTuCamQua', l: 'Ẩn bong bóng khi quá N từ cấm', t: 'num', min: 0, max: 20, step: 1 },
       { k: 'tuCamComment', l: 'Từ cấm trong bình luận (mỗi dòng một từ)', t: 'words', rows: 5 },
       { k: 'tuAnToanComment', l: 'Từ an toàn — giống từ cấm nhưng được phép (mỗi dòng một từ)', t: 'words', rows: 2 },
+      { k: 'hieuUngChat', l: 'Lệnh chat hiệu ứng bắt GẦN ĐÚNG (gõ tự do, sai chút vẫn ăn — không cần khớp chính xác)', t: 'chk', defTrue: true },
+      { k: 'lenhHieuUngChoGiay', l: 'Mỗi người gọi hiệu ứng cách nhau (giây)', t: 'num', min: 0, max: 120, step: 1 },
+      { k: 'lenhHoaRoi', l: 'Từ khóa gọi HOA RƠI (mỗi dòng một cụm; ưu tiên: pháo giấy > pháo hoa > hoa rơi)', t: 'lines', rows: 3 },
+      { k: 'lenhPhaoHoa', l: 'Từ khóa gọi PHÁO HOA (mỗi dòng một cụm)', t: 'lines', rows: 3 },
+      { k: 'lenhPhaoGiay', l: 'Từ khóa gọi PHÁO GIẤY (mỗi dòng một cụm)', t: 'lines', rows: 2 },
+      { k: 'hienBangLenh', l: 'Hiện bảng "Lệnh chat" trên màn hình cho người chơi biết gõ gì', t: 'chk', defTrue: true },
     ] },
     { title: '🖼 Vị trí các khung (lệch % khung hình)', note: 'X dương = dịch phải, Y dương = dịch xuống. Chỉnh khi khung bị TikTok che trên điện thoại.', fields: [
       { k: 'khungTraiX', l: 'Khung trái — lệch X (%)', t: 'num', min: -20, max: 20, step: 0.5 },

@@ -41,7 +41,7 @@ const SHOW_KEYS = ['feedChat', 'feedGift', 'feedJoin', 'feedFollow', 'feedLike',
   'bubbleChat', 'floatPoints', 'nameTags', 'rulesBox', 'boardTop10', 'toastTop', 'liveLabel', 'monkGreet', 'monkThank', 'monkFollow'];
 // các ô "mỗi dòng một câu": để trống = dùng câu mặc định (defaults trong file mapping)
 const LINE_KEYS = ['monkLines', 'monkGreet', 'monkThank', 'monkFollowThanks', 'guideLines', 'rulesLines',
-  'mcLines', 'mcGreet', 'mcCouple', 'mcThank', 'mcFollowLines', 'mcFunny', 'mcMilestone', 'mcTagVang', 'mcGuide', 'funnyLines', 'npcDanhSach'];
+  'mcLines', 'mcGreet', 'mcCouple', 'mcThank', 'mcFollowLines', 'mcFunny', 'mcMilestone', 'mcTagVang', 'mcGuide', 'funnyLines', 'npcDanhSach', 'lenhHoaRoi', 'lenhPhaoHoa', 'lenhPhaoGiay'];
 const num = (v, min, max, def) => { const n = Number(v); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def; };
 
 class Settings {
@@ -169,7 +169,7 @@ class Settings {
         choNguongDong: [0, 1000000, 1500], choHeSoDong: [0, 3, 1.3], hieuUngNgauNhienTuGiay: [1, 3600, 12], hieuUngNgauNhienDenGiay: [1, 3600, 25],
         doiTrangPhucChoGiay: [0, 120, 5], bongChatGiay: [1, 30, 4], bongChatMaxKyTu: [10, 200, 60], bongChatAnKhiTuCamQua: [0, 20, 2],
         khungTraiX: [-20, 20, 0], khungTraiY: [-20, 20, 0], khungPhaiX: [-20, 20, 0], khungPhaiY: [-20, 20, 0],
-        khungHangChoX: [-20, 20, 0], khungHangChoY: [-20, 20, 0], khungMcX: [-20, 20, 0], khungMcY: [-20, 20, 0], npcNguongVang: [0, 100, 6], npcMoiBaoLauGiay: [10, 3600, 25], npcNghiGiay: [10, 3600, 60] },
+        khungHangChoX: [-20, 20, 0], khungHangChoY: [-20, 20, 0], khungMcX: [-20, 20, 0], khungMcY: [-20, 20, 0], npcNguongVang: [0, 100, 6], npcMoiBaoLauGiay: [10, 3600, 25], npcNghiGiay: [10, 3600, 60], lenhHieuUngChoGiay: [0, 120, 8] },
       'san-nhay': { anticsIntervalSec: [1, 120, 7], camHomeZoom: [0.3, 1.5, 0.62], directorMinHoldSec: [0, 10, 1.2], djDoiSauGiay: [5, 600, 24],
         doMoPhanConLai: [0, 1, 0.55], doRucDen: [0, 2, 1], dropHeight: [0, 100, 40], dropHeightVip: [0, 100, 48],
         durEntry: [0, 30, 3.6], durGiftMid: [0, 30, 5], durGiftBig: [0, 30, 7], durGiftHuge: [0, 30, 8.5], durLevelup: [0, 30, 6],
@@ -181,14 +181,14 @@ class Settings {
         zoomPairMax: [0.5, 2, 1.1], zoomSolo: [0.5, 2, 1.12] },
     };
     const BOOL_BY_GAME = {
-      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong'],
+      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh'],
       'san-nhay': ['hieuUngDen', 'khuayDong', 'lamMoKhiLia', 'liaCamLenTrenCung', 'partyMaxNhanhHon', 'phuKienQua'],
     };
     const CHOICE_BY_GAME = {   // key: [các giá trị cho phép, mặc định]
       'san-nhay': { tocDoNhay: [['cham', 'thuong', 'nhanh'], 'thuong'], hieuUngManHinh: [['song', 'vong', 'led'], 'vong'] },
     };
     for (const [k, [mn, mx, def]] of Object.entries(NUM_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = num(cfg[k], mn, mx, def);
-    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])
+    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'lenhHieuUngChoGiay', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])
       if (clean[k] != null) clean[k] = Math.round(clean[k]);
     for (const k of BOOL_BY_GAME[id] || []) if (cfg[k] != null) clean[k] = !!cfg[k];
     for (const [k, [opts, def]] of Object.entries(CHOICE_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = opts.includes(cfg[k]) ? cfg[k] : def;

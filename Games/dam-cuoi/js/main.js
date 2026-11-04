@@ -400,6 +400,25 @@ function startGuide() {
 }
 function renderRules() { /* luật chơi đã gộp vào khung hướng dẫn xoay vòng cho gọn màn hình */ }
 
+/* BẢNG LỆNH CHAT (Nguyen yêu cầu 2026-11-04): khung tĩnh ở cột phải cho
+   người chơi nhìn là biết gõ gì ra hiệu ứng gì — khớp đúng các lệnh hệ
+   thống thật sự bắt (tag, đổi đồ, 3 lệnh hiệu ứng gần đúng, quà). Tắt
+   bằng hienBangLenh; tắt lệnh hiệu ứng thì 3 dòng hiệu ứng cũng ẩn. */
+function renderCmdBoard() {
+  const el = $('cmdboard');
+  if (!el) return;
+  if (cfg.hienBangLenh === false) { el.style.display = 'none'; return; }
+  const fxOff = cfg.hieuUngChat === false;
+  el.innerHTML = '<h4>💬 Lệnh chat</h4><ul>'
+    + (fxOff ? '' : '<li><span>🌸 "hoa rơi"</span><em>mưa hoa</em></li>'
+      + '<li><span>🎆 "pháo hoa"</span><em>pháo hoa</em></li>'
+      + '<li><span>🎉 "pháo giấy"</span><em>pháo giấy</em></li>')
+    + '<li><span>💌 gõ tên người thương</span><em>lên sân khấu</em></li>'
+    + '<li><span>👗 "đổi đồ"</span><em>đổi trang phục</em></li>'
+    + '<li><span>🎁 tặng quà</span><em>pháo + điểm</em></li></ul>';
+  el.style.display = '';
+}
+
 /* ============ Nền / mốc sảnh ============ */
 const BG = { file: '', tier: -1 };
 function applyTierFx(tier) {
@@ -684,31 +703,101 @@ function placeBanner() {
 }
 
 /* ============ Ghép đôi ============ */
+/* Gấp tên về dạng so khớp: thường + bỏ dấu + chỉ giữ chữ/số liền nhau
+   ("Ngọc Linh" -> "ngoclinh"). foldCmd đã có sẵn ở dưới (khai báo hàm
+   được hoist nên gọi từ đây vô tư). */
+function foldName(s) { return foldCmd(s).replace(/[^a-z0-9]+/g, ''); }
+function levRatio(a, b) {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  const mm = a.length, nn = b.length;
+  if (Math.abs(mm - nn) > 4) return 0;
+  let prev = []; for (let j = 0; j <= nn; j++) prev[j] = j;
+  for (let i = 1; i <= mm; i++) {
+    const cur = [i];
+    for (let j = 1; j <= nn; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return 1 - prev[nn] / Math.max(mm, nn);
+}
+function tagSimilarity(typed, cand) {
+  if (!typed || !cand) return 0;
+  let s = levRatio(typed, cand);
+  if (typed.length >= 4 && (cand.includes(typed) || typed.includes(cand))) s = Math.max(s, 0.86);   // chứa nhau = rất giống
+  return s;
+}
 function parseTag(text, self) {
   if (!text || !text.includes('@')) return null;
-  const lower = text.toLocaleLowerCase('vi');
+  /* TAG THÔNG MINH (Nguyen yêu cầu 2026-11-04 22:45): không phân biệt
+     hoa thường, BỎ DẤU, dính liền hay cách chữ đều nhận ("@ngoclinh",
+     "@NGOC LINH", "@Ngọc Linh" cùng về một người); gõ gần đúng
+     ("@hehee", "@ngoc lynh") thì lấy người GIỐNG NHẤT đang có mặt
+     trong phòng. Hợp đồng cũ giữ nguyên: khớp người quen -> trả user;
+     không khớp ai -> trả "bóng ma" tag:... cho luồng tag người vắng. */
+  const folded = foldCmd(text);
+  // Lớp 1: khớp chính xác trên bản đã gấp (giữ khoảng trắng) — dài nhất thắng
   let best = null, bestLen = 0;
   for (const u of known.values()) {
     if (self && u.id === self.id) continue;
     for (const cand of [u.nickname, u.uniqueId]) {
       if (!cand) continue;
-      const c = String(cand).toLocaleLowerCase('vi');
-      if (c.length >= 2 && lower.includes('@' + c) && c.length > bestLen) { best = u; bestLen = c.length; }
+      const c = foldCmd(cand);
+      if (c.length >= 2 && folded.includes('@' + c) && (c.length > bestLen || (c.length === bestLen && best && best.npc && !u.npc))) { best = u; bestLen = c.length; }
     }
   }
   if (best) return best;
-  const m = text.match(/@([^\s@,;:!?]+(?: [^\s@,;:!?]+){0,2})/);
-  if (!m) return null;
-  const STOP = ['cưới', 'ơi', 'ơi!', 'yêu', 'nhé', 'nha', 'nè', 'đi', 'à', 'ạ', 'quá', 'lắm', 'luôn', 'không', 'ko', 'hông', 'với', 'và', 'của', 'làm', 'cho', 'em', 'anh', 'chị', 'mình', 'tớ', 'tao', 'mày'];
-  const words = m[1].split(/\s+/).filter(Boolean);
-  while (words.length && (STOP.includes(words[words.length - 1].toLocaleLowerCase('vi')) || words[words.length - 1].length === 1)) words.pop();
-  const name = words.join(' ').trim();
-  if (name.length < 2) return null;
-  for (const u of known.values()) {
-    if (self && u.id === self.id) continue;
-    if (String(u.nickname).toLocaleLowerCase('vi') === name.toLocaleLowerCase('vi')) return u;
+  // Lớp 2: khớp dính liền — phần sau @ (gấp + bỏ khoảng trắng) bắt đầu bằng tên gấp liền
+  const afterAt = folded.slice(folded.indexOf('@') + 1).replace(/[^a-z0-9]+/g, '');
+  if (afterAt.length >= 3) {
+    let b2 = null, l2 = 0;
+    for (const u of known.values()) {
+      if (self && u.id === self.id) continue;
+      for (const cand of [u.nickname, u.uniqueId]) {
+        if (!cand) continue;
+        const cs = foldName(cand);
+        if (cs.length >= 3 && afterAt.startsWith(cs) && (cs.length > l2 || (cs.length === l2 && b2 && b2.npc && !u.npc))) { b2 = u; l2 = cs.length; }
+      }
+    }
+    if (b2) return b2;
   }
-  return { id: 'tag:' + name.toLocaleLowerCase('vi').replace(/\s+/g, '-'), nickname: name, avatar: '' };
+  // Trích tên người chơi gõ sau @ (tối đa 3 từ, bỏ từ đệm ở đuôi) — cho lớp 3 + bóng ma
+  const m = text.match(/@([^\s@,;:!?]+(?: [^\s@,;:!?]+){0,2})/);
+  let typedName = '';
+  if (m) {
+    const STOP = ['cưới', 'ơi', 'ơi!', 'yêu', 'nhé', 'nha', 'nè', 'đi', 'à', 'ạ', 'quá', 'lắm', 'luôn', 'không', 'ko', 'hông', 'với', 'và', 'của', 'làm', 'cho', 'em', 'anh', 'chị', 'mình', 'tớ', 'tao', 'mày'];
+    const words = m[1].split(/\s+/).filter(Boolean);
+    while (words.length && (STOP.includes(words[words.length - 1].toLocaleLowerCase('vi')) || words[words.length - 1].length === 1)) words.pop();
+    typedName = words.join(' ').trim();
+  }
+  const typedF = foldName(typedName);
+  // Lớp 3a: tên gấp trùng khít một người quen (kể cả chưa vào phòng) — khớp chắc chắn thắng gần đúng
+  if (typedF.length >= 2) {
+    for (const wantNpc of [false, true]) {   // trùng tên khít: khách thật thắng NPC (dàn NPC có tên phổ biến, khách thật trùng tên là chuyện thường)
+      for (const u of known.values()) {
+        if (self && u.id === self.id) continue;
+        if (!!u.npc !== wantNpc) continue;
+        if (foldName(u.nickname) === typedF || foldName(u.uniqueId || '') === typedF) return u;
+      }
+    }
+  }
+  // Lớp 3b: gần đúng — chỉ tìm trong số người ĐANG CÓ MẶT trong phòng, phải thắng rõ người thứ hai
+  if (typedF.length >= 3) {
+    let bU = null, bS = 0, s2 = 0;
+    for (const u of known.values()) {
+      if (self && u.id === self.id) continue;
+      if (!P.get(u.id)) continue;
+      let sc = 0;
+      for (const cand of [u.nickname, u.uniqueId]) {
+        if (!cand) continue;
+        sc = Math.max(sc, tagSimilarity(typedF, foldName(cand)));
+      }
+      if (u.npc) sc -= 0.08;   // suýt soát thì ưu tiên khách thật hơn NPC
+      if (sc > bS) { s2 = bS; bS = sc; bU = u; } else if (sc > s2) s2 = sc;
+    }
+    if (bU && bS >= 0.72 && (bS - s2 >= 0.06 || bS >= 0.9)) return bU;
+  }
+  if (!typedName || typedName.length < 2) return null;
+  return { id: 'tag:' + typedName.toLocaleLowerCase('vi').replace(/\s+/g, '-'), nickname: typedName, avatar: '' };
 }
 /* ===== Bong chat + san loc comment =====
    Nguyen chot cach loc (2026-11-04): tu cam thi CHE bang dau * (giu nguyen do
@@ -1102,9 +1191,76 @@ function onChat(m) {
     }
     requestCouple(m.user, partner, true); return;
   }
-  const low = text.toLocaleLowerCase('vi');
-  if (/(pháo\s*hoa|phao\s*hoa)/.test(low)) { FX.fireworks(3); return; }
-  if (/(hoa\s*rơi|mưa\s*hoa|hoa\s*roi)/.test(low)) { FX.petals(120); return; }
+  const loose = scanLooseTag(text, m.user);
+  if (loose) { requestCouple(m.user, loose, true); return; }
+  chatFx(m.user, text);
+}
+
+/* TAG KHÔNG CẦN @ (Nguyen yêu cầu 2026-11-04 22:51): quét cả câu comment
+   tìm tên người chơi đang có mặt — gõ mỗi tên trong câu chat cũng ghép
+   được. Ngưỡng phải CHẶT hơn tag có @ (câu chat thường không được ghép
+   nhầm): ăn khi (1) nguyên tên đã gấp xuất hiện trong câu (dính liền,
+   bỏ dấu), hoặc (2) gõ đúng TÊN GỌI (từ cuối của tên, >= 3 ký tự), hoặc
+   (3) gần đúng rất cao (>= 0.9) và thắng rõ người thứ hai. Tên gấp
+   ngắn hơn 4 ký tự thì bỏ qua (dễ nhầm từ thường — vẫn tag bằng @
+   được). Khách thật được ưu tiên hơn NPC khi suýt soát. */
+function scanLooseTag(text, self) {
+  const tokens = foldCmd(text).split(' ').filter(Boolean);
+  if (!tokens.length) return null;
+  const wins = [];
+  for (let n = 1; n <= 3; n++) for (let i = 0; i + n <= tokens.length; i++) wins.push(tokens.slice(i, i + n).join(''));
+  let best = null, bS = 0, s2 = 0;
+  for (const u of known.values()) {
+    if (self && u.id === self.id) continue;
+    if (!P.get(u.id)) continue;
+    let sc = 0;
+    for (const cand of [u.nickname, u.uniqueId]) {
+      if (!cand) continue;
+      const cf = foldName(cand);
+      if (cf.length < 4) continue;
+      const parts = foldCmd(cand).split(' ').filter(Boolean);
+      const given = parts.length ? foldName(parts[parts.length - 1]) : '';
+      for (const w of wins) {
+        if (w === cf) { sc = 1; break; }
+        if (given.length >= 3 && w === given) sc = Math.max(sc, 0.95);
+        else if (w.length >= 4) sc = Math.max(sc, tagSimilarity(w, cf));
+      }
+      if (sc === 1) break;
+    }
+    if (u.npc) sc -= 0.08;
+    if (sc > bS) { s2 = bS; bS = sc; best = u; } else if (sc > s2) s2 = sc;
+  }
+  if (best && (bS === 1 || (bS >= 0.95 && bS - s2 >= 0.04) || (bS >= 0.9 && bS - s2 >= 0.08))) return best;
+  return null;
+}
+
+/* ===== LỆNH CHAT HIỆU ỨNG — bắt GẦN ĐÚNG (Nguyen yêu cầu 2026-11-04) =====
+   Người chơi gõ tự do, không cần khớp chính xác: comment được gấp không
+   dấu rồi so TỪNG TỪ với các cụm từ khóa trong config — khớp đúng từ,
+   hoặc lệch nhẹ (từ dài >= 4 ký tự thì giống >= 75%) là ăn. Ưu tiên cụm
+   đặc thù: pháo giấy > pháo hoa > hoa rơi. Mỗi người 1 lần mỗi
+   lenhHieuUngChoGiay giây để khỏi spam hiệu ứng. (Thay 2 regex cứng
+   trước đây — mọi câu từng ăn trước đây vẫn ăn qua các cụm mặc định.) */
+const fxCmdAt = new Map();
+function stemHit(tokens, stem) {
+  const st = foldCmd(stem).split(' ').filter(Boolean);
+  if (!st.length) return false;
+  return st.every(w => tokens.some(tk => tk === w || (w.length >= 4 && levRatio(tk, w) >= 0.75)));
+}
+function chatFx(user, text) {
+  if (cfg.hieuUngChat === false) return;
+  const now = Date.now();
+  if (now - (fxCmdAt.get(user.id) || 0) < (Number(cfg.lenhHieuUngChoGiay) || 8) * 1000) return;
+  const tokens = foldCmd(text).split(' ').filter(Boolean);
+  if (!tokens.length) return;
+  const rules = [
+    { list: cfg.lenhPhaoGiay, go: () => { FX.confetti(90); toast('🎉 ' + user.nickname + ' bắn pháo giấy!', false); } },
+    { list: cfg.lenhPhaoHoa, go: () => { FX.fireworks(3); toast('🎆 ' + user.nickname + ' bắn pháo hoa!', false); } },
+    { list: cfg.lenhHoaRoi, go: () => { FX.petals(120); toast('🌸 ' + user.nickname + ' gọi hoa rơi!', false); } },
+  ];
+  for (const r of rules) {
+    if (asList(r.list).some(st => stemHit(tokens, st))) { fxCmdAt.set(user.id, now); r.go(); return; }
+  }
 }
 function greet(user) {
   const now = performance.now();
@@ -1260,7 +1416,7 @@ function applyConfig(c) {
      chứng các bản admin cũ) — asList ép hết về mảng chuỗi sạch. 1 key sai
      kiểu không được phép giết cả quá trình áp config/UI (lỗi 2026-11-04:
      màn hình mất hết khung/BXH/MC dù sự kiện vẫn chạy). */
-  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'rulesLines', 'guideLines', 'npcDanhSach']) {
+  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'rulesLines', 'guideLines', 'npcDanhSach', 'lenhHoaRoi', 'lenhPhaoHoa', 'lenhPhaoGiay']) {
     cfg[k] = asList(cfg[k]).filter(x => typeof x === 'string');
   }
   if (cfg.mcName) MC.name = cfg.mcName;
@@ -1326,7 +1482,7 @@ function applyConfig(c) {
   /* Hàng UI chạy SAU và TỪNG BƯỚC RIÊNG: dù bất kỳ bước cấu hình nào ở trên
      còn vấp, các khung luật/hướng dẫn/BXH/nền VẪN phải hiện — test giả lập
      hay live thật đều thấy UI như nhau. */
-  for (const fn of [renderRules, startGuide, renderBoard, renderCoupleCount, () => refreshBg(false)]) {
+  for (const fn of [renderRules, startGuide, renderBoard, renderCoupleCount, renderCmdBoard, () => refreshBg(false)]) {
     try { fn(); } catch (e) { console.error('[dam-cuoi] loi ve UI:', e); if (window.__diag) window.__diag.uiErr = String((e && e.message) || e); }
   }
   if (window.__diag) window.__diag.stage = 'config-ok';   // mốc cho hộp tự chẩn đoán ở index.html
@@ -1445,6 +1601,8 @@ if (isDemo) {
     mcMinSec: 16, mcMaxSec: 24,
     npcTuDong: true, npcNguongVang: 6, npcMoiBaoLauGiay: 25, npcNghiGiay: 60,
     npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
+    hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
+    lenhHoaRoi: ['hoa rơi', 'mưa hoa', 'hoa'], lenhPhaoHoa: ['pháo hoa', 'pháo'], lenhPhaoGiay: ['pháo giấy', 'confetti'],
     bgRules: [
       { viewers: 10, file: 'bg-500.webp' }, { viewers: 30, file: 'bg-2000.webp' },
       { viewers: 50, file: 'bg-5000.webp' }, { viewers: 100, file: 'bg-10000.webp' }, { viewers: 200, file: 'bg-sanh-moi.webp' },
