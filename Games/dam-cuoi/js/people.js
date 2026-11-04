@@ -156,6 +156,13 @@ function inTable(x, y, mx, my, self) {
 function buildPositions() {
   positions.length = 0;
   const tables = PAINTED_TABLES;
+  // Lọc chống đè: 1 vị trí chỉ được nhận nếu không quá sát vị trí đã nhận trước
+  // đó — ghế của 2 hàng bàn kề nhau (hoặc 2 bàn kề nhau) trước đây có điểm gần
+  // như trùng hẳn, người ngồi sau bị người trước che khuất hoàn toàn.
+  const farEnough = (x, y) => {
+    for (const q of positions) if (Math.abs(q.x - x) < 2.0 && Math.abs(q.y - y) < 1.5) return false;
+    return true;
+  };
   for (const t of tables) {
     for (let k = 0; k < 6; k++) {
       const a = k / 6 * Math.PI * 2 + 0.26;
@@ -163,13 +170,19 @@ function buildPositions() {
       const sx = t.x + Math.cos(a) * (t.rx + 1.7);
       const sy = Math.max(43.5, t.y + Math.sin(a) * (t.ry + 1.3));
       if (inTable(sx, sy, 0.9, 0.7, t)) continue;   // ghế này lại chui vào bàn bên cạnh -> bỏ
+      if (!farEnough(sx, sy)) continue;             // ghế này đè lên ghế đã nhận -> bỏ
       positions.push({ x: sx, y: sy, kind: 'seat', taken: null });
     }
   }
-  for (let gx = 3.6; gx <= 96.5; gx += 2.35)
-    for (let gy = FLOOR_Y + 2.4; gy <= 98.4; gy += 1.95) {
-      const x = gx + rand(-0.7, 0.7), y = gy + rand(-0.5, 0.5);
+  // Lưới điểm đứng: hàng LẺ xô ngang nửa bước (so le như gạch) để người hàng sau
+  // không bị người hàng trước che khuất hẳn; bước lưới rộng hơn trước và điểm
+  // đứng quá sát ghế quanh bàn cũng bỏ — giảm hẳn cảnh nhân vật đè lên nhau.
+  let grow = 0;
+  for (let gy = FLOOR_Y + 2.4; gy <= 98.4; gy += 2.1, grow++)
+    for (let gx = 3.6 + (grow % 2 ? 1.3 : 0); gx <= 96.5; gx += 2.55) {
+      const x = gx + rand(-0.5, 0.5), y = gy + rand(-0.35, 0.35);
       if (inTable(x, y, 1.8, 1.4, null)) continue;   // điểm đứng cũng né mặt bàn + lề
+      if (!farEnough(x, y)) continue;               // quá sát ghế/điểm đã nhận -> bỏ
       positions.push({ x, y, kind: 'stand', taken: null });
     }
   // Ưu tiên: GHẾ QUANH BÀN trước (đúng chất tiệc cưới), từ gần sân khấu ra xa;
@@ -184,12 +197,70 @@ function takePosition() {
 }
 function freePosition(pos) { if (pos && pos.taken) { pos.taken = null; freePool.push(pos); } }
 
+/* ---------- Tìm đường vòng quanh bàn (lưới ô + BFS) ----------
+   Đoạn thẳng bị bàn chắn thì rẽ qua các ô trống (hành lang thảm đỏ x 43–57 luôn
+   thông). Chỉ tính 1 lần khi bắt đầu đi, không tính mỗi khung hình. */
+const GRID = { x0: 1.2, y0: 43.2, dx: 1.23, dy: 1.24, nx: 80, ny: 46 };
+const BLOCKED = (() => {
+  const s = new Set();
+  for (let cy = 0; cy < GRID.ny; cy++) for (let cx = 0; cx < GRID.nx; cx++)
+    if (inTable(GRID.x0 + cx * GRID.dx, GRID.y0 + cy * GRID.dy, 0.85, 0.6, null)) s.add(cx + ',' + cy);
+  return s;
+})();
+function segClear(x1, y1, x2, y2) {
+  const d = Math.hypot(x2 - x1, y2 - y1), steps = Math.max(1, Math.ceil(d / 0.8));
+  for (let i = 1; i < steps; i++) { const t = i / steps; if (inTable(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, 0.85, 0.6, null)) return false; }
+  return true;
+}
+function nearestCell(x, y) {
+  let cx = Math.max(0, Math.min(GRID.nx - 1, Math.round((x - GRID.x0) / GRID.dx)));
+  let cy = Math.max(0, Math.min(GRID.ny - 1, Math.round((y - GRID.y0) / GRID.dy)));
+  if (!BLOCKED.has(cx + ',' + cy)) return [cx, cy];
+  for (let r = 1; r < 8; r++) for (let ax = cx - r; ax <= cx + r; ax++) for (let ay = cy - r; ay <= cy + r; ay++)
+    if (ax >= 0 && ay >= 0 && ax < GRID.nx && ay < GRID.ny && !BLOCKED.has(ax + ',' + ay)) return [ax, ay];
+  return [cx, cy];
+}
+function routeAround(x1, y1, x2, y2) {
+  if (segClear(x1, y1, x2, y2)) return [];
+  const [sx, sy] = nearestCell(x1, y1), [tx, ty] = nearestCell(x2, y2);
+  const key = (x, y) => x + ',' + y;
+  const prev = new Map([[key(sx, sy), null]]); const q = [[sx, sy]];
+  while (q.length) {
+    const [cx, cy] = q.shift();
+    if (cx === tx && cy === ty) break;
+    for (const [ax, ay] of [[cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]]) {
+      if (ax < 0 || ay < 0 || ax >= GRID.nx || ay >= GRID.ny) continue;
+      const k = key(ax, ay); if (prev.has(k) || BLOCKED.has(k)) continue;
+      prev.set(k, [cx, cy]); q.push([ax, ay]);
+    }
+  }
+  if (!prev.has(key(tx, ty))) return [];
+  const cells = []; let cur = [tx, ty];
+  while (cur) { cells.push(cur); cur = prev.get(key(cur[0], cur[1])); }
+  cells.reverse();
+  const cellPt = c => ({ x: GRID.x0 + c[0] * GRID.dx, y: GRID.y0 + c[1] * GRID.dy });
+  const pts = []; let from = { x: x1, y: y1 }, i = 0;
+  while (i < cells.length) {
+    let j = cells.length - 1;
+    while (j > i && !segClear(from.x, from.y, cellPt(cells[j]).x, cellPt(cells[j]).y)) j--;
+    if (j === cells.length - 1 && segClear(from.x, from.y, x2, y2)) break;   // nhìn thẳng tới đích được rồi
+    pts.push(cellPt(cells[j])); from = cellPt(cells[j]); i = j + 1;
+  }
+  return pts;
+}
+
 /* ---------- Di chuyển (tính theo px trong phòng, tốc độ theo quãng đường) ---------- */
 function walkPath(p, points, state, done) {
-  p.path = points.slice(); p.state = state || 'walk'; p.done = done || null;
+  const routed = [];
+  let px = p.x, py = p.y;
+  for (const q of points) {
+    if (py > FLOOR_Y - 2 && q.y > FLOOR_Y - 2) routed.push(...routeAround(px, py, q.x, q.y));
+    routed.push(q); px = q.x; py = q.y;
+  }
+  p.path = routed.slice(); p.state = state || 'walk'; p.done = done || null;
   p.target = p.path[0] || null;
-  let total = 0, px = p.x, py = p.y;
-  for (const q of points) { total += Math.hypot((q.x - px) / 100 * Ww, (q.y - py) / 100 * Hw); px = q.x; py = q.y; }
+  let total = 0; px = p.x; py = p.y;
+  for (const q of routed) { total += Math.hypot((q.x - px) / 100 * Ww, (q.y - py) / 100 * Hw); px = q.x; py = q.y; }
   p.speedPx = Math.max(170, Math.min(780, total / 4.2));
   if (p.target) p.faceLeft = p.target.x < p.x;
   p.dirty = true;
@@ -214,19 +285,16 @@ function stepPerson(p, dt) {
   const step = Math.min(dist, p.speedPx * dt);
   let nx = p.x + dxPx / dist * step / Ww * 100;
   let ny = p.y + dyPx / dist * step / Hw * 100;
-  /* Né mặt bàn khi ĐI: đường đi thẳng từ cửa/ghế này sang ghế khác dễ cắt ngang
-     qua bàn vẽ sẵn — nếu điểm tới lọt vào ellipse bàn (đã phồng lề an toàn) thì
-     đẩy ra ngoài theo hướng tâm, nhân vật tự lướt vòng quanh mép bàn. Chỉ áp
-     dụng ở sàn tiệc (phía trên là sân khấu, không có bàn). Ghế ngồi nằm ở vòng
-     ngoài (rx+1.7) nên vẫn tới nơi bình thường. */
+  /* Lớp bảo hiểm mỏng: không bao giờ để chân lọt vào mặt bàn thật (lề chỉ 0.1).
+     Việc né bàn chủ yếu do TÌM ĐƯỜNG trong walkPath đảm nhiệm — lớp đẩy lề to
+     trước đây tự tạo bẫy: 2 bàn kề nhau phồng lề chồng lên nhau bịt kín lối đi,
+     nhân vật bị đẩy qua lại và kẹt thành đống ở khe bàn. */
   if (ny > FLOOR_Y - 2) {
-    for (let pass = 0; pass < 2; pass++) {
-      for (const t of PAINTED_TABLES) {
-        const ex = t.rx + 1.15, ey = t.ry + 0.85;
-        const qx = (nx - t.x) / ex, qy = (ny - t.y) / ey;
-        const q = qx * qx + qy * qy;
-        if (q < 1 && q > 1e-6) { const s = 1 / Math.sqrt(q); nx = t.x + qx * s * ex; ny = t.y + qy * s * ey; }
-      }
+    for (const t of PAINTED_TABLES) {
+      const ex = t.rx + 0.12, ey = t.ry + 0.1;
+      const qx = (nx - t.x) / ex, qy = (ny - t.y) / ey;
+      const q = qx * qx + qy * qy;
+      if (q < 1 && q > 1e-6) { const s = 1 / Math.sqrt(q); nx = t.x + qx * s * ex; ny = t.y + qy * s * ey; }
     }
   }
   p.x = nx; p.y = ny;
@@ -243,7 +311,9 @@ function render(p) {
   if (Math.abs((p.boost || 1) - p.boostCur) > 0.01) p.dirty = true;
   const fh = FH * depth * stMul * p.boostCur;
   p.el.style.transform = `translate(${X.toFixed(1)}px,${Y.toFixed(1)}px) translate(-50%,-100%)`;
-  p.el.style.zIndex = Math.round(Y) + (p.boost > 1 ? 6000 : 0);
+  // z theo chiều sâu + zSeed cố định của từng người: hai người ngang tầm sâu không
+  // đổi lớp qua lại từng khung hình (hiện tượng chớp ẩn/hiện khi đứng sát nhau)
+  p.el.style.zIndex = Math.round(Y) * 8 + (p.zSeed || 0) + (p.boost > 1 ? 60000 : 0);
   p.el.style.setProperty('--fh', fh.toFixed(0) + 'px');
   p.el.classList.toggle('flip', !!p.faceLeft);
   p.el.classList.toggle('walking', !!p.target);
@@ -295,9 +365,10 @@ P.spawn = function (user) {
   const home = takePosition();
   if (!home) return null;
   const p = {
-    user, el: makeEl(user), x: home.x, y: 99.4, home, outfit: 'casual',
+    user, el: makeEl(user), x: home.x + rand(-2.4, 2.4), y: 99.4, home, outfit: 'casual',
     state: 'walk', target: null, path: [], done: null, faceLeft: false,
     couple: null, idleFor: rand(2, 9), boost: 1, spotScale: 1, dirty: true, speedPx: 200,
+    zSeed: Math.abs(hash(user.id || user.nickname || '')) % 8,   // phá hoà z-index ổn định, chống chớp lớp
   };
   home.taken = p;
   people.set(user.id, p);
@@ -410,7 +481,9 @@ function leaveStage(c) {
   let back = 0;
   for (const p of [c.a, c.b]) {
     p.el.classList.remove('pairfx');
-    walkPath(p, [{ x: p.home.x < 50 ? 47 : 53, y: 90 }, { x: p.home.x, y: p.home.y }], 'walk', () => { p.state = 'home'; if (++back === 2 && P.onPairHome) P.onPairHome(c); });
+    // Xuống bậc thang (điểm ngay dưới bục) rồi về THẲNG vị trí của mình — trước đây
+    // đường về vòng xuống tận y=90 cuối phòng rồi mới quay lên, rất vô lý.
+    walkPath(p, [{ x: p.home.x < 50 ? 47 : 53, y: stageY + 7 }, { x: p.home.x, y: p.home.y }], 'walk', () => { p.state = 'home'; if (++back === 2 && P.onPairHome) P.onPairHome(c); });
   }
   if (P.onPairReturn) P.onPairReturn(c);   // camera bám theo khi đi về chỗ
   promoteStage();
@@ -457,10 +530,14 @@ P.setCrown = function (couple) {
     p.el.appendChild(s);
   }
 };
-/* Tắt hoạt ảnh nhân vật ngoài khung camera cho nhẹ máy */
+/* Tắt hoạt ảnh nhân vật ngoài khung camera cho nhẹ máy — có TRỄ 2 ngưỡng:
+   đang hiện thì phải ra xa viền thêm 4.5% mới tắt, đang tắt thì phải vào sâu
+   hơn viền 1.5% mới bật lại; không còn cảnh nhân vật sát viền chớp tắt/bật
+   hoạt ảnh liên tục khi camera lia chậm. */
 P.cull = function (x0, y0, x1, y1) {
   for (const p of people.values()) {
-    const inside = p.x > x0 && p.x < x1 && p.y > y0 && p.y < y1;
+    const m = p.inside ? 4.5 : -1.5;
+    const inside = p.x > x0 - m && p.x < x1 + m && p.y > y0 - m && p.y < y1 + m;
     if (inside !== p.inside) { p.inside = inside; p.el.classList.toggle('far', !inside); }
   }
 };
