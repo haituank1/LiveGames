@@ -112,7 +112,12 @@
   #camtab small{display:block;font-size:calc(var(--u)*1.7);font-weight:700;color:#ffd76a;letter-spacing:.6px}
 
   /* ---------- Dancer ---------- */
-  .dancer{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;will-change:transform}
+  .dancer{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;will-change:transform;
+    transition:filter .45s ease,opacity .45s ease}
+  /* LÀM MỜ KHI LIA CAM: main.js bật #world.focusing theo đạo diễn camera và gắn .is-focus cho
+     dancer đang được lia; --dimB = hệ số sáng của phần còn lại (config doMoPhanConLai) */
+  #world.focusing .dancer{filter:brightness(var(--dimB,.55)) saturate(.65);opacity:.82}
+  #world.focusing .dancer.is-focus{filter:brightness(1.07) drop-shadow(0 0 14px rgba(255,230,150,.55));opacity:1}
   .dancer .figwrap{position:relative;z-index:1;filter:drop-shadow(0 5px 6px rgba(10,0,30,.45))}
   .dancer .figwrap img.chibi{height:var(--fh,120px);display:block}
   .dancer.onstage .figwrap{filter:drop-shadow(0 0 12px rgba(255,215,106,.8)) drop-shadow(0 5px 7px rgba(10,0,30,.4))}
@@ -135,8 +140,8 @@
     width:calc(var(--fh,120px)*.98);height:calc(var(--fh,120px)*.17);border-radius:50%;pointer-events:none;display:none}
   .dancer .auraring.t1{display:block;border:2px solid rgba(216,140,80,.95);box-shadow:0 0 10px rgba(216,140,80,.6)}
   .dancer .auraring.t2{display:block;border:2px solid rgba(225,235,245,.95);box-shadow:0 0 12px rgba(200,225,255,.75)}
-  .dancer .auraring.t3{display:block;border:2px dashed rgba(255,215,106,.95);box-shadow:0 0 14px rgba(255,215,106,.8),inset 0 0 10px rgba(255,215,106,.4);animation:ringSpin 6s linear infinite}
-  .dancer .auraring.t4{display:block;border:3px solid #ff7ed6;box-shadow:0 0 18px rgba(255,126,214,.9),inset 0 0 12px rgba(126,214,255,.5);animation:ringHue 2.6s linear infinite}
+  .dancer .auraring.t3{display:block;border:2px dashed rgba(255,215,106,.95);box-shadow:0 0 14px rgba(255,215,106,.8),inset 0 0 10px rgba(255,215,106,.4);animation:ringSpin calc(6s * var(--spd,1)) linear infinite}
+  .dancer .auraring.t4{display:block;border:3px solid #ff7ed6;box-shadow:0 0 18px rgba(255,126,214,.9),inset 0 0 12px rgba(126,214,255,.5);animation:ringHue calc(2.6s * var(--spd,1)) linear infinite}
   @keyframes ringSpin{from{transform:translateX(-50%) rotate(0deg)}to{transform:translateX(-50%) rotate(360deg)}}
   @keyframes ringHue{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
   /* vòng sáng khi được chú ý */
@@ -144,7 +149,7 @@
     width:calc(var(--fh,120px)*1.24);height:calc(var(--fh,120px)*.24);border-radius:50%;pointer-events:none;
     border:3px solid rgba(255,230,150,.95);box-shadow:0 0 22px rgba(255,215,106,.85),inset 0 0 16px rgba(255,215,106,.5);
     opacity:0;transition:opacity .4s}
-  .dancer.focused .focusring{opacity:1;animation:focusPulse 1s ease-in-out infinite}
+  .dancer.focused .focusring{opacity:1;animation:focusPulse calc(1s * var(--spd,1)) ease-in-out infinite}
   @keyframes focusPulse{50%{transform:translateX(-50%) scale(1.1)}}
   .dancer .slotmark{position:absolute;top:calc(100% + 1px);left:50%;transform:translateX(-50%);z-index:0;pointer-events:none;
     font-size:min(calc(var(--fh,120px)*.06),14px);font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.5);
@@ -168,9 +173,9 @@
   .dancer.onstage .bubble,.dancer.paired .bubble,.dancer.focused .bubble,.dancer.vis-xung .bubble,.dancer.vis-spot .bubble{font-size:calc(var(--u0)*2.6);max-width:calc(var(--u0)*38)}
   .dancer.staff .chip{border-color:rgba(160,180,205,.6);background:rgba(20,26,40,.66)}
   .dancer .crown{position:absolute;top:calc(var(--fh,120px)*-.13);font-size:min(calc(var(--fh,120px)*.22),118px);z-index:3;
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));animation:crownBob 2.2s ease-in-out infinite}
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));animation:crownBob calc(2.2s * var(--spd,1)) ease-in-out infinite}
   .dancer .pairheart{position:absolute;top:calc(var(--fh,120px)*-.16);font-size:calc(var(--fh,120px)*.24);z-index:3;
-    filter:drop-shadow(0 2px 4px rgba(0,0,0,.35));animation:crownBob 1.4s ease-in-out infinite}
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.35));animation:crownBob calc(1.4s * var(--spd,1)) ease-in-out infinite}
   @keyframes crownBob{50%{transform:translateY(-6%)}}
   .dancer .bubble{position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%) scale(.7);z-index:5;
     background:rgba(255,255,255,.96);color:#38124f;border-radius:12px;padding:3px 8px;font-weight:600;text-align:center;

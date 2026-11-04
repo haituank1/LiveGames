@@ -72,7 +72,24 @@ const STAFF = [
 P.CHARS = CHARS; P.STAFF = STAFF;
 const charById = id => CHARS.find(c => c.id === id) || STAFF.find(c => c.id === id) || CHARS[5];
 P.charOf = p => charById(p && p.cls);
-P.charImg = id => charById(id).crowd;
+/* ===== TỐC ĐỘ NHẢY (main.js gọi P.setSpeedDir theo config tocDoNhay) =====
+   Trình duyệt không đổi được tốc độ GIF đang chạy (delay đã nướng trong file), nên mỗi GIF
+   có sẵn 3 bộ tốc độ: img/ = thường 1.0x · img/cham/ = 0.8x · img/nhanh/ = 1.3x.
+   Mọi URL ảnh nhân vật đều đi qua sped() để đổi tốc độ chỉ cần đổi 1 biến này. */
+let speedDir = '';
+function sped(path) { return speedDir && path ? path.replace('img/', 'img/' + speedDir) : path; }
+P.sped = sped;
+P.setSpeedDir = d => { speedDir = d || ''; };
+P.charImg = id => sped(charById(id).crowd);
+P.refreshImgs = function () {   // áp lại src theo tốc độ hiện tại cho mọi dancer đang có mặt
+  for (const p of people.values()) {
+    const c = charById(p.cls);
+    const raw = p.vis === 'spot' ? (c.spot || c.xung || c.crowd) : p.vis === 'xung' ? (c.xung || c.crowd) : c.crowd;
+    const src = sped(raw);
+    const img = p.el.querySelector('.chibi');
+    if (img.getAttribute('src') !== src) img.src = src;
+  }
+};
 function pickCharId() {
   const total = CHARS.reduce((s, c) => s + c.weight, 0);
   let r = Math.random() * total;
@@ -97,7 +114,7 @@ function makeEl(p) {
     : `<span class="av" style="background:hsl(${hue},55%,48%)">${esc((Array.from(String(p.user.nickname || '?').trim())[0] || '?').toUpperCase())}</span>`;
   el.innerHTML = `<div class="bubble"></div><div class="halo"></div><div class="wing wingL"></div><div class="wing wingR"></div>` +
     `<div class="auraring"></div><div class="focusring"></div>` +
-    `<div class="figwrap"><img class="chibi" src="${charById(p.cls).crowd}" alt=""></div>` +
+    `<div class="figwrap"><img class="chibi" src="${sped(charById(p.cls).crowd)}" alt=""></div>` +
     `<div class="acc"></div>` +
     `<div class="chip">${av}<span class="nm">${esc(p.user.nickname)}</span><span class="lvb"></span></div>` +
     `<div class="slotmark">${p.staff ? 'STAFF' : (p.home ? p.home.id : '')}</div>`;
@@ -153,7 +170,7 @@ P.setVis = function (p, vis) {
   if (!p || p.vis === vis) return;
   p.vis = vis;
   const c = charById(p.cls);
-  const src = vis === 'spot' ? (c.spot || c.xung || c.crowd) : vis === 'xung' ? (c.xung || c.crowd) : c.crowd;
+  const src = sped(vis === 'spot' ? (c.spot || c.xung || c.crowd) : vis === 'xung' ? (c.xung || c.crowd) : c.crowd);
   const img = p.el.querySelector('.chibi');
   if (img.getAttribute('src') !== src) img.src = src;
   p.el.classList.toggle('vis-spot', vis === 'spot');
@@ -212,7 +229,7 @@ let coneFollow = null;
 function spawnGhost(p) {
   if (!trailBox) return;
   const g = document.createElement('img');
-  g.src = charById(p.cls).crowd;
+  g.src = sped(charById(p.cls).crowd);
   g.className = 'ghost';
   g.style.height = scaleFor(p) + 'px';
   g.style.transform = `translate(${p.x / 100 * Wpx}px, ${p.y / 100 * Hpx}px) translate(-50%,-100%)`;

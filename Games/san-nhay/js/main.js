@@ -37,6 +37,7 @@ const DEFAULTS = {
   xpPerComment: 2, xpPerGiftCoin: 2, xpPerFollow: 5, xpPer100Likes: 5, soloXpDiv: 15, pairXp: 15,
   levelXp: [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200, 4000, 5000, 6200, 7600, 9200, 11000, 13000, 15500, 18500, 22000],
   lvScaleMax: 1.25, entryFlairLv: 5, entryFlairLv2: 10, dropHeight: 40, dropHeightVip: 48,
+  lamMoKhiLia: true, doMoPhanConLai: 0.55, tocDoNhay: 'thuong', partyMaxNhanhHon: true,
   guideLines: [], funnyLines: [],
 };
 let cfg = { ...DEFAULTS };
@@ -349,9 +350,10 @@ const Dir = {
     for (const p of itemDancers(item)) refreshVis(p);
     if (item.kind === 'focus' || item.kind === 'pair') {
       const imgP = item.p || (item.pair && item.pair[0]);
-      if (imgP) screenShowFocus({ img: (P.charOf(imgP).xung || P.charOf(imgP).crowd), name: item.name || imgP.user.nickname, sub: item.reason || '' });
+      if (imgP) screenShowFocus({ img: P.sped(P.charOf(imgP).xung || P.charOf(imgP).crowd), name: item.name || imgP.user.nickname, sub: item.reason || '' });
     }
     if (item.name || item.reason) showCamtab(item);
+    syncDim();
   },
   end(item) {
     if (item.p) P.setFocus(item.p, false);
@@ -361,6 +363,7 @@ const Dir = {
     this.lastEndAt = nowMs();
     hideCamtab();
     screenShowDJ();
+    syncDim();
   },
   tick() {
     if (camLockMode || this.locked) return;
@@ -392,6 +395,21 @@ function itemDancers(item) {
   return item.p ? [item.p] : [];
 }
 setInterval(() => Dir.tick(), 200);
+/* ===== LÀM MỜ PHẦN CÒN LẠI KHI CAMERA LIA (config: lamMoKhiLia / doMoPhanConLai) =====
+   Khi đạo diễn giữ 1 cảnh cận cảnh (quà / lên LV / solo / nhảy đôi / người mới rơi xuống),
+   #world mang lớp .focusing → mọi dancer bị giảm sáng theo --dimB (CSS), trừ dancer của
+   cảnh đó mang .is-focus (cặp đôi: cả 2 cùng sáng). Party Max / toàn cảnh / tour ngắm sàn
+   (cảnh gắn noDim) = KHÔNG làm mờ. Gọi ở cuối Dir.start / Dir.end để luôn khớp trạng thái. */
+let dimSet = new Set();
+function syncDim() {
+  const item = (cfg.lamMoKhiLia && !Dir.locked && Dir.cur && !Dir.cur.noDim) ? Dir.cur : null;
+  const targets = item ? itemDancers(item) : [];
+  worldEl.classList.toggle('focusing', targets.length > 0);
+  const next = new Set(targets);
+  for (const p of dimSet) if (!next.has(p)) p.el.classList.remove('is-focus');
+  for (const p of next) if (!dimSet.has(p)) p.el.classList.add('is-focus');
+  dimSet = next;
+}
 let camtabTimer = 0;
 function showCamtab(item) {
   const el = $('camtab');
@@ -406,7 +424,7 @@ function idleTour() {
   if (free.length && Math.random() < 0.7) {
     const p = free[Math.floor(Math.random() * free.length)];
     Dir.request({
-      kind: 'focus', p, prio: 10, dur: 6, zoom: 1.05, follow: false, vis: 'xung',
+      kind: 'focus', p, prio: 10, dur: 6, zoom: 1.05, follow: false, vis: 'xung', noDim: true,
       reason: p.staff ? '🎧 NHÂN VIÊN QUÁN ĐANG QUẨY' : '📹 NGẮM SÀN', name: p.user.nickname,
     });
   } else Cam.home();
@@ -462,6 +480,7 @@ function partyMax() {
   energy = 100; renderEnergy();
   partyUntil = nowMs() + 10000;
   Dir.locked = true;
+  if (cfg.partyMaxNhanhHon && (cfg.tocDoNhay || 'thuong') !== 'nhanh') { speedOverride = 'nhanh'; applySpeed(); }
   if (Dir.cur) Dir.end(Dir.cur);
   Dir.queue.length = 0;
   Cam.overview();
@@ -483,6 +502,7 @@ function partyMax() {
     $('beams').classList.remove('on');
     FX.setDisco(false);
     clearInterval(partyFxTimer);
+    if (speedOverride) { speedOverride = null; applySpeed(); }
     Dir.locked = false;
     energy = 30; renderEnergy();
     for (const p of P.all()) refreshVis(p);
@@ -903,11 +923,31 @@ function resetScores() {   // nút reset của LiveBridge: xoá tiến trình tu
   renderBoard();
 }
 
+/* ============ TỐC ĐỘ NHẢY THEO CONFIG (tocDoNhay: 'cham' | 'thuong' | 'nhanh') ============
+   GIF không đổi được tốc độ lúc chạy nên mỗi GIF có sẵn 3 bộ file: img/ (thường) ·
+   img/cham/ (0.8x) · img/nhanh/ (1.3x) — đổi tốc độ = trỏ sang thư mục khác qua
+   Party.dancers (sped/setSpeedDir/refreshImgs). Biến CSS --spd nhân thời lượng các
+   animation hào quang / bob quanh dancer: chậm 1.25 · thường 1 · nhanh 0.77.
+   Party Max tạm ép 'nhanh' nếu partyMaxNhanhHon = true (speedOverride). */
+const SPEED_DIR = { cham: 'cham/', thuong: '', nhanh: 'nhanh/' };
+const SPEED_SPD = { cham: 1.25, thuong: 1, nhanh: 0.77 };
+let speedOverride = null;
+function applySpeed() {
+  const want = speedOverride || cfg.tocDoNhay || 'thuong';
+  P.setSpeedDir(SPEED_DIR[want] != null ? SPEED_DIR[want] : '');
+  P.refreshImgs();
+  document.documentElement.style.setProperty('--spd', SPEED_SPD[want] || 1);
+  $('screenDJimg').src = P.sped('img/nv03-dj-headspin.gif');
+}
+
 /* ============ Cấu hình ============ */
 function applyConfig(c) {
   cfg = { ...DEFAULTS, ...(c || {}) };
   A.setConfig(cfg);
   P.setTune({ lvScaleMax: cfg.lvScaleMax, dropHeight: cfg.dropHeight, dropHeightVip: cfg.dropHeightVip });
+  worldEl.style.setProperty('--dimB', clamp(cfg.doMoPhanConLai != null ? cfg.doMoPhanConLai : 0.55, 0.3, 1));
+  applySpeed();
+  syncDim();
   storeInit();
   startGuide();
   renderBoard();
@@ -1088,6 +1128,6 @@ W.test = {   // móc kiểm chứng / chụp ảnh demo
   party: () => partyMax(),
   clearFloor: () => { for (const p of P.all().filter(p => !p.staff)) P.removeUser(p.user.id); },
   fall: name => ensureDancer({ id: 'test-' + Date.now(), nickname: name || 'Khách Mới', avatar: '' }),
-  state: () => ({ dancers: P.count(), real: P.realCount(), staff: P.all().filter(p => p.staff).length, stage: stageIds, pair: !!pair, solo: !!solo, dir: W.dir.state() }),
+  state: () => ({ dancers: P.count(), real: P.realCount(), staff: P.all().filter(p => p.staff).length, stage: stageIds, pair: !!pair, solo: !!solo, dir: W.dir.state(), dim: worldEl.classList.contains('focusing'), spd: document.documentElement.style.getPropertyValue('--spd') }),
 };
 })();

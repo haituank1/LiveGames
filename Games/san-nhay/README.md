@@ -92,3 +92,14 @@ Kiến trúc phòng + camera port từ game đám cưới (1 ảnh phòng lớn,
 - Cấu hình: toàn bộ con số (zoom/thời lượng từng loại cảnh, XP, ngưỡng LV, retentionDays, resetDay,
   staffThreshold…) nằm trong `defaults` của `LiveBridge/config/mappings/san-nhay.json`; game có bản
   mặc định tại máy giống hệt để chạy demo độc lập.
+- **Làm mờ khi lia cam** (`lamMoKhiLia` = true, `doMoPhanConLai` = 0.55): khi đạo diễn giữ cảnh cận
+  cảnh (quà / lên LV / solo / nhảy đôi / người mới rơi), mọi dancer trừ người được lia bị giảm sáng +
+  bão hoà + hơi trong để nhân vật chính nổi bật (CSS `#world.focusing .dancer` + `.is-focus`, chuyển
+  mượt 0.45s, main.js `syncDim()` gọi theo Dir.start/end). Party Max / toàn cảnh / tour ngắm sàn
+  thì không mờ. Đặt `lamMoKhiLia: false` để tắt hẳn.
+- **Tốc độ nhảy** (`tocDoNhay`: `cham` | `thuong` | `nhanh`): trình duyệt không đổi được tốc độ GIF
+  đang chạy, nên mỗi GIF trong `img/` có sẵn 2 bộ biến thể delay trong `img/cham/` (0.8x) và
+  `img/nhanh/` (1.3x) — sinh bằng cách vá trường delay của từng frame, dung lượng không đổi.
+  Game đổi tốc độ = đổi thư mục ảnh (dancers.js `sped()`), đồng thời nhân thời lượng animation hào
+  quang/bob qua biến CSS `--spd` (1.25 / 1 / 0.77). `partyMaxNhanhHon` = true: trong Party Max cả
+  sàn tạm nhảy bản `nhanh`, hết Party Max trả về tốc độ config.

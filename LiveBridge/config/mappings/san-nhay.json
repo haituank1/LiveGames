@@ -44,6 +44,7 @@
  "defaults": {
   "camHomeZoom": 0.62,
   "directorMinHoldSec": 1.2,
+  "doMoPhanConLai": 0.55,
   "dropHeight": 40,
   "dropHeightVip": 48,
   "durEntry": 3.6,
@@ -73,6 +74,7 @@
    "⬆ Cày XP lên LV: vòng hào quang đổi bậc, LV10+ đội vương miện",
    "👑 Top quà tuần đứng podium — reset mỗi thứ 6"
   ],
+  "lamMoKhiLia": true,
   "levelXp": [
    0,
    100,
@@ -101,6 +103,7 @@
   "musicVolume": 40,
   "pairSec": 20,
   "pairXp": 15,
+  "partyMaxNhanhHon": true,
   "resetDay": 5,
   "retentionDays": 7,
   "sfxOn": true,
@@ -108,6 +111,7 @@
   "soloSec": 20,
   "soloXpDiv": 15,
   "staffThreshold": 14,
+  "tocDoNhay": "thuong",
   "xpPer100Likes": 5,
   "xpPerComment": 2,
   "xpPerFollow": 5,
