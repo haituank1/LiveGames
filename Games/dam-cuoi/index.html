@@ -4,11 +4,44 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Đám Cưới Online</title>
+<script>
+/* HỘP TỰ CHẨN ĐOÁN lúc khởi động (Nguyen gặp lỗi màn hình đỏ trống 3 lần
+   2026-11-04 mà không cách nào nhìn vào máy anh ấy được): script inline này
+   chạy TRƯỚC mọi file khác, ghi lại lỗi + mốc khởi động; nếu sau 7 giây game
+   chưa sẵn sàng thì TỰ hiện hộp báo ngay trên màn hình game — đang dừng ở
+   bước nào, lỗi gì — để chụp gửi là biết ngay nguyên nhân. Game khỏe thì
+   hộp không bao giờ hiện. Mở ?diag=1 để xem hộp bất cứ lúc nào. */
+window.__diag = { build: '9834ea0-d1', stage: 'html', errs: [] };
+(function () {
+  var D = window.__diag;
+  function rec(s) { D.errs.push(String(s).slice(0, 200)); if (D.errs.length > 4) D.errs.shift(); }
+  window.addEventListener('error', function (e) { rec((e.message || 'loi script') + (e.filename ? ' @' + String(e.filename).split('/').pop() : '')); }, true);
+  window.addEventListener('unhandledrejection', function (e) { rec('promise: ' + ((e.reason && e.reason.message) || e.reason)); });
+  var ce = console.error.bind(console);
+  console.error = function () { try { rec(Array.prototype.map.call(arguments, function (a) { return (a && a.message) || String(a); }).join(' ')); } catch (_) {} return ce.apply(null, arguments); };
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  var t = 0;
+  var iv = setInterval(function () {
+    t++;
+    var el = document.getElementById('bootdiag');
+    if (!el) return;
+    if (D.stage === 'config-ok') { el.style.display = 'none'; clearInterval(iv); return; }
+    if (t < 7 && !/[?&]diag=1/.test(location.search)) return;
+    var msg = D.stage === 'html' ? 'Chưa nạp được mã game — bản cập nhật có thể chưa về máy, hoặc thiếu file khi pull.'
+      : D.stage === 'main-ok' ? 'Mã game đã nạp nhưng CHƯA KẾT NỐI được LiveBridge — kiểm tra cửa sổ LiveBridge có đang chạy không rồi tải lại trang game.'
+      : D.stage === 'ws-ok' ? 'Đã nối LiveBridge nhưng áp cấu hình bị lỗi (xem dòng lỗi dưới).'
+      : 'Đang chờ áp cấu hình từ LiveBridge…';
+    el.innerHTML = '⚠ GAME CHƯA SẴN SÀNG · build ' + D.build + ' · dừng ở: ' + D.stage + '<br>' + msg + (D.errs.length ? '<br>Lỗi gần nhất: ' + esc(D.errs[D.errs.length - 1]) : '');
+    el.style.display = 'block';
+  }, 1000);
+})();
+</script>
 <style>
   :root{--u0:4px;--k:1.2;--u:var(--u0);--safe:0px;--side:0px}
   #left,#side,#mc,#queue{--u:calc(var(--u0)*var(--k))}
   html,body{margin:0;height:100%;overflow:hidden;background:#2a0a18;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#2a0a18}
+  #bootdiag{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:99999;max-width:94%;background:rgba(20,0,8,.93);color:#ffd9e2;border:1px solid #ff5b7f;border-radius:10px;padding:8px 10px;font-size:11px;line-height:1.55;text-align:center;display:none;pointer-events:none}
   /* ---------- Phòng cưới rộng + camera lia ---------- */
   #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;background:#430b18}
   #bgfull{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat;z-index:1}
@@ -160,6 +193,7 @@
 </head>
 <body>
 <div id="stage">
+  <div id="bootdiag"></div>
   <div id="world">
     <div id="bgfull"></div>
     <div id="spot"></div>

@@ -973,6 +973,7 @@ function applyConfig(c) {
   for (const fn of [renderRules, startGuide, renderBoard, () => refreshBg(false)]) {
     try { fn(); } catch (e) { console.error('[dam-cuoi] loi ve UI:', e); }
   }
+  if (window.__diag) window.__diag.stage = 'config-ok';   // mốc cho hộp tự chẩn đoán ở index.html
 }
 
 /* ============ Khung hình 9:16 ============ */
@@ -1133,6 +1134,7 @@ if (isDemo) {
     .on('block', onBlock)
     .on('config', m => applyConfig(m.config))
     .on('hello', h => { if (h && h.config) applyConfig(h.config); })
+    .on('open', () => { if (window.__diag && window.__diag.stage !== 'config-ok') window.__diag.stage = 'ws-ok'; })
     .on('seen', m => { if (m && m.user) ensureGuest(m.user); })   // thả tim cũng tính là khách đến dự
     .on('status', m => {
       const st = (m && m.tiktok) || {};
@@ -1172,4 +1174,5 @@ function startDemo() {
 }
 
 W.handle = handle; W.chat = onChat; W.parseTag = parseTag; W.peopleApi = P;
+if (window.__diag && window.__diag.stage === 'html') window.__diag.stage = 'main-ok';
 })();
