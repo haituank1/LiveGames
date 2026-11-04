@@ -415,12 +415,33 @@ function loop(t) {
 function makeEl(user) {
   const el = document.createElement('div');
   el.className = 'person';
+  /* Avatar canh ten: uu tien ANH THAT cua nguoi choi (URL TikTok). Chua co
+     anh thi dung bong nguoi mau mem lam cho giu cho (khong dung chu cai viet
+     tat nua — Nguyen chon 2026-11-04: de chu nhin tho). Anh tai loi thi cung
+     tu ve bong nguoi chu khong de vong tron trong. */
   const av = user.avatar
-    ? `<span class="av"><img src="${esc(user.avatar)}" alt="" onerror="this.remove()"></span>`
-    : `<span class="av" style="background:${avatarColor(user.id)}">${esc(initials(user.nickname))}</span>`;
+    ? `<span class="av" style="background-color:${avatarColor(user.id)}"><img src="${esc(user.avatar)}" alt="" onerror="this.parentNode.classList.add('def');this.remove()"></span>`
+    : `<span class="av def" style="background-color:${avatarColor(user.id)}"></span>`;
   el.innerHTML = `<div class="figwrap"></div><div class="chip">${av}<span class="nm">${esc(user.nickname)}</span></div>`;
   return el;
 }
+/* Cap nhat ANH THAT vao chip ten bat cu luc nao anh ve duoc: nhieu nguoi
+   duoc spawn boi mot su kien chua kem anh (hoac anh chi xuat hien o su kien
+   sau), truoc day chip giu nguyen dang mac dinh mai mai du cac su kien sau
+   da co anh. main.js register() goi ham nay sau moi lan gop thong tin. */
+P.setAvatar = function (id, url) {
+  const p = people.get(id);
+  if (!p || !url || p.user.avatar === url) return;
+  p.user.avatar = url;
+  const chip = p.el.querySelector('.chip');
+  if (!chip) return;
+  const span = document.createElement('span');
+  span.className = 'av';
+  span.style.backgroundColor = avatarColor(id);
+  span.innerHTML = `<img src="${esc(url)}" alt="" onerror="this.parentNode.classList.add('def');this.remove()">`;
+  const old = chip.querySelector('.av');
+  if (old) old.replaceWith(span); else chip.prepend(span);
+};
 /* Bong chat tren dau nhan vat: main.js da loc noi dung truoc khi goi.
    Comment moi ghi de comment cu va dem lai thoi gian an. */
 P.say = function (id, text, sec) {

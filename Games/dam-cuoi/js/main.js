@@ -69,6 +69,7 @@ function register(user) {
   const old = known.get(user.id);
   const u = old ? { ...old, ...user, avatar: user.avatar || old.avatar } : { ...user };
   known.set(user.id, u);
+  if (u.avatar) P.setAvatar(u.id, u.avatar);   // anh ve muon thi chip ten cap nhat sang anh that ngay
   return u;
 }
 function ensureGuest(user) {
