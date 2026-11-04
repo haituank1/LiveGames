@@ -112,7 +112,7 @@ function escapeHtml(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp
 const MC = {
   name: 'MC',
   queue: [], busyUntil: 0, timer: null, lastLine: '',
-  lines: [], funny: [], couple: [], thank: [], greet: [], follow: [], milestone: [],
+  lines: [], funny: [], couple: [], thank: [], greet: [], follow: [], milestone: [], tagVang: [],
 };
 function fill(tpl, vars) {
   return String(tpl).replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
@@ -310,7 +310,12 @@ P.onPairReveal = function (c) {
   if (FX.petalBurst) FX.petalBurst(mid.fx, mid.fy);
   if (FX.stageSparkle) FX.stageSparkle(mid.fx, mid.fy - 0.04);
   FX.hearts(12, mid.fx, mid.fy);
-  mcReact(2.5, MC.couple, { a: c.a.user.nickname, b: c.b.user.nickname });
+  if (c.tagVangTen && MC.tagVang && MC.tagVang.length) {
+    // Cặp "ghép tạm" vì người thương vắng mặt: MC tranh thủ rủ người thương vào live
+    mcReact(2.6, MC.tagVang, { a: c.a.user.nickname, b: c.b.user.nickname, ten: c.tagVangTen });
+  } else {
+    mcReact(2.5, MC.couple, { a: c.a.user.nickname, b: c.b.user.nickname });
+  }
   if (far) {
     // Cặp ở xa nhau: vừa đổi đồ cho A xong thì lia sang B cho khán giả thấy B lên đồ
     Cam.farPair = null;
@@ -405,6 +410,24 @@ function randomSingle(except) {
   }
   return singles.length ? singles[Math.floor(Math.random() * singles.length)] : null;
 }
+/* Người độc thân KHÁC GIỚI đang có mặt trong phòng (phục vụ ghép tạm khi tag
+   người thương vắng mặt): ưu tiên người đoán giới tính ngược hẳn với người tag;
+   không có thì lấy người chưa đoán được giới tính; tuyệt không ghép cùng giới
+   khi đã đoán được giới tính của cả hai. */
+function randomSingleOpp(except) {
+  const g = P.guessGender(except.nickname || '');
+  const strict = [], loose = [];
+  for (const u of known.values()) {
+    if (u.id === except.id) continue;
+    const p = P.get(u.id);
+    if (!p || p.couple) continue;
+    const gu = P.guessGender(u.nickname || '');
+    if (g !== '?' && gu !== '?' && gu === g) continue;   // cùng giới rõ ràng -> bỏ qua
+    (gu !== '?' && g !== '?' ? strict : loose).push(u);
+  }
+  const pool = strict.length ? strict : loose;
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+}
 function requestCouple(a, b, viaTag) {
   const ua = register(a), ub = register(b);
   if (!ua || !ub || ua.id === ub.id) return null;
@@ -485,7 +508,21 @@ function onChat(m) {
   ensureGuest(m.user);
   const text = String(m.text || '');
   const partner = parseTag(text, m.user);
-  if (partner) { requestCouple(m.user, partner, true); return; }
+  if (partner) {
+    /* Người được tag CHƯA HỀ có mặt trong game (parseTag trả về "bóng ma"
+       tag:...): thay vì ghép với bóng ma, ghép TẠM với 1 người độc thân khác
+       giới đang có mặt + MC đọc câu rủ người thương vào live — tạo động lực
+       kéo đúng người yêu/vợ chồng của họ vào phòng để ghép đúng đôi. Hết
+       người phù hợp thì mới quay về ghép bóng ma như cũ. */
+    if (String(partner.id).startsWith('tag:') && cfg.ghepDoiNgauNhien !== false) {
+      const alt = randomSingleOpp(m.user);
+      if (alt) {
+        const c = requestCouple(m.user, alt, true);
+        if (c) { c.tagVangTen = partner.nickname; return; }
+      }
+    }
+    requestCouple(m.user, partner, true); return;
+  }
   const low = text.toLocaleLowerCase('vi');
   if (/(pháo\s*hoa|phao\s*hoa)/.test(low)) { FX.fireworks(3); return; }
   if (/(hoa\s*rơi|mưa\s*hoa|hoa\s*roi)/.test(low)) { FX.petals(120); return; }
@@ -546,6 +583,7 @@ function applyConfig(c) {
   if (cfg.mcName) MC.name = cfg.mcName;
   MC.lines = cfg.mcLines || []; MC.funny = cfg.mcFunny || []; MC.couple = cfg.mcCouple || [];
   MC.thank = cfg.mcThank || []; MC.greet = cfg.mcGreet || []; MC.follow = cfg.mcFollowLines || [];
+  MC.tagVang = cfg.mcTagVang || [];
   MC.milestone = cfg.mcMilestone || [];
   if (window.NpcVoice) NpcVoice.setConfig(cfg);
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
@@ -662,6 +700,8 @@ if (isDemo) {
     mcThank: ['{ten} chơi lớn quá! Cặp đôi trên sân khấu thay mặt hai họ cảm ơn bạn!', 'Cảm ơn {ten} đã mừng cưới thật hậu hĩnh!'],
     mcGreet: ['Chào mừng {ten} đã đến dự đám cưới online của chúng ta!', 'Khách quý {ten} vừa đến! Mời bạn vào khuôn viên chọn chỗ đẹp nhé!'],
     mcFollowLines: ['Cảm ơn {ten} đã follow! MC se duyên cho bạn ngay đây!'],
+    ghepDoiNgauNhien: true,
+    mcTagVang: ['{a} gọi {ten} mà {ten} chưa có trong phòng — MC ghép tạm {a} với {b} cho đỡ trống nhé! {a} ơi, mau nhắn {ten} vào live để hai bạn được làm lễ cùng nhau!', '{ten} ơi, {a} đang chờ bạn trong phòng cưới đó! MC se duyên tạm cho {a} với {b} trong lúc chờ — {ten} vào nhanh kẻo mất lượt nha!'],
     mcMilestone: ['CẢ NHÀ ƠI! Sảnh cưới đã nâng cấp lên mốc {moc} nhờ tổng lượt xem tăng vọt!'],
     musicOn: true, musicVolume: 0.5, sfxOn: true, sfxVolume: 0.8,
   });
