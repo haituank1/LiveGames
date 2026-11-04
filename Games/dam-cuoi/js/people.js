@@ -767,6 +767,52 @@ P.makeCouple = function (userA, userB) {
   return c;
 };
 
+/* Tư thế đứng của 1 cặp ở ô sân khấu i: ai đứng trái/phải + toạ độ đích
+   của từng người. Xếp NỮ KỀ NỮ, NAM KỀ NAM ở đường giáp giữa các cặp:
+   cặp giữa: nam trái – nữ phải; cặp 2 bên: nữ trái – nam phải. Đích được
+   kẹp vào đúng vùng an toàn trên bục (khung cố định). */
+function slotPose(c, i) {
+  const y = stageY + (i ? STAGE_FRAME.sideDrop : 0);
+  const off = STAGE_FRAME.pairOff[i];
+  const leftP = i === 0 ? c.groom : c.bride;
+  const rightP = i === 0 ? c.bride : c.groom;
+  const yL = y + (leftP === c.groom ? STAGE_FRAME.groomDrop : 0);
+  const yR = y + (rightP === c.groom ? STAGE_FRAME.groomDrop : 0);
+  const clampX = v => Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], v));
+  const yMax = stageY + STAGE_FRAME.zoneDropMax;
+  return { leftP, rightP, l: { x: clampX(STAGE_FRAME.spots[i] - off), y: Math.min(yMax, yL) }, r: { x: clampX(STAGE_FRAME.spots[i] + off), y: Math.min(yMax, yR) } };
+}
+/* Độ dài đường đi còn lại của 1 người (px) theo path hiện tại */
+function pairPathLen(p) {
+  let t = 0, px = p.x, py = p.y;
+  for (const q of p.path || []) { t += Math.hypot((q.x - px) / 100 * Ww, (q.y - py) / 100 * Hw); px = q.x; py = q.y; }
+  return t;
+}
+/* Căn tốc độ 2 bạn đời để ĐI HẾT đường trong cùng một khoảng thời gian:
+   người đường ngắn hơn đi nhanh hơn tương ứng (giới hạn mềm 170–1100px/s).
+   Nhờ vậy hai người luôn tới nơi CÙNG LÚC thay vì người trước người sau. */
+function syncPairSpeed(a, b) {
+  const la = pairPathLen(a), lb = pairPathLen(b);
+  if (la < 1 || lb < 1 || !a.speedPx || !b.speedPx) return;
+  const T = Math.min(la / a.speedPx, lb / b.speedPx);
+  if (!(T > 0)) return;
+  a.speedPx = Math.max(170, Math.min(1100, la / T));
+  b.speedPx = Math.max(170, Math.min(1100, lb / T));
+}
+/* Trượt 1 cặp ĐANG DIỄN sang ô sân khấu khác (dùng khi nhường giữa):
+   trạng thái giữ nguyên 'stage', đồng hồ buổi lễ KHÔNG đặt lại — cặp chỉ
+   đổi chỗ đứng, diễn nốt phần thời gian còn lại ở ô mới. */
+function moveCoupleToSlot(c, i) {
+  if (c.spot >= 0) stageSlots[c.spot] = null;
+  stageSlots[i] = c; c.spot = i;
+  c.a.spotScale = c.b.spotScale = i === 0 ? P.tune.scaleC : P.tune.scaleS;
+  const pose = slotPose(c, i);
+  walkPath(pose.leftP, [pose.l], 'stage');
+  walkPath(pose.rightP, [pose.r], 'stage');
+  syncPairSpeed(pose.leftP, pose.rightP);
+  c.a.dirty = c.b.dirty = true;
+}
+
 function promoteStage() {
   /* Số cặp lên cùng lúc (Nguyen chốt lại 2026-11-04 17:02): bình thường
      CHỈ 1 CẶP trên sân khấu cho thoáng và tập trung; chỉ khi hàng chờ
@@ -779,7 +825,22 @@ function promoteStage() {
   const hardMax = Math.max(1, P.tune.maxStage || 2);
   const want = stageQueue.length >= (P.tune.crowdQueue || 4) ? Math.min(2, hardMax) : Math.min(1, hardMax);
   const cap = Math.max(1, Math.min(want, staged + stageQueue.length));
-  let onStage = staged;
+  /* NHƯỜNG GIỮA CHO CẶP LÊN SAU (Nguyen chốt 2026-11-04 17:18): nếu ô
+     giữa đang có cặp diễn và sắp có cặp mới được lên (còn ô bên trống,
+     cap cho phép), mà cặp giữa đã diễn QUÁ NỬA lượt (≥55% coupleSec)
+     thì cặp giữa trượt sang ô bên — cặp mới vào giữa làm tâm điểm
+     (featured = ô 0 nên camera + điểm quà tự dồn về cặp mới). Cặp giữa
+     mới diễn chưa lâu thì giữ nguyên, cặp mới lấy ô bên như thường. */
+  if (stageQueue.length && staged && staged < cap && stageSlots[0] && stageSlots[0].state === 'stage') {
+    const freeSide = !stageSlots[1] ? 1 : (!stageSlots[2] ? 2 : -1);
+    if (freeSide > 0) {
+      const inc = stageSlots[0];
+      const total = P.coupleSec || 25;
+      const performed = total - Math.max(0, inc.timer != null ? inc.timer : total);
+      if (performed >= total * 0.55) moveCoupleToSlot(inc, freeSide);
+    }
+  }
+  let onStage = stageSlots.filter(Boolean).length;
   for (let i = 0; i < 3; i++) {
     if (stageSlots[i] || !stageQueue.length || onStage >= cap) continue;
     const c = stageQueue.shift(); c.giftPriority = false; notifyQueue();
@@ -793,19 +854,26 @@ function promoteStage() {
     setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
     c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
     if (P.onPairReveal) P.onPairReveal(c);
-    const y = stageY + (i ? STAGE_FRAME.sideDrop : 0);
-    const off = STAGE_FRAME.pairOff[i];
-    /* Xếp NỮ KỀ NỮ, NAM KỀ NAM ở đường giáp giữa các cặp:
-       cặp giữa: nam trái – nữ phải; cặp 2 bên: nữ trái – nam phải */
-    const leftP = i === 0 ? c.groom : c.bride;
-    const rightP = i === 0 ? c.bride : c.groom;
-    const yL = y + (leftP === c.groom ? STAGE_FRAME.groomDrop : 0);
-    const yR = y + (rightP === c.groom ? STAGE_FRAME.groomDrop : 0);
-    // Kẹp điểm đứng cuối vào đúng vùng an toàn trên bục (khung cố định)
-    const clampX = v => Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], v));
-    const yMax = stageY + STAGE_FRAME.zoneDropMax;
-    walkPath(leftP, [{ x: 47, y: 90 }, { x: 47, y: stageY + 7 }, { x: clampX(STAGE_FRAME.spots[i] - off), y: Math.min(yMax, yL) }], 'toStage');
-    walkPath(rightP, [{ x: 53, y: 90 }, { x: 53, y: stageY + 7 }, { x: clampX(STAGE_FRAME.spots[i] + off), y: Math.min(yMax, yR) }], 'toStage', () => arriveStage(c));
+    /* ĐI LÊN SÂN KHẤU CÙNG NHAU (Nguyen yêu cầu 2026-11-04 17:19):
+       trước đây mỗi người đi một mạch từ nhà lên — quãng đường khác
+       nhau nên người tới trước đứng một mình trên sân khấu, người kia
+       lũi thủi theo sau trông rất buồn cười (cả 2 chiều nam/nữ). Nay
+       chia 2 chặng: CHẶNG 1 mỗi người tự đi tới ĐIỂM TẬP KẾT ở đầu thảm
+       đỏ (47/53, y=90) rồi ĐỢI bạn đời; CHẶNG 2 cả hai mới cùng đi lên,
+       tốc độ căn khớp để tới nơi cùng lúc, và buổi lễ chỉ bắt đầu khi
+       CẢ HAI đã đứng vào vị trí (arriveStage chờ đủ 2 người). */
+    const pose = slotPose(c, i);
+    let gathered = 0;
+    const onGather = () => {
+      if (++gathered !== 2 || !couples.includes(c) || c.state !== 'toStage') return;
+      let arrived = 0;
+      const onArr = () => { if (++arrived === 2) arriveStage(c); };
+      walkPath(pose.leftP, [{ x: 47, y: stageY + 7 }, pose.l], 'toStage', onArr);
+      walkPath(pose.rightP, [{ x: 53, y: stageY + 7 }, pose.r], 'toStage', onArr);
+      syncPairSpeed(pose.leftP, pose.rightP);
+    };
+    walkPath(pose.leftP, [{ x: 47, y: 90 }], 'toStage', onGather);
+    walkPath(pose.rightP, [{ x: 53, y: 90 }], 'toStage', onGather);
     if (P.onPairWalk) P.onPairWalk(c);   // camera bám theo khi đi thảm đỏ
   }
 }
