@@ -623,7 +623,12 @@ function requestCouple(a, b, viaTag) {
       }
       if (P.requeueCouple(c)) {
         coupleFormTimes.push(Date.now());
-        /* không lia cam khi xếp lại hàng — tới lượt lên sân khấu camera mới bám theo */
+        /* NGOẠI LỆ cho cặp ĐÃ làm lễ được tag lại (Nguyen chot 2026-11-04):
+           thay sang BỘ ĐỒ CƯỚI KHÁC + lia cam tới như cặp mới cho đẹp.
+           (Cặp ghép lần đầu vẫn: không lia cam, chờ tới lượt mới thay đồ.) */
+        P.cycleOutfit(c.a.user.id);
+        c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
+        if (P.onPairFocus) P.onPairFocus(c);
         toast(`${ua.nickname} ❤ ${ub.nickname} — lên sân khấu lần nữa!`, false);
       }
     }
