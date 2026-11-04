@@ -858,13 +858,16 @@ setInterval(() => {
   }
 }, 2400);
 
-/* ============ Âm thanh: nút bật tiếng ============ */
-function setupSoundBtn() {
-  const btn = $('sound');
+/* ============ Âm thanh: theo config, KHÔNG còn nút bấm (Nguyen chot 2026-11-04) ============
+   Nút "Bấm để bật âm thanh" đã bỏ hẳn: tiếng đi theo config trong setting
+   (mặc định tắt). audio.js tự mở khóa âm thanh ở lần chạm/phím đầu tiên trên
+   trang (pointerdown/keydown) nên nếu bật nhạc trong config thì click đầu
+   tiên vào trang là có tiếng — không cần nút riêng che khung hình nữa. */
+let audioInited = false;
+function initAudio() {
+  if (audioInited) return;
+  audioInited = true;
   A.init();
-  const upd = () => { btn.style.display = A.state() === 'running' ? 'none' : ''; };
-  setTimeout(upd, 1200);
-  btn.addEventListener('click', () => { A.resume(); setTimeout(upd, 300); });
 }
 
 /* ============ Khởi động ============ */
@@ -923,7 +926,7 @@ if (isDemo) {
     mcMilestone: ['CẢ NHÀ ƠI! Sảnh cưới đã nâng cấp lên mốc {moc} nhờ tổng lượt xem tăng vọt!'],
     musicOn: true, musicVolume: 0.5, sfxOn: true, sfxVolume: 0.8,
   });
-  setupSoundBtn();
+  initAudio();
   startDemo();
 } else {
   // LiveBridgeClient dùng API .on('event'|'chat'|'hello'|'config'|'status'|'block'|'seen')
@@ -946,7 +949,7 @@ if (isDemo) {
       else say('Đang chờ kết nối LIVE…', '');
     })
     .connect();
-  setTimeout(setupSoundBtn, 300);
+  setTimeout(initAudio, 300);
 }
 mcRandomLoop();
 
