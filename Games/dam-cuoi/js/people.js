@@ -61,6 +61,7 @@ const SETS_BASE = [
   { name: 'Tím lavender', bride: 'img/bride6.png', groom: 'img/groom6.png' },
   { name: 'Xanh biển', bride: 'img/bride7.png', groom: 'img/groom7.png' },
   { name: 'Hồng đào', bride: 'img/bride8.png', groom: 'img/groom8.png' },
+  { name: 'Xanh mint', bride: 'img/bride9.png', groom: 'img/groom9.png' },
 ];
 const SETS_ROYAL = [
   { name: 'Hoàng gia vàng', bride: 'img/royal-bride1.png', groom: 'img/royal-groom1.png' },
@@ -69,16 +70,16 @@ const SETS_ROYAL = [
   { name: 'Hoàng gia bạch kim', bride: 'img/royal-bride4.png', groom: 'img/royal-groom4.png' },
   { name: 'Hoàng gia lục bảo', bride: 'img/royal-bride5.png', groom: 'img/royal-groom5.png' },
 ];
-const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png', 'img/guest-girl3.png', 'img/guest-girl4.png', 'img/guest-girl5.png'];
-const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.png', 'img/guest-boy4.png'];
+const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png', 'img/guest-girl3.png', 'img/guest-girl4.png', 'img/guest-girl5.png', 'img/guest-girl6.png'];
+const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.png', 'img/guest-boy4.png', 'img/guest-boy5.png'];
 [...SETS_BASE, ...SETS_ROYAL].forEach(s => { for (const src of [s.bride, s.groom]) { const im = new Image(); im.src = src; } });
 [...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; });
 /* Bộ avatar nhỏ làm sẵn cho chip tên (cắt mặt từ chính các nhân vật của
    game, để ở img/avatars/): người chưa có ảnh TikTok thì lấy 1 mặt trong bộ
    này làm ảnh đại diện — theo giới của nhân vật, cố định theo id — thay cho
    hình bóng người trống trơn trước đây (Nguyen chot 2026-11-04). */
-const AV_GIRLS = Array.from({ length: 18 }, (_, i) => `img/avatars/av-f${i + 1}.webp`);
-const AV_BOYS = Array.from({ length: 17 }, (_, i) => `img/avatars/av-m${i + 1}.webp`);
+const AV_GIRLS = Array.from({ length: 20 }, (_, i) => `img/avatars/av-f${i + 1}.webp`);
+const AV_BOYS = Array.from({ length: 19 }, (_, i) => `img/avatars/av-m${i + 1}.webp`);
 [...AV_GIRLS, ...AV_BOYS].forEach(src => { const im = new Image(); im.src = src; });
 function isGirlFigure(p) {
   if (p.outfit === 'bride') return true;
