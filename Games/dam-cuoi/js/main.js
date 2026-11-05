@@ -754,7 +754,7 @@ P.onPairFocus = function (c) {
   }
 };
 P.onPairWalk = function (c) { Cam.follow(c); };       // bám theo lúc đi thảm đỏ lên sân khấu
-P.onPairReturn = function (c) { Cam.follow(c); };     // bám theo lúc đi về chỗ
+P.onPairReturn = function (c) { Cam.follow(c); syncStageSpotlight(); };   // bám theo lúc đi về chỗ; cặp vừa xuống -> tắt spotlight/tên cặp (V3)
 P.onPairHome = function (c) {                          // về tới nơi: nhả camera, quay về toàn cảnh
   if (Cam.followC === c) { Cam.unfollow(); Cam.home(); }
 };
@@ -850,7 +850,8 @@ function showBanner(text, ms = 4600) {
   el.classList.add('on');
   placeBanner();
   clearTimeout(bannerTimer);
-  bannerTimer = setTimeout(() => { if (!cfg.hienTatCaKhung) el.classList.remove('on'); }, ms);
+  bannerTimer = setTimeout(() => { if (!cfg.hienTatCaKhung) el.classList.remove('on'); syncStageSpotlight(); }, ms);   // V3: banner tat -> hien lai ten cap (neu van dang dien)
+  syncStageSpotlight();   // V3: banner vua hien -> an ten cap, tranh chong o
 }
 /* Can vi tri banner cho vua ca hai phia (Nguyen chot 2026-11-04): mac dinh o
    bannerY (30%) — nhung khi bong MC dang hien thi phai dat banner NGAY DUOI
@@ -859,7 +860,7 @@ function showBanner(text, ms = 4600) {
    khong vuot xuong che dau cap doi tren san khau (dau o ~39%). */
 function placeBanner() {
   const el = $('banner');
-  if (!el || !el.classList.contains('on')) return;
+  if (!el || !el.classList.contains('on')) { syncStageSpotlight(); return; }   // V3: MC vua hien/an thi can lai ca ten cap (chung o banner)
   let center = cfg.bannerY != null ? cfg.bannerY : 30;
   const mc = $('mc');
   if (mc && mc.classList.contains('on')) {
@@ -868,6 +869,7 @@ function placeBanner() {
     center = Math.min(Math.max(center, mcBottom + 2.3), 36);
   }
   el.style.top = center + '%';
+  syncStageSpotlight();   // V3: banner doi vi tri -> can lai ten cap theo
 }
 
 /* ============ Ghép đôi ============ */
@@ -1307,6 +1309,39 @@ function requestCouple(a, b, via) {
   toast(`${ua.nickname} ❤ ${ub.nickname} — đang lên sân khấu!`, false);
   return c;
 }
+/* V3 (nv3): dong bo trang thai "cap dang dien" — 1 cho duy nhat bat/tat
+   spotlight manh + vignette + ten cap to (class couple-on tren #stage).
+   Bat: onCoupleStage (cap vua toi san khau). Tat: onPairReturn (cap vua
+   xuong) + vong 3s (tan cap / truong hop le). Ten lay tu P.featured()
+   (cap o o giua duy nhat) — dung textContent vi nickname la input nguoi
+   dung, khong innerHTML. Ten cap dung chung o voi banner (tren dau cap,
+   duoi bong MC) va CHI hien khi banner tat — banner hien thi ten an
+   (class banner-on), banner tat thi ten hien den het buoi le. */
+function syncStageSpotlight() {
+  const c = P.featured && P.featured();
+  const on = !!(c && c.state === 'stage');
+  stageEl.classList.toggle('couple-on', on);
+  const bannerEl = $('banner');
+  stageEl.classList.toggle('banner-on', !!(bannerEl && bannerEl.classList.contains('on')));
+  const nameEl = $('coupleName');
+  if (nameEl) {
+    nameEl.textContent = on ? `💍 ${c.a.user.nickname} ❤ ${c.b.user.nickname}` : '';
+    if (on) {
+      /* Can ten cap vao dung o banner — cung cong thuc nhu placeBanner
+         nhung kep tran 34% (pill ten cao hon banner nen can tran thap
+         hon de khong cham dau cap o ~39%). */
+      let center = cfg.bannerY != null ? cfg.bannerY : 30;
+      const mc = $('mc');
+      if (mc && mc.classList.contains('on')) {
+        const stg = stageEl.getBoundingClientRect();
+        const mcBottom = (mc.getBoundingClientRect().bottom - stg.top) / stg.height * 100;
+        center = Math.min(Math.max(center, mcBottom + 2.3), 34);
+      }
+      nameEl.style.top = center + '%';
+    }
+  }
+  return on;
+}
 P.onCoupleStage = function (c) {
   const npc = !!(c.a.npc || c.b.npc);   // cặp NPC diễn cho phòng vui: KHÔNG đếm lễ, KHÔNG ghi điểm
   if (!npc) {
@@ -1330,6 +1365,19 @@ P.onCoupleStage = function (c) {
   if (FX.ringHearts) FX.ringHearts(sp.fx, sp.fy - 0.09);
   if (FX.stageSparkle) FX.stageSparkle(sp.fx, sp.fy - 0.06);
   const spot = $('spot'); if (spot) spot.classList.add('on');
+  /* V3: cap vua toi san khau — bat ngay spotlight manh (ten cap hien
+     sau khi banner "LE THANH HON" tat, chung o banner — xem
+     syncStageSpotlight), them 1 dot lap lanh phu sau 0.9s neu cap van
+     dang dien (guard featured === c de timeout cu khong sang nham cap sau). */
+  syncStageSpotlight();
+  if (FX.glitter) FX.glitter(60);
+  setTimeout(() => {
+    const f = P.featured && P.featured();
+    if (f === c && FX.stageSparkle) {
+      const mid2 = Cam.toScreen((c.a.x + c.b.x) / 2, (c.a.y + c.b.y) / 2);
+      FX.stageSparkle(mid2.fx, mid2.fy - 0.06);
+    }
+  }, 900);
 };
 P.onQueueChange = function (names) {
   lastQueueLen = names.length;
@@ -2135,7 +2183,7 @@ function resize() {
 addEventListener('resize', resize);
 document.addEventListener('fullscreenchange', () => { lastLayoutKey = ''; resize(); });
 setInterval(resize, 2000);
-setInterval(() => { const sp = $('spot'); if (sp && !P.featured()) sp.classList.remove('on'); }, 3000);
+setInterval(() => { const sp = $('spot'); if (sp && !P.featured()) sp.classList.remove('on'); syncStageSpotlight(); }, 3000);   // V3: tat spotlight/ten cap neu san khau trong (tan cap / truong hop le)
 
 /* Hiệu ứng ÂU YẾM riêng cho từng cặp đang trên bục — mỗi vị trí 1 kiểu khác nhau:
    cặp giữa: suối tim + vòng tim · cặp trái: mưa cánh hoa · cặp phải: vòng tim + hoa xen kẽ */
