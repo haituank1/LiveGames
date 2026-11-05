@@ -528,7 +528,7 @@ P.stageFreshSec = function () {
   let m = Infinity;
   for (const c of couples) {
     if (c.state !== 'stage') continue;
-    const performed = (P.coupleSec || 25) - Math.max(0, c.timer != null ? c.timer : 0);
+    const performed = c.hold ? 1e9 : (P.coupleSec || 25) - Math.max(0, c.timer != null ? c.timer : 0);
     if (performed < m) m = performed;
   }
   return m;
@@ -984,7 +984,13 @@ function promoteStage() {
   let journeying = false, freshPerforming = false;
   for (const c of couples) {
     if (c.state === 'toStage') journeying = true;
-    else if (c.state === 'stage') {
+    else if (c.state === 'stage' && !c.hold) {
+      /* Cap dang GIU san khau (hold) = DA dien xong (timer dung 0) —
+         khong duoc tinh la "dang dien non": neu coupleSec < releaseSec
+         thi performed khong bao gio cham releaseSec, cong dong vinh
+         vien va khong cap nao (tag tay / tu ghep / follow) len duoc
+         nua — ket cung san khau (phat hien 2026-11-05 khi test HOLD +
+         tu ghep doi voi coupleSec = 5 < nhaCapTiepSauGiay = 6). */
       const performed = (P.coupleSec || 25) - Math.max(0, c.timer != null ? c.timer : 0);
       if (performed < (P.releaseSec || 6)) freshPerforming = true;
     }
