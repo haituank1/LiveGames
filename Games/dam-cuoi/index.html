@@ -135,26 +135,33 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
      --tg-stage: độ sáng vòm sân khấu · --tg-tint: màu phủ theo mốc
      --tg-side: tối nhẹ hai bên sảnh · --ab-op: tia sáng thảm giữa
      --sc-op: làm mờ nhẹ 2 dải thảm đỏ bên · --spot-a: độ mạnh đèn sân khấu */
-  #stage{--tg-stage:.12;--tg-tint:rgba(255,196,130,.06);--tg-side:.08;--ab-op:.3;--sc-op:.35;--spot-a:.5}
-  #stage[data-tier="0"]{--tg-stage:.12;--tg-tint:rgba(255,196,130,.06);--tg-side:.08;--ab-op:.3;--sc-op:.35;--spot-a:.5}
-  #stage[data-tier="1"]{--tg-stage:.2;--tg-tint:rgba(255,150,190,.09);--tg-side:.12;--ab-op:.42;--sc-op:.5;--spot-a:.55}
-  #stage[data-tier="2"]{--tg-stage:.3;--tg-tint:rgba(255,205,110,.11);--tg-side:.16;--ab-op:.55;--sc-op:.65;--spot-a:.6}
-  #stage[data-tier="3"]{--tg-stage:.4;--tg-tint:rgba(255,190,140,.13);--tg-side:.2;--ab-op:.68;--sc-op:.8;--spot-a:.65}
-  #stage[data-tier="4"]{--tg-stage:.52;--tg-tint:rgba(255,190,80,.16);--tg-side:.22;--ab-op:.82;--sc-op:.9;--spot-a:.75}
-  #stage[data-tier="5"]{--tg-stage:.62;--tg-tint:rgba(255,170,70,.18);--tg-side:.1;--ab-op:1;--sc-op:.25;--spot-a:.9}
+  #stage{--tg-stage:.12;--tg-tint:rgba(255,196,130,.06);--tg-side:.08;--ab-op:.25;--sc-op:.35;--spot-a:.5}
+  #stage[data-tier="0"]{--tg-stage:.12;--tg-tint:rgba(255,196,130,.06);--tg-side:.08;--ab-op:.25;--sc-op:.35;--spot-a:.5}
+  #stage[data-tier="1"]{--tg-stage:.2;--tg-tint:rgba(255,150,190,.09);--tg-side:.12;--ab-op:.32;--sc-op:.5;--spot-a:.55}
+  #stage[data-tier="2"]{--tg-stage:.3;--tg-tint:rgba(255,205,110,.11);--tg-side:.16;--ab-op:.42;--sc-op:.65;--spot-a:.6}
+  #stage[data-tier="3"]{--tg-stage:.4;--tg-tint:rgba(255,190,140,.13);--tg-side:.2;--ab-op:.5;--sc-op:.8;--spot-a:.65}
+  #stage[data-tier="4"]{--tg-stage:.52;--tg-tint:rgba(255,190,80,.16);--tg-side:.22;--ab-op:.58;--sc-op:.9;--spot-a:.75}
+  #stage[data-tier="5"]{--tg-stage:.62;--tg-tint:rgba(255,170,70,.18);--tg-side:.1;--ab-op:.65;--sc-op:.25;--spot-a:.9}
   #tiergrade{position:absolute;inset:0;z-index:2;pointer-events:none;
     background:
       radial-gradient(ellipse 36% 24% at 50% 38%,rgba(255,226,150,var(--tg-stage)),transparent 70%),
       linear-gradient(to bottom,var(--tg-tint),transparent 45%),
       linear-gradient(90deg,rgba(24,4,16,var(--tg-side)) 0%,transparent 16%,transparent 84%,rgba(24,4,16,var(--tg-side)) 100%)}
-  /* Tia sáng dọc thảm đỏ giữa: hình thang mở rộng dần xuống dưới theo phối
-     cảnh (đỉnh x 45–55% ở y 38%, đáy x 43–57% ở y 100%), khớp đường lễ
-     trong TABLE_FRAMES (thảm giữa hw 7.5% ở y0 43%, mở dần xuống dưới).
-     Chỉ là ánh sáng, không sửa hình học thảm. */
-  #aislebeam{position:absolute;left:40%;top:38%;width:20%;height:62%;z-index:2;pointer-events:none;
-    clip-path:polygon(25% 0,75% 0,85% 100%,15% 100%);
-    background:linear-gradient(to bottom,rgba(255,238,190,.55),rgba(255,214,140,.28) 55%,rgba(255,200,120,.18));
-    mix-blend-mode:screen;opacity:var(--ab-op);transition:opacity 2s}
+  /* Ánh sáng dọc thảm đỏ giữa — SỬA sau chẩn đoán 2026-11-05 (xem dưới):
+     bản cũ là hình thang clip-path + gradient dọc + screen ở opacity 1
+     (mốc 5): khi camera zoom lên sân khấu, mép thẳng của hình thang cắt
+     ngang thảm đỏ tối thành 1 mảng sáng dài hình chữ nhật, mép cứng,
+     lại tràn ra ngoài thảm thật (thảm chỉ rộng ~13% ở sân khấu trong
+     khi tia cũ rộng 20% của #world). Bản mới: KHÔNG còn clip-path,
+     chỉ còn 1 quầng sáng bầu dục (radial, tâm ở sân khấu, mờ dần ra
+     4 phía) + mask dọc làm mờ dần cả đầu trên lẫn cuối dưới — không
+     còn đường thẳng nào. Hẹp hơn (rộng 16%, ôm sát thảm giữa) và đỉnh
+     ở mốc cao đã giảm (xem --ab-op: mốc 5 chỉ còn .65). */
+  #aislebeam{position:absolute;left:42%;top:36%;width:16%;height:64%;z-index:2;pointer-events:none;
+    background:radial-gradient(ellipse 50% 42% at 50% 28%,rgba(255,238,190,.45),rgba(255,214,140,.2) 55%,transparent 75%);
+    mix-blend-mode:screen;opacity:var(--ab-op);transition:opacity 2s;
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 18%,#000 72%,transparent 100%);
+    mask-image:linear-gradient(to bottom,transparent 0%,#000 18%,#000 72%,transparent 100%)}
   /* Làm mờ nhẹ 2 dải thảm đỏ bên (hình thang theo phối cảnh nền mac-dinh:
      trái đỉnh x 36–42% → đáy x 26–38%, phải đối xứng). Ở mốc hoàng gia
      (sảnh mới chỉ có 1 thảm giữa) độ mờ giảm gần về 0 để khỏi tối bàn vàng. */
