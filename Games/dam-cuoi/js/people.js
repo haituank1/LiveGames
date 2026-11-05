@@ -359,12 +359,69 @@ function watchFigure(img, p) {
   img.onerror = () => { waits = 3; setTimeout(check, 250); };
   setTimeout(check, 1200);
 }
+/* ---------- V4: kieu nhay + lap lanh doi do (style rieng cua V4) ----------
+   index.html dang do nv1/nv2/nv3 cung sua trong dot nay nen V4 khong dung
+   vao do: style nay duoc chen 1 lan tu people.js (id 'v4-style'), chi chua
+   cac class moi cua V4 (dance-b / dance-c / outfit-sparkle), khong ghi de
+   class cu. */
+function ensureV4Style() {
+  try {
+    if (document.getElementById('v4-style')) return;
+    const st = document.createElement('style');
+    st.id = 'v4-style';
+    st.textContent = [
+      /* 2 bien the nhay mung: B cham hon + lac hong manh, C nhanh + nhun
+         lien tuc — cung voi danceA co san thanh 3 dieu khac nhau. */
+      '.person.dance.dance-b .figwrap{animation:danceB .65s ease-in-out infinite}',
+      '@keyframes danceB{25%{transform:translateY(-7%) rotate(-5deg)}75%{transform:translateY(-1%) rotate(5deg)}}',
+      '.person.flip.dance.dance-b .figwrap{animation:danceBF .65s ease-in-out infinite}',
+      '@keyframes danceBF{25%{transform:scaleX(-1) translateY(-7%) rotate(5deg)}75%{transform:scaleX(-1) translateY(-1%) rotate(-5deg)}}',
+      '.person.dance.dance-c .figwrap{animation:danceC .42s ease-in-out infinite}',
+      '@keyframes danceC{30%{transform:translateY(-3%) scale(1.04)}60%{transform:translateY(-6%) rotate(2deg)}}',
+      '.person.flip.dance.dance-c .figwrap{animation:danceCF .42s ease-in-out infinite}',
+      '@keyframes danceCF{30%{transform:scaleX(-1) translateY(-3%) scale(1.04)}60%{transform:scaleX(-1) translateY(-6%) rotate(-2deg)}}',
+      /* Lap lanh doi do cuoi: chop vang — thoi luong lay tu --sparkle-dur
+         (0.8–1.2s, dat theo tung nguoi luc doi do). */
+      '.person.outfit-sparkle .figwrap,.person.flip.outfit-sparkle .figwrap{animation:outfitSparkle var(--sparkle-dur,1s) ease-out}',
+      '@keyframes outfitSparkle{0%{filter:drop-shadow(0 0 0 rgba(255,215,106,0)) brightness(1)}25%{filter:drop-shadow(0 0 18px rgba(255,215,106,.95)) drop-shadow(0 0 34px rgba(255,150,200,.7)) brightness(1.35)}70%{filter:drop-shadow(0 0 10px rgba(255,215,106,.6)) brightness(1.12)}100%{filter:drop-shadow(0 5px 6px rgba(90,10,40,.35)) brightness(1)}}',
+    ].join('\n');
+    document.head.appendChild(st);
+  } catch (e) { /* khong co head / chay ngoai trinh duyet: bo qua, chi mat hieu ung phu */ }
+}
+/* V4 — dieu nhay cua 1 nguoi, co dinh theo id (hash): nguoi nao nhay dieu
+   day moi lan danceAll goi, hang xom khac dieu nhau thay vi cung 1 dieu.
+   '' = danceA co san, 'dance-b' / 'dance-c' = 2 bien the moi. */
+P.danceVariantFor = function (id) {
+  const variants = ['', 'dance-b', 'dance-c'];
+  return variants[hash(String(id || '')) % variants.length];
+};
+/* V4 — thoi luong lap lanh doi do: ngau nhien 0.8–1.2s theo plan. */
+function outfitSparkleMs() { return rand(800, 1200); }
+/* V4 — moc test: BOSS/checker goi P._v4test.sparkleMs() + P.danceVariantFor(id)
+   de kiem tra khoang thoi gian + phan bo dieu nhay ma khong can chay live. */
+P._v4test = { sparkleMs: outfitSparkleMs };
 function setOutfit(p, outfit) {
+  const prevOutfit = p.outfit, prevSet = p.set;
   p.outfit = outfit;
   if (outfit === 'casual') p.set = null;
   setFigure(p);
   p.el.classList.toggle('wedding', outfit !== 'casual');
   p.dirty = true;
+  /* V4 — doi sang do cuoi (casual -> bride/groom, hoac doi sang BO cuoi
+     khac qua cycleOutfit) thi lap lanh 0.8–1.2s: khoanh khac chuyen bo
+     thay vi doi cai bup. Chi khi that su doi vai / doi bo (cung vai +
+     cung bo goi lai thi khong chop nua). */
+  if ((outfit === 'bride' || outfit === 'groom') && (prevOutfit !== outfit || p.set !== prevSet)) {
+    try {
+      ensureV4Style();
+      const ms = outfitSparkleMs();
+      p.el.style.setProperty('--sparkle-dur', ms + 'ms');
+      p.el.classList.add('outfit-sparkle');
+      const token = (p._sparkleToken = (p._sparkleToken || 0) + 1);
+      clearTimeout(p._sparkleT);
+      p._sparkleT = setTimeout(() => { if (p._sparkleToken === token) p.el.classList.remove('outfit-sparkle'); }, ms);
+    } catch (e) { /* loi hieu ung phu khong duoc lam chet doi do */ }
+  }
   // chưa có ảnh thật thì ảnh đại diện mặc định cũng theo vai/giới hiện tại
   if (!p.user.avatar) {
     const avImg = p.el.querySelector('.chip .av img');
@@ -1462,10 +1519,19 @@ P.setTune = function (t) {
 };
 P.coupleOf = function (uid) { const p = people.get(uid); return p ? p.couple : null; };
 P.danceAll = function (sec = 5) {
-  /* M13d: 1 setTimeout duy nhat cho ca phong thay vi 1 timeout/nguoi. */
+  /* M13d: 1 setTimeout duy nhat cho ca phong thay vi 1 timeout/nguoi.
+     V4 — moi nguoi nhay theo dieu co dinh cua minh (danceVariantFor):
+     ca sanh co 3 dieu (A co san + B cham/lac hong + C nhanh/nhun) thay
+     vi tat ca nhay y het nhau. */
+  ensureV4Style();
   const els = [];
-  for (const p of people.values()) { p.el.classList.add('dance'); els.push(p.el); }
-  setTimeout(() => { for (const el of els) el.classList.remove('dance'); }, sec * 1000);
+  for (const p of people.values()) {
+    p.el.classList.add('dance');
+    const v = P.danceVariantFor(p.user.id || p.user.nickname);
+    if (v) p.el.classList.add(v);
+    els.push(p.el);
+  }
+  setTimeout(() => { for (const el of els) el.classList.remove('dance', 'dance-b', 'dance-c'); }, sec * 1000);
 };
 /* M13c: chi go vuong mien cu DA BIET (luu tham chieu) thay vi quet toan
    DOM moi lan doi diem — querySelectorAll('.person .crown') cu chay
