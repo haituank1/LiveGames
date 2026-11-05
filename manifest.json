@@ -1,0 +1,1687 @@
+{
+  "commit": "fc3a1ca132b57428e4c1a6d45794614d69b8079e",
+  "short": "fc3a1ca",
+  "generatedAt": "2026-11-05T15:37:38.656Z",
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha": "03a81f71b2e4e60c90266f4dfee4510b81b26741",
+      "size": 306
+    },
+    {
+      "path": "DemoVoices/GV01-Giong-Bong-Bong.mp3",
+      "sha": "ddfb3219a773a89dcfa98f7aa300a607d33c5dc1",
+      "size": 0
+    },
+    {
+      "path": "DemoVoices/GV02-Giong-Lem-Linh.mp3",
+      "sha": "79f1794b041919d8f8fa9d50747a306688e88def",
+      "size": 0
+    },
+    {
+      "path": "DemoVoices/HUONG-DAN.md",
+      "sha": "f7bbebc3a58a39d8008f067e3b8ceef595c85c8d",
+      "size": 5588
+    },
+    {
+      "path": "Games/chua-3d/audio/README.txt",
+      "sha": "0823351e193a5c0666e0c7f23f598c52af2cdcfb",
+      "size": 2297
+    },
+    {
+      "path": "Games/chua-3d/audio/chuong-lon.wav",
+      "sha": "6e93b39317c53c7a2458c860717dd162e569fa8b",
+      "size": 749744
+    },
+    {
+      "path": "Games/chua-3d/audio/chuong.wav",
+      "sha": "ff3e9c79cc12749af3099bfc163b2f955a4ce273",
+      "size": 317564
+    },
+    {
+      "path": "Games/chua-3d/audio/mo.wav",
+      "sha": "349f527ef526724fdd036f787628a4610a8c9dd1",
+      "size": 26504
+    },
+    {
+      "path": "Games/chua-3d/audio/niem.wav",
+      "sha": "cc556c0a5017c46dbf3a6628102eecda62258b92",
+      "size": 405764
+    },
+    {
+      "path": "Games/chua-3d/bg--.webp",
+      "sha": "7be56feb43250d4e31f91bb5c9824e56080fdaa5",
+      "size": 315738
+    },
+    {
+      "path": "Games/chua-3d/bg-1.webp",
+      "sha": "0b194e3d131ee56f68bed3c353819b9874ca97b0",
+      "size": 410386
+    },
+    {
+      "path": "Games/chua-3d/bg-2.webp",
+      "sha": "a8f6715d59fb2abdc5a35b9545a342966d6b2da7",
+      "size": 407582
+    },
+    {
+      "path": "Games/chua-3d/bg-3.webp",
+      "sha": "4fcadc6cabd068f1ec7fb3b0d2ca4a103f945624",
+      "size": 453286
+    },
+    {
+      "path": "Games/chua-3d/bg-4.webp",
+      "sha": "b303822d4f1c6c50d17b2ae20dd336c568b8a71e",
+      "size": 4793148
+    },
+    {
+      "path": "Games/chua-3d/bg.webp",
+      "sha": "b303822d4f1c6c50d17b2ae20dd336c568b8a71e",
+      "size": 4793148
+    },
+    {
+      "path": "Games/chua-3d/images/cat-from-left-to-right-1.gif",
+      "sha": "94dbb2e90fc315d4fda09fdf8d8e48ba54bb98c9",
+      "size": 35380
+    },
+    {
+      "path": "Games/chua-3d/images/cat-from-left-to-rigth-1-1.gif",
+      "sha": "eb1c23cfb6f4e13e92dadb57075279e87e4f4112",
+      "size": 1510274
+    },
+    {
+      "path": "Games/chua-3d/images/cat-from-right-to-left-1.gif",
+      "sha": "9ebf47a8f24ffa7845d188de3302d7d3ba908dd2",
+      "size": 14678
+    },
+    {
+      "path": "Games/chua-3d/images/dog-from-right-to-left-2.gif",
+      "sha": "7f4e6722a5695a0ffee02ecaedcaab9672904416",
+      "size": 441927
+    },
+    {
+      "path": "Games/chua-3d/images/dog-from-right-to-left.gif",
+      "sha": "3c582b97f02da156e197fe022731100181f61d18",
+      "size": 774538
+    },
+    {
+      "path": "Games/chua-3d/images/dog1.gif",
+      "sha": "7710d934b856202ea0660d23f45e8db90fa6bee2",
+      "size": 799918
+    },
+    {
+      "path": "Games/chua-3d/images/sandal-1.png",
+      "sha": "2aea0c6aec8a7df44191a992dabf92ac32ffee3e",
+      "size": 190
+    },
+    {
+      "path": "Games/chua-3d/images/sandal-2.png",
+      "sha": "33b28d57e253a06d15bebf05158d6928363333ab",
+      "size": 186
+    },
+    {
+      "path": "Games/chua-3d/images/sandal-3.png",
+      "sha": "2ea5e7fe0694529ab36e80c8a6b59e82b3489f13",
+      "size": 190
+    },
+    {
+      "path": "Games/chua-3d/images/sandal-4.png",
+      "sha": "9512105bd3db1257fa2806652e4b49dd861ecdfb",
+      "size": 184
+    },
+    {
+      "path": "Games/chua-3d/images/sandal-5.png",
+      "sha": "c5c6f2cf3be820f1739a244ff8b99031235fa7f7",
+      "size": 190
+    },
+    {
+      "path": "Games/chua-3d/index.html",
+      "sha": "1295f35611fc5af2c9c4ed041044854ed2d38003",
+      "size": 13651
+    },
+    {
+      "path": "Games/chua-3d/js/audio.js",
+      "sha": "b7d5a66c92dd409bfc7fddfbebf902d54acf6b7d",
+      "size": 11955
+    },
+    {
+      "path": "Games/chua-3d/js/crowd.js",
+      "sha": "77e64193fc9e0354b5fc93f2c95f6c9ea348a57b",
+      "size": 43177
+    },
+    {
+      "path": "Games/chua-3d/js/effects.js",
+      "sha": "e76c03c4321882f6b3403e65bb2729d14af3e022",
+      "size": 9898
+    },
+    {
+      "path": "Games/chua-3d/js/main.js",
+      "sha": "7b21312f7f22a61f124a79e1da71145f438e00e7",
+      "size": 46148
+    },
+    {
+      "path": "Games/chua-3d/js/ui.js",
+      "sha": "93a19cff190b7e3b70e4f022c239962f874371e4",
+      "size": 17609
+    },
+    {
+      "path": "Games/dam-cuoi/BG-LAYOUT.md",
+      "sha": "d477c478209e009c7e9007925587e57c6d2ccc62",
+      "size": 8277
+    },
+    {
+      "path": "Games/dam-cuoi/README.md",
+      "sha": "7e2dd88afbcc38e4d45e96ef3d490973f7618e14",
+      "size": 7197
+    },
+    {
+      "path": "Games/dam-cuoi/audio/README.txt",
+      "sha": "30c4133a45b5a810d9546ec86356fdd6797b1804",
+      "size": 389
+    },
+    {
+      "path": "Games/dam-cuoi/bg-10000.webp",
+      "sha": "19e5014feac780af07ccc94fc3877fce9692f460",
+      "size": 606056
+    },
+    {
+      "path": "Games/dam-cuoi/bg-2000.webp",
+      "sha": "c75ea18ac9218d30f2635446a28bfef790f3cb31",
+      "size": 615788
+    },
+    {
+      "path": "Games/dam-cuoi/bg-500.webp",
+      "sha": "36e24a2661edfd944d890e05d2735a7391a853f9",
+      "size": 438686
+    },
+    {
+      "path": "Games/dam-cuoi/bg-5000.webp",
+      "sha": "45bd5520677af09fa449188f73621366550f0d18",
+      "size": 482714
+    },
+    {
+      "path": "Games/dam-cuoi/bg-full.webp",
+      "sha": "bcbe350a9326737066f0dd8c861c07ef9cdd0393",
+      "size": 445710
+    },
+    {
+      "path": "Games/dam-cuoi/bg-sanh-moi.webp",
+      "sha": "342767ac5b3c875c5cf526892df972cb83c241bb",
+      "size": 430784
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f1.webp",
+      "sha": "e24d27ac53a704b33674090ccc24344ad3fb78ce",
+      "size": 14164
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f10.webp",
+      "sha": "5541cccd554faf3aa2deae66d349240ee9a3578d",
+      "size": 11468
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f11.webp",
+      "sha": "1c8a13278a4701d8cd5967bc34982e948b91f790",
+      "size": 10126
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f12.webp",
+      "sha": "396756579c89272e5440d9d36b0a6f67937cfa35",
+      "size": 10214
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f13.webp",
+      "sha": "5645c9c1e36063ff655eb350253f1cf18a20529a",
+      "size": 14006
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f14.webp",
+      "sha": "606a0fe0249e9d784bf9aea037e6f5e1a71dd222",
+      "size": 12912
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f15.webp",
+      "sha": "5a89b5bbbd2f9fd96d3e652e2f747d55ff61f556",
+      "size": 12968
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f16.webp",
+      "sha": "64fda525373c3dcd2db82bf4e2c87c05f5f1b54c",
+      "size": 10874
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f17.webp",
+      "sha": "9da0ec332155deec76fbe2c2233235d6c1bf11f6",
+      "size": 14398
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f18.webp",
+      "sha": "0e28af4fef2520799e44bc1ccfceac2c8af5f0eb",
+      "size": 10448
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f19.webp",
+      "sha": "4157d10822f35cdbe43adebf3bcec2747c2741f8",
+      "size": 14064
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f2.webp",
+      "sha": "f138be0ea71559ae9f5aef4f664c85de2c36b1dd",
+      "size": 17542
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f20.webp",
+      "sha": "e48428e75aa31422edf21fb4aa86b7660da1d0ac",
+      "size": 11386
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f21.webp",
+      "sha": "8f42d04fdd4b95a2af2e2c4bf3031b7ec2e84c8e",
+      "size": 10944
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f22.webp",
+      "sha": "aa19f4ed55ac0b0c50ea725c086e940972e8d440",
+      "size": 11954
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f23.webp",
+      "sha": "72db27d5480c4b748a97cf68b72da6991e772bc6",
+      "size": 13590
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f3.webp",
+      "sha": "af3abb143532b3d80d12dd186e11b452c6c1e14b",
+      "size": 11516
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f4.webp",
+      "sha": "df1a68b032d6cdd8f6ca8dc8fe5ed8d1efe09dcd",
+      "size": 12660
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f5.webp",
+      "sha": "0b3af42f973036cdcbede0cc0ac3cb1ceea260af",
+      "size": 15528
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f6.webp",
+      "sha": "7adc60392486cb83cfeafdbe3c89b4babcfd7131",
+      "size": 15488
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f7.webp",
+      "sha": "13d3899c3864e03e0b2f98fe11bab14f1f2f6894",
+      "size": 10280
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f8.webp",
+      "sha": "bb3095f2eacc3e5e213bbfe44c82bc5923e5dcd5",
+      "size": 10596
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-f9.webp",
+      "sha": "2c84e59a5427bc6813f8a848ee1c26e3829e13fb",
+      "size": 12946
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m1.webp",
+      "sha": "6629a744f3b1409126423ebfb766725509936770",
+      "size": 9644
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m10.webp",
+      "sha": "fd19520c75d2d0efdc0aaf43d34499295ba54ae0",
+      "size": 9974
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m11.webp",
+      "sha": "8e2242e4fbeec080563c8208b315103916a66998",
+      "size": 9844
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m12.webp",
+      "sha": "175bd8740d9257513b0103688b44748057b3fdfe",
+      "size": 10692
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m13.webp",
+      "sha": "8ace8b7fa78ad1eb1c7890d2a9393f8d455effbe",
+      "size": 9768
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m14.webp",
+      "sha": "762a7f429d5bc7fbaa89027957c72682c3b379ab",
+      "size": 8862
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m15.webp",
+      "sha": "46b9562b1133c513930373fa8f8b35205e662b01",
+      "size": 10298
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m16.webp",
+      "sha": "496be6e1b0fb0740bb5a606177e815cdad57d073",
+      "size": 10248
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m17.webp",
+      "sha": "45b41aa8e0a93463221f5df9a879db4d8b22abc1",
+      "size": 10114
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m18.webp",
+      "sha": "d3e6f4d2361ca1b8fab6451bce6068171ba35b42",
+      "size": 8972
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m19.webp",
+      "sha": "be0477df9e90916607d8888514c278df19868b2a",
+      "size": 10630
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m2.webp",
+      "sha": "f6e6a971c8d245fb125543bfa4992ee09c6d46c9",
+      "size": 10758
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m20.webp",
+      "sha": "a93e9e8ec124fac4920ed8a6cd9af71d87dc0d2e",
+      "size": 8334
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m21.webp",
+      "sha": "7a0505ab7d3d0894bb6744d94904a1769f45ad11",
+      "size": 9022
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m22.webp",
+      "sha": "51ee20add127b0f2d9bc8be6b1253c79ed64ec80",
+      "size": 8762
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m3.webp",
+      "sha": "81211fb2937799210e27dfbdb3abd4852d4d32c8",
+      "size": 10232
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m4.webp",
+      "sha": "d49dbe5eb3d92c8e9cebf4f21918999155269fc2",
+      "size": 13254
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m5.webp",
+      "sha": "80ec82ee78af34e84bd897b3f564d94d47ed8016",
+      "size": 11706
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m6.webp",
+      "sha": "9360b517fafd6009401938abab718345b153a126",
+      "size": 11242
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m7.webp",
+      "sha": "de708daf91acf83c6dc0c502ac9c0a8c0feccc94",
+      "size": 10968
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m8.webp",
+      "sha": "ebd4f7cf51bd9f26c400081e8e36ef6d0b213300",
+      "size": 11578
+    },
+    {
+      "path": "Games/dam-cuoi/img/avatars/av-m9.webp",
+      "sha": "a29968d995fc02b48f4113b2220e9e3e30e72876",
+      "size": 9284
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride.png",
+      "sha": "918ae358b22a73df27898995c19ac5268f92d63c",
+      "size": 577656
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride2.png",
+      "sha": "772da48b902d2e7a57cedb51ded6076af77ea703",
+      "size": 506425
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride3.png",
+      "sha": "acdd3527e9ff17375296b961986cb934291e2149",
+      "size": 353864
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride4.png",
+      "sha": "0a1cbd147b914546055a0ed2552966bb9fb1cde8",
+      "size": 558661
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride5.png",
+      "sha": "d0759c707b554c8a1240aa9a06271bcb0cc3c8d0",
+      "size": 447232
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride6.png",
+      "sha": "d89b694c65c86e125d87c0172fca1cbcbe024ac6",
+      "size": 538720
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride7.png",
+      "sha": "de08df1dec7cee62fc4190d8018867bd1caf742e",
+      "size": 547169
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride8.png",
+      "sha": "8d55235a5b1f6a5c45bc4bf16b8d39e0e4d2f2de",
+      "size": 628153
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride9.png",
+      "sha": "08c66f98938db0b8f01e1206c08b94640bf4da1b",
+      "size": 553481
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom.png",
+      "sha": "476ca2590fae4949f0cb98ae0ac3c993ea29f81e",
+      "size": 362963
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom2.png",
+      "sha": "e4a71bc899858b4c813e4e7341f94e72c5181143",
+      "size": 375009
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom3.png",
+      "sha": "a54baa6dcea156c033106d1a10dd0dbe49420a0b",
+      "size": 339161
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom4.png",
+      "sha": "38325aef3680ad5e5910213f5ba52c40c9730b96",
+      "size": 356683
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom5.png",
+      "sha": "22cc95931cd0905620063176d6bed0079f635168",
+      "size": 390313
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom6.png",
+      "sha": "e38332320b7d99cb7b15b7d513a4582d53457902",
+      "size": 350946
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom7.png",
+      "sha": "b4ca652623b87c8dc97c17f3f5b31c978c07fe4a",
+      "size": 245077
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom8.png",
+      "sha": "3480445cc4ee06282622114f505aa16316f8d9ab",
+      "size": 335697
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom9.png",
+      "sha": "ce9ee020811d9c1d93147cee2a389e7e61442637",
+      "size": 314822
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-boy.png",
+      "sha": "13d58bb62b171c30b3a39b0790f8833b462a1ffd",
+      "size": 368797
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-boy2.png",
+      "sha": "96e7084f4183974b3b17f9dde7dfc7df94a6dcd6",
+      "size": 444171
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-boy3.png",
+      "sha": "11d364d0798292db4a721ff7d85556f9c98c89b0",
+      "size": 278137
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-boy4.png",
+      "sha": "190aca9c86e18a15f232817ac964dcf4a6315049",
+      "size": 282471
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-boy5.png",
+      "sha": "bd8d36ea4ca7844457dc6e7f2dce9520b27783d6",
+      "size": 441921
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-boy6.png",
+      "sha": "b7a49f27c2994fd11b2a8c31aa0a0df113f9d975",
+      "size": 294951
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-girl.png",
+      "sha": "de8bb01db30b91afa7ea049757b07d29eabfc442",
+      "size": 334744
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-girl2.png",
+      "sha": "99664994fbedea23024d1f70859130e0f907cac1",
+      "size": 346843
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-girl3.png",
+      "sha": "4bc3073617e1f3139e38c0d95e5b22038e39ead5",
+      "size": 414317
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-girl4.png",
+      "sha": "408af89ec759f10ccb8cb6075762db9812baf33c",
+      "size": 322128
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-girl5.png",
+      "sha": "1199835f93652c5be116c4a6e3552f0a3d5b9d3d",
+      "size": 419790
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-girl6.png",
+      "sha": "93db87aec7371028118efcf2d72831ce096c3075",
+      "size": 312150
+    },
+    {
+      "path": "Games/dam-cuoi/img/guest-girl7.png",
+      "sha": "8ab94cd3f8f1e4632c423dc2e47b94514ef8181c",
+      "size": 558368
+    },
+    {
+      "path": "Games/dam-cuoi/img/mc-nu.png",
+      "sha": "ae338afe500eb0dcc788c843b5a11f672e321e9f",
+      "size": 370335
+    },
+    {
+      "path": "Games/dam-cuoi/img/mc.png",
+      "sha": "ec586002934ffa86f271fad6be5cecb1b497627b",
+      "size": 256738
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-bride1.png",
+      "sha": "8f5f701f516e03f0438709525a92a91624442975",
+      "size": 531284
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-bride2.png",
+      "sha": "3e17d825ea9e242d2a919c121a089fb641ad46ae",
+      "size": 469228
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-bride3.png",
+      "sha": "53d7efac65c44e50ba509b98071e7034fa824ee0",
+      "size": 407901
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-bride4.png",
+      "sha": "7a67cddfe06a4cff7d6222020f8016644192b13c",
+      "size": 507786
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-bride5.png",
+      "sha": "6df5230d50b9119c79b472e868d840b9cb531ab3",
+      "size": 470305
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-bride6.png",
+      "sha": "1cb408fa76a1bf7c8d35c2761cb188c6a1c7724b",
+      "size": 473706
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-bride7.png",
+      "sha": "01195ba901034cd6b24a44b3dc40d71fbc65eb31",
+      "size": 517728
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-groom1.png",
+      "sha": "eca3abd99fee99141c0bf65573b28daa10850da0",
+      "size": 436326
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-groom2.png",
+      "sha": "f336ce768155450d77a149aba51915545e9cd0d5",
+      "size": 344399
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-groom3.png",
+      "sha": "3f587c6a825709347a1d63fd41a4c67f3a12c173",
+      "size": 313865
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-groom4.png",
+      "sha": "00307cef7fe7e73338230bc575790dd2338aee98",
+      "size": 293821
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-groom5.png",
+      "sha": "21f512ad5f51148be247968aef79abaa07095faf",
+      "size": 333851
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-groom6.png",
+      "sha": "be358a0a48922f88954bb62ad763ef9316cbf1c5",
+      "size": 286783
+    },
+    {
+      "path": "Games/dam-cuoi/img/royal-groom7.png",
+      "sha": "9891de7bd7a98cda7f1c875c489ee427d9f3b578",
+      "size": 307505
+    },
+    {
+      "path": "Games/dam-cuoi/index.html",
+      "sha": "fbb8cfbaca67b9bf58b96a19192f327baf9682de",
+      "size": 21618
+    },
+    {
+      "path": "Games/dam-cuoi/js/audio.js",
+      "sha": "c07858a988936e4f297cd26c2975af08597c5919",
+      "size": 9041
+    },
+    {
+      "path": "Games/dam-cuoi/js/effects.js",
+      "sha": "6af81c563219d1c4bba3a4cc1ecac52b729c56fe",
+      "size": 27703
+    },
+    {
+      "path": "Games/dam-cuoi/js/main.js",
+      "sha": "0fedff500a3b2db24409d225a04e7e77e13b1476",
+      "size": 151730
+    },
+    {
+      "path": "Games/dam-cuoi/js/people.js",
+      "sha": "7b93c940eed99c51cec123bc3e409bc1306a2cb3",
+      "size": 87149
+    },
+    {
+      "path": "Games/san-nhay/BAR-LAYOUT.md",
+      "sha": "2d3f556779fd5690c80d45db29846dc71411b76f",
+      "size": 4214
+    },
+    {
+      "path": "Games/san-nhay/README.md",
+      "sha": "d305025a0f8c234ee455f381bdedb43b0d18e8f1",
+      "size": 18781
+    },
+    {
+      "path": "Games/san-nhay/audio/README.txt",
+      "sha": "a2bf50dac5dbf73d9c2c501a794720afe02b9235",
+      "size": 285
+    },
+    {
+      "path": "Games/san-nhay/bg-bar.webp",
+      "sha": "888661af7dd1ef282b7e3b1f23e583b18a69a8a8",
+      "size": 215780
+    },
+    {
+      "path": "Games/san-nhay/img/acc-crown-diamond.gif",
+      "sha": "43762ca5fd06236322052c186bb8032dfd82b8be",
+      "size": 72272
+    },
+    {
+      "path": "Games/san-nhay/img/acc-crown-gold.gif",
+      "sha": "06387704ad66c3d76d46042a1ce5a31c5f182456",
+      "size": 74232
+    },
+    {
+      "path": "Games/san-nhay/img/acc-gem-ring.gif",
+      "sha": "2ae7bad8cac8a0306e1fde04d267207141ec6b14",
+      "size": 26457
+    },
+    {
+      "path": "Games/san-nhay/img/acc-wings-gold.gif",
+      "sha": "4d8c13b054c60b064fd2aa9402c1e2e48f444ebc",
+      "size": 169914
+    },
+    {
+      "path": "Games/san-nhay/img/acc-wings-royal.gif",
+      "sha": "f91ebf5eef3a8016d06b7789cb886f19e860efb6",
+      "size": 190462
+    },
+    {
+      "path": "Games/san-nhay/img/cham/acc-crown-diamond.gif",
+      "sha": "4e1016da946d5d028942be4ead0f78e0a89bcc2c",
+      "size": 72272
+    },
+    {
+      "path": "Games/san-nhay/img/cham/acc-crown-gold.gif",
+      "sha": "8b860b8552d78151b767b9000041a52e0a2c00a9",
+      "size": 74232
+    },
+    {
+      "path": "Games/san-nhay/img/cham/acc-gem-ring.gif",
+      "sha": "4b34ef649eb86b4f72fe106dfc883778d9160a69",
+      "size": 26457
+    },
+    {
+      "path": "Games/san-nhay/img/cham/acc-wings-gold.gif",
+      "sha": "ef857ca39a2a888971686f8764ffd6e2e26a86ee",
+      "size": 169914
+    },
+    {
+      "path": "Games/san-nhay/img/cham/acc-wings-royal.gif",
+      "sha": "77ed2dab057835986bc424aea19bf1e3a90f3a80",
+      "size": 190462
+    },
+    {
+      "path": "Games/san-nhay/img/cham/kiem-tien-1-thuong.gif",
+      "sha": "ab66c67de850639050f8cbc14afb552cbda2c520",
+      "size": 36590
+    },
+    {
+      "path": "Games/san-nhay/img/cham/kiem-tien-2-xung-dai.gif",
+      "sha": "5d3e0bcd6c927502b9d79ba14a0445caeb5e0407",
+      "size": 221491
+    },
+    {
+      "path": "Games/san-nhay/img/cham/kiem-tien-3-spotlight-dai.gif",
+      "sha": "856d65f12f382bca6a13cc0657de857daeaa1c84",
+      "size": 677740
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv01-dai-gia-spotlight-dai.gif",
+      "sha": "9a96f51eb36787c8c2975358ff5bcc9c4f8c578d",
+      "size": 617992
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv01-dai-gia-vung-tien.gif",
+      "sha": "f2db6b3361966c03564803750b6f9ce7f971bc95",
+      "size": 115813
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv01-dai-gia-xung-dai.gif",
+      "sha": "c93fa44fa3acbdeb6c17d121b08a2889bde97a2a",
+      "size": 326058
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv02-idol-hiphop-fail.gif",
+      "sha": "0b818251bafe02ec172951d14db77da7a52a32b4",
+      "size": 54966
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv02-idol-nhay.gif",
+      "sha": "48a466d7a7a3f007c5be3d8478dc87aa97446506",
+      "size": 98238
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv02-idol-spotlight-dai.gif",
+      "sha": "9e0676003bb1ce997486f551b313681dce03545e",
+      "size": 472674
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv02-idol-xung-dai.gif",
+      "sha": "485506ca0db4af1b4b46a061a30cc02b6d7e1f9f",
+      "size": 283341
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv03-dj-headspin.gif",
+      "sha": "3a74956795389502c82d4b2cc6754fc3864446f7",
+      "size": 54845
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv03-dj-scratch.gif",
+      "sha": "e19bc3da01240519213588f375278bb97ba319cc",
+      "size": 84470
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv03-dj-spotlight-dai.gif",
+      "sha": "74729e31b2099c41375cfa7b89ad64a332fa4cae",
+      "size": 446083
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv03-dj-xung-dai.gif",
+      "sha": "552cdb5c117442bbd9c5ae85fa17072f1571fe70",
+      "size": 207638
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv04-dan-quay-hit-dat.gif",
+      "sha": "190799d8812a8b0391690e2ae413e04cfbcfeeb4",
+      "size": 41509
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv04-dan-quay-spotlight-dai.gif",
+      "sha": "ee72feae092f02b6789301191132473cd37da162",
+      "size": 401643
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv04-dan-quay-vinahouse.gif",
+      "sha": "608cd0f656ef5227689260abef8388bcc63d30bd",
+      "size": 77633
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv04-dan-quay-xung-dai.gif",
+      "sha": "2672c72beea7f56198ab4840bd2672ec753c678b",
+      "size": 219265
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv05-mascot-hit-dat.gif",
+      "sha": "0c239b6fead411ffcf382c196c3671b4ae2cde75",
+      "size": 47784
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv05-mascot-lac-mong.gif",
+      "sha": "602cc61455a549caf7eb15738b5d3f6673058f59",
+      "size": 82190
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv05-mascot-spotlight-dai.gif",
+      "sha": "91a92124e5b9ecc84e6d41b3c899614c7b2a5485",
+      "size": 412179
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv05-mascot-xung-dai.gif",
+      "sha": "f5cfccc26d65066354fdbd29177ef68fa8e84a5d",
+      "size": 229414
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv06-tan-binh-danh-nhau.gif",
+      "sha": "573affe8d920ef8cc607528eafafc1540d9d2ab5",
+      "size": 74029
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv06-tan-binh-nhay.gif",
+      "sha": "5216ba28c3e73559c798f3eba558ddcb7f7a353b",
+      "size": 85590
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv06-tan-binh-spotlight-dai.gif",
+      "sha": "8f87cb6c777e27e7109f8eed02092dc270c62ef2",
+      "size": 422452
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv06-tan-binh-xung-dai.gif",
+      "sha": "2a261d8e18a3de9cea264a75b2eddbed3eda535c",
+      "size": 260131
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv09-phuc-vu-nhay.gif",
+      "sha": "3c533f29a0f4d3421415f81c0d0ff1f3b5a02d66",
+      "size": 44558
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv10-bartender-nhay.gif",
+      "sha": "c1281414a9fcade3e0083c5921320c3e3a6c6e51",
+      "size": 59704
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv11-be-ruou-nhay.gif",
+      "sha": "044d066fbe8a21aeec2f6bc4511fed604e912c82",
+      "size": 51719
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv12-bao-ve-nhay.gif",
+      "sha": "cdd4b7a85390e561edfd471d59fd74da2e7f60aa",
+      "size": 41833
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv13-dai-ca-ba-dao.gif",
+      "sha": "65ddd15337498384ba48372d9cd17fbf301acf41",
+      "size": 106496
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv13-dai-ca-spotlight-dai.gif",
+      "sha": "db4b0a0282641d5c3b430e46e57636cde28a712d",
+      "size": 525393
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv13-dai-ca-xung-dai.gif",
+      "sha": "ca79e2d27f9baf417021f0d911d85c4149fa186f",
+      "size": 321682
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv14-sieu-hai-nhay-day.gif",
+      "sha": "625c48aefd28c514d7e7620f2cdcbf2db37049ed",
+      "size": 43097
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv14-sieu-hai-nhay-ga.gif",
+      "sha": "98714ce1b63f95f1b2b5c8952701fc54a8ed58d1",
+      "size": 90964
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv14-sieu-hai-spotlight-dai.gif",
+      "sha": "27dd1b41bdaeaad86ff442a0b7493c9139db6859",
+      "size": 416866
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv14-sieu-hai-xung-dai.gif",
+      "sha": "7344bc029c9d6e1875bf67f712d440e1cf8d0470",
+      "size": 244257
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv15-nu-vuong-quat-lanh.gif",
+      "sha": "103b2855c4a4d87372c7729ad24859880f7df4e9",
+      "size": 66419
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv15-nu-vuong-spotlight-dai.gif",
+      "sha": "aca7b6feadc4524d4979bd19ca969a471dfd5283",
+      "size": 363840
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv15-nu-vuong-xung-dai.gif",
+      "sha": "921f041d0353e58979f804e5362f6307bab533f6",
+      "size": 220377
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv16-hype.gif",
+      "sha": "22942d86748e73599baa66df6a8868b34fe2adaa",
+      "size": 179391
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv16-mix.gif",
+      "sha": "70ce9519f78a4f4ccb0adaeffb202fa6fee8c1d5",
+      "size": 169744
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv16-spot.gif",
+      "sha": "3a3e0e66e867be186a510c73fa1bc7e5e293ddc0",
+      "size": 275175
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv17-hype.gif",
+      "sha": "efc515a0c5d8b0746a42528169c84c9051351344",
+      "size": 166038
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv17-mix.gif",
+      "sha": "7569c5f3e675630a2385b1f7edd1f82fac7488ea",
+      "size": 150519
+    },
+    {
+      "path": "Games/san-nhay/img/cham/nv17-spot.gif",
+      "sha": "27aa708f03a8b249cbade11d1f8ed5675950c0a0",
+      "size": 268623
+    },
+    {
+      "path": "Games/san-nhay/img/cham/phuong-hoang-1-thuong.gif",
+      "sha": "fef3f1f746ab3f89357fdc3e929d04076c38038d",
+      "size": 46156
+    },
+    {
+      "path": "Games/san-nhay/img/cham/phuong-hoang-2-xung-dai.gif",
+      "sha": "8e50e50481967d0f3613a6531d764a8d7a8c67d4",
+      "size": 237190
+    },
+    {
+      "path": "Games/san-nhay/img/cham/phuong-hoang-3-spotlight-dai.gif",
+      "sha": "2d145580145731f1c6b6aef7f48d069abe85d198",
+      "size": 933990
+    },
+    {
+      "path": "Games/san-nhay/img/heli.png",
+      "sha": "02495fd6dca40a7b86b8b49590c90d24e485b5fe",
+      "size": 139506
+    },
+    {
+      "path": "Games/san-nhay/img/kiem-tien-1-thuong.gif",
+      "sha": "d94bd2b7bf1759490542fc86c271381725167df6",
+      "size": 36590
+    },
+    {
+      "path": "Games/san-nhay/img/kiem-tien-2-xung-dai.gif",
+      "sha": "686c4efded1eefcb420e76d5b8d7e22b5152c5de",
+      "size": 221491
+    },
+    {
+      "path": "Games/san-nhay/img/kiem-tien-3-spotlight-dai.gif",
+      "sha": "f1aa5e02a8c4ffb7a28cbfd8bbcfdff4735e9db0",
+      "size": 677740
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/acc-crown-diamond.gif",
+      "sha": "98bb6fdd49a5098ffe4d4ed1117ca7f8be07622e",
+      "size": 72272
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/acc-crown-gold.gif",
+      "sha": "4747a79314fc447b48651fb3444a156c1a35018c",
+      "size": 74232
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/acc-gem-ring.gif",
+      "sha": "ae934ff6cb41a74507d4c231f8d51964d2e05f96",
+      "size": 26457
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/acc-wings-gold.gif",
+      "sha": "96d424d3a094d19e73971b1b8f8079231dfb5dc1",
+      "size": 169914
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/acc-wings-royal.gif",
+      "sha": "f47b3c04a9f0b30ecae3409651894bd89254a39a",
+      "size": 190462
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/kiem-tien-1-thuong.gif",
+      "sha": "cc6eec1261d2ef7061a41e73251bdd21f0e2b9a7",
+      "size": 36590
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/kiem-tien-2-xung-dai.gif",
+      "sha": "7071f3b1c0ee756dc911e2078217cf35630ddb1f",
+      "size": 221491
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/kiem-tien-3-spotlight-dai.gif",
+      "sha": "8f10fc030a25c0056a8e3a692de38b0a80346386",
+      "size": 677740
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv01-dai-gia-spotlight-dai.gif",
+      "sha": "f2280c98d8235456e8dd01156112b9e0fcb5f928",
+      "size": 617992
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv01-dai-gia-vung-tien.gif",
+      "sha": "f95c7094f02fb8e3cc2001d4b4530bc40f940410",
+      "size": 115813
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv01-dai-gia-xung-dai.gif",
+      "sha": "f13e2ba994110374e4cb84fca7d5bc0c55757b90",
+      "size": 326058
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv02-idol-hiphop-fail.gif",
+      "sha": "7a78d010fcd9ca54993b305b97de51f2705c4b22",
+      "size": 54966
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv02-idol-nhay.gif",
+      "sha": "fabadbf0646f05b076cc6498114e23e502bceb5d",
+      "size": 98238
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv02-idol-spotlight-dai.gif",
+      "sha": "0ddb642f744471db79021422d2edc42ae8bf7c70",
+      "size": 472674
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv02-idol-xung-dai.gif",
+      "sha": "824a6891ea0047050e907969acec74eee64cf999",
+      "size": 283341
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv03-dj-headspin.gif",
+      "sha": "4334775b39a132d9d2af3d834a09ce5195867ead",
+      "size": 54845
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv03-dj-scratch.gif",
+      "sha": "ad8c703b4b656adb95888752cc5a448c853bc066",
+      "size": 84470
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv03-dj-spotlight-dai.gif",
+      "sha": "6268a2d53951881113b6d6a1703dfcc256a76501",
+      "size": 446083
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv03-dj-xung-dai.gif",
+      "sha": "29ace11cf42a7b56978c33926e6a2bab6a15c169",
+      "size": 207638
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv04-dan-quay-hit-dat.gif",
+      "sha": "11bd8e700b35dd898d5780f06ea0b0c3a1132651",
+      "size": 41509
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv04-dan-quay-spotlight-dai.gif",
+      "sha": "9c7f7d867db40685b9939dcecdad0b772f61486b",
+      "size": 401643
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv04-dan-quay-vinahouse.gif",
+      "sha": "a09eedbba68c62d14234d387984bc524cf9fcd25",
+      "size": 77633
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv04-dan-quay-xung-dai.gif",
+      "sha": "b6d18ffb63a5eb9ca8c64ff0919965fece188740",
+      "size": 219265
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv05-mascot-hit-dat.gif",
+      "sha": "507b23ae428741fb1d81dc8e8ecf7c789217260b",
+      "size": 47784
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv05-mascot-lac-mong.gif",
+      "sha": "b378a98a4547b683ee04532c955c9b03290b64a9",
+      "size": 82190
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv05-mascot-spotlight-dai.gif",
+      "sha": "ee80c3f637344857a154fc19b8b594db626690f5",
+      "size": 412179
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv05-mascot-xung-dai.gif",
+      "sha": "4b8bc017e0190aa29c1734b9b30bf637970cbfab",
+      "size": 229414
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv06-tan-binh-danh-nhau.gif",
+      "sha": "23916ce43c938e083be5d6fb01645ff380f1f8e5",
+      "size": 74029
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv06-tan-binh-nhay.gif",
+      "sha": "f0220bd2b1b3d6f665255e976227a3dd436dc682",
+      "size": 85590
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv06-tan-binh-spotlight-dai.gif",
+      "sha": "22e228ebfc42a07bb25a4fce56efc4169a31a1d3",
+      "size": 422452
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv06-tan-binh-xung-dai.gif",
+      "sha": "81fc4f7a66d04393157b9719a82c915c64f1b70e",
+      "size": 260131
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv09-phuc-vu-nhay.gif",
+      "sha": "8b297e0068b140d58b497216548cddc2fccd493c",
+      "size": 44558
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv10-bartender-nhay.gif",
+      "sha": "0f41688731673fc1b5bc26106803592ce9086009",
+      "size": 59704
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv11-be-ruou-nhay.gif",
+      "sha": "61435c57f3535ac99059c6616dcc4fe397bcfa68",
+      "size": 51719
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv12-bao-ve-nhay.gif",
+      "sha": "0e852dadb85d3ce6bcca25c0455833ddf62680e4",
+      "size": 41833
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv13-dai-ca-ba-dao.gif",
+      "sha": "cd3f46fc3809a7cee3409a7b92bab059c1a6d0cb",
+      "size": 106496
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv13-dai-ca-spotlight-dai.gif",
+      "sha": "8dafd24b4630e7782d582eac18a61cdc578f0904",
+      "size": 525393
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv13-dai-ca-xung-dai.gif",
+      "sha": "d1d9e29cb8ff35a15abe9c096d95f800dbea7eb9",
+      "size": 321682
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv14-sieu-hai-nhay-day.gif",
+      "sha": "39bff47d9f59290319734021f1369562a4cd3092",
+      "size": 43097
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv14-sieu-hai-nhay-ga.gif",
+      "sha": "cdb2ff9cdda6bb1cbf45a505b7b9ce831c2bf3dc",
+      "size": 90964
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv14-sieu-hai-spotlight-dai.gif",
+      "sha": "c16fbf1eeb9a500eeb75ce0600e5f488e33606ba",
+      "size": 416866
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv14-sieu-hai-xung-dai.gif",
+      "sha": "89a9da1211be27214f3e319510411f9a6151e016",
+      "size": 244257
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv15-nu-vuong-quat-lanh.gif",
+      "sha": "51488816ca8d6679acf8c48f8f3824b6cc9f5da9",
+      "size": 66419
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv15-nu-vuong-spotlight-dai.gif",
+      "sha": "9f5fab9fd9b069de30a58d81b1404f27be24fa9a",
+      "size": 363840
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv15-nu-vuong-xung-dai.gif",
+      "sha": "9f024389a5310fd4df0843723f5339843dd7a31a",
+      "size": 220377
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv16-hype.gif",
+      "sha": "9dc0411a13bf2a4e5efe45bc7f5484e4ff2997f0",
+      "size": 179391
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv16-mix.gif",
+      "sha": "19c7e8f48ff41ccfb3edf9ae53b8c06071658501",
+      "size": 169744
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv16-spot.gif",
+      "sha": "f31a6fbac24fce98e4388d2ac4564d26a8e56f1b",
+      "size": 275175
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv17-hype.gif",
+      "sha": "ff327f84289db7c64bb933648d4383d2bb79cb5c",
+      "size": 166038
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv17-mix.gif",
+      "sha": "4216745f67c70e7a5260504e45835e1fcbf1e049",
+      "size": 150519
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/nv17-spot.gif",
+      "sha": "9d71becc3c90a66d3a0d87a781dc6e2670eb21f6",
+      "size": 268623
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/phuong-hoang-1-thuong.gif",
+      "sha": "51058a54e7462c2ae91a9981f859a2bfda3a26ff",
+      "size": 46156
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/phuong-hoang-2-xung-dai.gif",
+      "sha": "9fdb064ba38476a3341df722ad5a60c9e09d703d",
+      "size": 237190
+    },
+    {
+      "path": "Games/san-nhay/img/nhanh/phuong-hoang-3-spotlight-dai.gif",
+      "sha": "f6b9ca552c79c48acb921306a37b821533da343d",
+      "size": 933990
+    },
+    {
+      "path": "Games/san-nhay/img/nv01-dai-gia-spotlight-dai.gif",
+      "sha": "2f9d3abe6260f04d7aaaa25c79f60be8a9afc3a2",
+      "size": 617992
+    },
+    {
+      "path": "Games/san-nhay/img/nv01-dai-gia-vung-tien.gif",
+      "sha": "aa9e6fbeb5d44ce92c1fcc49c1afe47c48581245",
+      "size": 115813
+    },
+    {
+      "path": "Games/san-nhay/img/nv01-dai-gia-xung-dai.gif",
+      "sha": "0a32694177e186b0ffbf1dce377cf82dac5a5a9b",
+      "size": 326058
+    },
+    {
+      "path": "Games/san-nhay/img/nv02-idol-hiphop-fail.gif",
+      "sha": "7e8b40d71ccbcefbd7742fe8c30fd6a2b207beaf",
+      "size": 54966
+    },
+    {
+      "path": "Games/san-nhay/img/nv02-idol-nhay.gif",
+      "sha": "2bf50974c0baa7749be8cfdb5e93c8c42998350c",
+      "size": 98238
+    },
+    {
+      "path": "Games/san-nhay/img/nv02-idol-spotlight-dai.gif",
+      "sha": "d78ba7a8f9a3879ef1d6b6418c2b18f75b23a9be",
+      "size": 472674
+    },
+    {
+      "path": "Games/san-nhay/img/nv02-idol-xung-dai.gif",
+      "sha": "3a191d53b4859e582f572bafe44455b6d70e6914",
+      "size": 283341
+    },
+    {
+      "path": "Games/san-nhay/img/nv03-dj-headspin.gif",
+      "sha": "d10b14d6407dd836a5c9d1e0e9682ef3b4341e71",
+      "size": 54845
+    },
+    {
+      "path": "Games/san-nhay/img/nv03-dj-scratch.gif",
+      "sha": "dad95a96b451b798dd50c709564f30fd731b8466",
+      "size": 84470
+    },
+    {
+      "path": "Games/san-nhay/img/nv03-dj-spotlight-dai.gif",
+      "sha": "376432813e1ae396459681b33a7a67f75893a488",
+      "size": 446083
+    },
+    {
+      "path": "Games/san-nhay/img/nv03-dj-xung-dai.gif",
+      "sha": "545be8651bc1b32e77a184ed4d6b110f34070474",
+      "size": 207638
+    },
+    {
+      "path": "Games/san-nhay/img/nv04-dan-quay-hit-dat.gif",
+      "sha": "09ec0f42d915e48959092a6d9d6e65aa265fed08",
+      "size": 41509
+    },
+    {
+      "path": "Games/san-nhay/img/nv04-dan-quay-spotlight-dai.gif",
+      "sha": "72a9e414e1e521cd5f72e8ca8c26c8e734b939d4",
+      "size": 401643
+    },
+    {
+      "path": "Games/san-nhay/img/nv04-dan-quay-vinahouse.gif",
+      "sha": "0232150b864d53bc7b9dce33f0868689fbd2d4eb",
+      "size": 77633
+    },
+    {
+      "path": "Games/san-nhay/img/nv04-dan-quay-xung-dai.gif",
+      "sha": "8082fea7e5a502f0971dc23c5cfbd4c143410064",
+      "size": 219265
+    },
+    {
+      "path": "Games/san-nhay/img/nv05-mascot-hit-dat.gif",
+      "sha": "81f854fcab17199945999b3ed353ab01b5ca3d16",
+      "size": 47784
+    },
+    {
+      "path": "Games/san-nhay/img/nv05-mascot-lac-mong.gif",
+      "sha": "9afa996af383e269c4d36dc54653b6f6858c7d6f",
+      "size": 82190
+    },
+    {
+      "path": "Games/san-nhay/img/nv05-mascot-spotlight-dai.gif",
+      "sha": "5b450321d1a08f2ba9af055a3b33932b670a09a4",
+      "size": 412179
+    },
+    {
+      "path": "Games/san-nhay/img/nv05-mascot-xung-dai.gif",
+      "sha": "28536a3662e05ca4346ace5dea1e526467b3db7f",
+      "size": 229414
+    },
+    {
+      "path": "Games/san-nhay/img/nv06-tan-binh-danh-nhau.gif",
+      "sha": "523d85e2ff006c76355c7a059e52093749e5e584",
+      "size": 74029
+    },
+    {
+      "path": "Games/san-nhay/img/nv06-tan-binh-nhay.gif",
+      "sha": "758d90d99b5025a1b5fe45fa5fe3923ae9eba460",
+      "size": 85590
+    },
+    {
+      "path": "Games/san-nhay/img/nv06-tan-binh-spotlight-dai.gif",
+      "sha": "64c00cadaf375b01b9a7fe6e9a0a8614a1c92c5b",
+      "size": 422452
+    },
+    {
+      "path": "Games/san-nhay/img/nv06-tan-binh-xung-dai.gif",
+      "sha": "1bfa7c59b7884cf28cf0997e8872d4e549f5f81f",
+      "size": 260131
+    },
+    {
+      "path": "Games/san-nhay/img/nv09-phuc-vu-nhay.gif",
+      "sha": "cb549906dc6253fb711d940ef1e7bacd011c7d54",
+      "size": 44558
+    },
+    {
+      "path": "Games/san-nhay/img/nv10-bartender-nhay.gif",
+      "sha": "5fee0397688b357c66157528e21e4759b9146e16",
+      "size": 59704
+    },
+    {
+      "path": "Games/san-nhay/img/nv11-be-ruou-nhay.gif",
+      "sha": "860a462842755ffc9d1122fb9c6b99fcf2f6b1d0",
+      "size": 51719
+    },
+    {
+      "path": "Games/san-nhay/img/nv12-bao-ve-nhay.gif",
+      "sha": "7ff5019ec871b3c643cc6d7a6f654563bc00bee3",
+      "size": 41833
+    },
+    {
+      "path": "Games/san-nhay/img/nv13-dai-ca-ba-dao.gif",
+      "sha": "dc76226a6b4786654deccb091b573581b75c677a",
+      "size": 106496
+    },
+    {
+      "path": "Games/san-nhay/img/nv13-dai-ca-spotlight-dai.gif",
+      "sha": "d7bb28b3e3d0e2e8ec3c711e3506b7c1eb79f6a3",
+      "size": 525393
+    },
+    {
+      "path": "Games/san-nhay/img/nv13-dai-ca-xung-dai.gif",
+      "sha": "7a22610bbdfdf039261af38b480d52191a8a00e3",
+      "size": 321682
+    },
+    {
+      "path": "Games/san-nhay/img/nv14-sieu-hai-nhay-day.gif",
+      "sha": "a7f721d846fffd7b1a35e911ed1d9cf11f9d9824",
+      "size": 43097
+    },
+    {
+      "path": "Games/san-nhay/img/nv14-sieu-hai-nhay-ga.gif",
+      "sha": "8d981e1a79ee5068b08d2ceb0e0c029780037b95",
+      "size": 90964
+    },
+    {
+      "path": "Games/san-nhay/img/nv14-sieu-hai-spotlight-dai.gif",
+      "sha": "5f5312dcb8320f71e5a20160a9158e4cfc7ad375",
+      "size": 416866
+    },
+    {
+      "path": "Games/san-nhay/img/nv14-sieu-hai-xung-dai.gif",
+      "sha": "6fea3c4b4501f7aa7c816770a3d3a17a0c683d3d",
+      "size": 244257
+    },
+    {
+      "path": "Games/san-nhay/img/nv15-nu-vuong-quat-lanh.gif",
+      "sha": "c7d6aa3cc54f3755fc95b03a1f4968527b199fd9",
+      "size": 66419
+    },
+    {
+      "path": "Games/san-nhay/img/nv15-nu-vuong-spotlight-dai.gif",
+      "sha": "be078736baae661881fbfcc00e084896f3293db8",
+      "size": 363840
+    },
+    {
+      "path": "Games/san-nhay/img/nv15-nu-vuong-xung-dai.gif",
+      "sha": "6af72f79490ece2995832a9f73fe38d551cf28c9",
+      "size": 220377
+    },
+    {
+      "path": "Games/san-nhay/img/nv16-hype.gif",
+      "sha": "c583792f06534500e389ae184d2d11ed7835da0d",
+      "size": 179391
+    },
+    {
+      "path": "Games/san-nhay/img/nv16-mix.gif",
+      "sha": "5c3bbc180fccd960d085352d26e6af738b1a6b85",
+      "size": 169744
+    },
+    {
+      "path": "Games/san-nhay/img/nv16-spot.gif",
+      "sha": "f9eed904c1dc3e2ed79d3b397f4e09a4634af723",
+      "size": 275175
+    },
+    {
+      "path": "Games/san-nhay/img/nv17-hype.gif",
+      "sha": "5cd5b3c258a14e30c723a17c664ade6f0161871f",
+      "size": 166038
+    },
+    {
+      "path": "Games/san-nhay/img/nv17-mix.gif",
+      "sha": "f8d339d6d31d4461e6723cfd927fb1008324df96",
+      "size": 150519
+    },
+    {
+      "path": "Games/san-nhay/img/nv17-spot.gif",
+      "sha": "692785a168e18b41d40e1578df0777fffb1be2d0",
+      "size": 268623
+    },
+    {
+      "path": "Games/san-nhay/img/phuong-hoang-1-thuong.gif",
+      "sha": "cd4e26a84e395bfb468fb2db52d59971d4bcef71",
+      "size": 46156
+    },
+    {
+      "path": "Games/san-nhay/img/phuong-hoang-2-xung-dai.gif",
+      "sha": "2dc891e7b5616c3c3b4c988fb3a2a3810beb37ae",
+      "size": 237190
+    },
+    {
+      "path": "Games/san-nhay/img/phuong-hoang-3-spotlight-dai.gif",
+      "sha": "1efbdd19020978359509b39ac1271c63f08e7d58",
+      "size": 933990
+    },
+    {
+      "path": "Games/san-nhay/index.html",
+      "sha": "6a4975e7377f13a995e878844dbd40b44d409ee3",
+      "size": 39876
+    },
+    {
+      "path": "Games/san-nhay/js/audio.js",
+      "sha": "fef000d6efe7112beda747144dd645f4bbbd0e34",
+      "size": 7368
+    },
+    {
+      "path": "Games/san-nhay/js/dancers.js",
+      "sha": "f12426369d9c2005e55abd0e3f7f6fbdb49bc379",
+      "size": 23415
+    },
+    {
+      "path": "Games/san-nhay/js/effects.js",
+      "sha": "dd3e919eb1f3bb57e183827db7cec57cf730514b",
+      "size": 14886
+    },
+    {
+      "path": "Games/san-nhay/js/main.js",
+      "sha": "7ef9f6688941f5415312e988525339e3c829db31",
+      "size": 87598
+    },
+    {
+      "path": "HANDOFF.md",
+      "sha": "d397da534398697694d4049142cff8336f38dea4",
+      "size": 11009
+    },
+    {
+      "path": "LiveBridge/config/baseline/chua-3d.json",
+      "sha": "0c900ad64d84dd24de99d3ec5555a32ddaaebad4",
+      "size": 5465
+    },
+    {
+      "path": "LiveBridge/config/baseline/settings-games.json",
+      "sha": "809209e3b74a7d127cf0bb7fdf0a904d1f1076c0",
+      "size": 4864
+    },
+    {
+      "path": "LiveBridge/config/default.json",
+      "sha": "2deea810e21e471c2de8448308ccc2970b473763",
+      "size": 188
+    },
+    {
+      "path": "LiveBridge/config/mappings/chua-3d.json",
+      "sha": "5ab449df3ecb2a46bfd0a0fb440671eab3bd25e7",
+      "size": 17886
+    },
+    {
+      "path": "LiveBridge/config/mappings/dam-cuoi.json",
+      "sha": "289a1b4013a85b4bd2b4adfd2fd9309db8e5847d",
+      "size": 28339
+    },
+    {
+      "path": "LiveBridge/config/mappings/san-nhay.json",
+      "sha": "159353e6247a68271dc319ee3ae2cd91eeb88353",
+      "size": 5785
+    },
+    {
+      "path": "LiveBridge/package-lock.json",
+      "sha": "e4cb6148ebe9b3a5fe2e57e9e189e8b5ec4dc2a0",
+      "size": 26629
+    },
+    {
+      "path": "LiveBridge/package.json",
+      "sha": "9c7985cd2d2495bbb1f50f5414277cd64ed7239b",
+      "size": 439
+    },
+    {
+      "path": "LiveBridge/public/admin.html",
+      "sha": "3379338a69371e52378c7af42ce2ecc913c7f9a4",
+      "size": 75124
+    },
+    {
+      "path": "LiveBridge/public/livebridge-client.js",
+      "sha": "8a1fb7ef9e3a5c9d00df77aff06885307b43ccab",
+      "size": 2356
+    },
+    {
+      "path": "LiveBridge/public/npc-voice.js",
+      "sha": "a1e67b3a27fad41656fcf6f1362d63bd3a3877d2",
+      "size": 19019
+    },
+    {
+      "path": "LiveBridge/public/simulator.html",
+      "sha": "53f80aada7df3d47d122b202deb22b729e5cb83a",
+      "size": 13843
+    },
+    {
+      "path": "LiveBridge/server.js",
+      "sha": "a8c0c0442fefb588171fc3ff17d6c644e82d45cf",
+      "size": 15565
+    },
+    {
+      "path": "LiveBridge/src/chuan-hoa.js",
+      "sha": "c132fba17f01684869f7c3d70f11a157c4c08739",
+      "size": 5414
+    },
+    {
+      "path": "LiveBridge/src/mapper.js",
+      "sha": "e4d04b5b1ce13bb2d912428c29a5546f34ffd08e",
+      "size": 8531
+    },
+    {
+      "path": "LiveBridge/src/settings.js",
+      "sha": "e09c62128d296614e81fc8afcf35c802226ae326",
+      "size": 22216
+    },
+    {
+      "path": "LiveBridge/src/static.js",
+      "sha": "127836dd8e9cce881013d47d2c2dc3505bc22bd5",
+      "size": 4017
+    },
+    {
+      "path": "LiveBridge/src/tiktok.js",
+      "sha": "d881784482b7735ea308b1082bf222fcb53e68e1",
+      "size": 7224
+    },
+    {
+      "path": "LiveBridge/src/tts.js",
+      "sha": "5f0719b1ac925427e7bd03f20ec2f076aa5645f8",
+      "size": 9655
+    },
+    {
+      "path": "README.md",
+      "sha": "fda54be527baff34256a018d3e479daf38e77ef7",
+      "size": 36963
+    },
+    {
+      "path": "dong-goi.bat",
+      "sha": "99240c5a47a7d772bc88b208b2bc50de24a42540",
+      "size": 363
+    },
+    {
+      "path": "start-livebridge.bat",
+      "sha": "731d63af1ddda51c55d30fa2b8a736116294ff95",
+      "size": 1501
+    },
+    {
+      "path": "tools/HUONG-DAN.txt",
+      "sha": "f5052e3d0ccc65508736c082dfb7e3cf98d4cdca",
+      "size": 1182
+    },
+    {
+      "path": "tools/dong-goi.ps1",
+      "sha": "ce4fea12cf8b7c428921a87b706974a5d1c7e843",
+      "size": 4004
+    },
+    {
+      "path": "tools/make-sfx.mjs",
+      "sha": "bb7f627a11fd7de62f8e0341a10b4dc5f8c89e8d",
+      "size": 6608
+    }
+  ]
+}

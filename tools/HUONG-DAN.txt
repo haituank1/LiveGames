@@ -17,3 +17,16 @@ Không cần cài gì thêm (đã kèm sẵn Node.js trong thư mục runtime). 
 
 Nhạc nền: thả file nhạc (mp3, m4a...) vào Games\chua-3d\audio. Nên dùng nhạc miễn phí bản quyền.
 Chi tiết hơn: xem README.md.
+
+CẬP NHẬT BẢN MỚI (không cần tải lại toàn bộ, không cần gửi lại file zip)
+=========================================================================
+Khi có bản game mới, chỉ cần:
+1. TẮT LiveBridge trước (đóng cửa sổ đen của start-livebridge.bat).
+2. Bấm đúp cap-nhat.bat — mở ra trang cập nhật, hiện bản đang dùng và bản mới nhất.
+3. Nếu có bản mới thì bấm nút "Cập nhật ngay" — máy chỉ tải những file đã đổi
+   (thường chỉ vài trăm KB), kiểm tra xong mới chép đè.
+4. Cập nhật xong thì tắt cửa sổ cập nhật, bấm đúp start-livebridge.bat để chạy bản mới.
+
+Lưu ý: cập nhật giữ nguyên tài khoản TikTok + cài đặt riêng của bạn, nhạc/ảnh bạn
+tự thêm, không xóa gì của bạn. Nếu trang báo "LiveBridge đang chạy" thì tắt
+LiveBridge rồi bấm "Kiểm tra cập nhật" lại. Cần có mạng để tải bản mới.

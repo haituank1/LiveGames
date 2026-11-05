@@ -23,6 +23,14 @@ if (-not (Test-Path $node)) {
 if (-not (Test-Path $node)) { throw 'Không tìm thấy node.exe trên máy này để đóng gói kèm.' }
 if (-not (Test-Path (Join-Path $root 'LiveBridge\node_modules'))) { throw 'Chưa có LiveBridge\node_modules: chạy start-livebridge.bat một lần trước.' }
 
+# Sinh version.json + manifest.json từ git (bản commit hiện tại) để người nhận dùng
+# cap-nhat.bat so được với bản trên GitHub. Lỗi thì chỉ cảnh báo, vẫn đóng gói tiếp.
+try {
+  & $node (Join-Path $root 'tools\tao-version.js')
+} catch {
+  Write-Host "  (cảnh báo) Không sinh được version.json/manifest.json: $($_.Exception.Message)"
+}
+
 Write-Host "Chép dự án vào $stage ..."
 if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
 New-Item -ItemType Directory -Force $stage | Out-Null
