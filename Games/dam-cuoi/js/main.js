@@ -1428,9 +1428,35 @@ function npcTick() {
   onChat({ user: known.get(a.id) || a, text: '@' + b.nickname });
 }
 
+/* THA TIM (Nguyen yeu cau 2026-11-05 12:18): moi su kien tha tim - ke
+   ca chi 1 tim - no 1 hieu ung NGAU NHIEN (hoa roi / phao hoa / phao
+   giay, luong vua phai). Chong spam lag: moi nguoi toi thieu
+   timHieuUngChoGiay giay (mac dinh 2) moi kich hoat lai; tat bang
+   hieuUngThaTim. Moc 50 tim/nguoi van nhay chuc mung nhu luat cu
+   (truoc day mapper every=50 -> dance; nay mapper every=1 -> action
+   'like' va game tu dem moc). Nguoi chi tha tim KHONG hien nhan vat
+   trong sanh (giu nhu cu - chi join/comment moi vao sanh). */
+const likeFxAt = new Map();
+const likeTotals = new Map();
+function onLike(ev) {
+  const u = ev.user; if (!u || !u.id) return;
+  const n = Math.max(1, Number(ev.count) || 1);
+  const tot = (likeTotals.get(u.id) || 0) + n;
+  likeTotals.set(u.id, tot);
+  if (Math.floor(tot / 50) > Math.floor((tot - n) / 50)) P.danceAll(5);
+  if (cfg.hieuUngThaTim === false) return;
+  const now = performance.now();
+  const cdMs = (cfg.timHieuUngChoGiay != null ? cfg.timHieuUngChoGiay : 2) * 1000;
+  if (now - (likeFxAt.get(u.id) || -1e9) < cdMs) return;
+  likeFxAt.set(u.id, now);
+  const r = Math.random();
+  if (r < 1 / 3) FX.petals(55);
+  else if (r < 2 / 3) FX.fireworks(1);
+  else FX.confetti(45);
+}
 function handle(ev) {
   const src = ev.source || {};
-  if (ev.user) ensureGuest(ev.user);
+  if (ev.user && ev.action !== 'like') ensureGuest(ev.user);   // chi tha tim thi chua vao sanh (giu nhu cu)
   if (ev.action === 'join' && ev.user) greet(ev.user);
   if (ev.action === 'couple') {
     const partner = (src.text && parseTag(src.text, ev.user)) || randomSingle(ev.user);
@@ -1443,6 +1469,8 @@ function handle(ev) {
     mcReact(2.9, MC.follow, { ten: ev.user.nickname });   // follow xếp SAU mọi câu cảm ơn quà (Nguyen yêu cầu 2026-11-04)
   } else if (ev.action === 'dance') {
     P.danceAll(5);
+  } else if (ev.action === 'like') {
+    onLike(ev);
   } else if (ev.action === 'fireworks') {
     FX.fireworks(Math.max(1, Math.min(6, ev.value || 1)));
   } else if (ev.action === 'petals') {
@@ -1733,7 +1761,7 @@ if (isDemo) {
     choCongMoiCapCho: 15, choCongMoiCapGhep: 8, choMienGhep: 2,
     choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
     hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,
-    fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20,
+    fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20, hieuUngThaTim: true, timHieuUngChoGiay: 2,
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4,
     bannerY: 30,
@@ -1817,7 +1845,7 @@ function startDemo() {
     const r = Math.random();
     k++;
     if (r < 0.42) { const c = chats[k % chats.length](u); if (c) onChat(c); }
-    else if (r < 0.62) handle({ action: 'petals', value: 1, count: 1, user: u, source: { kind: 'like' } });
+    else if (r < 0.62) handle({ action: 'like', value: 1, count: 1, user: u, source: { kind: 'like' } });
     else if (r < 0.8) handle({ action: 'couple', value: 1, count: 1, user: u, diamonds: [1, 5, 10, 39, 99][Math.floor(Math.random() * 5)], source: { kind: 'gift', giftName: 'Rose' } });
     else handle({ action: 'spotlight', value: 1, count: 1, user: u, source: { kind: 'follow' } });
     demoExtra += Math.floor(rand(6, 18));

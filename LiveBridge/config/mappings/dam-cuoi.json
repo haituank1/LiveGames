@@ -5,6 +5,7 @@
     "dance": "Các cặp đôi trên sân khấu nhảy chúc mừng + tim bay",
     "fireworks": "Bắn pháo hoa",
     "join": "Người xem vào phòng (MC chào, chưa lên sân khấu)",
+    "like": "Thả tim — nổ 1 hiệu ứng ngẫu nhiên (hoa rơi / pháo hoa / pháo giấy)",
     "petals": "Mưa cánh hoa hồng",
     "spotlight": "Đưa người tương tác lên sân khấu cùng một bạn đồng hành ngẫu nhiên"
   },
@@ -366,6 +367,8 @@
     "fxHoaRoiMoiGiay": 10,
     "fxPhaoHoaMoiGiay": 20,
     "fxPhaoGiayMoiGiay": 20,
+    "hieuUngThaTim": true,
+    "timHieuUngChoGiay": 2,
     "lenhDoiGioiTinh": true,
     "lenhDoiTrangPhuc": true,
     "doiTrangPhucChoGiay": 5,
@@ -439,8 +442,8 @@
     "value": 1
   },
   "like": {
-    "action": "dance",
-    "every": 50,
+    "action": "like",
+    "every": 1,
     "label": "Thả tim",
     "value": 1
   },
