@@ -244,6 +244,8 @@
     "hienBangLenh": true,
     "lenhHieuUngChoGiay": 8,
     "lenhHoaRoi": "hoa,roi,tung,vui",
+    "lenhGhepDoi": true,
+    "tuKhoaGhepDoi": "ghép đôi, ghep doi, ghep, doi",
     "lenhPhaoHoa": "phao,chuc,mung",
     "lenhPhaoGiay": "giay,hanh,phuc,ve",
     "khungHuongDanX": 0,

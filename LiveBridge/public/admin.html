@@ -599,6 +599,8 @@ const GAME_SCHEMAS = {
       { k: 'timHieuUngChoGiay', l: '❤ Thả tim — mỗi người cách nhau (giây) mới nổ tiếp (chống spam lag)', t: 'num', min: 0, max: 60, step: 0.5 },
       { k: 'hieuUngNgauNhienTuGiay', l: 'Hiệu ứng ngẫu nhiên mỗi từ (giây)', t: 'num', min: 1, max: 3600 },
       { k: 'hieuUngNgauNhienDenGiay', l: 'đến (giây)', t: 'num', min: 1, max: 3600 },
+      { k: 'lenhGhepDoi', l: 'Lệnh chat "ghép đôi": người độc thân gõ từ khóa là tự ghép với 1 người độc thân ngẫu nhiên', t: 'chk', defTrue: true },
+      { k: 'tuKhoaGhepDoi', l: 'Từ khóa ghép đôi — các từ/cụm cách nhau dấu phẩy, gõ trúng là ghép (không phân biệt dấu, gõ sai chút vẫn ăn)', t: 'txt' },
       { k: 'lenhDoiGioiTinh', l: 'Lệnh chat "nam" / "nữ" tự khai giới tính', t: 'chk', defTrue: true },
       { k: 'lenhDoiTrangPhuc', l: 'Lệnh chat "đổi đồ" đổi trang phục', t: 'chk', defTrue: true },
       { k: 'doiTrangPhucChoGiay', l: 'Đổi đồ cách nhau (giây)', t: 'num', min: 0, max: 120 },

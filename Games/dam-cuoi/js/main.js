@@ -1234,6 +1234,28 @@ function handleChatCommands(user, text) {
     }
   }
 }
+/* LENH "GHEP DOI" (Nguyen yeu cau 2026-11-05 12:20): nguoi doc than go
+   tu khoa trong o config tuKhoaGhepDoi (mac dinh "ghep doi, ghep, doi" -
+   sua duoc trong admin, cach nhau dau phay) la tu ghep voi 1 nguoi doc
+   than ngau nhien (uu tien khac gioi), giong co che follow. Khop khong
+   dau qua stemHit nhu lenh hieu ung. Chi chay khi comment khong tag
+   duoc ai - tag cu the van uu tien truoc. Tat bang lenhGhepDoi. */
+function pairCommand(user, text) {
+  if (cfg.lenhGhepDoi === false) return false;
+  const kws = stemList(cfg.tuKhoaGhepDoi);
+  if (!kws.length) return false;
+  const tokens = foldCmd(text).split(' ').filter(Boolean);
+  if (!tokens.length) return false;
+  if (!kws.some(kw => stemHit(tokens, kw, true))) return false;
+  const partner = randomSingleOpp(user) || randomSingle(user);
+  if (!partner) {
+    FX.hearts(10, 0.5, 0.55);
+    toast(`💘 ${user.nickname} muốn ghép đôi — chưa có ai độc thân khác trong sảnh`, false);
+    return true;
+  }
+  requestCouple(user, partner, true);
+  return true;
+}
 function onChat(m) {
   if (!m.user) return;
   ensureGuest(m.user);
@@ -1258,6 +1280,7 @@ function onChat(m) {
   }
   const loose = scanLooseTag(text, m.user);
   if (loose) { requestCouple(m.user, loose, true); return; }
+  if (pairCommand(m.user, text)) return;
   chatFx(m.user, text);
 }
 
@@ -1738,7 +1761,7 @@ if (isDemo) {
     npcTuDong: true, npcNguongVang: 6, npcMoiBaoLauGiay: 25, npcNghiGiay: 60,
     npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
     hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
-    lenhHoaRoi: 'hoa,roi,tung,vui', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
+    lenhHoaRoi: 'hoa,roi,tung,vui', lenhGhepDoi: true, tuKhoaGhepDoi: 'ghép đôi, ghep doi, ghep, doi', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
     khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0,
     khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 5.8, khungBangLenhX: 1, khungBangLenhY: 1,
     coChuHuongDan: 110, coChuMucTieu: 100, coChuDemCap: 110, coChuBxh: 110, coChuSoMung: 110, coChuBangLenh: 130, coChuHangCho: 110, coChuMc: 100,

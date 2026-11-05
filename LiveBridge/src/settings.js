@@ -41,7 +41,7 @@ const SHOW_KEYS = ['feedChat', 'feedGift', 'feedJoin', 'feedFollow', 'feedLike',
   'bubbleChat', 'floatPoints', 'nameTags', 'rulesBox', 'boardTop10', 'toastTop', 'liveLabel', 'monkGreet', 'monkThank', 'monkFollow'];
 // các ô "mỗi dòng một câu": để trống = dùng câu mặc định (defaults trong file mapping)
 const LINE_KEYS = ['monkLines', 'monkGreet', 'monkThank', 'monkFollowThanks', 'guideLines', 'rulesLines',
-  'mcLines', 'mcGreet', 'mcCouple', 'mcThank', 'mcFollowLines', 'mcFunny', 'mcMilestone', 'mcTagVang', 'mcGuide', 'funnyLines', 'npcDanhSach', 'lenhHoaRoi', 'lenhPhaoHoa', 'lenhPhaoGiay'];
+  'mcLines', 'mcGreet', 'mcCouple', 'mcThank', 'mcFollowLines', 'mcFunny', 'mcMilestone', 'mcTagVang', 'mcGuide', 'funnyLines', 'npcDanhSach', 'lenhHoaRoi', 'lenhPhaoHoa', 'lenhPhaoGiay', 'tuKhoaGhepDoi'];
 const num = (v, min, max, def) => { const n = Number(v); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def; };
 
 class Settings {
@@ -181,7 +181,7 @@ class Settings {
         zoomPairMax: [0.5, 2, 1.1], zoomSolo: [0.5, 2, 1.12] },
     };
     const BOOL_BY_GAME = {
-      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung', 'hieuUngThaTim'],
+      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung', 'hieuUngThaTim', 'lenhGhepDoi'],
       'san-nhay': ['hieuUngDen', 'khuayDong', 'lamMoKhiLia', 'liaCamLenTrenCung', 'partyMaxNhanhHon', 'phuKienQua'],
     };
     const CHOICE_BY_GAME = {   // key: [các giá trị cho phép, mặc định]
