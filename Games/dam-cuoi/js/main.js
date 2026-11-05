@@ -1704,7 +1704,7 @@ if (isDemo) {
     lenhHoaRoi: 'hoa,roi,tung,vui', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
     khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0,
     khungBxhX: 0, khungBxhY: 0, khungSoMungX: 0, khungSoMungY: 0, khungBangLenhX: 0, khungBangLenhY: 0,
-    coChuHuongDan: 100, coChuMucTieu: 100, coChuDemCap: 100, coChuBxh: 100, coChuSoMung: 100, coChuBangLenh: 100, coChuHangCho: 100, coChuMc: 100,
+    coChuHuongDan: 110, coChuMucTieu: 100, coChuDemCap: 110, coChuBxh: 110, coChuSoMung: 110, coChuBangLenh: 130, coChuHangCho: 110, coChuMc: 100,
     hienTatCaKhung: false,
     bgRules: [
       { viewers: 10, file: 'bg-500.webp' }, { viewers: 30, file: 'bg-2000.webp' },
