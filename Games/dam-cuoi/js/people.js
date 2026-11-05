@@ -150,8 +150,25 @@ const SETS_ROYAL = [
 ];
 const GUEST_GIRLS = ['img/guest-girl.png', 'img/guest-girl2.png', 'img/guest-girl3.png', 'img/guest-girl4.png', 'img/guest-girl5.png', 'img/guest-girl6.png', 'img/guest-girl7.png'];
 const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.png', 'img/guest-boy4.png', 'img/guest-boy5.png', 'img/guest-boy6.png'];
-[...SETS_BASE, ...SETS_ROYAL].forEach(s => { for (const src of [s.bride, s.groom]) { const im = new Image(); im.src = src; } });
-[...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; });
+/* TAI TRUOC + GIAI MA TRUOC (mat-hinh 2026-11-05): chi dat src nhu truoc
+   thi trinh duyet moi tai xuong, chua giai ma — lan dau ve hinh nao
+   cung phai giai ma ngay giua khung hinh, duoi tai nang thi hang doi
+   giai ma dai ra (do duoc: anh moi sinh mat trung vi ~15s moi ve ra
+   duoc, 26% khong ve ra trong 30s) nen watchFigure tuong la mat hinh.
+   Nay giai ma san ngay tu luc mo game, chia dot nho (4 anh/dot, cach
+   50ms) de khong giat luc tai trang; hoang gia truoc (nang nhat, can
+   luc sanh len moc 5) roi moi den bo thuong + khach. Anh da giai ma thi
+   nam trong bo dem anh cua trinh duyet, luc nguoi moi vao chi viec ve
+   lai. Loi giai ma (file hong that) thi bo qua — watchFigure van canh
+   o luc dung nhu cu. */
+const PRELOAD_CHIBI = [];
+[...SETS_ROYAL, ...SETS_BASE].forEach(s => { for (const src of [s.bride, s.groom]) { const im = new Image(); im.src = src; PRELOAD_CHIBI.push(im); } });
+[...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; PRELOAD_CHIBI.push(im); });
+(function predecodeChibi(i) {
+  if (i >= PRELOAD_CHIBI.length) return;
+  for (const im of PRELOAD_CHIBI.slice(i, i + 4)) { if (im.decode) im.decode().catch(() => {}); }
+  setTimeout(() => predecodeChibi(i + 4), 50);
+})(0);
 /* Bộ avatar nhỏ làm sẵn cho chip tên (cắt mặt từ chính các nhân vật của
    game, để ở img/avatars/): người chưa có ảnh TikTok thì lấy 1 mặt trong bộ
    này làm ảnh đại diện — theo giới của nhân vật, cố định theo id — thay cho
@@ -339,10 +356,14 @@ function watchFigure(img, p) {
     return pool.find(f => f !== cur) || null;
   };
   const heal = () => {
-    if (busts < 2) { busts++; waits = 0; img.src = cur + (cur.includes('?') ? '&' : '?') + 'r=' + busts; setTimeout(check, 1500); return; }
+    /* Chi tai lai 1 lan (truoc day 2 lan): tai lai kem ?r= ne cache, chi
+       co ich khi file trong cache bi cat cut that — anh chi CHAM thi tai
+       lai chi them 1 luot tai + giai ma vao hang doi dang tac, lam cac
+       anh khac cham theo (hieu ung day do). */
+    if (busts < 1) { busts++; img.src = cur + (cur.includes('?') ? '&' : '?') + 'r=' + busts; setTimeout(check, 1500); return; }
     const fb = fallbackFile();
     if (!swapped && fb && fb !== cur) {
-      swapped = true; busts = 0; cur = fb;
+      swapped = true; busts = 1; cur = fb;   // du phong khong duoc tai lai nua: no la file flagship da giai ma san, hong thi bao loi luon
       if (window.__diag) window.__diag.errs.push('mat hinh ' + file + ' -> doi du phong ' + fb);
       img.src = fb; setTimeout(check, 1500); return;
     }
@@ -350,11 +371,16 @@ function watchFigure(img, p) {
   };
   const check = () => {
     if (!img.isConnected) return;                        // đã thay hình khác
-    if (img.complete) {
-      if (img.naturalWidth > 0 && imgPaintOk(img)) return;   // hình ổn THẬT (vẽ ra được, không chỉ có header)
-      heal();                                                // complete nhưng hỏng hẳn hoặc bị cắt cụt
-    } else if (waits >= 3) heal();
-    else { waits++; setTimeout(check, 1800); }
+    if (img.complete && img.naturalWidth > 0 && imgPaintOk(img)) return;   // hình ổn THẬT (vẽ ra được, không chỉ có header)
+    /* CHAM khong phai HONG (mat-hinh 2026-11-05): duoi tai nang, anh
+       complete roi van co the chua giai ma xong nen ve chua ra — truoc
+       day truong hop nay chua ngay lap tuc (heal) nen cu anh cham la
+       bi doi bo + ghi loi oan. Nay doi nhu anh chua tai xong: thu lai
+       toi da 5 lan cach nhau 1,8s (~10s) moi ket luan hong. Anh loi
+       that (onerror) van duoc cuu nhanh vi onerror dat waits = 3. */
+    if (waits >= 5) { heal(); return; }
+    waits++;
+    setTimeout(check, 1800);
   };
   img.onerror = () => { waits = 3; setTimeout(check, 250); };
   setTimeout(check, 1200);
