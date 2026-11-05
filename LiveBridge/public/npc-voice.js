@@ -57,7 +57,10 @@
     /* Chuyển giọng trước, không phát — gọi ngay khi câu vào hàng chờ.
        voice: giọng đọc riêng cho lần này (vd MC nam/nữ luân phiên ở đám
        cưới) — không truyền thì dùng giọng mặc định của game. */
-    prefetch(text, voice) {
+    /* prio: muc uu tien trong hang doi tong hop cua server (mac dinh 2
+       nhu cu — cau that cua MC). Lam nong (warm-up) truyen prio 0 de cau
+       that chen len truoc; server doi 0 -> 1 (thap hon 2). */
+    prefetch(text, voice, prio) {
       if (!this.cfg.on || !text) return null;
       const key = this._key(text, voice);
       const hit = this._cache.get(key);
@@ -67,11 +70,18 @@
         try {
           const r = await fetch('/api/tts', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text, voice: voice || this.cfg.voice, rate: this.cfg.rate, prio: 2 }),
+            body: JSON.stringify({ text, voice: voice || this.cfg.voice, rate: this.cfg.rate, prio: (prio != null ? prio : 2) }),
           });
           const j = await r.json();
           if (j && j.ok && j.url) { entry.url = j.url; return entry; }
         } catch (_) { /* không qua LiveBridge / mạng lỗi -> speak() sẽ fallback hiện chữ */ }
+        /* V11 — KHONG GIU entry loi trong cache: truoc day fetch loi thi
+           promise tra null nhung entry VAN NAM trong _cache (chi bi day ra
+           khi >240 muc) — doan tinh lap lai trong moi cau ("Cam on", "da
+           follow"...) ma dinh 1 lan la ca loat cau sau deu 'not-ready' va
+           khong bao gio thu lai. Gio xoa entry loi (chi khi no van la
+           entry hien tai cua key) de lan sau xin lai binh thuong. */
+        if (this._cache.get(key) === entry) this._cache.delete(key);
         return null;
       })();
       this._cache.set(key, entry);

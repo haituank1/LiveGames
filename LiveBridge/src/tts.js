@@ -8,7 +8,15 @@
    lúc NPC sắp nói nên khi chữ hiện lên là tiếng đã sẵn sàng).
 
    Hàng đợi chuyển giọng NỐI TIẾP có ưu tiên: job NPC (prio cao) chen trước
-   job thường — không bao giờ gọi 2 lần TTS cùng lúc (tránh bị giới hạn). */
+   job thường — không bao giờ gọi 2 lần TTS cùng lúc (tránh bị giới hạn).
+   V11 — FILE GIONG TINH SHIP KEM REPO (LiveBridge/voice-static/): cac doan
+   tinh lap lai cua MC (~89 doan x 2 giong) duoc tong hop san bang script
+   tools/tao-giong-tinh.js va commit kem repo; lan chay dau sau khi lay
+   lai source (cache chay voice-cache/ trong) van lay ra phat ngay, khong
+   can cho tong hop tung doan — dung co che da xay ra 2026-11-06 (voice
+   chet o phut thu 2 vi hang doi lam nong ~178 viec nghẽn). File tinh
+   chi doc, khong bao gio ghi de; cau moi (ten khach...) van qua hang
+   doi nhu cu. */
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
@@ -37,8 +45,11 @@ function cleanForSpeech(text) {
 const STALE_MS = Number(process.env.TTS_STALE_MS) > 0 ? Number(process.env.TTS_STALE_MS) : 5 * 60 * 1000;
 
 class TtsEngine {
-  constructor(cacheDir) {
+  constructor(cacheDir, staticDir) {
     this.cacheDir = cacheDir;
+    // Thu muc file giong tinh ship kem repo (chi doc); mac dinh la anh em
+    // cua cacheDir (LiveBridge/voice-static/). Khong co thi chi dung cache chay.
+    this.staticDir = staticDir || path.join(path.dirname(cacheDir), 'voice-static');
     this.ram = new Map();          // key -> Buffer (tối đa ~80 câu gần nhất)
     this.pending = new Map();       // key -> Promise<Buffer|null>
     this.queue = [];                // [{ key, text, voice, rate, prio, at, resolve }]
@@ -79,6 +90,15 @@ class TtsEngine {
     } catch (_) { /* file hỏng -> coi như chưa có */ }
     return null;
   }
+  /* V11 — doc file giong tinh ship kem repo (chi doc, khong ghi). Ten file
+     la key sha256 giong ham key() ben duoi, giong het cache chay. */
+  _staticGet(key) {
+    try {
+      const f = path.join(this.staticDir, key + '.mp3');
+      if (fs.existsSync(f)) { const b = fs.readFileSync(f); if (b.length > 500) return b; }
+    } catch (_) { /* khong co / hong -> coi nhu chua co */ }
+    return null;
+  }
   _diskPut(key, buf, meta) {
     try {
       fs.writeFileSync(path.join(this.cacheDir, key + '.mp3'), buf);
@@ -105,6 +125,8 @@ class TtsEngine {
     const rate = Math.max(-50, Math.min(50, parseInt(opts.rate ?? 0) || 0));
     const key = this.key(text, voice, rate);
     if (this.ram.has(key)) { this.stats.cacheHit++; return { id: key, cached: true }; }
+    const st = this._staticGet(key);
+    if (st) { this._ramPut(key, st); this.stats.cacheHit++; return { id: key, cached: true }; }
     const disk = this._diskGet(key);
     if (disk) { this._ramPut(key, disk); this.stats.cacheHit++; return { id: key, cached: true }; }
     if (!this.pending.has(key)) {
@@ -144,6 +166,8 @@ class TtsEngine {
   audio(id) {
     if (!/^[a-f0-9]{32}$/.test(String(id))) return null;
     if (this.ram.has(id)) return this.ram.get(id);
+    const st = this._staticGet(id);
+    if (st) { this._ramPut(id, st); return st; }
     const disk = this._diskGet(id);
     if (disk) this._ramPut(id, disk);
     return disk;

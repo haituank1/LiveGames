@@ -127,6 +127,15 @@ function preloadOne(file) {
 }
 function startPreload() { for (const f of [...TIERS.map(t => t.file), ...ASSET_IMGS]) preloadOne(f); }
 startPreload();
+/* V11 — BAO KHI NEN XONG (cho diem 5, nen truoc nhan vat sau): people.js
+   cho tin nay roi moi tai + giai ma anh nhan vat, de 6 file nen khong bi
+   xep sau hang doi anh nhan vat luc mo game (cache lanh). Qua 5s ma nen
+   chua xong thi van bao de khong ket nhan vat. */
+window.__bgReady = false;
+Promise.race([
+  Promise.all(TIERS.map(t => assetPromise[t.file] || Promise.resolve(null))),
+  new Promise(r => setTimeout(() => r(null), 5000)),
+]).then(() => { window.__bgReady = true; window.dispatchEvent(new Event('damcuoi:bgready')); });
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
 /* C5 — doc/ghi localStorage LUON co try/catch: trinh duyet chan storage
@@ -583,18 +592,18 @@ function setBackground(file) {
   curView = BG_VIEW[file] || null;
   const tk = ++bgToken;
   const el = $('bgfull');
-  el.style.backgroundImage = `url("${file}")`;
-  /* File này mà PRELOAD đã báo ok (xem startPreload ở đầu file) thì ảnh
-     đã nằm trong bộ nhớ đệm + đã giải mã — CSS ở trên hiện ngay, không
-     cần dò lại. Chưa preload xong thì CHỜ nó (tối đa 3 giây) rồi quyết
-     định; preload báo hỏng hoặc chờ quá lâu thì mới chạy chuỗi cứu hộ
-     dò lỗi/lùi nền ở dưới (thử lại kèm ?r=, lùi dần bg-full -> bg-500,
-     mọi lần lùi đều ghi vào hộp chẩn đoán). */
-  if (assetState[file] === 'ok') return;
+  /* V11 — GIU NEN CU TOI KHI NEN MOI SAN SANG: truoc day doi
+     backgroundImage NGAY roi moi cho preload (toi da 3s) — neu file
+     chua tai xong thi khung hinh chi con mau nen sau (do dam) cho toi
+     khi anh ve. Nay chi doi URL khi file da preload ok (da nam trong
+     bo nho dem + da giai ma, hien ngay) hoac khi cho xong no bao ok;
+     chua san sang thi nen cu van hien, khong de man hinh trong. */
+  const apply = () => { if (tk === bgToken) el.style.backgroundImage = `url("${file}")`; };
+  if (assetState[file] === 'ok') { apply(); return; }
   const ready = assetPromise[file] || Promise.resolve(null);
   Promise.race([ready, new Promise(r => setTimeout(() => r(null), 3000))]).then(ok => {
     if (tk !== bgToken) return;
-    if (ok === true) { el.style.backgroundImage = `url("${file}")`; return; }
+    if (ok === true) { apply(); return; }
     bgRescue(file, tk, el);
   });
 }
@@ -2100,7 +2109,13 @@ function applyConfig(c) {
        16:18). Nay: chờ 2.5s cho nền và khung ổn định, rồi bơm NHỎ GIỌT
        2 đoạn (×2 giọng) mỗi 300ms; voice vẫn nóng dần trong ~1 phút đầu
        mà không nghẽn mạng. Câu nào cần nói trước khi nóng kịp thì khâu
-       prefetch lúc vào hàng chờ vẫn lo như cũ. */
+       prefetch lúc vào hàng chờ vẫn lo như cũ.
+       V11 — ƯU TIÊN THẤP + BACKPRESSURE: bơm làm nóng gửi prio 0 (server
+       xếp sau câu thật prio 2) và CHỜ đợt vừa bơm xong (tối đa 2s) mới bơm
+       đợt tiếp — lúc cache ấm mỗi đợt xong trong ~0,1s nên nóng vẫn nhanh;
+       lúc cache lạnh thì bơm tự chậm theo tốc độ tổng hợp của server, số
+       việc đang chờ không bao giờ vượt quá 1 đợt (4 việc), câu thật không
+       còn phải xếp sau cả trăm việc làm nóng. */
     const jobs = [];
     const seenSeg = new Set();
     for (const pool of [MC.lines, MC.funny, MC.greet, MC.follow, MC.thank, MC.milestone, MC.tagVang, MC.tagDaCoDoi, MC.sapMoc, MC.couple]) {
@@ -2111,12 +2126,14 @@ function applyConfig(c) {
     const mv = MC.personas && MC.personas[0] && MC.personas[0].voice;
     if (MC._warmTimer) clearTimeout(MC._warmTimer);
     let ji = 0;
-    const pumpWarm = () => {
+    const pumpWarm = async () => {
+      const batch = [];
       for (let n = 0; n < 2 && ji < jobs.length; n++) {
         const seg = jobs[ji++];
-        NpcVoice.prefetch(seg);          // giọng mặc định (MC nữ)
-        if (mv) NpcVoice.prefetch(seg, mv);   // cả giọng MC nam
+        batch.push(NpcVoice.prefetch(seg, undefined, 0));          // giọng mặc định (MC nữ), prio thấp
+        if (mv) batch.push(NpcVoice.prefetch(seg, mv, 0));   // cả giọng MC nam, prio thấp
       }
+      if (batch.length) await Promise.race([Promise.all(batch.map(p => p || Promise.resolve(null))), new Promise(r => setTimeout(() => r(null), 2000))]);
       if (ji < jobs.length) MC._warmTimer = setTimeout(pumpWarm, 300);
     };
     MC._warmTimer = setTimeout(pumpWarm, 2500);

@@ -15,7 +15,7 @@ const { Settings } = require('./src/settings');
 const { serveStatic, listMedia, listBackgrounds } = require('./src/static');
 const { TtsEngine } = require('./src/tts');
 
-const tts = new TtsEngine(path.join(__dirname, 'voice-cache'));
+const tts = new TtsEngine(path.join(__dirname, 'voice-cache'), path.join(__dirname, 'voice-static'));   // V11: thu muc 2 la file giong tinh ship kem repo (chi doc)
 /* Trạng thái "NPC đang nói" — cổng ưu tiên voice dùng chung: game báo start/end
    qua WS, server phát cho MỌI client (kể cả ToolVoiceTikTok nối role=voice-monitor)
    để các voice khác tự tắt tiếng/ giữ hàng chờ trong lúc NPC nói. */
