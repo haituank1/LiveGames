@@ -1078,6 +1078,16 @@ function slotPose(c) {
   const yMax = stageY + STAGE_FRAME.zoneDropMax;
   return { leftP, rightP, l: { x: clampX(STAGE_FRAME.spot - off), y: Math.min(yMax, yL) }, r: { x: clampX(STAGE_FRAME.spot + off), y: Math.min(yMax, yR) } };
 }
+/* Dat cap ve dung tu the slotPose HIEN TAI (theo stageY/khung cua nen
+   dang chay): dung khi nen doi khung giua chung hoac cap toi noi sau
+   khi khung da doi — chan phai cham dung mat buc cua nen do. */
+function snapToSlotPose(c) {
+  const pose = slotPose(c);
+  for (const p of [c.a, c.b]) {
+    const t = p === pose.leftP ? pose.l : pose.r;
+    p.x = t.x; p.y = t.y; p.dirty = true;
+  }
+}
 /* Độ dài đường đi còn lại của 1 người (px) theo path hiện tại */
 function pairPathLen(p) {
   let t = 0, px = p.x, py = p.y;
@@ -1232,6 +1242,7 @@ function arriveStage(c) {
   c.a.state = 'stage'; c.b.state = 'stage';
   c.a.el.classList.remove('pairfx'); c.b.el.classList.remove('pairfx');
   c.journeyAt = 0; c._heals = 0;
+  snapToSlotPose(c);   // V8-lo-lung: khung co the da doi trong luc cap di len (37.2 -> 42.6) — chot lai dung vi tri cua nen hien tai truoc khi bat dau le, neu khong cap se lo lung het buoi le
   if (P.onCoupleStage) { try { P.onCoupleStage(c); } catch (e) { diagErr('onCoupleStage: ' + e.message); } }
   /* Hẹn giờ NHẢ cặp tiếp theo đúng mốc đứng đủ releaseSec (nhịp lia
      cam ở promoteStage): tới giờ gọi lại promoteStage, cổng nhịp ở đó
@@ -1531,6 +1542,18 @@ P.setBgFile = function (file) {
     if (p.couple) continue;   // dang co doi (tren san khau / di len / di ve): chi doi home, luc ve se di ve home moi
     if (p.state === 'home' && bd <= 2.25) { p.x = best.x; p.y = best.y; p.dirty = true; continue; }   // lech <=1.5%: chot toa do ve dung slot moi, khong di chuyen
     walkTo(p, { x: best.x, y: best.y }, 'walk', () => { p.state = 'home'; });   // ca nguoi dang di (walk) cung duoc doi huong ve home moi
+  }
+  /* V8-lo-lung: cap DANG DIEN tren san khau (state 'stage') phai dung
+     theo khung cua NEN DANG CHAY — doi nen doi khung (37.2 -> 42.6)
+     ma cap van giu toa do cu (vong lap tren bo qua nguoi co doi) thi
+     chan lo lung tren buc (do duoc: chan cach mat buc 180-195px o
+     khung 1280). Snap ngay ve slotPose moi — cap dang dung yen
+     (khong target) nen snap an toan, lai trung luc nen doi nen
+     khong thay giat. Cap dang di len (toStage) thi arriveStage snap
+     khi toi noi. */
+  for (const c of couples) {
+    if (c.state !== 'stage') continue;
+    snapToSlotPose(c);
   }
 };
 P.coupleSec = 25;
