@@ -162,20 +162,30 @@ const GUEST_BOYS = ['img/guest-boy.png', 'img/guest-boy2.png', 'img/guest-boy3.p
    lai. Loi giai ma (file hong that) thi bo qua — watchFigure van canh
    o luc dung nhu cu. */
 const PRELOAD_CHIBI = [];
-[...SETS_ROYAL, ...SETS_BASE].forEach(s => { for (const src of [s.bride, s.groom]) { const im = new Image(); im.src = src; PRELOAD_CHIBI.push(im); } });
-[...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; PRELOAD_CHIBI.push(im); });
-(function predecodeChibi(i) {
-  if (i >= PRELOAD_CHIBI.length) return;
-  for (const im of PRELOAD_CHIBI.slice(i, i + 4)) { if (im.decode) im.decode().catch(() => {}); }
-  setTimeout(() => predecodeChibi(i + 4), 50);
-})(0);
-/* Bộ avatar nhỏ làm sẵn cho chip tên (cắt mặt từ chính các nhân vật của
-   game, để ở img/avatars/): người chưa có ảnh TikTok thì lấy 1 mặt trong bộ
-   này làm ảnh đại diện — theo giới của nhân vật, cố định theo id — thay cho
-   hình bóng người trống trơn trước đây (Nguyen chot 2026-11-04). */
+/* V11 — NEN TRUOC, NHAN VAT SAU: people.js nap truoc main.js nen dot tai
+   truoc day (45 anh nhan vat + 45 avatar) chay TRUOC ca 6 file nen, tranh
+   6 ket noi/host luc mo game (cache lanh) khien nen doi cham. Nay cho tin
+   'damcuoi:bgready' tu main.js (6 file nen xong, hoac qua 5s) roi moi tai
+   + giai ma; qua 8s khong thay tin thi bat dau luon de khong ket nhan vat. */
+function startChibiPreload() {
+  [...SETS_ROYAL, ...SETS_BASE].forEach(s => { for (const src of [s.bride, s.groom]) { const im = new Image(); im.src = src; PRELOAD_CHIBI.push(im); } });
+  [...GUEST_GIRLS, ...GUEST_BOYS].forEach(src => { const im = new Image(); im.src = src; PRELOAD_CHIBI.push(im); });
+  (function predecodeChibi(i) {
+    if (i >= PRELOAD_CHIBI.length) return;
+    for (const im of PRELOAD_CHIBI.slice(i, i + 4)) { if (im.decode) im.decode().catch(() => {}); }
+    setTimeout(() => predecodeChibi(i + 4), 50);
+  })(0);
+  [...AV_GIRLS, ...AV_BOYS].forEach(src => { const im = new Image(); im.src = src; });
+}
 const AV_GIRLS = Array.from({ length: 23 }, (_, i) => `img/avatars/av-f${i + 1}.webp`);
 const AV_BOYS = Array.from({ length: 22 }, (_, i) => `img/avatars/av-m${i + 1}.webp`);
-[...AV_GIRLS, ...AV_BOYS].forEach(src => { const im = new Image(); im.src = src; });
+if (window.__bgReady) startChibiPreload();
+else {
+  let chibiStarted = false;
+  const goChibi = () => { if (!chibiStarted) { chibiStarted = true; startChibiPreload(); } };
+  window.addEventListener('damcuoi:bgready', goChibi);
+  setTimeout(goChibi, 8000);
+}
 function isGirlFigure(p) {
   if (p.outfit === 'bride') return true;
   if (p.outfit === 'groom') return false;
