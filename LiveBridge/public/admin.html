@@ -528,6 +528,10 @@ function buildGame(g) {
    đám cưới vẫn thấy "vào chùa / thầy / đệm". Nay mỗi game có bộ ô riêng đúng với
    các key mà game đó thật sự đọc (trong defaults của file mapping của nó);
    game chưa có schema thì chỉ hiện các nhóm dùng chung + gói quà. */
+/* Bo so VI TRI chuan cua dam cuoi (khop mac dinh trong mapping/settings, siet gon 2026-11-05).
+   Nut "Dat lai vi tri mac dinh" ghi de cac key nay len config da luu cua nguoi dung va ap dung ngay. */
+const POS_DEFAULTS = { khungTraiX: 0, khungTraiY: 2, khungPhaiX: 0, khungPhaiY: 2, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: -6, hienTatCaKhung: false, khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0, khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 5.8, khungBangLenhX: 1, khungBangLenhY: 1 };
+
 const GAME_SCHEMAS = {
   'dam-cuoi': [
     { title: '💒 Sân khấu & camera', fields: [
@@ -609,7 +613,7 @@ const GAME_SCHEMAS = {
       { k: 'lenhPhaoGiay', l: 'Từ khóa gọi PHÁO GIẤY — cách nhau dấu phẩy', t: 'txt' },
       { k: 'hienBangLenh', l: 'Hiện bảng "Lệnh chat" trên màn hình cho người chơi biết gõ gì', t: 'chk', defTrue: true },
     ] },
-    { title: '🖼 Vị trí các khung (tọa độ % từ góc 0,0)', note: 'Mỗi khung tính vị trí TỪ GÓC khung hình: khung trái/phải tính từ góc trên của chúng, hàng chờ/bảng lệnh tính Y từ mép dưới. Lệch nhóm trái/phải dịch cả nhóm cùng phía.', fields: [
+    { title: '🖼 Vị trí các khung (tọa độ % từ góc 0,0)', resetPos: true, note: 'Mỗi khung tính vị trí TỪ GÓC khung hình: khung trái/phải tính từ góc trên của chúng, hàng chờ/bảng lệnh tính Y từ mép dưới. Lệch nhóm trái/phải dịch cả nhóm cùng phía.', fields: [
       { k: 'khungTraiX', l: 'Khung trái — lệch X (%)', t: 'num', min: -20, max: 20, step: 0.5 },
       { k: 'khungTraiY', l: 'Khung trái — lệch Y (%)', t: 'num', min: -20, max: 20, step: 0.5 },
       { k: 'khungPhaiX', l: 'Khung phải — lệch X (%)', t: 'num', min: -20, max: 20, step: 0.5 },
@@ -782,6 +786,22 @@ function buildSchema(g, add, save, saveDef) {
         bridge.send({ type: 'game.config', game: g.id, config: cfg });
       };
       for (const k of keys) if (F[k] && F[k].input) F[k].input.onchange = send;
+    }
+    if (gr.resetPos) {
+      const btn = el('button', 'sm', '↺ Đặt lại vị trí mặc định');
+      btn.title = 'Đưa mọi ô vị trí trong nhóm này về bộ số chuẩn và áp dụng ngay cho game (ghi đè số đã lưu)';
+      btn.onclick = () => {
+        const cfg = {};
+        for (const [k, v] of Object.entries(POS_DEFAULTS)) {
+          const x = F[k]; if (!x || !x.input) continue;
+          if (x.kind === 'chk') { x.input.checked = !!v; cfg[k] = !!v; }
+          else { x.input.value = v; cfg[k] = v; }
+        }
+        bridge.send({ type: 'game.config', game: g.id, config: cfg });
+        btn.textContent = '✓ Đã đặt lại — game đã áp dụng';
+        setTimeout(() => { btn.textContent = '↺ Đặt lại vị trí mặc định'; }, 2500);
+      };
+      G.node(btn);
     }
   }
   /* gói quà & hành động — dùng chung mọi game */
