@@ -49,6 +49,18 @@ Bấm đúp **`dong-goi.bat`** → ra file `dist\TestGameAI.zip` (khoảng 45 MB
 thư viện `node_modules` và file `HUONG-DAN.txt`. **Không** kèm cài đặt riêng (`settings.json`: tài khoản TikTok, danh sách chặn).
 Người nhận giải nén rồi bấm đúp `start-livebridge.bat` là chạy. Mặc định **không kèm nhạc nền** trong `audio` cho nhẹ
 (vẫn kèm tiếng chuông, mõ, niệm; thiếu nhạc thì game tự tạo nhạc nền thiền). Muốn kèm cả nhạc: `dong-goi.bat -WithMusic`.
+Lúc đóng gói, `dong-goi.bat` tự sinh `version.json` + `manifest.json` từ commit git hiện tại để người nhận so được phiên bản.
+
+### Cập nhật bản mới (người nhận tự làm, không cần tải lại toàn bộ)
+
+Người nhận chỉ cần bấm đúp **`cap-nhat.bat`** (chỉ chạy khi LiveBridge đang **tắt**): mở ra trang cập nhật
+(`http://127.0.0.1:8790/`) hiện phiên bản đang dùng và bản mới nhất trên GitHub. Có bản mới thì bấm **Cập nhật ngay** —
+máy chỉ tải những file đã đổi (bản sửa code thường chỉ vài trăm KB thay vì 45 MB), kiểm tra mã băm từng file rồi mới chép đè,
+file nào bản mới đã bỏ thì xóa. Giữ nguyên `settings.json`, nhạc/ảnh người nhận tự thêm, `runtime/` và `node_modules/`.
+Nếu trang báo LiveBridge đang chạy thì tắt cửa sổ đen của LiveBridge rồi bấm Kiểm tra lại. Cập nhật xong thì mở lại
+`start-livebridge.bat` để chạy bản mới. Chi tiết kỹ thuật: `tools/cap-nhat.js` (chỉ dùng module có sẵn của Node.js,
+so bản qua GitHub Compare API, tải file qua `raw.githubusercontent.com`, xác thực bằng git blob SHA-1);
+`tools/tao-version.js` sinh `version.json` + `manifest.json` từ git (chạy tay trước khi push, `dong-goi.bat` cũng tự gọi).
 
 | Trang | Địa chỉ |
 |---|---|
