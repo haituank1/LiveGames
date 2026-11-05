@@ -1237,11 +1237,6 @@ function journeyReveal(c) {
   c.groom.set = c.set; c.bride.set = c.set;
   setOutfit(c.groom, 'groom'); setOutfit(c.bride, 'bride');
   c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
-  /* V3: khung vang nhe quanh cap — bat tu luc bien hinh o giua tham,
-     GIU het buoi le tren san khau (arriveStage chi go pairfx, khong go
-     cai nay), go khi xuong/tan cap (leaveStage/dissolveCouple/
-     releaseOldCouple). */
-  c.a.el.classList.add('stage-gold'); c.b.el.classList.add('stage-gold');
   if (P.onPairReveal) { try { P.onPairReveal(c); } catch (e) { diagErr('onPairReveal: ' + e.message); } }
   setTimeout(() => driveLeg3(c), 1400);
 }
@@ -1306,9 +1301,6 @@ function arriveStage(c) {
   c.timer = P.coupleSec || 25;
   c.a.state = 'stage'; c.b.state = 'stage';
   c.a.el.classList.remove('pairfx'); c.b.el.classList.remove('pairfx');
-  /* V3: chi go pairfx (vong sang luc bien hinh) — GIU stage-gold (khung
-     vang) cho het buoi le; leaveStage/dissolveCouple/releaseOldCouple
-     moi go. */
   c.journeyAt = 0; c._heals = 0;
   if (P.onCoupleStage) { try { P.onCoupleStage(c); } catch (e) { diagErr('onCoupleStage: ' + e.message); } }
   /* Hẹn giờ NHẢ cặp tiếp theo đúng mốc đứng đủ releaseSec (nhịp lia
@@ -1383,7 +1375,7 @@ function leaveStage(c) {
   if (near) { freePosition(mover.home); near.taken = mover; mover.home = near; }
   let back = 0;
   for (const p of [c.a, c.b]) {
-    p.el.classList.remove('pairfx'); p.el.classList.remove('stage-gold');   // V3: xuong san khau -> go khung vang
+    p.el.classList.remove('pairfx');
     /* M5: dem ve nha dang ky qua p.homeDone (xem stepPerson) thay vi
        done cua walkPath — ghep lai / dissolve / doi khung ghi de
        p.done thi bo dem nay van chay khi nguoi ve toi home; chi khi
@@ -1428,7 +1420,7 @@ function dissolveCouple(c, leaving) {
   for (const p of [c.a, c.b]) {
     if (!p || people.get(p.user.id) !== p) continue;
     p.couple = null; p.boost = 1;
-    p.el.classList.remove('pairfx'); p.el.classList.remove('stage-gold');   // V3: tan cap -> go khung vang
+    p.el.classList.remove('pairfx');
     setOutfit(p, 'casual');
     walkTo(p, { x: p.home.x, y: p.home.y }, 'walk', () => { p.state = 'home'; });
   }
@@ -1486,7 +1478,7 @@ function releaseOldCouple(c) {
   for (const p of [c.a, c.b]) {
     if (people.get(p.user.id) !== p) continue;
     p.couple = null; p.boost = 1; p.spotScale = 1;
-    p.el.classList.remove('pairfx'); p.el.classList.remove('stage-gold');   // V3: gianh cap -> go khung vang
+    p.el.classList.remove('pairfx');
     setOutfit(p, 'casual');
     walkPath(p, [{ x: p.x < 50 ? 40 : 60, y: stageY + 7 }, { x: p.home.x, y: p.home.y }], 'walk', () => { p.state = 'home'; });
     if (p.speedPx) p.speedPx = Math.min(1250, Math.round(p.speedPx * 1.55));
