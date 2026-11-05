@@ -1,8 +1,13 @@
 {
-  "commit": "fc3a1ca132b57428e4c1a6d45794614d69b8079e",
-  "short": "fc3a1ca",
-  "generatedAt": "2026-11-05T15:37:38.656Z",
+  "commit": "8e1e188caf561191b45c2f058800705c88e7be55",
+  "short": "8e1e188",
+  "generatedAt": "2026-11-05T16:16:56.415Z",
   "files": [
+    {
+      "path": ".github/workflows/refresh-manifest.yml",
+      "sha": "fb8969238739199fd277a2c47a2ae44fbc17702c",
+      "size": 1253
+    },
     {
       "path": ".gitignore",
       "sha": "03a81f71b2e4e60c90266f4dfee4510b81b26741",
@@ -11,17 +16,17 @@
     {
       "path": "DemoVoices/GV01-Giong-Bong-Bong.mp3",
       "sha": "ddfb3219a773a89dcfa98f7aa300a607d33c5dc1",
-      "size": 0
+      "size": 80293
     },
     {
       "path": "DemoVoices/GV02-Giong-Lem-Linh.mp3",
       "sha": "79f1794b041919d8f8fa9d50747a306688e88def",
-      "size": 0
+      "size": 81637
     },
     {
       "path": "DemoVoices/HUONG-DAN.md",
       "sha": "f7bbebc3a58a39d8008f067e3b8ceef595c85c8d",
-      "size": 5588
+      "size": 5415
     },
     {
       "path": "Games/chua-3d/audio/README.txt",
@@ -1655,13 +1660,23 @@
     },
     {
       "path": "README.md",
-      "sha": "fda54be527baff34256a018d3e479daf38e77ef7",
-      "size": 36963
+      "sha": "428629516f73fcefc9b991662682987d28959c30",
+      "size": 38340
+    },
+    {
+      "path": "cap-nhat.bat",
+      "sha": "41395be6a48ddac703dd5760e03dc2e00ba95878",
+      "size": 1421
     },
     {
       "path": "dong-goi.bat",
       "sha": "99240c5a47a7d772bc88b208b2bc50de24a42540",
       "size": 363
+    },
+    {
+      "path": "manifest.json",
+      "sha": "58f7020214b5c3d91f7dbbe2de514e4a91368450",
+      "size": 50066
     },
     {
       "path": "start-livebridge.bat",
@@ -1670,18 +1685,33 @@
     },
     {
       "path": "tools/HUONG-DAN.txt",
-      "sha": "f5052e3d0ccc65508736c082dfb7e3cf98d4cdca",
-      "size": 1182
+      "sha": "9ec77b2c3e73515a9f8de194c8ae2b7e0fcd671c",
+      "size": 2181
+    },
+    {
+      "path": "tools/cap-nhat.js",
+      "sha": "e5274ead2f3c2a8c4af9ea54bfd24332b54682a4",
+      "size": 27942
     },
     {
       "path": "tools/dong-goi.ps1",
-      "sha": "ce4fea12cf8b7c428921a87b706974a5d1c7e843",
+      "sha": "4f367a6e6c03ebb85ce2620ad6d8f2acf81d78e3",
       "size": 4004
     },
     {
       "path": "tools/make-sfx.mjs",
       "sha": "bb7f627a11fd7de62f8e0341a10b4dc5f8c89e8d",
       "size": 6608
+    },
+    {
+      "path": "tools/tao-version.js",
+      "sha": "b3bba873273a572aff7294a29fc11779e606b795",
+      "size": 2580
+    },
+    {
+      "path": "version.json",
+      "sha": "c6f8fef7139d8da73625b0ddb778759a6f8075ae",
+      "size": 234
     }
   ]
 }

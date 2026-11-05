@@ -1,0 +1,34 @@
+# Tu dong lam moi version.json + manifest.json sau moi lan push len main.
+# Ly do: cap-nhat.bat so file that voi manifest.json tren GitHub (qua raw,
+# khong ton luot GitHub API). Manifest chi dung khi no mo ta dung cay file
+# cua commit moi nhat — neu khong lam moi, updater se tuong ban cu la ban moi
+# (hoac tai nham file cu de len file moi). Workflow nay chay tao-version.js
+# roi commit lai 2 file do. paths-ignore + dieu kien actor de commit cua
+# chinh workflow khong kich hoat lai workflow (tranh vong lap vo han).
+name: Lam moi version + manifest
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'version.json'
+      - 'manifest.json'
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node tools/tao-version.js
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.json manifest.json
+          git diff --cached --quiet || git commit -m "Cap nhat version.json + manifest.json"
+          git push
