@@ -1,0 +1,5 @@
+# Ép mọi file text trong repo dùng LF (xuống dòng kiểu Unix) ở mọi máy,
+# kể cả Windows. Nếu không, Git trên Windows (autocrlf mặc định) tự đổi LF
+# thành CRLF khi tải repo về, làm sai mã băm khi updater so file với manifest
+# (tưởng file đã đổi dù nội dung giống hệt) và gây nhiễu khi diff.
+* text=auto eol=lf
