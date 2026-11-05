@@ -1484,7 +1484,6 @@ function applyPanelPos() {
   const px = (v, base) => ((Number(v) || 0) / 100 * (base || 0)) + 'px';
   root.setProperty('--plx', px(cfg.khungTraiX, SW)); root.setProperty('--ply', px(cfg.khungTraiY, SH));
   root.setProperty('--prx', px(cfg.khungPhaiX, SW)); root.setProperty('--pry', px(cfg.khungPhaiY, SH));
-  root.setProperty('--qx', px(cfg.khungHangChoX, SW)); root.setProperty('--qy', px(cfg.khungHangChoY, SH));
   root.setProperty('--mcx', px(cfg.khungMcX, SW)); root.setProperty('--mcy', px(cfg.khungMcY, SH));
   /* Vị trí + cỡ chữ TỪNG KHUNG (Nguyen yêu cầu 2026-11-04 23:41): mỗi
      khung một cặp lệch X/Y riêng (% khung hình, áp qua thuộc tính CSS
@@ -1493,9 +1492,19 @@ function applyPanelPos() {
   root.setProperty('--gdx', px(cfg.khungHuongDanX, SW)); root.setProperty('--gdy', px(cfg.khungHuongDanY, SH));
   root.setProperty('--gox', px(cfg.khungMucTieuX, SW)); root.setProperty('--goy', px(cfg.khungMucTieuY, SH));
   root.setProperty('--ccx', px(cfg.khungDemCapX, SW)); root.setProperty('--ccy', px(cfg.khungDemCapY, SH));
-  root.setProperty('--bx', px(cfg.khungBxhX, SW)); root.setProperty('--byy', px(cfg.khungBxhY, SH));
-  root.setProperty('--ldx', px(cfg.khungSoMungX, SW)); root.setProperty('--ldy', px(cfg.khungSoMungY, SH));
-  root.setProperty('--cbx', px(cfg.khungBangLenhX, SW)); root.setProperty('--cby', px(cfg.khungBangLenhY, SH));
+  /* TOẠ ĐỘ TỪ GỐC 0,0 (Nguyen chốt 2026-11-05): vị trí từng khung
+     tính thẳng từ góc khung hình (%), không còn lệch theo vị trí chảy
+     trong cột. Khung phải/sổ/bảng lệnh tính X từ mép PHẢI, hàng chờ/
+     bảng lệnh tính Y từ mép DƯỚI (góc nhà của chúng). Lệch nhóm
+     khungPhai cộng dồn vào các khung bên phải; thông báo (toasts)
+     bám dưới nhóm phải. Hàng chờ + bảng lệnh: X/Y là khoảng cách %
+     từ góc dưới của chúng. */
+  const pct = (a, b) => String((Number(a) || 0) + (Number(b) || 0));
+  root.setProperty('--bx', pct(cfg.khungBxhX, cfg.khungPhaiX)); root.setProperty('--byy', pct(cfg.khungBxhY, cfg.khungPhaiY));
+  root.setProperty('--ldx', pct(cfg.khungSoMungX, cfg.khungPhaiX)); root.setProperty('--ldy', pct(cfg.khungSoMungY, cfg.khungPhaiY));
+  root.setProperty('--cbx', String(Number(cfg.khungBangLenhX) || 0)); root.setProperty('--cby', String(Number(cfg.khungBangLenhY) || 0));
+  root.setProperty('--tox', pct(1, cfg.khungPhaiX)); root.setProperty('--toy', pct(13, cfg.khungPhaiY));
+  root.setProperty('--qx2', String(Number(cfg.khungHangChoX) || 0)); root.setProperty('--qy2', String(Number(cfg.khungHangChoY) || 0));
   const fv = v => String((Number(v) || 100) / 100);
   root.setProperty('--f-guide', fv(cfg.coChuHuongDan)); root.setProperty('--f-goal', fv(cfg.coChuMucTieu));
   root.setProperty('--f-count', fv(cfg.coChuDemCap)); root.setProperty('--f-board', fv(cfg.coChuBxh));
@@ -1703,7 +1712,7 @@ if (isDemo) {
     hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
     lenhHoaRoi: 'hoa,roi,tung,vui', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
     khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0,
-    khungBxhX: 0, khungBxhY: 0, khungSoMungX: 0, khungSoMungY: 0, khungBangLenhX: 0, khungBangLenhY: 0,
+    khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 6.5, khungBangLenhX: 1, khungBangLenhY: 1,
     coChuHuongDan: 110, coChuMucTieu: 100, coChuDemCap: 110, coChuBxh: 110, coChuSoMung: 110, coChuBangLenh: 130, coChuHangCho: 110, coChuMc: 100,
     hienTatCaKhung: false,
     bgRules: [
@@ -1728,7 +1737,7 @@ if (isDemo) {
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4,
     bannerY: 30,
-    khungTraiX: 0, khungTraiY: 0, khungPhaiX: 0, khungPhaiY: 0, khungHangChoX: 0, khungHangChoY: 0, khungMcX: 0, khungMcY: 0,
+    khungTraiX: 0, khungTraiY: 5, khungPhaiX: 0, khungPhaiY: 5, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: 0,
     hienBongChat: true, bongChatGiay: 4, bongChatMaxKyTu: 60, bongChatAnKhiTuCamQua: 2,
     tuCamComment: ['vl', 'vcl', 'vkl', 'vãi', 'địt', 'đụ', 'đéo', 'cặc', 'lồn', 'buồi', 'đĩ', 'đm', 'dm', 'đmm', 'dcm', 'đcm', 'cave', 'loz'],
     tuAnToanComment: ['cac'],
