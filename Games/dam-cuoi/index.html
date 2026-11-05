@@ -147,7 +147,12 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
 
   /* ---------- Nhân vật ---------- */
   .person{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;will-change:transform}
-  .person .figwrap{filter:drop-shadow(0 5px 6px rgba(90,10,40,.35));animation:bob 2.8s ease-in-out infinite}
+  /* V2 (2026-11-05): bong chan that (.gshadow) neo cung o day figwrap
+     (bottom = chieu cao chip ten) nen khong nhun theo nguoi, rong/mo
+     theo --fh/--depth; vien mo dong nhat cho moi bo qua filter cua
+     .figwrap (thay cho drop-shadow lech cuon theo bob truoc day). */
+  .person .gshadow{position:absolute;left:50%;bottom:calc(var(--fh,120px)*.17 + 4px);width:calc(var(--fh,120px)*.68);height:calc(var(--fh,120px)*.11);transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(35,8,22,.70) 0%,rgba(35,8,22,.45) 55%,rgba(35,8,22,0) 75%);border-radius:50%;filter:blur(2px);pointer-events:none;z-index:0;opacity:calc(.55 + var(--depth,1)*.35)}
+  .person .figwrap{position:relative;z-index:1;filter:drop-shadow(0 0 2px rgba(80,15,40,.55));animation:bob 2.8s ease-in-out infinite}
   .person .figwrap svg{height:var(--fh,120px);display:block}
   .person .figwrap img.chibi{height:var(--fh,120px);display:block}
   .person.walking .figwrap img.chibi{animation:chibiSway .3s ease-in-out infinite alternate}
@@ -246,8 +251,11 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
     gap:calc(var(--u)*1.2);width:calc((100% - var(--side)*2 - var(--u)*30) * var(--mcw,1));z-index:2100;
     opacity:0;transform:translateX(-110%);transition:transform .7s cubic-bezier(.2,.9,.3,1.1),opacity .5s;pointer-events:none}
   #mc.on{opacity:1;transform:none}
-  #mc .pic{flex:none;width:calc(var(--u)*10);height:calc(var(--u)*12);filter:drop-shadow(0 4px 10px #000a)}
-  #mc .pic img{width:100%;height:100%;object-fit:contain;object-position:bottom}
+  #mc .pic{position:relative;flex:none;width:calc(var(--u)*10);height:calc(var(--u)*12)}
+  /* V2 (2026-11-05): MC cung co bong chan nhu khach (cung huong sang tu
+     tren xuong); filter vien mo chuyen xuong img de khoi phu len bong. */
+  #mc .pic::after{content:'';position:absolute;left:50%;bottom:0;width:95%;height:12%;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(20,5,12,.68) 0%,rgba(20,5,12,.42) 55%,rgba(20,5,12,0) 75%);border-radius:50%;filter:blur(2px);pointer-events:none;z-index:0}
+  #mc .pic img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;object-position:bottom;filter:drop-shadow(0 0 2px rgba(80,15,40,.55)) drop-shadow(0 4px 10px #000a)}
   #mc .say{flex:1;position:relative;background:rgba(255,248,238,.97);color:#571233;border:2px solid #e75480;border-radius:calc(var(--u)*2.4);
     padding:calc(var(--u)*1) calc(var(--u)*1.8);font-size:calc(var(--u)*2.5*var(--f-mc,1));font-weight:600;line-height:1.3;box-shadow:0 4px 14px #0007}
   #mc .say b{display:block;font-size:calc(var(--u)*2*var(--f-mc,1));color:#c2185b;margin-bottom:calc(var(--u)*.3)}

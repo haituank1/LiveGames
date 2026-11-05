@@ -748,7 +748,11 @@ function stepPerson(p, dt) {
 
 function render(p) {
   const X = p.x / 100 * Ww, Y = p.y / 100 * Hw;
-  const depth = 0.8 + Math.max(0, Math.min(1, (p.y - FLOOR_Y) / 62)) * 0.38;
+  /* V2 (2026-11-05): pho cap theo y — GIU NGUYEN gioi han 0.80-1.18, chi
+     rut ngan quang y dat gioi han (62 -> 40): vung khach thuong dung
+     (y 44-60) truoc day chi chenh ~10% nen xa/gan nhin to bang nhau;
+     nay y=60 da ~0.95, y>=84 dat tran 1.18. */
+  const depth = 0.8 + Math.max(0, Math.min(1, (p.y - FLOOR_Y) / 40)) * 0.38;
   const stMul = (p.state === 'stage' || p.state === 'toStage') ? (p.spotScale || 1.18) : 1;
   if (p.boostCur == null) p.boostCur = p.boost || 1;
   p.boostCur += ((p.boost || 1) - p.boostCur) * 0.13;   // phóng to/thu nhỏ cũng phải mượt, không nhảy cóc
@@ -759,6 +763,7 @@ function render(p) {
   // đổi lớp qua lại từng khung hình (hiện tượng chớp ẩn/hiện khi đứng sát nhau)
   p.el.style.zIndex = Math.round(Y) * 8 + (p.zSeed || 0) + (p.boost > 1 ? 60000 : 0);
   p.el.style.setProperty('--fh', fh.toFixed(0) + 'px');
+  p.el.style.setProperty('--depth', depth.toFixed(3));   // V2: bong chan mo theo xa/gan (CSS .gshadow)
   p.el.classList.toggle('flip', !!p.faceLeft);
   p.el.classList.toggle('walking', !!p.target);
   p.dirty = false;
@@ -820,7 +825,10 @@ function makeEl(user) {
   const av = user.avatar
     ? `<span class="av" style="background-color:${avatarColor(user.id)}"><img src="${esc(user.avatar)}" alt="" onerror="this.onerror=null;this.src='${defAvatarForUser(user)}'"></span>`
     : `<span class="av" style="background-color:${avatarColor(user.id)}"><img src="${defAvatarForUser(user)}" alt=""></span>`;
-  el.innerHTML = `<div class="figwrap"></div><div class="chip">${av}<span class="nm">${esc(user.nickname)}</span></div>`;
+  /* V2 (2026-11-05): bong chan rieng (.gshadow) dat CUNG CAP voi figwrap,
+     khong nam trong figwrap — figwrap nhun theo animation bob/walk nen
+     bong ma nam trong do se nhun theo nguoi, mat tac dung neo xuong san. */
+  el.innerHTML = `<span class="gshadow" aria-hidden="true"></span><div class="figwrap"></div><div class="chip">${av}<span class="nm">${esc(user.nickname)}</span></div>`;
   return el;
 }
 /* Cap nhat ANH THAT vao chip ten bat cu luc nao anh ve duoc: nhieu nguoi
