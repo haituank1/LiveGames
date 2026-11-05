@@ -23,7 +23,7 @@ const DEFAULT_PORT = 8790;
 
 /* File/thư mục KHÔNG bao giờ tải/xóa qua updater (cài đặt riêng, dữ liệu người dùng,
    file chạy, hoặc file chỉ dành cho người đóng gói). So khớp với dong-goi.ps1. */
-const EXCLUDED_DIRS = ['.git/', 'dist/', 'runtime/', 'node_modules/', 'LiveBridge/voice-cache/'];
+const EXCLUDED_DIRS = ['.git/', '.github/', 'dist/', 'runtime/', 'node_modules/', 'LiveBridge/voice-cache/'];
 const EXCLUDED_FILES = new Set([
   'LiveBridge/config/settings.json', // tài khoản TikTok + cài đặt riêng của người nhận
   'LiveBridge/config/settings.json.tmp',
@@ -346,7 +346,10 @@ async function doUpdate() {
     progress = { state: 'error', done: 0, total: 0, current: '', message: e.message || String(e), result: null };
     throw e;
   }
-  cleanStaging();
+  // Chi don thu muc tam khi khong con file updater cho xu ly sau; neu co file
+  // updater thi GIU LAI thu muc tam cho buoc chep de ben duoi (no se don sau
+  // khi chep xong) — don som se xoa mat file updater vua tai ve.
+  if (!selfFiles.length) cleanStaging();
   const result = {
     already: false,
     updated: normal.map(f => f.path),
@@ -356,9 +359,11 @@ async function doUpdate() {
   };
   progress = { state: 'done', done: progress.total, total: progress.total, current: '', message: 'Xong.', result };
 
-  // File của chính updater có bản mới: chép đè sau khi đã trả kết quả rồi thoát,
-  // để lần chạy sau dùng bản updater mới. Ghi đè thất bại (vd. Windows khóa file .bat
-  // đang chạy) thì updater cũ vẫn dùng được, chỉ báo cho người dùng biết.
+  // File của chính updater có bản mới: chép đè sau khi đã trả kết quả (de khong
+  // ghi de file .bat/.js dang chay giua chung). Server VAN CHAY TIEP bang code
+  // cu trong bo nho; lan chay cap-nhat.bat sau se dung ban updater moi.
+  // Ghi de that bai (vd. Windows khoa file .bat dang chay) thi updater cu van
+  // dung duoc, chi bao cho nguoi dung biet qua cua so den.
   if (selfFiles.length) {
     setTimeout(() => {
       try {
@@ -374,7 +379,6 @@ async function doUpdate() {
         console.log('[cap-nhat] Khong ghi de duoc file updater dang chay (' + e.message + ') — updater cu van dung duoc.');
       }
       try { fs.rmSync(STAGING, { recursive: true, force: true }); } catch (_) { /* bỏ qua */ }
-      process.exit(0);
     }, 600);
   }
   return result;

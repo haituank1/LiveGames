@@ -59,8 +59,13 @@ máy chỉ tải những file đã đổi (bản sửa code thường chỉ vài
 file nào bản mới đã bỏ thì xóa. Giữ nguyên `settings.json`, nhạc/ảnh người nhận tự thêm, `runtime/` và `node_modules/`.
 Nếu trang báo LiveBridge đang chạy thì tắt cửa sổ đen của LiveBridge rồi bấm Kiểm tra lại. Cập nhật xong thì mở lại
 `start-livebridge.bat` để chạy bản mới. Chi tiết kỹ thuật: `tools/cap-nhat.js` (chỉ dùng module có sẵn của Node.js,
-so bản qua GitHub Compare API, tải file qua `raw.githubusercontent.com`, xác thực bằng git blob SHA-1);
-`tools/tao-version.js` sinh `version.json` + `manifest.json` từ git (chạy tay trước khi push, `dong-goi.bat` cũng tự gọi).
+so bản bằng `version.json` + `manifest.json` tải qua `raw.githubusercontent.com`
+— không tốn lượt GitHub API; API Compare/Trees chỉ còn là đường dự phòng,
+xác thực file tải về bằng git blob SHA-1); `tools/tao-version.js` sinh
+`version.json` + `manifest.json` từ git (chạy tay trước khi push,
+`dong-goi.bat` cũng tự gọi); GitHub Action `.github/workflows/refresh-manifest.yml`
+tự làm mới 2 file đó sau mỗi lần push lên `main` để manifest luôn mô tả đúng
+cây file mới nhất.
 
 | Trang | Địa chỉ |
 |---|---|
