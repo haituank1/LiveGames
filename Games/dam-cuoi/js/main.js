@@ -1503,7 +1503,7 @@ function applyPanelPos() {
   root.setProperty('--bx', pct(cfg.khungBxhX, cfg.khungPhaiX)); root.setProperty('--byy', pct(cfg.khungBxhY, cfg.khungPhaiY));
   root.setProperty('--ldx', pct(cfg.khungSoMungX, cfg.khungPhaiX)); root.setProperty('--ldy', pct(cfg.khungSoMungY, cfg.khungPhaiY));
   root.setProperty('--cbx', String(Number(cfg.khungBangLenhX) || 0)); root.setProperty('--cby', String(Number(cfg.khungBangLenhY) || 0));
-  root.setProperty('--tox', pct(1, cfg.khungPhaiX)); root.setProperty('--toy', pct(13, cfg.khungPhaiY));
+  root.setProperty('--tox', pct(1, cfg.khungPhaiX)); root.setProperty('--toy', pct(11.5, cfg.khungPhaiY));
   root.setProperty('--qx2', String(Number(cfg.khungHangChoX) || 0)); root.setProperty('--qy2', String(Number(cfg.khungHangChoY) || 0));
   const fv = v => String((Number(v) || 100) / 100);
   root.setProperty('--f-guide', fv(cfg.coChuHuongDan)); root.setProperty('--f-goal', fv(cfg.coChuMucTieu));
@@ -1712,7 +1712,7 @@ if (isDemo) {
     hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
     lenhHoaRoi: 'hoa,roi,tung,vui', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
     khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0,
-    khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 6.5, khungBangLenhX: 1, khungBangLenhY: 1,
+    khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 5.8, khungBangLenhX: 1, khungBangLenhY: 1,
     coChuHuongDan: 110, coChuMucTieu: 100, coChuDemCap: 110, coChuBxh: 110, coChuSoMung: 110, coChuBangLenh: 130, coChuHangCho: 110, coChuMc: 100,
     hienTatCaKhung: false,
     bgRules: [
@@ -1737,7 +1737,7 @@ if (isDemo) {
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4,
     bannerY: 30,
-    khungTraiX: 0, khungTraiY: 5, khungPhaiX: 0, khungPhaiY: 5, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: 0,
+    khungTraiX: 0, khungTraiY: 2, khungPhaiX: 0, khungPhaiY: 2, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: -6,
     hienBongChat: true, bongChatGiay: 4, bongChatMaxKyTu: 60, bongChatAnKhiTuCamQua: 2,
     tuCamComment: ['vl', 'vcl', 'vkl', 'vãi', 'địt', 'đụ', 'đéo', 'cặc', 'lồn', 'buồi', 'đĩ', 'đm', 'dm', 'đmm', 'dcm', 'đcm', 'cave', 'loz'],
     tuAnToanComment: ['cac'],
