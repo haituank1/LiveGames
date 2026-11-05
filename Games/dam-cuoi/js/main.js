@@ -210,6 +210,7 @@ const DEFAULT_CFG = {
   guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view', '👗 Gõ "nam" / "nữ" / "đổi đồ" → đổi nhân vật, trang phục'],
   musicOn: true, musicVolume: 35, sfxOn: true, sfxVolume: 55,
   choDoiLanThapGiay: 30, hangChoToiDa: 4, tuGhepDoiKhiRong: true, tuGhepDoiSauGiay: 5,
+  rongKhungMc: 100, rongThongBao: 100, khungThongBaoX: 0, khungThongBaoY: 0,
 };
 const known = new Map();       // user.id -> user (để parse tag theo tên)
 const nameFoldCache = new Map();   // M13: user.id -> { nick, uid } (ten da gap, xem foldedNames)
@@ -1980,13 +1981,18 @@ function applyPanelPos() {
   root.setProperty('--bx', pct(cfg.khungBxhX, cfg.khungPhaiX)); root.setProperty('--byy', pct(cfg.khungBxhY, cfg.khungPhaiY));
   root.setProperty('--ldx', pct(cfg.khungSoMungX, cfg.khungPhaiX)); root.setProperty('--ldy', pct(cfg.khungSoMungY, cfg.khungPhaiY));
   root.setProperty('--cbx', String(Number(cfg.khungBangLenhX) || 0)); root.setProperty('--cby', String(Number(cfg.khungBangLenhY) || 0));
-  root.setProperty('--tox', pct(1, cfg.khungPhaiX)); root.setProperty('--toy', pct(11.5, cfg.khungPhaiY));
+  root.setProperty('--tox', pct(pct(1, cfg.khungThongBaoX), cfg.khungPhaiX)); root.setProperty('--toy', pct(pct(11.5, cfg.khungThongBaoY), cfg.khungPhaiY));
   root.setProperty('--qx2', String(Number(cfg.khungHangChoX) || 0)); root.setProperty('--qy2', String(Number(cfg.khungHangChoY) || 0));
   const fv = v => String((Number(v) || 100) / 100);
   root.setProperty('--f-guide', fv(cfg.coChuHuongDan)); root.setProperty('--f-goal', fv(cfg.coChuMucTieu));
   root.setProperty('--f-count', fv(cfg.coChuDemCap)); root.setProperty('--f-board', fv(cfg.coChuBxh));
   root.setProperty('--f-ledger', fv(cfg.coChuSoMung)); root.setProperty('--f-cmd', fv(cfg.coChuBangLenh));
   root.setProperty('--f-queue', fv(cfg.coChuHangCho)); root.setProperty('--f-mc', fv(cfg.coChuMc));
+  /* Rong 2 popup (Nguyen yeu cau 2026-11-05): khung MC rong gan full man
+     hinh nen che mat thong bao ben phai; rong = % so voi nhu cu (100 = nhu
+     cu). Toast: rong tuong tu + lech X/Y rieng cong don vao lech nhom
+     phai (truoc day doi toast phai doi ca nhom phai). */
+  root.setProperty('--mcw', fv(cfg.rongKhungMc)); root.setProperty('--tow', fv(cfg.rongThongBao));
   /* Banner "LE THANH HON" (va banner moc/qua lon): cao bao nhieu % tinh tu
      mep tren — dua len cao de khong che mat nhan vat tren san khau (mac dinh
      30%, truoc day co dinh 44% nen che ngang cap doi). */
@@ -2232,7 +2238,7 @@ if (isDemo) {
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4, choDoiLanThapGiay: 30,
     bannerY: 30,
-    khungTraiX: 0, khungTraiY: 2, khungPhaiX: 0, khungPhaiY: 2, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: -6,
+    khungTraiX: 0, khungTraiY: 2, khungPhaiX: 0, khungPhaiY: 2, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: -6, rongKhungMc: 100, rongThongBao: 100, khungThongBaoX: 0, khungThongBaoY: 0,
     hienBongChat: true, bongChatGiay: 4, bongChatMaxKyTu: 60, bongChatAnKhiTuCamQua: 2,
     tuCamComment: ['vl', 'vcl', 'vkl', 'vãi', 'địt', 'đụ', 'đéo', 'cặc', 'lồn', 'buồi', 'đĩ', 'đm', 'dm', 'đmm', 'dcm', 'đcm', 'cave', 'loz'],
     tuAnToanComment: ['cac'],

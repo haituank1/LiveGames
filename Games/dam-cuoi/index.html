@@ -181,7 +181,7 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   #cmdboard li span{white-space:nowrap}
   #cmdboard li em{font-style:normal;color:#ffd76a;white-space:nowrap}
   #couplecount{translate:var(--ccx,0px) var(--ccy,0px);color:#ffd76a;font-size:calc(var(--u)*2.1*var(--f-count,1));font-weight:800;text-shadow:0 1px 3px #0009}
-  #toasts{position:absolute;right:calc(var(--tox,1)*1%);top:calc(var(--toy,18)*1%);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1);width:calc(var(--u)*35)}
+  #toasts{position:absolute;right:calc(var(--tox,1)*1%);top:calc(var(--toy,18)*1%);display:flex;flex-direction:column;align-items:flex-end;gap:calc(var(--u)*1);width:calc(var(--u)*35 * var(--tow,1))}
   .toast{position:relative;overflow:hidden;display:flex;align-items:center;gap:calc(var(--u)*1.2);width:100%;box-sizing:border-box;
     background:linear-gradient(100deg,rgba(150,25,90,.92),rgba(220,60,130,.88));border:1px solid rgba(255,190,220,.8);
     color:#fff;border-radius:calc(var(--u)*3);padding:calc(var(--u)*.7) calc(var(--u)*1.4);font-size:calc(var(--u)*2.3);
@@ -201,7 +201,7 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
 
   /* ---------- MC ---------- */
   #mc{position:absolute;left:calc(var(--side) + var(--u)*1 + var(--mcx,0px));top:calc(var(--u)*34 + var(--mcy,0px));display:flex;flex-direction:row;align-items:flex-start;
-    gap:calc(var(--u)*1.2);width:calc(100% - var(--side)*2 - var(--u)*30);z-index:2100;
+    gap:calc(var(--u)*1.2);width:calc((100% - var(--side)*2 - var(--u)*30) * var(--mcw,1));z-index:2100;
     opacity:0;transform:translateX(-110%);transition:transform .7s cubic-bezier(.2,.9,.3,1.1),opacity .5s;pointer-events:none}
   #mc.on{opacity:1;transform:none}
   #mc .pic{flex:none;width:calc(var(--u)*10);height:calc(var(--u)*12);filter:drop-shadow(0 4px 10px #000a)}

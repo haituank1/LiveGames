@@ -530,7 +530,7 @@ function buildGame(g) {
    game chưa có schema thì chỉ hiện các nhóm dùng chung + gói quà. */
 /* Bo so VI TRI chuan cua dam cuoi (khop mac dinh trong mapping/settings, siet gon 2026-11-05).
    Nut "Dat lai vi tri mac dinh" ghi de cac key nay len config da luu cua nguoi dung va ap dung ngay. */
-const POS_DEFAULTS = { khungTraiX: 0, khungTraiY: 2, khungPhaiX: 0, khungPhaiY: 2, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: -6, hienTatCaKhung: false, khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0, khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 5.8, khungBangLenhX: 1, khungBangLenhY: 1 };
+const POS_DEFAULTS = { khungTraiX: 0, khungTraiY: 2, khungPhaiX: 0, khungPhaiY: 2, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: -6, rongKhungMc: 100, rongThongBao: 100, khungThongBaoX: 0, khungThongBaoY: 0, hienTatCaKhung: false, khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0, khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 5.8, khungBangLenhX: 1, khungBangLenhY: 1 };
 
 const GAME_SCHEMAS = {
   'dam-cuoi': [
@@ -641,6 +641,10 @@ const GAME_SCHEMAS = {
       { k: 'khungHangChoY', l: 'Hàng chờ — vị trí Y (% từ mép dưới)', t: 'num', min: 0, max: 95, step: 0.5 },
       { k: 'khungMcX', l: 'Khung MC — lệch X (%)', t: 'num', min: -20, max: 20, step: 0.5 },
       { k: 'khungMcY', l: 'Khung MC — lệch Y (%)', t: 'num', min: -20, max: 20, step: 0.5 },
+      { k: 'rongKhungMc', l: 'Khung MC — chiều ngang (%) — 100 là như cũ, nhỏ lại để khỏi che thông báo bên phải', t: 'num', min: 20, max: 100, step: 1 },
+      { k: 'khungThongBaoX', l: 'Thông báo (lên sân khấu...) — lệch X thêm (%)', t: 'num', min: -40, max: 40, step: 0.5 },
+      { k: 'khungThongBaoY', l: 'Thông báo (lên sân khấu...) — lệch Y thêm (%)', t: 'num', min: -40, max: 40, step: 0.5 },
+      { k: 'rongThongBao', l: 'Thông báo (lên sân khấu...) — chiều ngang (%)', t: 'num', min: 50, max: 150, step: 5 },
       { k: 'hienTatCaKhung', l: '👁 Hiện TẤT CẢ khung (kể cả khung đang trống, có nội dung mẫu) để kiểm tra vị trí + cỡ chữ', t: 'chk' },
       { k: 'khungHuongDanX', l: 'Hướng dẫn (dòng chữ chạy) — lệch X (%)', t: 'num', min: -40, max: 40, step: 0.5 },
       { k: 'khungHuongDanY', l: 'Hướng dẫn — lệch Y (%)', t: 'num', min: -40, max: 40, step: 0.5 },
