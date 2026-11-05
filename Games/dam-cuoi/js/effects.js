@@ -1,11 +1,28 @@
 /* Hiệu ứng đám cưới trên canvas phủ: pháo hoa, mưa cánh hoa hồng, mưa giấy màu, tim bay, lấp lánh ambient.
-   Mật độ hiệu ứng ambient tăng theo mốc mắt xem (main.js gọi E.setTier). */
+   Mật độ hiệu ứng ambient tăng theo mốc mắt xem (main.js gọi E.setTier).
+   VĐ1 — grade theo mốc: setTier còn đặt data-tier lên #stage để CSS trong
+   index.html đổi màu grade / tia sáng / độ sáng sân khấu theo mốc; bảng
+   TIER_AMBIENT dưới đây cho mỗi mốc một "chất" riêng (bướm, kim tuyến,
+   bokeh, sao băng) thay vì chỉ tăng đều theo tier. */
 (function () {
 'use strict';
 const W = (window.Wedding = window.Wedding || {});
 const E = (W.effects = {});
 let cv, ctx, w = 1, h = 1;
 let rafId = 0, fxHidden = document.hidden, fwTimers = [];   // M11 — id rAF + handle timeout pháo hoa đang chờ
+/* VĐ1 — mật độ ambient RIÊNG theo mốc (chỉ số = tier 0..5: 0/10/30/50/100/200
+   lượt xem, khớp TIERS trong main.js): mốc 1 thêm bướm sáng, mốc 2 thêm kim
+   tuyến + bokeh, mốc 3 bokeh/đèn lồng mạnh hơn, mốc 4 thêm sao băng, mốc 5
+   mạnh nhất + pháo hoa định kỳ (đã có sẵn). Tốc độ tính bằng hạt/giây. */
+const TIER_AMBIENT = [
+  { sparkle: 1.1, dust: 0.7, petal: 0.25, bokeh: 0,    orb: 0,    glit: 0,   bfly: 0 },
+  { sparkle: 1.9, dust: 1.1, petal: 0.5,  bokeh: 0,    orb: 0,    glit: 0,   bfly: 2 },
+  { sparkle: 2.8, dust: 1.5, petal: 0.8,  bokeh: 0.3,  orb: 0.22, glit: 0.9, bfly: 2 },
+  { sparkle: 3.7, dust: 1.9, petal: 1.2,  bokeh: 0.6,  orb: 0.35, glit: 1.6, bfly: 3 },
+  { sparkle: 4.6, dust: 2.3, petal: 1.6,  bokeh: 0.9,  orb: 0.5,  glit: 2.6, bfly: 3 },
+  { sparkle: 5.6, dust: 2.7, petal: 2.0,  bokeh: 1.2,  orb: 0.6,  glit: 3.4, bfly: 3 },
+];
+const amb = () => TIER_AMBIENT[Math.max(0, Math.min(TIER_AMBIENT.length - 1, tier))];
 function startLoop() { if (!rafId) { lastT = 0; rafId = requestAnimationFrame(loop); } }
 function stopLoop() { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
 /* M11 — tab ẩn: rAF vốn đã dừng nhưng setInterval ở main.js vẫn gọi FX.*
@@ -21,7 +38,7 @@ document.addEventListener('visibilitychange', () => {
   } else startLoop();
 });
 const P = [];            // hạt chung: {kind, x,y,vx,vy,life,max,size,color,rot,vr,grav,drag}
-let tier = 0, sparkleAcc = 0, lastT = 0, petalAcc = 0, bokehAcc = 0, dustAcc = 0, streakT = 6, royalT = 14, bflyT = 3, orbAcc = 0;
+let tier = 0, sparkleAcc = 0, lastT = 0, petalAcc = 0, bokehAcc = 0, dustAcc = 0, glitAcc = 0, streakT = 6, royalT = 14, bflyT = 3, orbAcc = 0;
 const rand = (a, b) => a + Math.random() * (b - a);
 const FW_COLORS = ['#ffd76a', '#ff7eb0', '#ff9d5c', '#a8e6ff', '#c3a6ff', '#ffffff', '#ff5c7a'];
 const PETALS = ['#ffb7cd', '#ff8fab', '#ffd6e3', '#fff0f5', '#ff6b9d'];
@@ -37,7 +54,17 @@ E.resize = function (W2, H2, dpr) {
   cv.width = Math.round(W2 * dpr); cv.height = Math.round(H2 * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 };
-E.setTier = t => { tier = t; };
+E.setTier = t => {
+  tier = t | 0;
+  /* VĐ1 — grade theo mốc: main.js đã gọi setTier mỗi lần đổi mốc
+     (refreshBg), nên đặt data-tier lên #stage tại đây là đủ, không cần
+     sửa main.js. CSS trong index.html đọc data-tier để đổi màu grade /
+     tia sáng / độ sáng sân khấu. Kẹp 0..5: admin thêm mốc mới qua bgRules
+     thì grade lấy mốc cao nhất đã định nghĩa, không rơi về mặc định. */
+  const st = document.getElementById('stage');
+  if (st) st.dataset.tier = String(Math.max(0, Math.min(TIER_AMBIENT.length - 1, tier)));
+};
+E.getTier = () => tier;
 E.fireworks = function (n = 3) { E.fireworksShow(n); };
 
 function add(p) { if (fxHidden) return; if (P.length < 1400) P.push(p); }
@@ -266,9 +293,9 @@ function loop(t) {
   rafId = requestAnimationFrame(loop);
   const dt = Math.min(0.05, lastT ? (t - lastT) / 1000 : 0.016); lastT = t;
   ctx.clearRect(0, 0, w, h);
-  // lấp lánh ambient: mốc càng cao càng dày (1.1 → 5.4 hạt/giây), thỉnh thoảng
+  // lấp lánh ambient: mật độ riêng theo mốc (xem TIER_AMBIENT), thỉnh thoảng
   // có "sao lớn" sáng hẳn lên giữa sảnh cho ra chất lung linh
-  sparkleAcc += dt * (1.1 + tier * 0.85);
+  sparkleAcc += dt * amb().sparkle;
   while (sparkleAcc >= 1) {
     sparkleAcc--;
     const hero = Math.random() < 0.12;
@@ -276,17 +303,17 @@ function loop(t) {
       life: 0, max: rand(1.2, 2.4), size: rand(1.4, 3.2) * (hero ? 1.9 : 1), color: '#ffe9a8', grav: 0, drag: 0 });
   }
   // bụi vàng li ti bay lơ lửng khắp sảnh — nền "có không khí" ở mọi mốc
-  dustAcc += dt * (0.7 + tier * 0.5);
+  dustAcc += dt * amb().dust;
   while (dustAcc >= 1) {
     dustAcc--;
     add({ kind: 'dust', x: rand(0, w), y: rand(h * 0.25, h * 1.02), vx: rand(-7, 7), vy: -rand(5, 15),
       life: 0, max: rand(6, 11), size: rand(5, 13), color: '#ffd76a', grav: 0, drag: 0, sway: rand(0, 6.3) });
   }
-  // sao băng xẹt qua vòm hoa ở hai mốc cao nhất
+  // sao băng xẹt qua vòm hoa ở hai mốc cao nhất (mốc hoàng gia dày hơn)
   if (tier >= 4) {
     streakT -= dt;
     if (streakT <= 0) {
-      streakT = rand(8, 15);
+      streakT = tier >= 5 ? rand(5, 9) : rand(8, 15);
       add({ kind: 'streak', x: rand(w * 0.08, w * 0.5), y: rand(h * 0.05, h * 0.2), vx: rand(280, 400), vy: rand(70, 120),
         life: 0, max: rand(0.7, 1), size: rand(1.8, 2.6), color: '#ffffff', grav: 0, drag: 0 });
     }
@@ -297,7 +324,7 @@ function loop(t) {
     if (royalT <= 0) { royalT = rand(26, 38); E.fireworksShow(3, 340); }
   }
   // hoa rơi ambient rất nhẹ + bokeh mơ màng ở các mốc cao — sảnh lúc nào cũng "sống"
-  petalAcc += dt * (0.25 + tier * 0.16);
+  petalAcc += dt * amb().petal;
   while (petalAcc >= 1) {
     petalAcc--;
     add({ kind: 'petal', x: rand(0, w), y: -12, vx: rand(-10, 10), vy: rand(22, 44),
@@ -305,25 +332,36 @@ function loop(t) {
       color: PETALS[Math.floor(Math.random() * PETALS.length)], grav: 0, drag: 0, sway: rand(0, 6.3),
       flut: rand(1.6, 3.6), ph: rand(0, 6.3), lotus: Math.random() < 0.18 ? 1 : 0 });
   }
-  if (tier >= 2) {
-    bokehAcc += dt * 0.3;
+  if (amb().bokeh > 0) {
+    bokehAcc += dt * amb().bokeh;
     while (bokehAcc >= 1) {
       bokehAcc--;
       add({ kind: 'bokeh', x: rand(0, w), y: rand(h * 0.55, h * 1.02), vx: rand(-6, 6), vy: -rand(9, 22),
         life: 0, max: rand(5, 9), size: rand(10, 28), color: ['#ffd9ec', '#ffe9a8', '#cfe8ff'][Math.floor(Math.random() * 3)], grav: 0, drag: 0, sway: rand(0, 6.3) });
     }
     // đèn lồng ấm bay lên — sảnh cao cấp lúc nào cũng có ánh sáng chuyển động
-    orbAcc += dt * 0.22;
+    orbAcc += dt * amb().orb;
     while (orbAcc >= 1) { orbAcc--; E.lanterns(1); }
   }
-  // bướm phát sáng bay quanh sảnh từ mốc Hoa Khai trở đi (tối đa 2–3 con)
-  if (tier >= 1) {
+  // VĐ1 — kim tuyến rơi ambient từ mốc Kim Tuyến (tier 2) trở đi: sảnh vàng
+  // lấp lánh ngay cả khi không ai tặng quà (rơi chậm hơn kim tuyến bắn ra
+  // từ E.glitter để không át mặt cặp đôi)
+  if (amb().glit > 0) {
+    glitAcc += dt * amb().glit;
+    while (glitAcc >= 1) {
+      glitAcc--;
+      add({ kind: 'glit', x: rand(0, w), y: rand(-h * 0.2, -8), vx: rand(-8, 8), vy: rand(18, 38),
+        life: 0, max: rand(4, 7), size: rand(1.6, 3), color: '#ffd76a', grav: 0, drag: 0, sway: rand(0, 6.3) });
+    }
+  }
+  // bướm phát sáng bay quanh sảnh từ mốc Hoa Khai trở đi (tối đa theo bảng mốc)
+  if (amb().bfly > 0) {
     bflyT -= dt;
     if (bflyT <= 0) {
       bflyT = 2.5;
       let alive = 0;
       for (const q of P) if (q.kind === 'bfly') alive++;
-      if (alive < (tier >= 3 ? 3 : 2)) spawnButterfly();
+      if (alive < amb().bfly) spawnButterfly();
     }
   }
   for (let i = P.length - 1; i >= 0; i--) {
