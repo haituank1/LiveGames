@@ -138,7 +138,6 @@ function addLedger(user, giftName, dia) {
 /* ============ Trạng thái ============ */
 let cfg = {};
 const known = new Map();       // user.id -> user (để parse tag theo tên)
-const tagCooldown = new Map();
 const greeted = new Set();
 let lastGreet = -1e9;
 const coupleByKey = new Map();
@@ -904,7 +903,7 @@ function giftPriority(user) {
   }
   const alt = randomSingleOpp(user) || randomSingle(user);
   if (!alt) return;
-  const nc = requestCouple(user, alt, false);
+  const nc = requestCouple(user, alt, 'gift');
   if (nc) { nc.giftPriority = true; toast(`🎁 ${user.nickname} tặng quà — MC se duyên và ưu tiên cặp của bạn lên sân khấu kế tiếp!`, true); }
 }
 function showBubble(user, text) {
@@ -965,7 +964,11 @@ function computeStageCooldown() {
   const max = cfg.choLenSanKhauMax != null ? cfg.choLenSanKhauMax : 600;
   return Math.round(Math.min(max, Math.max(min, sec)));
 }
-setInterval(() => { P.setStageCooldown(computeStageCooldown()); }, 5000);
+/* Cooldown THEO NGUOI ngan (config choNguoiGiay, mac dinh 30): chi de
+   1 nguoi khong chiem san khau lien tuc khi doi ban dien lien tuc;
+   cooldown THEO CAP (cong thuc dong tren) moi la chang chinh. */
+function personCdSec() { const v = Number(cfg.choNguoiGiay); return isFinite(v) && v >= 0 ? v : 30; }
+setInterval(() => { P.setStageCooldowns(computeStageCooldown(), personCdSec()); }, 5000);
 /* ===== Hieu ung NGAU NHIEN giu sanh luon song (Nguyen chot 2026-11-04) =====
    Nguoi xem nhieu khi chi chat / tha tim chu khong tang qua — neu chi cho
    qua moi co hieu ung thi sanh trong chet. Cu moi mot khoang ngau nhien
@@ -1065,19 +1068,34 @@ function cheGheuTag(ua, ub) {
   lastCheGheuAt = now;
   mcReact(2.2, pool, { a: ua.nickname, b: ub.nickname, c: partner.nickname });
 }
-function requestCouple(a, b, viaTag) {
+/* Phan hoi khi ghep doi bi chan (truoc day nhieu nhanh chan IM LANG —
+   khach thay nhu game hong). Toast nay co tiet che theo nguoi (6s/lan)
+   de khong thanh spam khi co nguoi go lien tuc. */
+const blockToastAt = new Map();
+function blockedToast(ua, ub) {
+  const now = performance.now();
+  if (now - (blockToastAt.get(ua.id) || -1e9) < 6000) return;
+  blockToastAt.set(ua.id, now);
+  const cb = P.coupleOf(ub.id), ca = P.coupleOf(ua.id);
+  if (cb && cb !== ca) toast(`⏳ ${ub.nickname} đang ở trong một cặp khác — chờ cặp đó xong thì tag lại nhé`, false);
+  else if (ca) toast(`⏳ ${ua.nickname} đang ở trong một cặp khác rồi — chờ cặp hiện tại xong nhé`, false);
+}
+/* via/origin: 'manual' (khach tu tag / go lenh ghep doi), 'npc' /
+   'autopair' (he thong tu sinh), 'follow' / 'gift' (su kien cua khach).
+   KHONG con cooldown tag 20s: ban cu khoa ca lan tag THAT BAI (doi tac
+   dang ban) lan lan tag do he thong tu sinh nhan danh khach — goc cua
+   loi "tag mai khong an". Chong spam da co san: moi nguoi chi o trong
+   1 cap tai 1 thoi diem + cooldown san khau rieng. */
+function requestCouple(a, b, via) {
+  const origin = typeof via === 'string' ? via : (via === false ? 'follow' : 'manual');
   const ua = register(a), ub = register(b);
   if (!ua || !ub || ua.id === ub.id) return null;
-  const now = performance.now();
-  if (viaTag) {
-    if (now - (tagCooldown.has(ua.id) ? tagCooldown.get(ua.id) : -1e9) < 20000) return null;
-    tagCooldown.set(ua.id, now);
-  }
   const before = P.coupleOf(ua.id);
   const wasPair = !!(before && ((before.a.user.id === ua.id && before.b.user.id === ub.id) || (before.a.user.id === ub.id && before.b.user.id === ua.id)));
-  const c = P.makeCouple(ua, ub);
+  const c = P.makeCouple(ua, ub, origin);
   if (!c) {
     cheGheuTag(ua, ub);   // một trong hai đã có đôi khác -> MC chế giễu có tên tuổi theo pool config
+    blockedToast(ua, ub);   // kem toast ly do ro rang (tiet che 6s/nguoi) — khong con chan im lang
     return null;
   }
   coupleByKey.set(c.key, c);
@@ -1204,9 +1222,13 @@ const outfitCd = new Map();
 function foldCmd(s) {
   return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/\s+/g, ' ').trim();
 }
+/* Tra ve TRUE khi comment DA LA mot lenh he thong (khai gioi tinh /
+   doi do) — pipeline onChat dung o do, khong chay tiep sang ghep doi /
+   hieu ung. Sua goc loi "doi do" bi lenh ghep doi cuop (tu khoa 'doi')
+   va loi go "nam" bi quet ten nguoi ten Nam cuop thanh ghep doi. */
 function handleChatCommands(user, text) {
   const p = P.get(user.id);
-  if (!p) return;
+  if (!p) return false;
   const f = foldCmd(text);
   if (cfg.lenhDoiGioiTinh !== false) {
     let g = null;
@@ -1219,6 +1241,7 @@ function handleChatCommands(user, text) {
       toast(g === 'F'
         ? `✅ ${user.nickname} là nữ — đã đổi sang nhân vật nữ${r && r.roleSwapped ? ' + đảo vai cô dâu cho đúng' : ''}!`
         : `✅ ${user.nickname} là nam — đã đổi sang nhân vật nam${r && r.roleSwapped ? ' + đảo vai chú rể cho đúng' : ''}!`, false);
+      return true;
     }
   }
   if (cfg.lenhDoiTrangPhuc !== false && /\b(doi do|doi trang phuc|thay do|thay trang phuc)\b/.test(f)) {
@@ -1232,7 +1255,9 @@ function handleChatCommands(user, text) {
       if (r && r.couple) toast(`👗 ${p.couple.a.user.nickname} ❤ ${p.couple.b.user.nickname} đổi bộ đồ cưới "${r.setName}"!`, false);
       else toast(`👗 ${user.nickname} vừa đổi trang phục mới!`, false);
     }
+    return true;   // dung la lenh doi do (ke ca dang trong cooldown doi do) — khong chay tiep
   }
+  return false;
 }
 /* LENH "GHEP DOI" (Nguyen yeu cau 2026-11-05 12:20): nguoi doc than go
    tu khoa trong o config tuKhoaGhepDoi (mac dinh "ghep doi, ghep, doi" -
@@ -1240,7 +1265,7 @@ function handleChatCommands(user, text) {
    than ngau nhien (uu tien khac gioi), giong co che follow. Khop khong
    dau qua stemHit nhu lenh hieu ung. Chi chay khi comment khong tag
    duoc ai - tag cu the van uu tien truoc. Tat bang lenhGhepDoi. */
-function pairCommand(user, text) {
+function pairCommand(user, text, origin) {
   if (cfg.lenhGhepDoi === false) return false;
   const kws = stemList(cfg.tuKhoaGhepDoi);
   if (!kws.length) return false;
@@ -1253,35 +1278,81 @@ function pairCommand(user, text) {
     toast(`💘 ${user.nickname} muốn ghép đôi — chưa có ai độc thân khác trong sảnh`, false);
     return true;
   }
-  requestCouple(user, partner, true);
+  requestCouple(user, partner, origin || 'random');
   return true;
 }
-function onChat(m) {
+/* Ghep voi nguoi duoc tag — kem nhanh "ghep tam" khi nguoi duoc tag
+   CHUA HE co mat trong game (parseTag tra ve "bong ma" tag:...): thay
+   vi ghep voi bong ma, ghep TAM voi 1 nguoi doc than khac gioi dang co
+   mat + MC doc cau ru nguoi thuong vao live. Het nguoi phu hop thi moi
+   quay ve ghep bong ma nhu cu. */
+function tryPairWith(user, partner, origin) {
+  if (String(partner.id).startsWith('tag:') && cfg.ghepDoiNgauNhien !== false) {
+    const alt = randomSingleOpp(user);
+    if (alt) {
+      const c = requestCouple(user, alt, origin);
+      if (c) { c.tagVangTen = partner.nickname; return c; }
+    }
+  }
+  return requestCouple(user, partner, origin);
+}
+const tagFailAt = new Map();
+function tagFailToast(user) {
+  const now = performance.now();
+  if (now - (tagFailAt.get(user.id) || -1e9) < 6000) return;
+  tagFailAt.set(user.id, now);
+  toast(`🔍 ${user.nickname} ơi, chưa thấy tên người thương sau @ — gõ đúng tên của họ nhé`, false);
+}
+/* ===== PIPELINE BOC TACH COMMENT (Nguyen chot 2026-11-05) =====
+   Moi comment chi chay DUNG MOT nhanh, theo thu tu uu tien co dinh —
+   trung nhanh nao la DUNG o do, khong chay tiep sang nhanh khac (goc
+   cua moi loi chong cheo truoc day: 1 cau vua doi do vua ghep doi,
+   vua goi ten vua no hieu ung...):
+   1) Bat dau bang @      -> GHEP DOI voi nguoi duoc tag (ke ca ten
+      go gan dung / nguoi vang mat thi ghep tam), dung. (Nguyen chi
+      rieng: cau @ thi check ghep doi truoc tien.)
+   2) Lenh he thong       -> khai gioi tinh ("nam"/"nu") / "doi do", dung.
+   3) Lenh hieu ung       -> hoa roi / phao hoa / phao giay, dung.
+      (Phai truoc buoc goi ten: tu khoa hieu ung la TU DON rat loang —
+      vd "hoa roi" trung ca TEN GOI "Hoa" cua 1 khach trong sanh;
+      neu quet ten truoc, cau goi hieu ung bi cuop thanh ghep doi.
+      Nguyen da noi ro: cau thuoc case hieu ung thi tha hieu ung va
+      khong check them.)
+   4) Goi ten khong @     -> ghep doi voi dung nguoi do (scanLooseTag), dung.
+   5) Lenh ghep doi       -> tu khoa config (ghep doi/cuoi/...) ghep
+      ngau nhien 1 nguoi doc than, dung.
+   6) Chat thuong         -> chi hien bong bong.
+   opts.origin: nguon sinh comment ('manual' mac dinh; 'npc' /
+   'autopair' khi he thong tu sinh comment gia lap) — truyen xuong
+   requestCouple/makeCouple de cap ghi nguon va de tag tay duoc gianh
+   cap tu dong dang xep hang. */
+function onChat(m, opts) {
   if (!m.user) return;
   ensureGuest(m.user);
   const text = String(m.text || '');
+  const origin = (opts && opts.origin) || 'manual';
+  /* Nguon o muc LAN (people.js xep hang cho theo nguon): comment cua
+     khach that tag ten -> 'tag' (lan 2); lenh ghep doi go tu khoa ->
+     'random' (lan 3); comment do he thong tu sinh giu nguyen nguon cua
+     no ('npc' lan 4 / 'autopair' lan 3-4) de xu ly rieng o lan thap. */
+  const tagOrigin = origin === 'manual' ? 'tag' : origin;
+  const pairOrigin = origin === 'manual' ? 'random' : origin;
   showBubble(m.user, text);
-  handleChatCommands(m.user, text);
-  const partner = parseTag(text, m.user);
-  if (partner) {
-    /* Người được tag CHƯA HỀ có mặt trong game (parseTag trả về "bóng ma"
-       tag:...): thay vì ghép với bóng ma, ghép TẠM với 1 người độc thân khác
-       giới đang có mặt + MC đọc câu rủ người thương vào live — tạo động lực
-       kéo đúng người yêu/vợ chồng của họ vào phòng để ghép đúng đôi. Hết
-       người phù hợp thì mới quay về ghép bóng ma như cũ. */
-    if (String(partner.id).startsWith('tag:') && cfg.ghepDoiNgauNhien !== false) {
-      const alt = randomSingleOpp(m.user);
-      if (alt) {
-        const c = requestCouple(m.user, alt, true);
-        if (c) { c.tagVangTen = partner.nickname; return; }
-      }
-    }
-    requestCouple(m.user, partner, true); return;
+  if (text.trim().startsWith('@')) {
+    const partner = parseTag(text, m.user);
+    /* Tag CHINH MINH: parseTag loai nguoi tag khoi danh sach khop nen
+       ten cua chinh minh tro thanh "nguoi vang mat" (bong ma) — khong
+       ghep tam voi nguoi la, bao lai cho khach biet. */
+    if (partner && String(partner.id).startsWith('tag:') && foldName(partner.nickname) === foldName(m.user.nickname || '')) tagFailToast(m.user);
+    else if (partner) tryPairWith(m.user, partner, tagOrigin);
+    else tagFailToast(m.user);
+    return;
   }
+  if (handleChatCommands(m.user, text)) return;
+  if (chatFx(m.user, text)) return;
   const loose = scanLooseTag(text, m.user);
-  if (loose) { requestCouple(m.user, loose, true); return; }
-  if (pairCommand(m.user, text)) return;
-  chatFx(m.user, text);
+  if (loose) { requestCouple(m.user, loose, tagOrigin); return; }
+  if (pairCommand(m.user, text, pairOrigin)) return;
 }
 
 /* TAG KHÔNG CẦN @ (Nguyen yêu cầu 2026-11-04 22:51): quét cả câu comment
@@ -1346,12 +1417,13 @@ function stemHit(tokens, stem, fuzzy) {
   if (!st.length) return false;
   return st.every(w => tokens.some(tk => tk === w || (fuzzy && w.length >= 4 && levRatio(tk, w) >= 0.8)));
 }
+/* Tra ve TRUE khi comment THUOC case hieu ung (khop tu khoa) — pipeline
+   dung o do ke ca khi hieu ung dang bi cooldown chua ban duoc; FALSE
+   khi khong phai cau hieu ung. */
 function chatFx(user, text) {
-  if (cfg.hieuUngChat === false) return;
-  const now = Date.now();
-  if (now - (fxCmdAt.get(user.id) || 0) < (Number(cfg.lenhHieuUngChoGiay) || 8) * 1000) return;
+  if (cfg.hieuUngChat === false) return false;
   const tokens = foldCmd(text).split(' ').filter(Boolean);
-  if (!tokens.length) return;
+  if (!tokens.length) return false;
   const rules = [
     { list: cfg.lenhPhaoGiay, go: () => { FX.confetti(90); toast('🎉 ' + user.nickname + ' bắn pháo giấy!', false); } },
     { list: cfg.lenhPhaoHoa, go: () => { FX.fireworks(3); toast('🎆 ' + user.nickname + ' bắn pháo hoa!', false); } },
@@ -1364,9 +1436,14 @@ function chatFx(user, text) {
      không bị nhận nhầm thành 'phao' (giống 75%). */
   for (const fuzzy of [false, true]) {
     for (const r of rules) {
-      if (stemList(r.list).some(st => stemHit(tokens, st, fuzzy))) { fxCmdAt.set(user.id, now); r.go(); return; }
+      if (stemList(r.list).some(st => stemHit(tokens, st, fuzzy))) {
+        const now = Date.now();
+        if (now - (fxCmdAt.get(user.id) || 0) >= (Number(cfg.lenhHieuUngChoGiay) || 8) * 1000) { fxCmdAt.set(user.id, now); r.go(); }
+        return true;
+      }
     }
   }
+  return false;
 }
 function greet(user) {
   const now = performance.now();
@@ -1408,7 +1485,7 @@ function npcRealCount() {
 }
 function npcStageBusy() {
   if (lastQueueLen > 0) return true;
-  for (const c of coupleByKey.values()) if (c && (c.state === 'focus' || c.state === 'queue' || c.state === 'toStage')) return true;
+  for (const c of coupleByKey.values()) if (c && c.a.couple === c && (c.state === 'focus' || c.state === 'queue' || c.state === 'toStage')) return true;   // c.a.couple === c: bo qua muc thua cua cap da tan con sot trong so coupleByKey
   const f = P.featured();
   // Cap that dang dien thi phai cho xong. NGOAI LE: cap NPC dang "giu san
   // khau" (hold = het gio dien ma chua co cap ke nen tam dung lai) thi
@@ -1448,7 +1525,7 @@ function npcTick() {
   const b = shuffled.find(u => u !== a && P.isGirl(u.id) !== aGirl) || shuffled.find(u => u !== a);
   if (!b) return;
   NPC.lastTagAt = Date.now();
-  onChat({ user: known.get(a.id) || a, text: '@' + b.nickname });
+  onChat({ user: known.get(a.id) || a, text: '@' + b.nickname }, { origin: 'npc' });
 }
 
 /* TU GHEP DOI KHI HANG CHO TRONG (Nguyen yeu cau 2026-11-05 12:36):
@@ -1456,26 +1533,26 @@ function npcTick() {
    5) va khong cap nao dang tren duong len thi tu ghep 1 cap tu khach
    DOC THAN dang co mat trong sanh (uu tien khac gioi), di dung duong
    onChat -> requestCouple nhu khach tu tag nhau (MC gioi thieu, len
-   san khau nhu thuong). Tat bang tuGhepDoiKhiRong. */
+   san khau nhu thuong). Tat bang tuGhepDoiKhiRong.
+   NPC KHONG nam trong danh sach nay: NPC co duong ghep rieng (npcTick,
+   chi chay khi phong vang) — hai he tu dong khong de len nhau, tranh
+   NPC bi ghep ca khi phong dang dong khach that. */
 let queueEmptySince = Date.now();
 function autoPairTick() {
   if (cfg.tuGhepDoiKhiRong === false) { queueEmptySince = Date.now(); return; }
   let transit = false;
-  for (const c of coupleByKey.values()) if (c && (c.state === 'focus' || c.state === 'toStage')) { transit = true; break; }
+  for (const c of coupleByKey.values()) if (c && c.a.couple === c && (c.state === 'focus' || c.state === 'toStage')) { transit = true; break; }   // c.a.couple === c: chi tinh cap con song, bo qua muc thua cua cap da tan con sot trong so
   if (lastQueueLen > 0 || transit) { queueEmptySince = Date.now(); return; }
   if (Date.now() - queueEmptySince < (Number(cfg.tuGhepDoiSauGiay) || 5) * 1000) return;
   const singles = [];
-  for (const u of known.values()) { const p = P.get(u.id); if (p && !p.couple && (p.state === 'home' || p.state === 'walk')) singles.push(u); }
+  for (const u of known.values()) { const p = P.get(u.id); if (p && !p.npc && !p.couple && (p.state === 'home' || p.state === 'walk')) singles.push(u); }
   if (singles.length < 2) { queueEmptySince = Date.now(); return; }
-  const now = performance.now();
-  const free = singles.filter(u => now - (tagCooldown.get(u.id) || -1e9) >= 20000);
-  const pool = free.length >= 2 ? free : singles;
-  const a = pool[Math.floor(Math.random() * pool.length)];
+  const a = singles[Math.floor(Math.random() * singles.length)];
   const aGirl = P.isGirl(a.id);
-  const b = pool.find(u => u !== a && P.isGirl(u.id) !== aGirl) || pool.find(u => u !== a);
+  const b = singles.find(u => u !== a && P.isGirl(u.id) !== aGirl) || singles.find(u => u !== a);
   if (!b) { queueEmptySince = Date.now(); return; }
   queueEmptySince = Date.now();
-  onChat({ user: known.get(a.id) || a, text: '@' + b.nickname });
+  onChat({ user: known.get(a.id) || a, text: '@' + b.nickname }, { origin: 'autopair' });
 }
 setInterval(autoPairTick, 1000);
 
@@ -1510,12 +1587,13 @@ function handle(ev) {
   if (ev.user && ev.action !== 'like') ensureGuest(ev.user);   // chi tha tim thi chua vao sanh (giu nhu cu)
   if (ev.action === 'join' && ev.user) greet(ev.user);
   if (ev.action === 'couple') {
-    const partner = (src.text && parseTag(src.text, ev.user)) || randomSingle(ev.user);
-    if (ev.user && partner) requestCouple(ev.user, partner, true);
+    const tagged = src.text && parseTag(src.text, ev.user);
+    const partner = tagged || randomSingle(ev.user);
+    if (ev.user && partner) requestCouple(ev.user, partner, tagged ? 'tag' : 'random');
   } else if (ev.action === 'spotlight') {           // follow
     if (!ev.user) return;
     const partner = randomSingle(ev.user);
-    if (partner) requestCouple(ev.user, partner, false);
+    if (partner) requestCouple(ev.user, partner, 'follow');
     else FX.hearts(12, 0.5, 0.6);
     mcReact(2.9, MC.follow, { ten: ev.user.nickname });   // follow xếp SAU mọi câu cảm ơn quà (Nguyen yêu cầu 2026-11-04)
   } else if (ev.action === 'dance') {
@@ -1624,7 +1702,7 @@ function applyConfig(c) {
   MC.tagDaCoDoi = (cfg.mcTagDaCoDoi && cfg.mcTagDaCoDoi.length) ? cfg.mcTagDaCoDoi : ['ê {a}, {b} đã có đôi rồi, mình không nên phá hoại gia đình nhà người khác nhá!', '{a} à, {b} đã có gia đình rồi, bạn nên chọn người khác đi nhé!', '{b} là của {c} rồi {a} ơi, chen vào là MC không cứu được đâu!', 'Thôi {a} ơi, {b} với {c} đang hạnh phúc, mình đừng làm kỳ đà cản mũi nha!'];
   try {
   buildBanSets();
-  P.setStageCooldown(computeStageCooldown());
+  P.setStageCooldowns(computeStageCooldown(), personCdSec());
   MC.milestone = cfg.mcMilestone || [];
   MC.sapMoc = (cfg.mcSapMoc && cfg.mcSapMoc.length) ? cfg.mcSapMoc : ['Cả nhà ơi, chỉ còn {con} lượt xem nữa là chạm mốc {moc} — sảnh {sanh} sắp mở rồi! Mọi người chia sẻ live giúp MC nhé!', 'Sắp rồi, sắp rồi! Còn đúng {con} lượt xem nữa là lên mốc {moc} — ai chưa vào thì vào nhanh nào!', 'Mốc {moc} lượt xem ở ngay trước mắt, chỉ thiếu {con} nữa thôi! Cả nhà thả tim và chia sẻ để mở sảnh {sanh} nhé!'];
   if (window.NpcVoice) NpcVoice.setConfig(cfg);
@@ -1789,7 +1867,7 @@ if (isDemo) {
     npcTuDong: true, npcNguongVang: 6, npcMoiBaoLauGiay: 25, npcNghiGiay: 60,
     npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
     hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
-    lenhHoaRoi: 'hoa,roi,tung,vui', lenhGhepDoi: true, tuKhoaGhepDoi: 'ghép đôi, ghep doi, ghep, doi', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
+    lenhHoaRoi: 'hoa,roi,tung,vui', lenhGhepDoi: true, tuKhoaGhepDoi: 'ghép đôi, ghep doi, ghep, doi, cưới, cuoi, kết hôn, ket hon', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
     khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0,
     khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 5.8, khungBangLenhX: 1, khungBangLenhY: 1,
     coChuHuongDan: 110, coChuMucTieu: 100, coChuDemCap: 110, coChuBxh: 110, coChuSoMung: 110, coChuBangLenh: 130, coChuHangCho: 110, coChuMc: 100,
@@ -1808,7 +1886,7 @@ if (isDemo) {
     mcFollowLines: ['Cảm ơn {ten} đã follow! Từ nay bạn là khách VIP của sảnh cưới này nhé!', 'Hoan hô! {ten} vừa follow phòng — MC ghi tên vào sổ khách quý rồi đó!', 'Cảm ơn {ten} đã theo dõi! Có bạn là sảnh cưới vui thêm hẳn luôn!', 'A, {ten} follow rồi nè! Từ nay đám cưới nào vui là có mặt bạn hết nhé!', 'MC cảm ơn {ten} đã follow. Tặng bạn một tràng pháo tay của cả sảnh cưới!', '{ten} ơi, follow là có duyên với sảnh cưới này rồi đó — ở lại chơi lâu nhé!', 'Tuyệt vời! {ten} đã follow — từ nay bạn là người nhà của MC rồi!', 'Cảm ơn {ten} đã nhấn theo dõi! Chuẩn bị tinh thần, sắp có cặp đôi dễ thương lên sân khấu đó!', 'Một lượt follow từ {ten}! MC cảm ơn bạn — khách quý như bạn là sảnh cưới đông vui hẳn!', '{ten} follow rồi! MC chúc bạn sớm tìm được người thương để tag lên sân khấu nhé!', '{ten} vừa follow là thành khách thân thiết của sảnh rồi đó! Lần sau vào là MC nhận ra liền.', 'Một cái nhấn follow của {ten} mà MC vui như nhận được thiệp mời vàng. Cảm ơn bạn đã ở lại với phòng!', 'Từ giờ {ten} có thẻ thành viên không cần đóng phí: vào là được chào, ra là được nhớ. Cảm ơn bạn đã follow!', '{ten} follow rồi, duyên với sảnh cưới coi như đã đóng dấu. Chúc bạn sớm có tên trong một lễ thành hôn thật đẹp!', 'MC vừa kết nạp {ten} vào hội bạn thân của sảnh cưới rồi nhé! Cảm ơn bạn đã theo dõi những đám cưới vui này.', 'Cảm ơn {ten} đã follow! Mỗi lượt theo dõi là thêm một vị khách ở lại ăn cưới tới cuối buổi.', '{ten} ơi, follow xong nhớ ghé thường xuyên nhé; sảnh này ngày nào cũng có duyên mới chờ bạn chứng kiến.', 'Nút follow của {ten} nhỏ xíu mà làm cả phòng ấm lên. MC cảm ơn và chúc bạn sớm được tag lên sân khấu!'],
     ghepDoiNgauNhien: true,
     uuTienQuaTang: true,
-    choLenSanKhauCoBan: 90, choTuDong: true, choLenSanKhauMin: 20, choLenSanKhauMax: 600,
+    choLenSanKhauCoBan: 90, choTuDong: true, choLenSanKhauMin: 20, choLenSanKhauMax: 300, choNguoiGiay: 30,
     choCongMoiCapCho: 15, choCongMoiCapGhep: 8, choMienGhep: 2,
     choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
     hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,

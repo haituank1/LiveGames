@@ -164,7 +164,7 @@ class Settings {
       'dam-cuoi': { coupleSec: [5, 600, 9], nhaCapTiepSauGiay: [1, 60, 6], phongToGoiTen: [1, 2, 1.32], zoomGoiTen: [1, 2, 1.18], zoomBamTheo: [1, 2, 1.08],
         coCapGiua: [0.5, 2, 1.22], lechCapGiua: [0, 10, 1.8], lechCapBen: [0, 10, 1.7], tamCapBen: [0, 100, 42], bannerY: [0, 60, 30],
         mcMinSec: [5, 3600, 18], mcMaxSec: [5, 3600, 26], hangChoToiDa: [0, 20, 4], nguongDongNguoi: [0, 10000, 70], phutImMatCho: [0, 120, 4], tyLeChoTrong: [0, 1, 0.45],
-        choLenSanKhauCoBan: [0, 3600, 90], choLenSanKhauMin: [0, 3600, 20], choLenSanKhauMax: [0, 7200, 600], choCongMoiCapCho: [0, 600, 15],
+        choLenSanKhauCoBan: [0, 3600, 90], choLenSanKhauMin: [0, 3600, 20], choLenSanKhauMax: [0, 7200, 300], choNguoiGiay: [0, 300, 30], choCongMoiCapCho: [0, 600, 15],
         choCongMoiCapGhep: [0, 600, 8], choMienGhep: [0, 100, 2], choNguongVang: [0, 100000, 300], choHeSoVang: [0, 2, 0.6],
         choNguongDong: [0, 1000000, 1500], choHeSoDong: [0, 3, 1.3], hieuUngNgauNhienTuGiay: [1, 3600, 12], hieuUngNgauNhienDenGiay: [1, 3600, 25], fxHoaRoiMoiGiay: [0, 3600, 10], fxPhaoHoaMoiGiay: [0, 3600, 20], fxPhaoGiayMoiGiay: [0, 3600, 20], timHieuUngChoGiay: [0, 60, 2], tuGhepDoiSauGiay: [3, 120, 5],
         doiTrangPhucChoGiay: [0, 120, 5], bongChatGiay: [1, 30, 4], bongChatMaxKyTu: [10, 200, 60], bongChatAnKhiTuCamQua: [0, 20, 2],

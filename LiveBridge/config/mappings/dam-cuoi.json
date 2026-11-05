@@ -21,11 +21,6 @@
         "action": "petals",
         "match": "hoa rơi|mưa hoa|hoa roi",
         "value": 2
-      },
-      {
-        "action": "couple",
-        "match": "cưới|kết hôn|cuoi|yêu|yeu",
-        "value": 1
       }
     ]
   },
@@ -245,7 +240,7 @@
     "lenhHieuUngChoGiay": 8,
     "lenhHoaRoi": "hoa,roi,tung,vui",
     "lenhGhepDoi": true,
-    "tuKhoaGhepDoi": "ghép đôi, ghep doi, ghep, doi",
+    "tuKhoaGhepDoi": "ghép đôi, ghep doi, ghep, doi, cưới, cuoi, kết hôn, ket hon",
     "tuGhepDoiKhiRong": true,
     "tuGhepDoiSauGiay": 5,
     "lenhPhaoHoa": "phao,chuc,mung",
@@ -357,7 +352,8 @@
     "choLenSanKhauCoBan": 90,
     "choTuDong": true,
     "choLenSanKhauMin": 20,
-    "choLenSanKhauMax": 600,
+    "choLenSanKhauMax": 300,
+    "choNguoiGiay": 30,
     "choCongMoiCapCho": 15,
     "choCongMoiCapGhep": 8,
     "choMienGhep": 2,
