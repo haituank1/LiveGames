@@ -1,8 +1,13 @@
 {
-  "commit": "ae5b5b5f3a931c6e3da87784f9c0d0e5895c0c8f",
-  "short": "ae5b5b5",
-  "generatedAt": "2026-11-05T16:16:28.748Z",
+  "commit": "8e1e188caf561191b45c2f058800705c88e7be55",
+  "short": "8e1e188",
+  "generatedAt": "2026-11-05T16:16:56.415Z",
   "files": [
+    {
+      "path": ".github/workflows/refresh-manifest.yml",
+      "sha": "fb8969238739199fd277a2c47a2ae44fbc17702c",
+      "size": 1253
+    },
     {
       "path": ".gitignore",
       "sha": "03a81f71b2e4e60c90266f4dfee4510b81b26741",
@@ -11,17 +16,17 @@
     {
       "path": "DemoVoices/GV01-Giong-Bong-Bong.mp3",
       "sha": "ddfb3219a773a89dcfa98f7aa300a607d33c5dc1",
-      "size": 0
+      "size": 80293
     },
     {
       "path": "DemoVoices/GV02-Giong-Lem-Linh.mp3",
       "sha": "79f1794b041919d8f8fa9d50747a306688e88def",
-      "size": 0
+      "size": 81637
     },
     {
       "path": "DemoVoices/HUONG-DAN.md",
       "sha": "f7bbebc3a58a39d8008f067e3b8ceef595c85c8d",
-      "size": 5588
+      "size": 5415
     },
     {
       "path": "Games/chua-3d/audio/README.txt",
@@ -1670,8 +1675,8 @@
     },
     {
       "path": "manifest.json",
-      "sha": "031d24ec8496543642ee6167e64e2ecd5c9a2070",
-      "size": 49456
+      "sha": "58f7020214b5c3d91f7dbbe2de514e4a91368450",
+      "size": 50066
     },
     {
       "path": "start-livebridge.bat",
@@ -1685,7 +1690,7 @@
     },
     {
       "path": "tools/cap-nhat.js",
-      "sha": "dc1823a3b6d941aadeae259d58df400362b2daa6",
+      "sha": "e5274ead2f3c2a8c4af9ea54bfd24332b54682a4",
       "size": 27942
     },
     {
@@ -1705,8 +1710,8 @@
     },
     {
       "path": "version.json",
-      "sha": "4038d578a8bca72f0bd2e76d2a2198cd71cca39f",
-      "size": 249
+      "sha": "c6f8fef7139d8da73625b0ddb778759a6f8075ae",
+      "size": 234
     }
   ]
 }
