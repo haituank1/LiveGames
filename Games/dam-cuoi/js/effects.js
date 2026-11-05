@@ -23,6 +23,86 @@ document.addEventListener('visibilitychange', () => {
 const P = [];            // hạt chung: {kind, x,y,vx,vy,life,max,size,color,rot,vr,grav,drag}
 let tier = 0, sparkleAcc = 0, lastT = 0, petalAcc = 0, bokehAcc = 0, dustAcc = 0, streakT = 6, royalT = 14, bflyT = 3, orbAcc = 0;
 const rand = (a, b) => a + Math.random() * (b - a);
+const clamp01 = v => Math.max(0, Math.min(1, v));
+
+/* ---------- V4: VUNG CAM CHE MAT CAP TREN SAN KHAU ----------
+   Canvas #fx (z-index 1500) nam TREN lop nguoi (#people, z-index 3) nen
+   bat ky hat FX nao ve de len mat cap dang cuoi cung che mat that — nhat
+   la flash no lon + sao phao + tim/hoa no ngay giua cap (ringHearts /
+   petalBurst / stageSparkle goi voi toa do man hinh cua cap).
+   Giai phap, khong doi logic qua / moc FX xu, khong doi thu tu lop:
+   - Vung mat = 2 hop (co dau / chu re) theo toa do man hinh 0..1.
+   - Nguon vung, uu tien giam dan: (1) vung hien do main.js dat qua
+     E.setFaceZones (sau nay nv3 co the truyen toa do mat that tu
+     Cam.toScreen); (2) neo tu lan goi FX lay tam cap gan nhat
+     (ringHearts / petalBurst / stageSparkle / hearts co x,y — tat ca
+     cac cho goi hien tai deu lay tam cap / nguoi duoc goi ten), mat
+     nam tren tam than ~0.07 man hinh, 2 mat lech tam ±0.055; neo het
+     han sau 8s (love tick 2.4s lam moi lien tuc khi cap con dien);
+     (3) mac dinh: 2 hop o giua san khau (0.44 / 0.56, 0.44) — dung cho
+     ca goc home (zoom 0.63) lan goc stage (zoom ~1.02), vi cap luon
+     dung giua san khau (STAGE_FRAME.spot = 50).
+   - Thuc thi: (a) dich muc tieu phao hoa ra khoi vung mat truoc khi
+     ban (E.firework); (b) hat nao dang o trong vung mat thi KHONG VE
+     khung hinh do nhung van bay tiep — xuat hien lai duoi vung mat,
+     doc nhu FX di SAU lung cap thay vi phu len mat. Flash no lon thi
+     bo luon neu dia phao cham vung mat (pad = ban kinh flash). */
+const FACE_ANCHOR_MS = 8000;
+const DEFAULT_FACE_ZONES = [
+  { cx: 0.44, cy: 0.44, hw: 0.05, hh: 0.06 },
+  { cx: 0.56, cy: 0.44, hw: 0.05, hh: 0.06 },
+];
+let explicitFaceZones = null;   // do main.js dat, chu so huu tu xoa qua clearFaceZones
+let coupleAnchor = null;        // {fx, fy, t} — lan goi FX lay tam cap gan nhat
+function anchorFaceZones(a) {
+  return [
+    { cx: a.fx - 0.055, cy: a.fy - 0.07, hw: 0.05, hh: 0.06 },
+    { cx: a.fx + 0.055, cy: a.fy - 0.07, hw: 0.05, hh: 0.06 },
+  ];
+}
+function currentFaceZones() {
+  if (explicitFaceZones) return explicitFaceZones;
+  if (coupleAnchor && Date.now() - coupleAnchor.t < FACE_ANCHOR_MS) return anchorFaceZones(coupleAnchor);
+  return DEFAULT_FACE_ZONES;
+}
+/* Dat vung mat hien (toa do man hinh 0..1). Gia tri sai bi bo, khong nem. */
+E.setFaceZones = function (zones) {
+  if (!Array.isArray(zones) || !zones.length) { explicitFaceZones = null; return; }
+  const ok = [];
+  for (const z of zones) {
+    if (!z) continue;
+    const cx = Number(z.cx), cy = Number(z.cy), hw = Number(z.hw), hh = Number(z.hh);
+    if (![cx, cy, hw, hh].every(Number.isFinite)) continue;
+    ok.push({ cx: clamp01(cx), cy: clamp01(cy), hw: Math.max(0, Math.min(0.5, hw)), hh: Math.max(0, Math.min(0.5, hh)) });
+  }
+  explicitFaceZones = ok.length ? ok : null;
+};
+E.clearFaceZones = function () { explicitFaceZones = null; };
+E.faceZones = function () { return currentFaceZones().map(z => ({ ...z })); };
+/* Moc quan sat V4 (cho test / chan doan): so hat da bi bo ve vi nam tren
+   vung mat cap tu dau phien. 0 khi chua co FX nao cham vung mat. */
+let faceSkipped = 0;
+E.faceSkipped = function () { return faceSkipped; };
+/* Ham dich muc tieu — de public de main.js / test goi truc tiep neu can. */
+E.shiftOutOfFace = shiftOutOfFace;
+function noteCoupleAnchor(fx, fy) {
+  if (Number.isFinite(fx) && Number.isFinite(fy)) coupleAnchor = { fx: clamp01(fx), fy: clamp01(fy), t: Date.now() };
+}
+/* Dich diem (fx, fy) ra khoi moi vung mat (day theo canh gan nhat + le 0.02),
+   kep lai trong man hinh. Chi dung cho muc tieu phao hoa. */
+function shiftOutOfFace(fx, fy) {
+  let x = fx, y = fy;
+  for (const z of currentFaceZones()) {
+    const hw = z.hw + 0.02, hh = z.hh + 0.02;
+    if (Math.abs(x - z.cx) < hw && Math.abs(y - z.cy) < hh) {
+      const dl = (z.cx - hw) - x, dr = (z.cx + hw) - x, dt = (z.cy - hh) - y, db = (z.cy + hh) - y;
+      const push = [[Math.abs(dl), dl, 0], [Math.abs(dr), dr, 0], [Math.abs(dt), 0, dt], [Math.abs(db), 0, db]]
+        .sort((a, b) => a[0] - b[0])[0];
+      x += push[1]; y += push[2];
+    }
+  }
+  return { fx: clamp01(x), fy: Math.max(0.05, Math.min(0.95, y)) };
+}
 const FW_COLORS = ['#ffd76a', '#ff7eb0', '#ff9d5c', '#a8e6ff', '#c3a6ff', '#ffffff', '#ff5c7a'];
 const PETALS = ['#ffb7cd', '#ff8fab', '#ffd6e3', '#fff0f5', '#ff6b9d'];
 const CONFETTI = ['#ffd76a', '#ff7eb0', '#7ed6ff', '#b8f26d', '#ffffff', '#c3a6ff'];
@@ -132,8 +212,11 @@ function onDeath(p) {
   }
 }
 E.firework = function (x, y, color) {
-  const tx = x != null ? x * w : rand(w * 0.15, w * 0.85);
-  const ty = y != null ? y * h : rand(h * 0.12, h * 0.36);
+  let tx = x != null ? x * w : rand(w * 0.15, w * 0.85);
+  let ty = y != null ? y * h : rand(h * 0.12, h * 0.36);
+  // V4 — muc tieu no roi vao vung mat cap thi dich ra xung quanh thay vi no len mat
+  const shifted = shiftOutOfFace(tx / w, ty / h);
+  tx = shifted.fx * w; ty = shifted.fy * h;
   const col = color || FW_COLORS[Math.floor(Math.random() * FW_COLORS.length)];
   const sx = Math.max(8, Math.min(w - 8, tx + rand(-30, 30)));
   add({ kind: 'rocket', x: sx, y: h + 6, tx, ty, sx, vx: 0, vy: 0, life: 0, max: rand(0.65, 0.9), size: 2.6, color: col, grav: 0, drag: 0 });
@@ -177,6 +260,7 @@ E.cannon = function () {
   if (W.audio) W.audio.sparkle();
 };
 E.hearts = function (n = 10, x, y) {
+  if (x != null && y != null) noteCoupleAnchor(x, y);   // V4 — tim bay tu vi tri cap: neo vung mat
   for (let i = 0; i < n; i++) {
     add({ kind: 'heart', x: (x != null ? x * w : rand(w * 0.3, w * 0.7)) + rand(-30, 30),
       y: (y != null ? y * h : h * 0.62) + rand(-8, 8), vx: rand(-12, 12), vy: rand(-66, -38),
@@ -187,6 +271,7 @@ E.hearts = function (n = 10, x, y) {
 
 /* Vòng tim nở quanh một điểm (lúc cặp đôi làm lễ) */
 E.ringHearts = function (x = 0.5, y = 0.38) {
+  noteCoupleAnchor(x, y);   // V4 — vong tim lay tam cap: neo vung mat
   for (let i = 0; i < 14; i++) {
     const a = (i / 14) * 6.283;
     add({ kind: 'heart', x: x * w, y: y * h, vx: Math.cos(a) * rand(38, 60), vy: Math.sin(a) * rand(30, 48) - 14,
@@ -195,6 +280,7 @@ E.ringHearts = function (x = 0.5, y = 0.38) {
 };
 /* Chùm hoa nổ tung tại một điểm */
 E.petalBurst = function (x = 0.5, y = 0.42) {
+  noteCoupleAnchor(x, y);   // V4 — chum hoa no ngay cap: neo vung mat
   for (let i = 0; i < 30; i++) {
     const a = rand(0, 6.283), sp = rand(40, 190);
     add({ kind: 'petal', x: x * w, y: y * h, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60,
@@ -221,6 +307,7 @@ E.bokeh = function (n = 8) {
 /* Vầng lấp lánh bùng quanh cặp đôi lúc làm lễ: vòng sao vàng + mưa kim tuyến
    phủ xuống sân khấu — khoảnh khắc lung linh nhất của buổi live */
 E.stageSparkle = function (x = 0.5, y = 0.4) {
+  noteCoupleAnchor(x, y);   // V4 — lap lanh san khau lay tam cap: neo vung mat
   // vòi phun kim tuyến dựng đứng dưới chân cặp đôi ~1.6 giây
   add({ kind: 'fountain', x: x * w, y: (y + 0.045) * h, vx: 0, vy: 0, life: 0, max: 1.6, size: 3, color: '#ffd76a', grav: 0, drag: 0, emit: 0 });
   for (let i = 0; i < 26; i++) {
@@ -266,6 +353,11 @@ function loop(t) {
   rafId = requestAnimationFrame(loop);
   const dt = Math.min(0.05, lastT ? (t - lastT) / 1000 : 0.016); lastT = t;
   ctx.clearRect(0, 0, w, h);
+  // V4 — vung mat theo px cua khung hinh nay (tinh 1 lan, dung cho moi hat)
+  const facePx = currentFaceZones().map(z => ({
+    x0: (z.cx - z.hw) * w, x1: (z.cx + z.hw) * w, y0: (z.cy - z.hh) * h, y1: (z.cy + z.hh) * h,
+  }));
+  const inFace = (x, y, pad) => facePx.some(z => x >= z.x0 - pad && x <= z.x1 + pad && y >= z.y0 - pad && y <= z.y1 + pad);
   // lấp lánh ambient: mốc càng cao càng dày (1.1 → 5.4 hạt/giây), thỉnh thoảng
   // có "sao lớn" sáng hẳn lên giữa sảnh cho ra chất lung linh
   sparkleAcc += dt * (1.1 + tier * 0.85);
@@ -366,7 +458,14 @@ function loop(t) {
       }
     }
     const fade = p.life > p.max - 0.7 ? (p.max - p.life) / 0.7 : 1;
-    if (p.kind === 'spark') {
+    // V4 — hat dang o tren mat cap: KHONG VE khung nay (hat van bay tiep,
+    // xuat hien lai duoi vung mat nhu di sau lung cap). Flash no lon thi
+    // bo luon neu dia phao cham vung mat (pad = ban kinh flash).
+    const facePad = p.kind === 'flash' ? p.size * 2.2 : 0;
+    if (inFace(p.x, p.y, facePad)) {
+      faceSkipped++;   // V4 — hat tren mat cap: khong ve, hat van bay tiep
+      // khong ve — co tinh de trong, khong continue (hat van song, van bay)
+    } else if (p.kind === 'spark') {
       // vệt sáng kéo sau sao pháo + nhấp nháy nếu là sao twinkle; cộng sáng cho rực
       let a = Math.max(0, fade);
       if (p.tw) a *= 0.35 + 0.65 * Math.abs(Math.sin(t / 90 + p.x * 0.7 + p.y));
