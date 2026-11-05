@@ -1,8 +1,13 @@
 {
-  "commit": "32581889d67797543c92001b74beda8a3a1129b1",
-  "short": "3258188",
-  "generatedAt": "2026-11-05T16:21:43.932Z",
+  "commit": "52a82a4d0ac4e3990d3b8b5b6266dea5cda5a7e7",
+  "short": "52a82a4",
+  "generatedAt": "2026-11-05T16:28:38.043Z",
   "files": [
+    {
+      "path": ".gitattributes",
+      "sha": "c927f837ba442b1721c90c2d4272e58840ecf86a",
+      "size": 372
+    },
     {
       "path": ".github/workflows/refresh-manifest.yml",
       "sha": "fb8969238739199fd277a2c47a2ae44fbc17702c",
@@ -1675,7 +1680,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "1a26f371e32e8772a2692712f263454e3c2c98e8",
+      "sha": "8ee710a55c95efff69c716a913673c2ff2851f64",
       "size": 50219
     },
     {
@@ -1690,8 +1695,8 @@
     },
     {
       "path": "tools/cap-nhat.js",
-      "sha": "9bedb5958f1386f99b84ef6581148ffa49bba4b8",
-      "size": 28265
+      "sha": "528f6e115e48e3cfa2f11b03715b8af0433c7d0b",
+      "size": 28971
     },
     {
       "path": "tools/dong-goi.ps1",
@@ -1710,8 +1715,8 @@
     },
     {
       "path": "version.json",
-      "sha": "3791034d45a8103dbf7fab2d6f0c1d70123e9ab1",
-      "size": 235
+      "sha": "74b4f8a31f7e35e78cedf667e30d7d6d388b996e",
+      "size": 238
     }
   ]
 }

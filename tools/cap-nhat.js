@@ -136,6 +136,21 @@ function liveBridgeRunning() {
 let lastCheck = null; // { at, result } — dùng lại cho bước cập nhật nếu còn mới (< 10 phút)
 let progress = { state: 'idle', done: 0, total: 0, current: '', message: '', result: null };
 
+/* So file local với mã băm trong manifest. Windows (git autocrlf mặc định) tự
+   đổi LF thành CRLF khi tải repo về nên mã băm khác dù nội dung giống hệt —
+   thử bỏ \r rồi so lại để khỏi tưởng file đã đổi. Chỉ thử với file text
+   (không có byte NUL trong 8KB đầu) để khỏi động vào file nhị phân. */
+function sameAsBlob(filePath, sha) {
+  let buf;
+  try { buf = fs.readFileSync(safeJoin(filePath)); } catch (_) { return false; }
+  if (gitBlobSha(buf) === sha) return true;
+  if (buf.includes(0x0d) && !buf.subarray(0, 8000).includes(0)) {
+    const norm = Buffer.from(buf.toString('utf8').replace(/\r\n/g, '\n'), 'utf8');
+    if (gitBlobSha(norm) === sha) return true;
+  }
+  return false;
+}
+
 /* So toàn bộ cây file của bản mới với file trên máy (dùng khi không biết bản local,
    hoặc khi GitHub cắt ngắn kết quả compare vì đổi quá 300 file). Chỉ thêm/sửa file
    đổi; file đã xóa chỉ xác định được khi có manifest.json local. */
@@ -146,9 +161,7 @@ async function diffViaTrees(remote) {
   let note = '';
   for (const t of tree.tree || []) {
     if (t.type !== 'blob' || isExcluded(t.path)) continue;
-    let same = false;
-    try { same = gitBlobSha(fs.readFileSync(safeJoin(t.path))) === t.sha; } catch (_) { same = false; }
-    if (!same) changed.push({ path: t.path, status: 'modified', sha: t.sha, size: t.size || 0 });
+    if (!sameAsBlob(t.path, t.sha)) changed.push({ path: t.path, status: 'modified', sha: t.sha, size: t.size || 0 });
   }
   const manifest = localManifest();
   if (manifest) {
@@ -175,9 +188,7 @@ function diffViaManifest(remoteManifest) {
   let note = '';
   for (const f of remoteManifest.files || []) {
     if (isExcluded(f.path) || META_FILES.has(f.path)) continue;
-    let same = false;
-    try { same = gitBlobSha(fs.readFileSync(safeJoin(f.path))) === f.sha; } catch (_) { same = false; }
-    if (!same) changed.push({ path: f.path, status: 'modified', sha: f.sha, size: f.size || 0 });
+    if (!sameAsBlob(f.path, f.sha)) changed.push({ path: f.path, status: 'modified', sha: f.sha, size: f.size || 0 });
   }
   const manifest = localManifest();
   if (manifest) {
@@ -201,13 +212,15 @@ async function checkForUpdate() {
   let remoteManifest = null;
 
   /* Đường chính: tải version.json + manifest.json qua raw.githubusercontent.com
-     (không bị giới hạn 60 lượt/giờ như GitHub API). "Mới nhất" = so file thật với
+     (không bị giới hạn 60 lượt/giờ như GitHub API). Thêm ?t= để khỏi dính bản
+     cache cũ của CDN trong 5 phút sau khi push. "Mới nhất" = so file thật với
      manifest, không chỉ so mã commit — vì version.json đã commit có thể ghi commit
      cũ hơn cây file một nhịp (do manifest tự tham chiếu chính nó). */
   try {
+    const bust = Date.now();
     const [ver, man] = await Promise.all([
-      fetchJson(rawUrl(BRANCH, 'version.json')),
-      fetchJson(rawUrl(BRANCH, 'manifest.json')),
+      fetchJson(rawUrl(BRANCH, 'version.json') + '?t=' + bust),
+      fetchJson(rawUrl(BRANCH, 'manifest.json') + '?t=' + bust),
     ]);
     if (ver && ver.commit && man && Array.isArray(man.files)) {
       remote = {
