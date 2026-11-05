@@ -1,7 +1,7 @@
 {
-  "commit": "8e1e188caf561191b45c2f058800705c88e7be55",
-  "short": "8e1e188",
-  "generatedAt": "2026-11-05T16:16:56.415Z",
+  "commit": "32581889d67797543c92001b74beda8a3a1129b1",
+  "short": "3258188",
+  "generatedAt": "2026-11-05T16:21:43.932Z",
   "files": [
     {
       "path": ".github/workflows/refresh-manifest.yml",
@@ -1660,8 +1660,8 @@
     },
     {
       "path": "README.md",
-      "sha": "428629516f73fcefc9b991662682987d28959c30",
-      "size": 38340
+      "sha": "53eae4fd5e67c4a2ee03c8fd383dd3d246598617",
+      "size": 38636
     },
     {
       "path": "cap-nhat.bat",
@@ -1675,8 +1675,8 @@
     },
     {
       "path": "manifest.json",
-      "sha": "58f7020214b5c3d91f7dbbe2de514e4a91368450",
-      "size": 50066
+      "sha": "1a26f371e32e8772a2692712f263454e3c2c98e8",
+      "size": 50219
     },
     {
       "path": "start-livebridge.bat",
@@ -1690,8 +1690,8 @@
     },
     {
       "path": "tools/cap-nhat.js",
-      "sha": "e5274ead2f3c2a8c4af9ea54bfd24332b54682a4",
-      "size": 27942
+      "sha": "9bedb5958f1386f99b84ef6581148ffa49bba4b8",
+      "size": 28265
     },
     {
       "path": "tools/dong-goi.ps1",
@@ -1710,8 +1710,8 @@
     },
     {
       "path": "version.json",
-      "sha": "c6f8fef7139d8da73625b0ddb778759a6f8075ae",
-      "size": 234
+      "sha": "3791034d45a8103dbf7fab2d6f0c1d70123e9ab1",
+      "size": 235
     }
   ]
 }
