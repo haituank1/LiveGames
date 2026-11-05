@@ -166,7 +166,7 @@ class Settings {
         mcMinSec: [5, 3600, 18], mcMaxSec: [5, 3600, 26], hangChoToiDa: [0, 20, 4], nguongDongNguoi: [0, 10000, 70], phutImMatCho: [0, 120, 4], tyLeChoTrong: [0, 1, 0.45],
         choLenSanKhauCoBan: [0, 3600, 90], choLenSanKhauMin: [0, 3600, 20], choLenSanKhauMax: [0, 7200, 600], choCongMoiCapCho: [0, 600, 15],
         choCongMoiCapGhep: [0, 600, 8], choMienGhep: [0, 100, 2], choNguongVang: [0, 100000, 300], choHeSoVang: [0, 2, 0.6],
-        choNguongDong: [0, 1000000, 1500], choHeSoDong: [0, 3, 1.3], hieuUngNgauNhienTuGiay: [1, 3600, 12], hieuUngNgauNhienDenGiay: [1, 3600, 25], fxHoaRoiMoiGiay: [0, 3600, 10], fxPhaoHoaMoiGiay: [0, 3600, 20], fxPhaoGiayMoiGiay: [0, 3600, 20], timHieuUngChoGiay: [0, 60, 2],
+        choNguongDong: [0, 1000000, 1500], choHeSoDong: [0, 3, 1.3], hieuUngNgauNhienTuGiay: [1, 3600, 12], hieuUngNgauNhienDenGiay: [1, 3600, 25], fxHoaRoiMoiGiay: [0, 3600, 10], fxPhaoHoaMoiGiay: [0, 3600, 20], fxPhaoGiayMoiGiay: [0, 3600, 20], timHieuUngChoGiay: [0, 60, 2], tuGhepDoiSauGiay: [3, 120, 5],
         doiTrangPhucChoGiay: [0, 120, 5], bongChatGiay: [1, 30, 4], bongChatMaxKyTu: [10, 200, 60], bongChatAnKhiTuCamQua: [0, 20, 2],
         khungTraiX: [-20, 20, 0], khungTraiY: [-20, 20, 2], khungPhaiX: [-20, 20, 0], khungPhaiY: [-20, 20, 2],
         khungHangChoX: [0, 90, 1], khungHangChoY: [0, 95, 1], khungMcX: [-20, 20, 0], khungMcY: [-20, 20, -6], npcNguongVang: [0, 100, 6], npcMoiBaoLauGiay: [10, 3600, 25], npcNghiGiay: [10, 3600, 60], lenhHieuUngChoGiay: [0, 120, 8], khungHuongDanX: [-40, 40, 0], khungHuongDanY: [-40, 40, 0], khungMucTieuX: [-40, 40, 0], khungMucTieuY: [-40, 40, 0], khungDemCapX: [-40, 40, 0], khungDemCapY: [-40, 40, 0], khungBxhX: [0, 90, 1], khungBxhY: [0, 95, 0], khungSoMungX: [0, 90, 1], khungSoMungY: [0, 95, 5.8], khungBangLenhX: [0, 90, 1], khungBangLenhY: [0, 95, 1], coChuHuongDan: [50, 300, 110], coChuMucTieu: [50, 300, 100], coChuDemCap: [50, 300, 110], coChuBxh: [50, 300, 110], coChuSoMung: [50, 300, 110], coChuBangLenh: [50, 300, 130], coChuHangCho: [50, 300, 110], coChuMc: [50, 300, 100] },
@@ -181,7 +181,7 @@ class Settings {
         zoomPairMax: [0.5, 2, 1.1], zoomSolo: [0.5, 2, 1.12] },
     };
     const BOOL_BY_GAME = {
-      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung', 'hieuUngThaTim', 'lenhGhepDoi'],
+      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung', 'hieuUngThaTim', 'lenhGhepDoi', 'tuGhepDoiKhiRong'],
       'san-nhay': ['hieuUngDen', 'khuayDong', 'lamMoKhiLia', 'liaCamLenTrenCung', 'partyMaxNhanhHon', 'phuKienQua'],
     };
     const CHOICE_BY_GAME = {   // key: [các giá trị cho phép, mặc định]

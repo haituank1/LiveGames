@@ -246,6 +246,8 @@
     "lenhHoaRoi": "hoa,roi,tung,vui",
     "lenhGhepDoi": true,
     "tuKhoaGhepDoi": "ghép đôi, ghep doi, ghep, doi",
+    "tuGhepDoiKhiRong": true,
+    "tuGhepDoiSauGiay": 5,
     "lenhPhaoHoa": "phao,chuc,mung",
     "lenhPhaoGiay": "giay,hanh,phuc,ve",
     "khungHuongDanX": 0,

@@ -1451,6 +1451,34 @@ function npcTick() {
   onChat({ user: known.get(a.id) || a, text: '@' + b.nickname });
 }
 
+/* TU GHEP DOI KHI HANG CHO TRONG (Nguyen yeu cau 2026-11-05 12:36):
+   hang cho san khau trong lien tuc qua tuGhepDoiSauGiay giay (mac dinh
+   5) va khong cap nao dang tren duong len thi tu ghep 1 cap tu khach
+   DOC THAN dang co mat trong sanh (uu tien khac gioi), di dung duong
+   onChat -> requestCouple nhu khach tu tag nhau (MC gioi thieu, len
+   san khau nhu thuong). Tat bang tuGhepDoiKhiRong. */
+let queueEmptySince = Date.now();
+function autoPairTick() {
+  if (cfg.tuGhepDoiKhiRong === false) { queueEmptySince = Date.now(); return; }
+  let transit = false;
+  for (const c of coupleByKey.values()) if (c && (c.state === 'focus' || c.state === 'toStage')) { transit = true; break; }
+  if (lastQueueLen > 0 || transit) { queueEmptySince = Date.now(); return; }
+  if (Date.now() - queueEmptySince < (Number(cfg.tuGhepDoiSauGiay) || 5) * 1000) return;
+  const singles = [];
+  for (const u of known.values()) { const p = P.get(u.id); if (p && !p.couple && (p.state === 'home' || p.state === 'walk')) singles.push(u); }
+  if (singles.length < 2) { queueEmptySince = Date.now(); return; }
+  const now = performance.now();
+  const free = singles.filter(u => now - (tagCooldown.get(u.id) || -1e9) >= 20000);
+  const pool = free.length >= 2 ? free : singles;
+  const a = pool[Math.floor(Math.random() * pool.length)];
+  const aGirl = P.isGirl(a.id);
+  const b = pool.find(u => u !== a && P.isGirl(u.id) !== aGirl) || pool.find(u => u !== a);
+  if (!b) { queueEmptySince = Date.now(); return; }
+  queueEmptySince = Date.now();
+  onChat({ user: known.get(a.id) || a, text: '@' + b.nickname });
+}
+setInterval(autoPairTick, 1000);
+
 /* THA TIM (Nguyen yeu cau 2026-11-05 12:18): moi su kien tha tim - ke
    ca chi 1 tim - no 1 hieu ung NGAU NHIEN (hoa roi / phao hoa / phao
    giay, luong vua phai). Chong spam lag: moi nguoi toi thieu
@@ -1784,7 +1812,7 @@ if (isDemo) {
     choCongMoiCapCho: 15, choCongMoiCapGhep: 8, choMienGhep: 2,
     choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
     hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,
-    fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20, hieuUngThaTim: true, timHieuUngChoGiay: 2,
+    fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20, hieuUngThaTim: true, timHieuUngChoGiay: 2, tuGhepDoiKhiRong: true, tuGhepDoiSauGiay: 5,
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4,
     bannerY: 30,
