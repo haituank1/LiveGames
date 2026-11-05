@@ -12,13 +12,13 @@
     "cooldownSec": 5,
     "rules": [
       {
-        "action": "fireworks",
         "match": "pháo hoa|phao hoa",
+        "action": "fireworks",
         "value": 2
       },
       {
-        "action": "petals",
         "match": "hoa rơi|mưa hoa|hoa roi",
+        "action": "petals",
         "value": 2
       }
     ]
@@ -29,12 +29,37 @@
     "npcVoiceMinGapSec": 8,
     "npcVoiceMaxPerMin": 6,
     "bgRules": [
-        { "viewers": 10, "file": "bg-500.webp", "label": "Hoa Khai", "royal": 0 },
-        { "viewers": 30, "file": "bg-2000.webp", "label": "Kim Tuyến", "royal": 0 },
-        { "viewers": 50, "file": "bg-5000.webp", "label": "Lung Linh", "royal": 0 },
-        { "viewers": 100, "file": "bg-10000.webp", "label": "Đại Tiệc Vàng", "royal": 1 },
-        { "viewers": 200, "file": "bg-sanh-moi.webp", "label": "Đám Cưới Hoàng Gia", "royal": 2 }
-      ],
+      {
+        "viewers": 10,
+        "file": "bg-500.webp",
+        "label": "Hoa Khai",
+        "royal": 0
+      },
+      {
+        "viewers": 30,
+        "file": "bg-2000.webp",
+        "label": "Kim Tuyến",
+        "royal": 0
+      },
+      {
+        "viewers": 50,
+        "file": "bg-5000.webp",
+        "label": "Lung Linh",
+        "royal": 0
+      },
+      {
+        "viewers": 100,
+        "file": "bg-10000.webp",
+        "label": "Đại Tiệc Vàng",
+        "royal": 1
+      },
+      {
+        "viewers": 200,
+        "file": "bg-sanh-moi.webp",
+        "label": "Đám Cưới Hoàng Gia",
+        "royal": 2
+      }
+    ],
     "coupleSec": 9,
     "nhaCapTiepSauGiay": 6,
     "mcCouple": [
@@ -381,63 +406,63 @@
   "description": "Đám Cưới Online – tag tên người thương để cùng lên sân khấu, quà tặng bắn pháo hoa, đông mắt xem thì sảnh cưới nâng cấp",
   "follow": {
     "action": "spotlight",
-    "label": "Theo dõi",
-    "value": 1
+    "value": 1,
+    "label": "Theo dõi"
   },
   "game": "dam-cuoi",
   "giftTiers": [
     {
-      "action": "fireworks",
-      "combo": 1,
-      "label": "Pháo hoa lớn",
       "minDiamonds": 99,
-      "value": 3
-    },
-    {
       "action": "fireworks",
-      "combo": 1,
-      "label": "Pháo hoa",
+      "value": 3,
+      "label": "Pháo hoa lớn",
+      "combo": 1
+    },
+    {
       "minDiamonds": 30,
-      "value": 2
+      "action": "fireworks",
+      "value": 2,
+      "label": "Pháo hoa",
+      "combo": 1
     },
     {
-      "action": "confetti",
-      "combo": 1,
-      "label": "Mưa giấy màu",
       "minDiamonds": 10,
-      "value": 2
+      "action": "confetti",
+      "value": 2,
+      "label": "Mưa giấy màu",
+      "combo": 1
     },
     {
-      "action": "petals",
-      "combo": 1,
-      "label": "Mưa hoa",
       "minDiamonds": 5,
-      "value": 2
+      "action": "petals",
+      "value": 2,
+      "label": "Mưa hoa",
+      "combo": 1
     },
     {
-      "action": "petals",
-      "combo": 1,
-      "label": "Hoa rơi",
       "minDiamonds": 1,
-      "value": 1
+      "action": "petals",
+      "value": 1,
+      "label": "Hoa rơi",
+      "combo": 1
     }
   ],
   "gifts": [
     {
-      "action": "petals",
-      "combo": 1,
-      "diamonds": 1,
-      "label": "Hoa hồng",
       "name": "Rose",
-      "value": 1
+      "diamonds": 1,
+      "action": "petals",
+      "value": 1,
+      "label": "Hoa hồng",
+      "combo": 1
     },
     {
-      "action": "confetti",
-      "combo": 1,
-      "diamonds": 1,
-      "label": "Bánh vòng",
       "name": "Doughnut",
-      "value": 1
+      "diamonds": 1,
+      "action": "confetti",
+      "value": 1,
+      "label": "Bánh vòng",
+      "combo": 1
     }
   ],
   "join": {
@@ -445,14 +470,14 @@
     "value": 1
   },
   "like": {
-    "action": "like",
     "every": 1,
-    "label": "Thả tim",
-    "value": 1
+    "action": "like",
+    "value": 1,
+    "label": "Thả tim"
   },
   "share": {
     "action": "confetti",
-    "label": "Chia sẻ",
-    "value": 1
+    "value": 1,
+    "label": "Chia sẻ"
   }
 }
