@@ -162,49 +162,108 @@ async function diffViaTrees(remote) {
   return { changed, removed, note };
 }
 
+/* version.json / manifest.json chỉ là "nhãn" phiên bản, updater tự ghi lại sau mỗi
+   lần cập nhật nên không đưa vào danh sách file đổi/xóa (tránh lúc nào cũng thấy
+   2 file này đổi do khác thời gian sinh). */
+const META_FILES = new Set(['version.json', 'manifest.json']);
+
+/* So file trên máy với manifest.json của bản mới (tải qua raw, không tốn lượt API).
+   Chỉ thêm/sửa file đổi; file đã xóa chỉ xác định được khi có manifest.json local. */
+function diffViaManifest(remoteManifest) {
+  const changed = [];
+  const removed = [];
+  let note = '';
+  for (const f of remoteManifest.files || []) {
+    if (isExcluded(f.path) || META_FILES.has(f.path)) continue;
+    let same = false;
+    try { same = gitBlobSha(fs.readFileSync(safeJoin(f.path))) === f.sha; } catch (_) { same = false; }
+    if (!same) changed.push({ path: f.path, status: 'modified', sha: f.sha, size: f.size || 0 });
+  }
+  const manifest = localManifest();
+  if (manifest) {
+    const remotePaths = new Set((remoteManifest.files || []).map(f => f.path));
+    for (const f of manifest.files) {
+      if (!isExcluded(f.path) && !META_FILES.has(f.path) && !remotePaths.has(f.path)) removed.push({ path: f.path, sha: f.sha });
+    }
+  } else {
+    note = 'Bản đang dùng chưa có manifest.json nên không xác định được file nào đã bị xóa ở bản mới — updater chỉ thêm/sửa, không xóa file lạ (nhạc/ảnh của bạn được giữ nguyên).';
+  }
+  return { changed, removed, note };
+}
+
 async function checkForUpdate() {
   const live = await liveBridgeRunning();
   const local = localVersion();
-  const remoteCommit = await fetchJson(api('/commits/' + BRANCH));
-  const remote = {
-    commit: remoteCommit.sha,
-    short: String(remoteCommit.sha).slice(0, 7),
-    date: (remoteCommit.commit && remoteCommit.commit.committer && remoteCommit.commit.committer.date) || '',
-    message: ((remoteCommit.commit && remoteCommit.commit.message) || '').split('\n')[0],
-  };
   let changed = [];
   let removed = [];
   let note = '';
+  let remote = null;
+  let remoteManifest = null;
 
-  if (local && local.commit === remote.commit) {
-    // Đã là bản mới nhất: không cần gọi thêm API.
-  } else if (local && local.commit) {
-    // Biết bản đang dùng -> hỏi GitHub đúng những file đổi giữa 2 commit.
-    const cmp = await fetchJson(api(`/compare/${local.commit}...${remote.commit}`));
-    if (cmp.truncated) {
-      // Đổi quá 300 file, GitHub cắt ngắn danh sách -> so toàn bộ cây file cho chắc.
-      ({ changed, removed, note } = await diffViaTrees(remote));
-    } else {
-      const tree = await fetchJson(api(`/git/trees/${remote.commit}?recursive=1`));
-      const sizeByPath = new Map();
-      for (const t of tree.tree || []) if (t.type === 'blob') sizeByPath.set(t.path, t.size || 0);
-      for (const f of cmp.files || []) {
-        if (isExcluded(f.filename)) continue;
-        if (f.status === 'removed') removed.push({ path: f.filename, sha: f.sha });
-        else changed.push({ path: f.filename, status: f.status, sha: f.sha, size: sizeByPath.get(f.filename) ?? null });
-      }
+  /* Đường chính: tải version.json + manifest.json qua raw.githubusercontent.com
+     (không bị giới hạn 60 lượt/giờ như GitHub API). "Mới nhất" = so file thật với
+     manifest, không chỉ so mã commit — vì version.json đã commit có thể ghi commit
+     cũ hơn cây file một nhịp (do manifest tự tham chiếu chính nó). */
+  try {
+    const [ver, man] = await Promise.all([
+      fetchJson(rawUrl(BRANCH, 'version.json')),
+      fetchJson(rawUrl(BRANCH, 'manifest.json')),
+    ]);
+    if (ver && ver.commit && man && Array.isArray(man.files)) {
+      remote = {
+        commit: ver.commit, short: String(ver.commit).slice(0, 7),
+        date: ver.date || '', message: (ver.message || '').split('\n')[0],
+      };
+      remoteManifest = man;
+      ({ changed, removed, note } = diffViaManifest(man));
     }
-  } else {
-    // Bản cũ chưa có version.json (zip gửi trước khi có updater) -> so toàn bộ cây file.
-    ({ changed, removed, note } = await diffViaTrees(remote));
+  } catch (_) { /* rớt xuống đường dự phòng bằng GitHub API bên dưới */ }
+
+  if (!remote) {
+    /* Đường dự phòng: GitHub API (có giới hạn lượt khi không đăng nhập). */
+    const remoteCommit = await fetchJson(api('/commits/' + BRANCH));
+    remote = {
+      commit: remoteCommit.sha,
+      short: String(remoteCommit.sha).slice(0, 7),
+      date: (remoteCommit.commit && remoteCommit.commit.committer && remoteCommit.commit.committer.date) || '',
+      message: ((remoteCommit.commit && remoteCommit.commit.message) || '').split('\n')[0],
+    };
+    if (local && local.commit === remote.commit) {
+      // Đã là bản mới nhất: không cần gọi thêm API.
+    } else if (local && local.commit) {
+      // Biết bản đang dùng -> hỏi GitHub đúng những file đổi giữa 2 commit.
+      const cmp = await fetchJson(api(`/compare/${local.commit}...${remote.commit}`));
+      if (cmp.truncated) {
+        // Đổi quá 300 file, GitHub cắt ngắn danh sách -> so toàn bộ cây file cho chắc.
+        ({ changed, removed, note } = await diffViaTrees(remote));
+      } else {
+        const tree = await fetchJson(api(`/git/trees/${remote.commit}?recursive=1`));
+        const sizeByPath = new Map();
+        for (const t of tree.tree || []) if (t.type === 'blob') sizeByPath.set(t.path, t.size || 0);
+        for (const f of cmp.files || []) {
+          if (isExcluded(f.filename) || META_FILES.has(f.filename)) continue;
+          if (f.status === 'removed') removed.push({ path: f.filename, sha: f.sha });
+          else changed.push({ path: f.filename, status: f.status, sha: f.sha, size: sizeByPath.get(f.filename) ?? null });
+        }
+        remoteManifest = {
+          commit: remote.commit, short: remote.short, generatedAt: new Date().toISOString(),
+          files: (tree.tree || []).filter(t => t.type === 'blob')
+            .map(t => ({ path: t.path, sha: t.sha, size: t.size || 0 }))
+            .sort((a, b) => (a.path < b.path ? -1 : 1)),
+        };
+      }
+    } else {
+      // Bản cũ chưa có version.json (zip gửi trước khi có updater) -> so toàn bộ cây file.
+      ({ changed, removed, note } = await diffViaTrees(remote));
+    }
   }
 
   const totalBytes = changed.reduce((s, f) => s + (f.size || 0), 0);
   const result = {
     liveBridgeRunning: live, local, remote,
-    upToDate: !!local && local.commit === remote.commit,
+    upToDate: changed.length === 0 && removed.length === 0,
     changed, removed, totalBytes, note,
-    checkedAt: new Date().toISOString(),
+    remoteManifest, checkedAt: new Date().toISOString(),
   };
   lastCheck = { at: Date.now(), result };
   return result;
@@ -265,12 +324,18 @@ async function doUpdate() {
       try { fs.rmSync(safeJoin(r.path), { force: true }); } catch (_) { /* file đã không còn: bỏ qua */ }
       progress.done += 1;
     }
-    // 3) Ghi phiên bản + manifest mới (dùng cây file từ GitHub để lần sau biết file nào đã xóa).
-    const tree = await fetchJson(api(`/git/trees/${check.remote.commit}?recursive=1`));
-    const files = (tree.tree || [])
-      .filter(t => t.type === 'blob')
-      .map(t => ({ path: t.path, sha: t.sha, size: t.size || 0 }))
-      .sort((a, b) => (a.path < b.path ? -1 : 1));
+    // 3) Ghi phiên bản + manifest mới (dùng manifest đã tải lúc kiểm tra; chỉ khi
+    // đường dự phòng API mới phải tải lại cây file) để lần sau biết file nào đã xóa.
+    let files;
+    if (check.remoteManifest && Array.isArray(check.remoteManifest.files)) {
+      files = check.remoteManifest.files;
+    } else {
+      const tree = await fetchJson(api(`/git/trees/${check.remote.commit}?recursive=1`));
+      files = (tree.tree || [])
+        .filter(t => t.type === 'blob')
+        .map(t => ({ path: t.path, sha: t.sha, size: t.size || 0 }))
+        .sort((a, b) => (a.path < b.path ? -1 : 1));
+    }
     fs.writeFileSync(path.join(ROOT, 'version.json'),
       JSON.stringify({ commit: check.remote.commit, short: check.remote.short, date: check.remote.date, message: check.remote.message, updatedAt: new Date().toISOString() }, null, 2) + '\n', 'utf8');
     fs.writeFileSync(path.join(ROOT, 'manifest.json'),
@@ -415,9 +480,9 @@ function showDone(p){
   if(p.state==='error'){ setLog('Cập nhật lỗi: '+p.message); return; }
   const d=p.result||{};
   if(d.already){ setLog('Đã là bản mới nhất.'); return; }
-  let t='✅ Cập nhật xong!\n• Đã đổi: '+d.updated.length+' file'+(d.bytes?' ('+fmt(d.bytes)+')':'')+'\n• Đã xóa: '+d.removed.length+' file\n• Bản mới: '+(d.remote?d.remote.short:'');
-  if(d.selfPending&&d.selfPending.length) t+='\n• File updater cũng có bản mới — đóng cửa sổ này rồi chạy lại cap-nhat.bat để dùng bản mới.';
-  t+='\n\nTắt cửa sổ này, bấm đúp start-livebridge.bat để chạy bản mới.';
+  let t='✅ Cập nhật xong!\\n• Đã đổi: '+d.updated.length+' file'+(d.bytes?' ('+fmt(d.bytes)+')':'')+'\\n• Đã xóa: '+d.removed.length+' file\\n• Bản mới: '+(d.remote?d.remote.short:'');
+  if(d.selfPending&&d.selfPending.length) t+='\\n• File updater cũng có bản mới — đóng cửa sổ này rồi chạy lại cap-nhat.bat để dùng bản mới.';
+  t+='\\n\\nTắt cửa sổ này, bấm đúp start-livebridge.bat để chạy bản mới.';
   setLog(t); $('bar').style.width='100%';
   check=null; $('btnUpdate').disabled=true; $('fileBox').innerHTML=''; $('status').innerHTML='<span class="tag ok">Đã cập nhật ✓</span>';
 }

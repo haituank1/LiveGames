@@ -1,7 +1,7 @@
 {
-  "commit": "fc3a1ca132b57428e4c1a6d45794614d69b8079e",
-  "short": "fc3a1ca",
-  "generatedAt": "2026-11-05T15:37:38.656Z",
+  "commit": "ae5b5b5f3a931c6e3da87784f9c0d0e5895c0c8f",
+  "short": "ae5b5b5",
+  "generatedAt": "2026-11-05T16:16:28.748Z",
   "files": [
     {
       "path": ".gitignore",
@@ -1655,13 +1655,23 @@
     },
     {
       "path": "README.md",
-      "sha": "fda54be527baff34256a018d3e479daf38e77ef7",
-      "size": 36963
+      "sha": "428629516f73fcefc9b991662682987d28959c30",
+      "size": 38340
+    },
+    {
+      "path": "cap-nhat.bat",
+      "sha": "41395be6a48ddac703dd5760e03dc2e00ba95878",
+      "size": 1421
     },
     {
       "path": "dong-goi.bat",
       "sha": "99240c5a47a7d772bc88b208b2bc50de24a42540",
       "size": 363
+    },
+    {
+      "path": "manifest.json",
+      "sha": "031d24ec8496543642ee6167e64e2ecd5c9a2070",
+      "size": 49456
     },
     {
       "path": "start-livebridge.bat",
@@ -1670,18 +1680,33 @@
     },
     {
       "path": "tools/HUONG-DAN.txt",
-      "sha": "f5052e3d0ccc65508736c082dfb7e3cf98d4cdca",
-      "size": 1182
+      "sha": "9ec77b2c3e73515a9f8de194c8ae2b7e0fcd671c",
+      "size": 2181
+    },
+    {
+      "path": "tools/cap-nhat.js",
+      "sha": "dc1823a3b6d941aadeae259d58df400362b2daa6",
+      "size": 27942
     },
     {
       "path": "tools/dong-goi.ps1",
-      "sha": "ce4fea12cf8b7c428921a87b706974a5d1c7e843",
+      "sha": "4f367a6e6c03ebb85ce2620ad6d8f2acf81d78e3",
       "size": 4004
     },
     {
       "path": "tools/make-sfx.mjs",
       "sha": "bb7f627a11fd7de62f8e0341a10b4dc5f8c89e8d",
       "size": 6608
+    },
+    {
+      "path": "tools/tao-version.js",
+      "sha": "b3bba873273a572aff7294a29fc11779e606b795",
+      "size": 2580
+    },
+    {
+      "path": "version.json",
+      "sha": "4038d578a8bca72f0bd2e76d2a2198cd71cca39f",
+      "size": 249
     }
   ]
 }
