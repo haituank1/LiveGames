@@ -138,6 +138,11 @@ const SETS_BASE = [
   { name: 'Xanh biển', bride: 'img/bride7.png', groom: 'img/groom7.png' },
   { name: 'Hồng đào', bride: 'img/bride8.png', groom: 'img/groom8.png' },
   { name: 'Xanh mint', bride: 'img/bride9.png', groom: 'img/groom9.png' },
+  /* V5: bộ cưới Việt MỚI — cô dâu áo dài hồng sen tóc đen + chú rể áo dài
+     đỏ khăn đóng đen. Thêm cuối SETS_BASE để không đổi thứ tự / chỉ số
+     các bộ cũ; bộ hoàng gia (SETS_ROYAL) giữ nguyên. Khác bộ 'Truyền
+     thống áo dài' đã có (cô dâu đỏ thêu phượng + chú rể xanh lam). */
+  { name: 'Áo dài sen hồng', bride: 'img/bride-aodai.png', groom: 'img/groom-aodai.png' },
 ];
 const SETS_ROYAL = [
   { name: 'Hoàng gia vàng', bride: 'img/royal-bride1.png', groom: 'img/royal-groom1.png' },

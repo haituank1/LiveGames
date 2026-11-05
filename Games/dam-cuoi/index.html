@@ -49,6 +49,16 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   /* ---------- Phòng cưới rộng + camera lia ---------- */
   #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;background:#430b18}
   #bgfull{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat;z-index:1}
+  /* V5 — grade dịu màu sảnh (chỉ CSS, không JS, không đụng effects.js của nv1):
+     lớp phủ xám-mận nhạt CHỈ ở vùng sảnh dưới (mờ dần từ y 36% xuống, trong
+     suốt hoàn toàn ở vùng sân khấu phía trên) nên vàng/hồng bớt chói mà sân
+     khấu vẫn sáng; hai bên tối nhẹ làm điểm nghỉ mắt. Nằm dưới #people (z 3)
+     nên chỉ dịu màu NỀN, không làm tối / xỉn màu nhân vật. Không dùng
+     backdrop-filter để chạy được cả trên CEF cũ của OBS. */
+  #grade{position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:
+      linear-gradient(90deg,rgba(24,12,22,.24),rgba(24,12,22,0) 15%,rgba(24,12,22,0) 85%,rgba(24,12,22,.24)),
+      linear-gradient(180deg,transparent 36%,rgba(66,54,66,.07) 60%,rgba(60,48,58,.15) 100%)}
   #people{position:absolute;inset:0;z-index:3}
   #spot{position:absolute;left:50%;top:13%;width:31%;height:27%;transform:translateX(-50%);pointer-events:none;z-index:2;
     background:radial-gradient(ellipse at 50% 88%,rgba(255,225,150,.5),rgba(255,225,150,.14) 55%,transparent 75%);
@@ -219,6 +229,7 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   <div id="bootdiag"></div>
   <div id="world">
     <div id="bgfull"></div>
+    <div id="grade" aria-hidden="true"></div>
     <div id="spot"></div>
     <div id="people"></div>
   </div>
