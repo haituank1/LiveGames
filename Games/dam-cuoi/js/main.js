@@ -13,7 +13,8 @@
 const W = (window.Wedding = window.Wedding || {});
 const FX = W.effects, A = W.audio, P = W.people;
 const q = new URLSearchParams(location.search);
-const isDemo = q.has('demo');
+/* L1: ?demo=0 tat demo (truoc day q.has('demo') nen ?demo=0 van vao demo). */
+const isDemo = q.has('demo') && q.get('demo') !== '0';
 const $ = id => document.getElementById(id);
 const rand = (a, b) => a + Math.random() * (b - a);
 const stageEl = $('stage');
@@ -23,7 +24,14 @@ const stageEl = $('stage');
 const say = () => {};
 
 /* ============ Mốc sảnh theo TỔNG lượt view tích lũy ============ */
-const TIERS = [
+/* M14b — MỘT NGUỒN SỰ THẬT: TIERS được xây từ cfg.bgRules (mapping config,
+   admin sửa được) lúc nhận config — tên mốc + file nền + cờ royal lấy từ
+   từng mục bgRules {viewers, file, label, royal}. TIERS_FALLBACK chỉ dùng
+   khi chưa có config / bgRules thiếu/rỗng/không hợp lệ (demo + mở game
+   riêng vẫn chạy như cũ). royal: 0 = thường, 1 = vàng (tia sáng beams),
+   2 = hoàng gia (beams + phát sáng + pháo hoa định kỳ); pool đồ hoàng gia
+   bật khi royal >= 1 (people.js setPool, qua P.setTierLevel). */
+const TIERS_FALLBACK = [
   { at: 0,     name: 'Lễ Ấm Áp',            file: 'bg-full.webp', royal: 0 },
   { at: 10,    name: 'Hoa Khai',            file: 'bg-500.webp', royal: 0 },
   { at: 30,    name: 'Kim Tuyến',           file: 'bg-2000.webp', royal: 0 },
@@ -31,6 +39,36 @@ const TIERS = [
   { at: 100,   name: 'Đại Tiệc Vàng',       file: 'bg-10000.webp', royal: 1 },
   { at: 200,   name: 'Đám Cưới Hoàng Gia',  file: 'bg-sanh-moi.webp', royal: 2 },
 ];
+let TIERS = TIERS_FALLBACK;
+/* Xây TIERS từ bgRules của config; trả null nếu không còn mục hợp lệ nào
+   (thiếu/rỗng/toàn mục sai kiểu) để caller giữ TIERS hiện tại. Mục sai
+   kiểu hoặc trùng mốc thì bỏ qua riêng mục đó, không giết cả danh sách.
+   label/royal thiếu thì lấy theo mốc cùng số view trong TIERS_FALLBACK
+   (để config cũ/demo chưa có 2 trường này vẫn ra đúng tên + hạng sảnh);
+   royal chấp nhận cả boolean (true = 1, false = 0) lẫn số 0/1/2. Mốc 0
+   (sảnh mặc định bg-full.webp) tự thêm vào đầu nếu bgRules không có. */
+function buildTiersFromBgRules(rules) {
+  if (!Array.isArray(rules) || !rules.length) return null;
+  const byAt = new Map(TIERS_FALLBACK.map(t => [t.at, t]));
+  const seen = new Set(), out = [];
+  for (const r of rules) {
+    if (!r) continue;
+    const at = Number(r.viewers != null ? r.viewers : r.views);
+    const file = typeof (r.file || r.bg) === 'string' ? (r.file || r.bg).trim() : '';
+    if (!isFinite(at) || at < 0 || !file || seen.has(at)) continue;
+    seen.add(at);
+    const fb = byAt.get(at);
+    const label = typeof r.label === 'string' ? r.label.trim().slice(0, 40) : '';
+    let royal = r.royal === true ? 1 : r.royal === false ? 0 : Number(r.royal);
+    if (!isFinite(royal)) royal = fb ? fb.royal : 0;
+    royal = Math.max(0, Math.min(2, Math.round(royal)));
+    out.push({ at, name: label || (fb ? fb.name : 'Mốc ' + at + ' lượt xem'), file, royal });
+  }
+  if (!out.length) return null;
+  out.sort((a, b) => a.at - b.at);
+  if (out[0].at > 0) out.unshift({ at: 0, name: 'Lễ Ấm Áp', file: 'bg-full.webp', royal: 0 });
+  return out;
+}
 /* Điểm đứng trên sân khấu trong PHÒNG RỘNG (% chiều cao phòng), theo từng ảnh phông */
 /* Góc máy theo từng nền (nền nào sân khấu nằm chỗ khác thì khung hình bám theo).
    Khung vị trí nhân vật (bàn/sàn/đường đứng) nằm ở people.js TABLE_FRAMES. */
@@ -91,14 +129,20 @@ function startPreload() { for (const f of [...TIERS.map(t => t.file), ...ASSET_I
 startPreload();
 
 const LS_TOTAL = isDemo ? 'damcuoi.totalviews.demo' : 'damcuoi.totalviews';
-let totalBase = parseInt(localStorage.getItem(LS_TOTAL) || '0', 10) || 0;
+/* C5 — doc/ghi localStorage LUON co try/catch: trinh duyet chan storage
+   (Safari Private, quota day) nem SecurityError/QuotaExceededError —
+   truoc day 2 dong getItem o top-level khong co guard nen game chet
+   trang ngay luc mo. Loi thi tra fallback / bo qua, game van chay. */
+function lsGet(key, fallback) { try { const v = localStorage.getItem(key); return v == null ? fallback : v; } catch (e) { return fallback; } }
+function lsSet(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
+let totalBase = parseInt(lsGet(LS_TOTAL, '0') || '0', 10) || 0;
 const counted = new Set();
 let demoExtra = 0;
 const totalViews = () => totalBase + counted.size + demoExtra;
 let saveTimer = 0;
 function persistTotal() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => localStorage.setItem(LS_TOTAL, String(totalBase + counted.size)), 1500);
+  saveTimer = setTimeout(() => lsSet(LS_TOTAL, String(totalBase + counted.size)), 1500);
 }
 function countView(user) {
   if (!user || !user.id || counted.has(user.id)) return;
@@ -112,7 +156,7 @@ function countView(user) {
    đặt chân lên sân khấu tính một lễ. Lưu bền qua các phiên như tổng
    lượt xem; nút Reset ở trang quản trị xoá cả số này. */
 const LS_COUPLLES = isDemo ? 'damcuoi.couples.demo' : 'damcuoi.couples';
-let couplesDone = parseInt(localStorage.getItem(LS_COUPLLES) || '0', 10) || 0;
+let couplesDone = parseInt(lsGet(LS_COUPLLES, '0') || '0', 10) || 0;
 function renderCoupleCount() {
   const el = $('couplecount');
   if (!el) return;
@@ -137,13 +181,50 @@ function addLedger(user, giftName, dia) {
 
 /* ============ Trạng thái ============ */
 let cfg = {};
+/* H10b — CẤU HÌNH MẶC ĐỊNH khi không có LiveBridge: NPC LUÔN CHẠY khi
+   game chạy — mở game riêng (thiếu file livebridge-client.js) hoặc
+   LiveBridge quá 8s chưa trả config thì áp bộ này rồi chạy npcSync.
+   Mirror đúng mapping defaults cho các key game cần để không crash
+   (NPC, sân khấu, nền, âm thanh, hàng chờ). Config thật đến muộn vẫn ghi
+   đè bình thường (applyConfig chạy lại, npcSync có guard NPC.started nên
+   không spawn trùng NPC). Các câu MC thiếu thì applyConfig tự lấy câu
+   mặc định trong code, không cần liệt kê hết ở đây. */
+const DEFAULT_CFG = {
+  mcName: 'MC Anh Tú', mcNameNu: 'MC Ngọc Trâm',
+  npcVoiceOn: true, npcVoice: 'vi-VN-HoaiMyNeural', npcVoiceNam: 'vi-VN-NamMinhNeural', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
+  coupleSec: 9, nhaCapTiepSauGiay: 6,
+  phongToGoiTen: 1.32, coCapGiua: 1.22, phongVangDuoi: 15,
+  zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8,
+  uuTienChoTrong: true, nguongDongNguoi: 70, phutImMatCho: 4, tyLeChoTrong: 0.45,
+  mcMinSec: 18, mcMaxSec: 26,
+  npcTuDong: true, npcNguongVang: 6, npcMoiBaoLauGiay: 25, npcNghiGiay: 60,
+  npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
+  bgRules: [
+    { viewers: 10, file: 'bg-500.webp', label: 'Hoa Khai', royal: 0 },
+    { viewers: 30, file: 'bg-2000.webp', label: 'Kim Tuyến', royal: 0 },
+    { viewers: 50, file: 'bg-5000.webp', label: 'Lung Linh', royal: 0 },
+    { viewers: 100, file: 'bg-10000.webp', label: 'Đại Tiệc Vàng', royal: 1 },
+    { viewers: 200, file: 'bg-sanh-moi.webp', label: 'Đám Cưới Hoàng Gia', royal: 2 },
+  ],
+  rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
+  guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view', '👗 Gõ "nam" / "nữ" / "đổi đồ" → đổi nhân vật, trang phục'],
+  musicOn: true, musicVolume: 35, sfxOn: true, sfxVolume: 55,
+  choDoiLanThapGiay: 30, hangChoToiDa: 4, tuGhepDoiKhiRong: true, tuGhepDoiSauGiay: 5,
+};
 const known = new Map();       // user.id -> user (để parse tag theo tên)
+const nameFoldCache = new Map();   // M13: user.id -> { nick, uid } (ten da gap, xem foldedNames)
 const greeted = new Set();
 let lastGreet = -1e9;
 const coupleByKey = new Map();
+/* C4 — phuong an A: go dang ky cap. coupleByKey song trong IIFE cua
+   main.js nen people.js khong xoa truc tiep duoc — expose qua P de
+   dissolveCouple() goi ngay luc tan cap, ke ca cap THAT (truoc day chi
+   npcDissolveRested() moi xoa, lai bo qua cap that). Xoa ca courtSince
+   de NPC khong giu moc nghi cua cap da chet. */
+P.unregisterCouple = key => { coupleByKey.delete(key); NPC.courtSince.delete(key); };
 const LS = isDemo ? 'damcuoi.scores.demo' : 'damcuoi.scores';
 let scores = {};
-try { scores = JSON.parse(localStorage.getItem(LS) || '{}'); } catch (e) { scores = {}; }
+try { scores = JSON.parse(lsGet(LS, '{}') || '{}'); } catch (e) { scores = {}; }
 /* Làm sạch điểm đã lưu từ các bản game đời đầu: có mục tên bị lưu dạng
    OBJECT (lên bảng thành "[object Object]") và điểm trống ("undefined").
    Chuẩn hoá ngay lúc nạp: tên là object thì lấy nickname, điểm ép số,
@@ -154,13 +235,20 @@ for (const k of Object.keys(scores)) {
   s.a = ten(s.a); s.b = ten(s.b); s.score = Number(s.score) || 0;
   if (!s.a || !s.b) delete scores[k];
 }
-const saveScores = () => localStorage.setItem(LS, JSON.stringify(scores));
+const saveScores = () => lsSet(LS, JSON.stringify(scores));
+/* H3: key cap dan dau BXH (Top 1) — luu ben de sau reload khoi phuc vuong
+   mien khi cap do duoc ghep lai (coupleByKey trong sau reload nen chi
+   nho key thi khong du, phai doi cap that su co mat trong phong). */
+const LS_LEADER = isDemo ? 'damcuoi.leader.demo' : 'damcuoi.leader';
+let savedLeaderKey = lsGet(LS_LEADER, '') || '';
 
 function register(user) {
   if (!user || !user.id) return null;
   const old = known.get(user.id);
   const u = old ? { ...old, ...user, avatar: user.avatar || old.avatar } : { ...user };
   known.set(user.id, u);
+  /* M13: ten doi thi xoa cache ten gap cua nguoi do (foldedNames tinh lai lan sau). */
+  if (old && (old.nickname !== u.nickname || old.uniqueId !== u.uniqueId)) nameFoldCache.delete(u.id);
   if (u.avatar) P.setAvatar(u.id, u.avatar);   // anh ve muon thi chip ten cap nhat sang anh that ngay
   return u;
 }
@@ -173,6 +261,15 @@ function ensureGuest(user) {
   if (p) { if (u.npc) p.npc = true; P.touch(u.id); }   // bất kỳ sự kiện nào cũng tính là còn tương tác -> giữ chỗ đẹp
   if (moi && p && !u.npc) maybeWelcomePan(p);          // NPC vào lặng lẽ: không giật cam chào, không câu chào MC
   return p;
+}
+/* Danh dau TUONG TAC that de tu ghep (Nguyen 2026-11-05): chi 4 loai
+   tinh — tha tim (like), comment, tang qua (gift), chia se (share).
+   Luu rieng o p.lastInteract, KHONG dung chung lastActive (lastActive
+   con phuc vu nhuong cho — 'seen'/follow/join cung cham vao do, nguoi
+   chi ngoi xem trong sanh chua chac con xem live). */
+function markInteract(user) {
+  const p = user && user.id ? P.get(user.id) : null;
+  if (p) p.lastInteract = Date.now();
 }
 /* LIA CAM CHÀO KHÁCH MỚI (Nguyen yêu cầu 2026-11-04): chỉ khi KHÔNG có cặp
    nào đang làm lễ hay đang chờ tới lượt — có đám cưới thì tuyệt đối không
@@ -209,11 +306,11 @@ function coupleScore(c, pts) {
 function resetAll() {
   scores = {}; saveScores(); renderBoard();
   couplesDone = 0;
-  try { localStorage.setItem(LS_COUPLLES, '0'); } catch (e) {}
+  lsSet(LS_COUPLLES, '0');
   renderCoupleCount();
   totalBase = 0; counted.clear(); demoExtra = 0;
   clearTimeout(saveTimer);
-  try { localStorage.setItem(LS_TOTAL, '0'); } catch (e) {}
+  lsSet(LS_TOTAL, '0');
   refreshBg(false);
   showBanner('🔄 ĐÃ RESET TOÀN BỘ · Bảng xếp hạng, điểm hạnh phúc và tổng lượt xem đã về 0', 5200);
 }
@@ -228,20 +325,29 @@ function renderBoard() {
     ? top.map((s, i) =>
       `<li><span>${i === 0 ? '👑 ' : ''}${escapeHtml(s.a)} ❤ ${escapeHtml(s.b)}</span><em>${fmtNum(s.score)}</em></li>`).join('')
     : '<li><span>💌 Chưa có cặp nào — tag người thương để mở màn!</span></li>';
-  P.setCrown(top.length ? coupleByKey.get(top[0].key) : null);
+  /* H3 — MOT luat duy nhat: vuong mien theo cap dan dau BXH. Chi gan khi
+     cap do con trong coupleByKey VA ca hai nguoi con trong phong (sau
+     reload coupleByKey trong, gan cho undefined nhu cu se go het roi
+     khong gan lai cho ai). */
+  const leader = top.length ? coupleByKey.get(top[0].key) : null;
+  if (leader && leader.a && leader.b && P.get(leader.a.user.id) && P.get(leader.b.user.id)) P.setCrown(leader);
+  else P.setCrown(null);
   if (top.length && top[0].key !== lastLeaderKey) {
     const first = lastLeaderKey === null;
     lastLeaderKey = top[0].key;
+    savedLeaderKey = top[0].key; lsSet(LS_LEADER, savedLeaderKey);   // H3: luu Top 1 de khoi phuc sau reload
     if (!first && Date.now() - lastLeaderAt > 25000) {
       lastLeaderAt = Date.now();
       showBanner(`👑 CẶP ĐÔI DẪN ĐẦU MỚI · ${top[0].a} ❤ ${top[0].b}`, 5000);
       FX.fireworks(2); FX.hearts(14);
     }
+  } else if (!top.length && lastLeaderKey !== null) {
+    lastLeaderKey = null; savedLeaderKey = ''; lsSet(LS_LEADER, '');
   }
 }
 let lastLeaderKey = null, lastLeaderAt = 0;
 function fmtNum(n) { return n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n); }
-function escapeHtml(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 
 /* ============ MC ============ */
 const MC = {
@@ -353,14 +459,19 @@ async function mcPump() {
     // Câu có parts (>=2 đoạn) thì phát theo đoạn: tĩnh đã cache + tên riêng.
     try {
       const pv = m.persona && m.persona.voice ? m.persona.voice : undefined;   // MC nam đọc giọng nam, MC nữ giọng mặc định (nữ)
-      if (m.parts && m.parts.length >= 2 && NpcVoice.speakParts) r = await NpcVoice.speakParts(m.parts, { kind: m.kind, voice: pv, onStart: ({ durationMs }) => show(durationMs) });
-      else r = await NpcVoice.speak(m.text, { kind: m.kind, voice: pv, onStart: ({ durationMs }) => show(durationMs) });
+      const voiceP = (m.parts && m.parts.length >= 2 && NpcVoice.speakParts)
+        ? NpcVoice.speakParts(m.parts, { kind: m.kind, voice: pv, onStart: ({ durationMs }) => show(durationMs) })
+        : NpcVoice.speak(m.text, { kind: m.kind, voice: pv, onStart: ({ durationMs }) => show(durationMs) });
+      /* H6: voice treo khong bao gio resolve -> MC ket vinh vien (mcSpeaking
+         khong co gi dat lai). Race voi timeout 9s; het gio thi coi nhu
+         khong phat duoc, hien chu nhu cu. */
+      r = await Promise.race([voiceP, new Promise(res => setTimeout(() => res({ played: false }), 9000))]) || { played: false };
     } catch (_) { /* rơi xuống hiện chữ */ }
   }
-  if (!r.played && !shown) show(0);
-  if (!r.played && shown) { /* onStart đã hiện + đã hẹn giờ ẩn */ }
-  if (r.played) { /* show() đã chạy trong onStart */ }
-  if (!shown) { mcSpeaking = false; }
+  /* H6: voice bao played=true nhung onStart chua kip chay (show chua chay)
+     thi cau thoai mat han — hien chu luon. show(0) tu hen gio an + dat
+     lai mcSpeaking; chi khi show that su khong chay moi dat tay o day. */
+  if (!shown) show(0);
 }
 function mcReact(prio, tplArr, vars) {
   const tpl = pick(tplArr);
@@ -382,13 +493,15 @@ function mcRandomLoop(first) {
 /* ============ Bảng hướng dẫn / luật chơi ============ */
 let guideIdx = 0, guideTimer = null;
 function startGuide() {
-  let lines = [...(cfg.rulesLines || []), ...(cfg.guideLines || [])].filter(Boolean);
+  /* H12: mcGuide (dòng MC hướng dẫn trong config) cũng xoay cùng luật
+     + hướng dẫn — trùng y hệt dòng đã có thì chỉ hiện 1 lần. */
+  let lines = [...new Set([...(cfg.rulesLines || []), ...(cfg.guideLines || []), ...(cfg.mcGuide || [])].filter(Boolean))];
   const el = $('guide');
   /* Cả luật lẫn hướng dẫn đều rỗng (config hỏng/trống) -> dùng 3 dòng mặc
      định trong code để khung trái không bao giờ nằm chết trống. */
   if (!lines.length) lines = ['💌 Comment tag tên người thương để ghép đôi lên sân khấu', '🎁 Tặng quà để cặp của bạn được ưu tiên lên sân khấu', '👗 Gõ "nam" / "nữ" / "đổi đồ" để đổi nhân vật, trang phục'];
   /* THỰC ĐƠN QUÀ (học theo live đối thủ — Nguyen duyệt 2026-11-04 18:08):
-     3 dòng quà -> hiệu ứng viết cứng trong code, khớp đúng GIFT_TIERS +
+     3 dòng quà -> hiệu ứng theo mốc xu trong config (giftFx), khớp đúng
      cách tính điểm, để luôn có mặt trong vòng xoay dù danh sách hướng
      dẫn trong config có bị sửa thế nào. */
   lines.push('🎁 Tặng quà → mưa hoa, pháo hoa chúc phúc cặp đôi', '🎆 Quà từ 99 xu → pháo hoa lớn + banner mừng cưới', '💞 Quà cộng điểm cho cặp đang làm lễ — nhất bảng đội vương miện 👑');
@@ -502,6 +615,11 @@ function bgRescue(file, tk, el) {
       ci++;
       if (ci < chain.length) {
         if (window.__diag) { window.__diag.errs.push('bg fail: ' + f); window.__diag.uiErr = 'Không tải được nền ' + f + ' — đã lùi về ' + chain[ci]; }
+        /* H5: file du phong da chot thi nap KHUNG cua no (P.setBgFile) TRUOC
+           khi doi anh — khong thi anh hien la sanh cu ma khung vi tri van
+           la sanh moi, cap dung sai cao do, ghe lech ban. */
+        if (P.setBgFile) P.setBgFile(chain[ci]);
+        if (window.__diag) window.__diag.errs.push('bg rescue: khung vi tri -> ' + chain[ci]);
         el.style.backgroundImage = `url("${chain[ci]}")`;
         probe(chain[ci], 0);
       } else if (window.__diag) { window.__diag.errs.push('bg fail tat ca'); window.__diag.uiErr = 'Không tải được bất kỳ nền nào — kiểm tra LiveBridge có đang chạy không'; }
@@ -617,8 +735,10 @@ function camLoop(t) {
   if (t - camCullT > 220) { camCullT = t; Cam.cullNow(); }
 }
 requestAnimationFrame(camLoop);
-/* onPairFocus: GIỮ LẠI nhưng không còn chỗ nào gọi — ghép đôi/xếp lại hàng
-   không lia cam nữa (Nguyen chot 2026-11-04), camera chỉ bám lúc lên sân khấu. */
+/* onPairFocus: VAN DUOC GOI — requestCouple (nhanh wasPair) lia cam toi cap
+   cu khi tag lai va cap van con o hang cho 'queue' sau requeue (cap moi
+   ghep lan dau thi khong lia — camera chi bam luc len san khau). Comment cu
+   ghi "khong con cho nao goi" la sai (M8). */
 P.onPairFocus = function (c) {
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 11000;
@@ -659,21 +779,29 @@ P.onPairReveal = function (c) {
   }
 };
 function bgFileFor(total) {
-  const rules = Array.isArray(cfg.bgRules) ? cfg.bgRules.filter(r => r && r.file).slice().sort((a, b) => a.viewers - b.viewers) : [];
-  let file = 'bg-full.webp';
-  for (const r of rules) if (total >= r.viewers) file = r.file;
-  return file;
+  /* M14b: nền lấy từ TIERS (đã xây từ cfg.bgRules) — cùng một nguồn sự
+     thật với tierOf/tên mốc; admin đổi bgRules thì nền đổi theo, không
+     lệch như trước (bgFileFor đọc bgRules, TIERS hardcode riêng). */
+  const t = TIERS[tierOf(total)];
+  return t ? t.file : 'bg-full.webp';
 }
 function refreshBg(announce) {
   const total = totalViews();
   const tier = tierOf(total);
   const file = bgFileFor(total);
+  /* M14: file nền không có trong TIERS -> cảnh báo vào __diag (chỉ báo
+     1 lần/file). Từ M14b bgFileFor đã lấy từ TIERS nên cảnh báo này chỉ
+     còn là lưới an toàn nếu sau này có đường khác đổi nền trực tiếp. */
+  if (!TIERS.some(t => t.file === file) && !warnedBgFiles.has(file)) {
+    warnedBgFiles.add(file);
+    if (window.__diag) { (window.__diag.errs = window.__diag.errs || []).push('bgRules file khong co trong TIERS: ' + file); }
+  }
   if (file !== BG.file) { BG.file = file; setBackground(file); }
   if (tier !== BG.tier) {
     const old = BG.tier;
     BG.tier = tier;
     FX.setTier(tier);
-    P.setTierLevel(tier);
+    P.setTierLevel(tier, TIERS[tier].royal);
     applyTierFx(tier);
     if (announce && old >= 0) {
       showBanner(`🎉 SẢNH CƯỚI NÂNG CẤP · ${TIERS[tier].name}`, 6000);
@@ -710,6 +838,7 @@ function refreshBg(announce) {
   }
 }
 const sapMocDaBao = new Set();
+const warnedBgFiles = new Set();   // M14: file bgRules la da canh bao (chi bao 1 lan/file)
 
 /* ============ Banner nghi thức giữa sân khấu ============ */
 let bannerTimer = 0;
@@ -745,6 +874,23 @@ function placeBanner() {
    ("Ngọc Linh" -> "ngoclinh"). foldCmd đã có sẵn ở dưới (khai báo hàm
    được hoist nên gọi từ đây vô tư). */
 function foldName(s) { return foldCmd(s).replace(/[^a-z0-9]+/g, ''); }
+/* M13: cache ten gap theo user — scanLooseTag/findNamedInText chay tren
+   moi chat, truoc day gap lai ten cua CA PHONG moi lan (foldCmd chay
+   normalize). Cache o day (toi da 500 muc qua mapSetCapped), lam moi khi
+   register thay ten (xem register). */
+function foldedCand(src) {
+  const cf = foldName(src || '');
+  const parts = foldCmd(src || '').split(' ').filter(Boolean);
+  return { src: src || '', cf, given: parts.length ? foldName(parts[parts.length - 1]) : '' };
+}
+function foldedNames(u) {
+  let f = nameFoldCache.get(u.id);
+  if (!f || f.nick.src !== (u.nickname || '') || f.uid.src !== (u.uniqueId || '')) {
+    f = { nick: foldedCand(u.nickname), uid: foldedCand(u.uniqueId) };
+    mapSetCapped(nameFoldCache, u.id, f);
+  }
+  return f;
+}
 function levRatio(a, b) {
   if (!a || !b) return 0;
   if (a === b) return 1;
@@ -890,21 +1036,18 @@ function chatFilter(raw) {
   const max = cfg.bongChatMaxKyTu || 60;
   return shown.length > max ? shown.slice(0, max - 1).trimEnd() + '…' : shown;
 }
-/* Uu tien len san khau cho NGUOI TANG QUA (Nguyen chot 2026-11-04): cap cua ho
-   duoc dua len DAU hang cho — tuc la cap KE TIEP duoc len san khau, khong chen
-   ngang cap dang dien. Ho con doc than thi MC se duyen luon (uu tien khac
-   gioi) roi cung dua len dau hang. Tat bang config uuTienQuaTang: false. */
-function giftPriority(user) {
+/* Uu tien len san khau cho NGUOI TANG QUA (Nguyen chot 2026-11-04, doi
+   2026-11-05): cap cua ho duoc dua vao LAN QUA, xep theo muc qua cao
+   nhat giam dan (xem bumpCouple) — khong chen ngang cap dang dien. Ho
+   con doc than thi CHI cam on (hieu ung + MC o handle), KHONG tu ghep
+   doi nua — muon co doi thi tag ten, go "ghep doi", follow MC hoac cho
+   he tu ghep khi hang cho trong. Tat bang config uuTienQuaTang: false. */
+function giftPriority(user, dia) {
   if (!user) return;
   const c = P.coupleOf(user.id);
   if (c) {
-    if (P.bumpCouple(c)) toast(`🎁 ${user.nickname} tặng quà — cặp của bạn được ưu tiên lên sân khấu kế tiếp!`, true);
-    return;
+    if (P.bumpCouple(c, dia)) toast(`🎁 ${user.nickname} tặng quà — cặp của bạn được ưu tiên trong hàng chờ quà!`, true);
   }
-  const alt = randomSingleOpp(user) || randomSingle(user);
-  if (!alt) return;
-  const nc = requestCouple(user, alt, 'gift');
-  if (nc) { nc.giftPriority = true; toast(`🎁 ${user.nickname} tặng quà — MC se duyên và ưu tiên cặp của bạn lên sân khấu kế tiếp!`, true); }
 }
 function showBubble(user, text) {
   if (cfg.hienBongChat === false) return;
@@ -1039,6 +1182,13 @@ setInterval(() => {
 P.onStageSkipped = function (c) {
   toast(`⏳ ${c.a.user.nickname} ❤ ${c.b.user.nickname} vừa làm lễ xong — ${P.stageCooldownRemain(c)}s nữa mới lên lại được`, false);
 };
+/* N1: cap MOI ghep nhung dinh cooldown nghi sau lan len truoc — bao dung
+   su that (cap CHUA lam le, chi dang cho het gio nghi) va se TU len lai
+   khi het gio (timer o makeCouple). Khong dung onStageSkipped o day vi
+   cau do chi dung cho cap DA lam le xong (nhanh wasPair). */
+P.onCooldownWait = function (c, remain) {
+  toast(`⏳ ${c.a.user.nickname} ❤ ${c.b.user.nickname} đang chờ hết giờ nghỉ — ${remain}s nữa sẽ tự lên sân khấu`, false);
+};
 /* ===== MC chế giễu khi tag trúng người ĐÃ CÓ ĐÔI (Nguyen chot) =====
    Trước đây tag hụt kiểu này chỉ có 1 câu cứng không tên tuổi. Nay dùng
    pool mcTagDaCoDoi trong config (nhiều biến thể hài, chèn tên {a} người
@@ -1064,18 +1214,21 @@ function cheGheuTag(ua, ub) {
     }
   }
   if (!partner) return;
-  cheGheuCd.set(ua.id, now);
+  mapSetCapped(cheGheuCd, ua.id, now);
   lastCheGheuAt = now;
   mcReact(2.2, pool, { a: ua.nickname, b: ub.nickname, c: partner.nickname });
 }
 /* Phan hoi khi ghep doi bi chan (truoc day nhieu nhanh chan IM LANG —
    khach thay nhu game hong). Toast nay co tiet che theo nguoi (6s/lan)
    de khong thanh spam khi co nguoi go lien tuc. */
+/* N9: map theo nguoi chi giu toi da 500 muc — vuot thi xoa muc cu nhat
+   (Map giu thu tu chen, key dau tien la cu nhat). */
+function mapSetCapped(m, k, v) { m.set(k, v); if (m.size > 500) m.delete(m.keys().next().value); }
 const blockToastAt = new Map();
 function blockedToast(ua, ub) {
   const now = performance.now();
   if (now - (blockToastAt.get(ua.id) || -1e9) < 6000) return;
-  blockToastAt.set(ua.id, now);
+  mapSetCapped(blockToastAt, ua.id, now);
   const cb = P.coupleOf(ub.id), ca = P.coupleOf(ua.id);
   if (cb && cb !== ca) toast(`⏳ ${ub.nickname} đang ở trong một cặp khác — chờ cặp đó xong thì tag lại nhé`, false);
   else if (ca) toast(`⏳ ${ua.nickname} đang ở trong một cặp khác rồi — chờ cặp hiện tại xong nhé`, false);
@@ -1088,17 +1241,38 @@ function blockedToast(ua, ub) {
    1 cap tai 1 thoi diem + cooldown san khau rieng. */
 function requestCouple(a, b, via) {
   const origin = typeof via === 'string' ? via : (via === false ? 'follow' : 'manual');
+  /* H8: 'tag:...' la bong ma (nguoi duoc tag chua he vao phong), khong phai
+     nguoi that — khong de lot vao P.makeCouple vi P.spawn se tao nhan vat
+     that cho no (co ghe, di dao, bi ghep tiep). Ghost chi duoc giu lam co
+     tagVangTen o tryPairWith, khong bao gio thanh mot nua cap. */
+  if (a && String(a.id).startsWith('tag:')) return null;
+  if (b && String(b.id).startsWith('tag:')) return null;
   const ua = register(a), ub = register(b);
   if (!ua || !ub || ua.id === ub.id) return null;
   const before = P.coupleOf(ua.id);
   const wasPair = !!(before && ((before.a.user.id === ua.id && before.b.user.id === ub.id) || (before.a.user.id === ub.id && before.b.user.id === ua.id)));
   const c = P.makeCouple(ua, ub, origin);
   if (!c) {
+    /* M4: phan biet "dang lam le" voi "da co doi khac". Doi phuong dang o
+       focus/queue/toStage/stage chua hold (quy trinh lam le 3.6s + hang
+       cho) thi KHONG che gheu — chi toast cho khach cho, tra null. Chi
+       che gheu khi doi phuong da yen vi o cap khac (court/stage+hold)
+       ma van khong ghep duoc. */
+    const inCeremony = cp => !!cp && (cp.state === 'focus' || cp.state === 'queue' || cp.state === 'toStage' || (cp.state === 'stage' && !cp.hold));
+    const cb = P.coupleOf(ub.id), ca = P.coupleOf(ua.id);
+    if (inCeremony(cb) || inCeremony(ca)) {
+      const busyName = inCeremony(cb) ? ub.nickname : ua.nickname;
+      toast(`⏳ ${busyName} đang làm lễ — chờ chút nhé`, false);
+      return null;
+    }
     cheGheuTag(ua, ub);   // một trong hai đã có đôi khác -> MC chế giễu có tên tuổi theo pool config
     blockedToast(ua, ub);   // kem toast ly do ro rang (tiet che 6s/nguoi) — khong con chan im lang
     return null;
   }
   coupleByKey.set(c.key, c);
+  /* H3: cap dan dau BXH cu (luu truoc reload) vua duoc ghep lai -> tra
+     vuong mien cho cap do ngay, khong doi toi lan ghi diem tiep theo. */
+  if (savedLeaderKey && c.key === savedLeaderKey && P.setCrown) P.setCrown(c);
   if (wasPair) {
     /* Cap da ton tai: dang trong quy trinh len san khau (gioi thieu / hang
        cho / dang dien) thi bo qua — comment them KHONG them trung vao danh
@@ -1118,7 +1292,11 @@ function requestCouple(a, b, via) {
            (Cặp ghép lần đầu vẫn: không lia cam, chờ tới lượt mới thay đồ.) */
         P.cycleOutfit(c.a.user.id);
         c.a.el.classList.add('pairfx'); c.b.el.classList.add('pairfx');
-        if (P.onPairFocus) P.onPairFocus(c);
+        /* N8: chi lia cam khi cap VAN CON O HANG CHO sau requeue — neu
+           san khau trong, promoteStage (trong requeueCouple) da dua cap
+           di toStage ngay va onPairWalk da lia cam theo; goi them
+           onPairFocus se lia chong 2 lan trong cung 1 tick. */
+        if (c.state === 'queue' && P.onPairFocus) P.onPairFocus(c);
         toast(`${ua.nickname} ❤ ${ub.nickname} — lên sân khấu lần nữa!`, false);
       }
     }
@@ -1132,11 +1310,12 @@ P.onCoupleStage = function (c) {
   const npc = !!(c.a.npc || c.b.npc);   // cặp NPC diễn cho phòng vui: KHÔNG đếm lễ, KHÔNG ghi điểm
   if (!npc) {
     couplesDone++;
-    try { localStorage.setItem(LS_COUPLLES, String(couplesDone)); } catch (e) {}
+    lsSet(LS_COUPLLES, String(couplesDone));
     renderCoupleCount();
     coupleScore(c, 30);
   }
-  if (BG.tier >= 4) P.setCrown(c);   // từ mốc Đại Tiệc Vàng (600+): cặp nào lên bục cũng đội vương miện
+  /* H3: cap dang dien KHONG cuop vuong mien — vuong mien chi theo cap dan
+     dau BXH (xem renderBoard); dong P.setCrown(c) cu o day da bo. */
   Cam.unfollow();
   Cam.busyUntil = Date.now() + 9000;
   Cam.stage();
@@ -1145,6 +1324,7 @@ P.onCoupleStage = function (c) {
   if (FX.cannon) FX.cannon();
   if (FX.butterflies) FX.butterflies(2);   // bướm phát sáng bay ra mừng lễ thành hôn
   FX.petals(60);
+  if (A.cheer) A.cheer();   // L8: hợp âm chúc mừng khi cặp đôi lên sân khấu (khác tiếng chuông bell)
   if (FX.petalBurst) FX.petalBurst(sp.fx, sp.fy);
   if (FX.ringHearts) FX.ringHearts(sp.fx, sp.fy - 0.09);
   if (FX.stageSparkle) FX.stageSparkle(sp.fx, sp.fy - 0.06);
@@ -1174,15 +1354,35 @@ function toast(text, vip) {
   setTimeout(() => t.remove(), 6600);
 }
 
-/* ============ Hiệu ứng theo quà ============ */
-const GIFT_TIERS = [
-  { min: 500, petals: 260, confetti: 160, fw: 6 },
-  { min: 99, petals: 180, confetti: 110, fw: 4 },
-  { min: 30, petals: 130, confetti: 60, fw: 2 },
-  { min: 10, petals: 90, confetti: 30, fw: 1 },
-  { min: 5, petals: 55, confetti: 0, fw: 0 },
-  { min: 1, petals: 30, confetti: 0, fw: 0 },
-];
+/* ============ Hiệu ứng theo quà (C1) ============
+   Đơn vị hiệu ứng — 1 "hiệu ứng" là lượng hạt/quả CỨNG trong 1 lần bắn:
+   hoa rơi = cfg.donViHoaRoi cánh (mặc định 100), pháo hoa =
+   cfg.donViPhaoHoa quả (5), pháo giấy = cfg.donViPhaoGiay mảnh (100).
+   Số hiệu ứng chỉ theo MỐC XU (config được, mặc định): >= quaTangMocLon
+   (299) -> quaTangHieuUngLon (10), >= quaTangMocVua (99) ->
+   quaTangHieuUngVua (5), còn lại -> quaTangHieuUngNho (1). Mốc lấy
+   theo mệnh giá quà thật của TikTok (99 / 299 — không có quà 100 hay
+   300 xu) để quà 99 xu được đúng 5 hiệu ứng, quà 299 xu được đúng 10.
+   Cả 3 loại LUÔN bắn cùng lúc, kể cả quà nhỏ — quà nào cũng là tiền. */
+function giftNum(k, fallback) { const v = Number(cfg[k]); return Number.isFinite(v) ? v : fallback; }
+function giftFxCount(dia) {
+  if (dia >= giftNum('quaTangMocLon', 299)) return giftNum('quaTangHieuUngLon', 10);
+  if (dia >= giftNum('quaTangMocVua', 99)) return giftNum('quaTangHieuUngVua', 5);
+  return giftNum('quaTangHieuUngNho', 1);
+}
+function giftFx(diamonds) {
+  const n = giftFxCount(diamonds);
+  FX.petals(n * giftNum('donViHoaRoi', 100));
+  FX.fireworks(n * giftNum('donViPhaoHoa', 5));
+  FX.confetti(n * giftNum('donViPhaoGiay', 100));
+  if (diamonds >= 10 && FX.glitter) FX.glitter(Math.min(120, 20 + diamonds));
+  if (diamonds >= 30 && FX.envelopes) FX.envelopes(diamonds >= 99 ? 90 : 40);
+  if (diamonds >= 99) {
+    if (FX.cannon) FX.cannon();
+    if (FX.bokeh) FX.bokeh(10);
+    const fl = $('flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
+  }
+}
 /* Ưu tiên VOICE cho người tặng quà (Nguyen yêu cầu 2026-11-04): hàng chờ
    MC vốn đã sắp xếp theo prio giảm dần và chen lên trước được — nên chỉ
    cần cho câu cảm ơn quà một prio TĂNG THEO GIÁ TRỊ QUÀ: quà càng lớn
@@ -1196,20 +1396,6 @@ function giftVoicePrio(dia) {
   if (dia >= 10) return 3.3;
   return 3.0;
 }
-function giftFx(diamonds) {
-  const t = GIFT_TIERS.find(x => diamonds >= x.min) || GIFT_TIERS[GIFT_TIERS.length - 1];
-  if (t.petals) FX.petals(t.petals);
-  if (t.confetti) FX.confetti(t.confetti);
-  if (t.fw) FX.fireworks(t.fw);
-  if (diamonds >= 10 && FX.glitter) FX.glitter(Math.min(120, 20 + diamonds));
-  if (diamonds >= 30 && FX.envelopes) FX.envelopes(diamonds >= 99 ? 90 : 40);
-  if (diamonds >= 99) {
-    if (FX.cannon) FX.cannon();
-    if (FX.bokeh) FX.bokeh(10);
-    const fl = $('flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
-  }
-}
-
 /* ============ Nhận sự kiện ============ */
 /* ===== Lệnh chat tương tác: tự khai giới tính + đổi trang phục (Nguyen chot) =====
    Tên người dùng rất khó đoán nam/nữ (nickname lạ, không dấu, tên nước ngoài)
@@ -1248,7 +1434,7 @@ function handleChatCommands(user, text) {
     const now = performance.now();
     const cdMs = (cfg.doiTrangPhucChoGiay != null ? cfg.doiTrangPhucChoGiay : 5) * 1000;
     if (now - (outfitCd.get(user.id) || -1e9) >= cdMs) {
-      outfitCd.set(user.id, now);
+      mapSetCapped(outfitCd, user.id, now);
       const r = P.cycleOutfit(user.id);
       const sp = Cam.toScreen(p.x, p.y);
       FX.hearts(6, sp.fx, sp.fy - 0.03);
@@ -1259,19 +1445,83 @@ function handleChatCommands(user, text) {
   }
   return false;
 }
+/* Tim ten nguoi choi trong cau chat — ban NOI LONG cua scanLooseTag,
+   dung rieng cho pairCommand ("ghep doi" + ten): scanLooseTag chay
+   truoc pairCommand nhung bo qua ten goi < 3 ky tu (vd "An", "My",
+   "Tu") va chi quet nguoi dang co mat — nen "ghep doi voi An" khong
+   ghep dung nguoi. Ban nay chap ten goi >= 2 ky tu va ten day du >= 2
+   ky tu; chi khop chac (ten day du hoac ten goi dung nguyen, hoac gan
+   dung rat cao) va thang ro nguoi thu hai — trung ten thi tra null de
+   pairCommand ghep ngau nhien, khong doan mo. */
+function findNamedInText(text, self) {
+  const tokens = foldCmd(text).split(' ').filter(Boolean);
+  if (!tokens.length) return null;
+  const wins = [];
+  for (let n = 1; n <= 3; n++) for (let i = 0; i + n <= tokens.length; i++) wins.push(tokens.slice(i, i + n).join(''));
+  let best = null, bS = 0, s2 = 0;
+  for (const u of known.values()) {
+    if (self && u.id === self.id) continue;
+    if (!P.get(u.id)) continue;
+    let sc = 0;
+    const fn = foldedNames(u);   // M13: ten gap lay tu cache theo user
+    for (const fc of [fn.nick, fn.uid]) {
+      const cf = fc.cf;
+      if (cf.length < 2) continue;
+      const given = fc.given;
+      for (const w of wins) {
+        if (w === cf) { sc = 1; break; }
+        if (given.length >= 2 && w === given) sc = Math.max(sc, 0.95);
+        /* Gan dung chi cho ten dai (cf >= 4): ten ngan (vd "An") ma
+           cho chay fuzzy thi cua so "tuankiet" chua "an" cung cho 0.86,
+           pha vo luat thang ro nguoi thu hai o duoi. */
+        else if (cf.length >= 4 && w.length >= 4) sc = Math.max(sc, tagSimilarity(w, cf));
+      }
+      if (sc === 1) break;
+    }
+    if (u.npc) sc -= 0.08;
+    if (sc > bS) { s2 = bS; bS = sc; best = u; } else if (sc > s2) s2 = sc;
+  }
+  if (best && (bS === 1 || (bS >= 0.95 && bS - s2 >= 0.04) || (bS >= 0.9 && bS - s2 >= 0.08))) return best;
+  return null;
+}
 /* LENH "GHEP DOI" (Nguyen yeu cau 2026-11-05 12:20): nguoi doc than go
-   tu khoa trong o config tuKhoaGhepDoi (mac dinh "ghep doi, ghep, doi" -
-   sua duoc trong admin, cach nhau dau phay) la tu ghep voi 1 nguoi doc
+   tu khoa trong o config tuKhoaGhepDoi (mac dinh "ghep doi, cuoi, yeu,
+   ket hon" - sua duoc trong admin, cach nhau dau phay) la tu ghep voi 1 nguoi doc
    than ngau nhien (uu tien khac gioi), giong co che follow. Khop khong
    dau qua stemHit nhu lenh hieu ung. Chi chay khi comment khong tag
-   duoc ai - tag cu the van uu tien truoc. Tat bang lenhGhepDoi. */
+   duoc ai - tag cu the van uu tien truoc. Tat bang lenhGhepDoi.
+   Ghep + ten nguoi choi khac (vd "ghep doi voi Linh"): ghep dung nguoi
+   do neu ho chua co doi dang xep hang / dang dien (xem findNamedInText
+   ben duoi); neu ho dang co doi trong hang cho thi ghep ngau nhien nhu
+   cu. BO luat cu "tu khoa don chi kich hoat khi cau <= 3 token" theo
+   yeu cau user 2026-11-05 — ten nguoi co khi dai (vd "Nguyen Thi Thu
+   Hang") lam cau dai ra, luat cu chan oan. Moi nguoi 20s moi goi lenh
+   1 lan. */
+const pairCmdAt = new Map();   // N6 + N9: cooldown rieng cho lenh ghep doi, 20s/nguoi
+const followPairAt = new Map();   // M3: cooldown rieng cho follow ghep doi, 20s/nguoi (nhu pairCmdAt)
 function pairCommand(user, text, origin) {
   if (cfg.lenhGhepDoi === false) return false;
   const kws = stemList(cfg.tuKhoaGhepDoi);
   if (!kws.length) return false;
   const tokens = foldCmd(text).split(' ').filter(Boolean);
   if (!tokens.length) return false;
-  if (!kws.some(kw => stemHit(tokens, kw, true))) return false;
+  const hit = kws.find(kw => stemHit(tokens, kw, true));
+  if (!hit) return false;
+  /* N6: 1 cau dua khong duoc ghep lai lien tuc — moi nguoi 20s moi goi
+     lenh ghep doi 1 lan (tinh ca lan het nguoi doc than). */
+  const now = Date.now();
+  if (now - (pairCmdAt.get(user.id) || 0) < 20000) return false;
+  mapSetCapped(pairCmdAt, user.id, now);
+  /* Ghep + ten: cau chat co ten 1 nguoi choi khac thi ghep DUNG nguoi
+     do (uu tien hon ghep ngau nhien) — mien la ho chua co doi dang xep
+     hang / dang dien. Ho dang co doi trong hang cho thi roi xuong ghep
+     ngau nhien ben duoi, khong cuop doi cua nguoi khac. */
+  const named = findNamedInText(text, user);
+  if (named) {
+    const ec = P.coupleOf(named.id);
+    const busy = ec && (ec.state === 'focus' || ec.state === 'queue' || ec.state === 'toStage' || ec.state === 'stage');
+    if (!busy) { requestCouple(user, named, origin || 'random'); return true; }
+  }
   const partner = randomSingleOpp(user) || randomSingle(user);
   if (!partner) {
     FX.hearts(10, 0.5, 0.55);
@@ -1287,12 +1537,19 @@ function pairCommand(user, text, origin) {
    mat + MC doc cau ru nguoi thuong vao live. Het nguoi phu hop thi moi
    quay ve ghep bong ma nhu cu. */
 function tryPairWith(user, partner, origin) {
-  if (String(partner.id).startsWith('tag:') && cfg.ghepDoiNgauNhien !== false) {
-    const alt = randomSingleOpp(user);
-    if (alt) {
-      const c = requestCouple(user, alt, origin);
-      if (c) { c.tagVangTen = partner.nickname; return c; }
+  if (String(partner.id).startsWith('tag:')) {
+    if (cfg.ghepDoiNgauNhien !== false) {
+      const alt = randomSingleOpp(user);
+      if (alt) {
+        const c = requestCouple(user, alt, origin);
+        if (c) { c.tagVangTen = partner.nickname; return c; }
+      }
     }
+    /* H8: het nguoi doc than de ghep tam — KHONG ghep voi bong ma nua
+       (truoc day requestCouple(user, ghost) tao nhan vat that cho
+       'tag:...' qua P.spawn). Bao khach ru nguoi thuong vao live. */
+    toast(`💌 ${partner.nickname} chưa vào phòng — chưa có ai độc thân để ghép tạm, rủ họ vào live nhé`, false);
+    return null;
   }
   return requestCouple(user, partner, origin);
 }
@@ -1300,7 +1557,7 @@ const tagFailAt = new Map();
 function tagFailToast(user) {
   const now = performance.now();
   if (now - (tagFailAt.get(user.id) || -1e9) < 6000) return;
-  tagFailAt.set(user.id, now);
+  mapSetCapped(tagFailAt, user.id, now);
   toast(`🔍 ${user.nickname} ơi, chưa thấy tên người thương sau @ — gõ đúng tên của họ nhé`, false);
 }
 /* ===== PIPELINE BOC TACH COMMENT (Nguyen chot 2026-11-05) =====
@@ -1329,6 +1586,7 @@ function tagFailToast(user) {
 function onChat(m, opts) {
   if (!m.user) return;
   ensureGuest(m.user);
+  markInteract(m.user);   // comment tinh la tuong tac (xem markInteract)
   const text = String(m.text || '');
   const origin = (opts && opts.origin) || 'manual';
   /* Nguon o muc LAN (people.js xep hang cho theo nguon): comment cua
@@ -1343,10 +1601,13 @@ function onChat(m, opts) {
     /* Tag CHINH MINH: parseTag loai nguoi tag khoi danh sach khop nen
        ten cua chinh minh tro thanh "nguoi vang mat" (bong ma) — khong
        ghep tam voi nguoi la, bao lai cho khach biet. */
-    if (partner && String(partner.id).startsWith('tag:') && foldName(partner.nickname) === foldName(m.user.nickname || '')) tagFailToast(m.user);
-    else if (partner) tryPairWith(m.user, partner, tagOrigin);
-    else tagFailToast(m.user);
-    return;
+    const selfTag = partner && String(partner.id).startsWith('tag:') && foldName(partner.nickname) === foldName(m.user.nickname || '');
+    if (selfTag) { tagFailToast(m.user); return; }
+    if (partner) { tryPairWith(m.user, partner, tagOrigin); return; }
+    tagFailToast(m.user);
+    /* N7: @ khong khop ai thi KHONG return ngay — roi xuong cac buoc
+       duoi (lenh he thong / hieu ung / goi ten / lenh ghep doi) de cau
+       vd "@ai do phao hoa" van no phao hoa thay vi chi hien toast. */
   }
   if (handleChatCommands(m.user, text)) return;
   if (chatFx(m.user, text)) return;
@@ -1368,21 +1629,25 @@ function scanLooseTag(text, self) {
   if (!tokens.length) return null;
   const wins = [];
   for (let n = 1; n <= 3; n++) for (let i = 0; i + n <= tokens.length; i++) wins.push(tokens.slice(i, i + n).join(''));
+  /* M13: fuzzy (levRatio) chi khi cau ngan (<= 6 tu) hoac co tu dai
+     (>= 6 ky tu, dang la ten go gan dung); cau dai toan tu ngan thi chi
+     khop chinh xac ten day du / ten goi — tranh quet fuzzy ca phong cho
+     moi chat thuong. */
+  const allowFuzzy = tokens.length <= 6 || tokens.some(t => t.length >= 6);
   let best = null, bS = 0, s2 = 0;
   for (const u of known.values()) {
     if (self && u.id === self.id) continue;
     if (!P.get(u.id)) continue;
     let sc = 0;
-    for (const cand of [u.nickname, u.uniqueId]) {
-      if (!cand) continue;
-      const cf = foldName(cand);
+    const fn = foldedNames(u);   // M13: ten gap lay tu cache theo user
+    for (const fc of [fn.nick, fn.uid]) {
+      const cf = fc.cf;
       if (cf.length < 4) continue;
-      const parts = foldCmd(cand).split(' ').filter(Boolean);
-      const given = parts.length ? foldName(parts[parts.length - 1]) : '';
+      const given = fc.given;
       for (const w of wins) {
         if (w === cf) { sc = 1; break; }
         if (given.length >= 3 && w === given) sc = Math.max(sc, 0.95);
-        else if (w.length >= 4) sc = Math.max(sc, tagSimilarity(w, cf));
+        else if (allowFuzzy && w.length >= 4) sc = Math.max(sc, tagSimilarity(w, cf));
       }
       if (sc === 1) break;
     }
@@ -1417,17 +1682,18 @@ function stemHit(tokens, stem, fuzzy) {
   if (!st.length) return false;
   return st.every(w => tokens.some(tk => tk === w || (fuzzy && w.length >= 4 && levRatio(tk, w) >= 0.8)));
 }
-/* Tra ve TRUE khi comment THUOC case hieu ung (khop tu khoa) — pipeline
-   dung o do ke ca khi hieu ung dang bi cooldown chua ban duoc; FALSE
-   khi khong phai cau hieu ung. */
+/* Tra ve TRUE khi comment THUOC case hieu ung VA hieu ung DA BAN that —
+   pipeline dung o do. FALSE khi khong phai cau hieu ung, hoac hieu ung
+   dang bi cooldown chan (N2: de onChat chay tiep sang scanLooseTag /
+   pairCommand thay vi nuot mat ghep doi). */
 function chatFx(user, text) {
   if (cfg.hieuUngChat === false) return false;
   const tokens = foldCmd(text).split(' ').filter(Boolean);
   if (!tokens.length) return false;
   const rules = [
-    { list: cfg.lenhPhaoGiay, go: () => { FX.confetti(90); toast('🎉 ' + user.nickname + ' bắn pháo giấy!', false); } },
-    { list: cfg.lenhPhaoHoa, go: () => { FX.fireworks(3); toast('🎆 ' + user.nickname + ' bắn pháo hoa!', false); } },
-    { list: cfg.lenhHoaRoi, go: () => { FX.petals(120); toast('🌸 ' + user.nickname + ' gọi hoa rơi!', false); } },
+    { list: cfg.lenhPhaoGiay, go: () => { FX.confetti(giftNum('donViPhaoGiay', 100)); toast('🎉 ' + user.nickname + ' bắn pháo giấy!', false); } },
+    { list: cfg.lenhPhaoHoa, go: () => { FX.fireworks(giftNum('donViPhaoHoa', 5)); toast('🎆 ' + user.nickname + ' bắn pháo hoa!', false); } },
+    { list: cfg.lenhHoaRoi, go: () => { FX.petals(giftNum('donViHoaRoi', 100)); toast('🌸 ' + user.nickname + ' gọi hoa rơi!', false); } },
   ];
   /* Hai vòng: vòng 1 khớp ĐÚNG từ — ý định rõ ràng thắng mọi suy đoán
      (vd "chúc mừng": pháo hoa có từ đúng 'chuc'/'mung' phải thắng pháo
@@ -1438,8 +1704,11 @@ function chatFx(user, text) {
     for (const r of rules) {
       if (stemList(r.list).some(st => stemHit(tokens, st, fuzzy))) {
         const now = Date.now();
-        if (now - (fxCmdAt.get(user.id) || 0) >= (Number(cfg.lenhHieuUngChoGiay) || 8) * 1000) { fxCmdAt.set(user.id, now); r.go(); }
-        return true;
+        if (now - (fxCmdAt.get(user.id) || 0) >= (Number(cfg.lenhHieuUngChoGiay) || 8) * 1000) { mapSetCapped(fxCmdAt, user.id, now); r.go(); return true; }
+        /* N2: hieu ung khop nhung dang bi cooldown chan -> KHONG chan
+           pipeline: tra false de onChat chay tiep sang scanLooseTag /
+           pairCommand thay vi nuot mat ghep doi. */
+        return false;
       }
     }
   }
@@ -1485,7 +1754,7 @@ function npcRealCount() {
 }
 function npcStageBusy() {
   if (lastQueueLen > 0) return true;
-  for (const c of coupleByKey.values()) if (c && c.a.couple === c && (c.state === 'focus' || c.state === 'queue' || c.state === 'toStage')) return true;   // c.a.couple === c: bo qua muc thua cua cap da tan con sot trong so coupleByKey
+  for (const c of coupleByKey.values()) if (c && c.a.couple === c && (c.state === 'queue' || c.state === 'toStage' || (c.state === 'focus' && !c.coolTimer))) return true;   // c.a.couple === c: bo qua muc thua cua cap da tan con sot trong so coupleByKey; cap focus dang cho het gio nghi (co coolTimer) khong chan NPC — nhu autoPairTick
   const f = P.featured();
   // Cap that dang dien thi phai cho xong. NGOAI LE: cap NPC dang "giu san
   // khau" (hold = het gio dien ma chua co cap ke nen tam dung lai) thi
@@ -1525,7 +1794,11 @@ function npcTick() {
   const b = shuffled.find(u => u !== a && P.isGirl(u.id) !== aGirl) || shuffled.find(u => u !== a);
   if (!b) return;
   NPC.lastTagAt = Date.now();
-  onChat({ user: known.get(a.id) || a, text: '@' + b.nickname }, { origin: 'npc' });
+  /* H8: NPC ghep thang NPC qua requestCouple, khong di vong onChat('@ten')
+     nua — parseTag co the khop nham sang khach that trung ten voi NPC.
+     Toast + loi MC gioi thieu cap moi van giu nguyen: toast o requestCouple,
+     MC o P.onPairReveal khi cap len san khau. */
+  requestCouple(a, b, 'npc');
 }
 
 /* TU GHEP DOI KHI HANG CHO TRONG (Nguyen yeu cau 2026-11-05 12:36):
@@ -1534,6 +1807,12 @@ function npcTick() {
    DOC THAN dang co mat trong sanh (uu tien khac gioi), di dung duong
    onChat -> requestCouple nhu khach tu tag nhau (MC gioi thieu, len
    san khau nhu thuong). Tat bang tuGhepDoiKhiRong.
+   Boc tham trong nhom TUONG TAC GAN NHAT (Nguyen 2026-11-05): nguoi
+   trong sanh chua chac con xem live; nguoi vua tha tim/comment/tang
+   qua/chia se (co lastInteract moi nhat — xem markInteract) thi chac
+   chan con xem, len san khau la thay minh ngay. Lay 5 nguoi doc than
+   tuong tac gan nhat lam nhom boc tham; chua co 2 nguoi tuong tac thi
+   boc trong ca sanh nhu cu.
    NPC KHONG nam trong danh sach nay: NPC co duong ghep rieng (npcTick,
    chi chay khi phong vang) — hai he tu dong khong de len nhau, tranh
    NPC bi ghep ca khi phong dang dong khach that. */
@@ -1541,18 +1820,31 @@ let queueEmptySince = Date.now();
 function autoPairTick() {
   if (cfg.tuGhepDoiKhiRong === false) { queueEmptySince = Date.now(); return; }
   let transit = false;
-  for (const c of coupleByKey.values()) if (c && c.a.couple === c && (c.state === 'focus' || c.state === 'toStage')) { transit = true; break; }   // c.a.couple === c: chi tinh cap con song, bo qua muc thua cua cap da tan con sot trong so
+  /* Cap 'focus' dang CHO HET GIO NGHI (co coolTimer — cho toi 300s)
+     KHONG tinh la transit: no khong sap vao hang, neu tinh thi tu ghep
+     bi chan ca buoi trong khi san khau trong. Chi 'toStage' va 'focus'
+     gioi thieu 3.6s (chua co coolTimer) moi chan tu ghep. */
+  for (const c of coupleByKey.values()) if (c && c.a.couple === c && (c.state === 'toStage' || (c.state === 'focus' && !c.coolTimer))) { transit = true; break; }   // c.a.couple === c: chi tinh cap con song, bo qua muc thua cua cap da tan con sot trong so
   if (lastQueueLen > 0 || transit) { queueEmptySince = Date.now(); return; }
   if (Date.now() - queueEmptySince < (Number(cfg.tuGhepDoiSauGiay) || 5) * 1000) return;
   const singles = [];
   for (const u of known.values()) { const p = P.get(u.id); if (p && !p.npc && !p.couple && (p.state === 'home' || p.state === 'walk')) singles.push(u); }
   if (singles.length < 2) { queueEmptySince = Date.now(); return; }
-  const a = singles[Math.floor(Math.random() * singles.length)];
+  /* Nhom boc tham = 5 nguoi doc than tuong tac GAN NHAT (lastInteract
+     moi nhat — chi tinh like/comment/tang qua/chia se, xem markInteract);
+     chua co 2 nguoi tuong tac thi boc trong ca sanh nhu cu. */
+  const interacted = singles.filter(u => (((P.get(u.id) || {}).lastInteract || 0) > 0));
+  const pool = interacted.slice().sort((x, y) => (((P.get(y.id) || {}).lastInteract || 0) - ((P.get(x.id) || {}).lastInteract || 0))).slice(0, 5);
+  const pickFrom = pool.length >= 2 ? pool : singles;
+  const a = pickFrom[Math.floor(Math.random() * pickFrom.length)];
   const aGirl = P.isGirl(a.id);
-  const b = singles.find(u => u !== a && P.isGirl(u.id) !== aGirl) || singles.find(u => u !== a);
+  const b = pickFrom.find(u => u !== a && P.isGirl(u.id) !== aGirl) || pickFrom.find(u => u !== a);
   if (!b) { queueEmptySince = Date.now(); return; }
   queueEmptySince = Date.now();
-  onChat({ user: known.get(a.id) || a, text: '@' + b.nickname }, { origin: 'autopair' });
+  /* H8: ghep thang qua requestCouple nhu npcTick (khong di vong onChat
+     '@ten' de tranh parseTag khop nham ten); toast + MC gioi thieu van
+     nhu cu (xem npcTick). */
+  requestCouple(a, b, 'autopair');
 }
 setInterval(autoPairTick, 1000);
 
@@ -1562,21 +1854,22 @@ setInterval(autoPairTick, 1000);
    timHieuUngChoGiay giay (mac dinh 2) moi kich hoat lai; tat bang
    hieuUngThaTim. Moc 50 tim/nguoi van nhay chuc mung nhu luat cu
    (truoc day mapper every=50 -> dance; nay mapper every=1 -> action
-   'like' va game tu dem moc). Nguoi chi tha tim KHONG hien nhan vat
-   trong sanh (giu nhu cu - chi join/comment moi vao sanh). */
+   'like' va game tu dem moc). Nguoi chi tha tim VAN hien nhan vat trong
+   sanh (qua handler 'seen' — tha tim tinh la khach den du); comment cu
+   ghi "KHONG hien" la sai (H9). */
 const likeFxAt = new Map();
 const likeTotals = new Map();
 function onLike(ev) {
   const u = ev.user; if (!u || !u.id) return;
   const n = Math.max(1, Number(ev.count) || 1);
   const tot = (likeTotals.get(u.id) || 0) + n;
-  likeTotals.set(u.id, tot);
+  mapSetCapped(likeTotals, u.id, tot);
   if (Math.floor(tot / 50) > Math.floor((tot - n) / 50)) P.danceAll(5);
   if (cfg.hieuUngThaTim === false) return;
   const now = performance.now();
   const cdMs = (cfg.timHieuUngChoGiay != null ? cfg.timHieuUngChoGiay : 2) * 1000;
   if (now - (likeFxAt.get(u.id) || -1e9) < cdMs) return;
-  likeFxAt.set(u.id, now);
+  mapSetCapped(likeFxAt, u.id, now);
   const r = Math.random();
   if (r < 1 / 3) FX.petals(55);
   else if (r < 2 / 3) FX.fireworks(1);
@@ -1584,7 +1877,10 @@ function onLike(ev) {
 }
 function handle(ev) {
   const src = ev.source || {};
-  if (ev.user && ev.action !== 'like') ensureGuest(ev.user);   // chi tha tim thi chua vao sanh (giu nhu cu)
+  /* H9: 'like' khong spawn truc tiep o day — nhung nguoi tha tim VAN vao
+     sanh qua handler 'seen' (xem .on('seen') o khoi dong: tha tim tinh
+     la khach den du), nhat quan voi quyet dinh tha tim tinh la tuong tac. */
+  if (ev.user && ev.action !== 'like') ensureGuest(ev.user);
   if (ev.action === 'join' && ev.user) greet(ev.user);
   if (ev.action === 'couple') {
     const tagged = src.text && parseTag(src.text, ev.user);
@@ -1592,38 +1888,63 @@ function handle(ev) {
     if (ev.user && partner) requestCouple(ev.user, partner, tagged ? 'tag' : 'random');
   } else if (ev.action === 'spotlight') {           // follow
     if (!ev.user) return;
-    const partner = randomSingle(ev.user);
-    if (partner) requestCouple(ev.user, partner, 'follow');
-    else FX.hearts(12, 0.5, 0.6);
+    /* M3: follow ghep doi nhu pairCommand — uu tien khac gioi, co
+       cooldown rieng 20s/nguoi (truoc day randomSingle + khong
+       cooldown nen spam follow tan/ghep lai cap court lien tuc). */
+    const nowF = Date.now();
+    if (nowF - (followPairAt.get(ev.user.id) || 0) >= 20000) {
+      mapSetCapped(followPairAt, ev.user.id, nowF);
+      const partner = randomSingleOpp(ev.user) || randomSingle(ev.user);
+      if (partner) requestCouple(ev.user, partner, 'follow');
+      else FX.hearts(12, 0.5, 0.6);
+    }
     mcReact(2.9, MC.follow, { ten: ev.user.nickname });   // follow xếp SAU mọi câu cảm ơn quà (Nguyen yêu cầu 2026-11-04)
   } else if (ev.action === 'dance') {
     P.danceAll(5);
   } else if (ev.action === 'like') {
+    markInteract(ev.user);   // tha tim tinh la tuong tac (xem markInteract)
     onLike(ev);
   } else if (ev.action === 'fireworks') {
-    FX.fireworks(Math.max(1, Math.min(6, ev.value || 1)));
+    /* C1 — mot nguon duy nhat ban FX: event mapper chi ban khi KHONG phai
+       qua (giftFx o khoi gift duoi day da ban) va KHONG phai chat
+       (onChat/chatFx da ban) — khong thi 1 qua/chat bi ban 2 dot. */
+    if (src.kind !== 'gift' && src.kind !== 'chat') FX.fireworks(Math.max(1, Math.min(6, ev.value || 1)));
   } else if (ev.action === 'petals') {
-    FX.petals(60 + (ev.value || 1) * 40);
+    if (src.kind !== 'gift' && src.kind !== 'chat') FX.petals(60 + (ev.value || 1) * 40);
   } else if (ev.action === 'confetti') {
-    FX.confetti(50 + (ev.value || 1) * 25);
+    if (src.kind === 'share') markInteract(ev.user);   // chia se tinh la tuong tac (xem markInteract)
+    if (src.kind !== 'gift' && src.kind !== 'chat') FX.confetti(50 + (ev.value || 1) * 25);
   }
 
   if (src.kind === 'gift') {
-    const dia = Math.max(0, Number(ev.diamonds || ev.value || 1));
-    const featured = P.featured() || P.coupleOf(ev.user && ev.user.id);
-    if (featured) coupleScore(featured, dia * 50);
+    markInteract(ev.user);   // tang qua tinh la tuong tac (xem markInteract)
+    /* H7: diamonds khong phai so ("abc") -> Number = NaN, Math.max(0, NaN)
+       = NaN, guard pts <= 0 khong chan duoc (NaN <= 0 la false) -> diem
+       nhiem NaN vinh vien (luu luon vao localStorage). Ep ve 0 + chi
+       cong diem khi dia huu han va > 0. */
+    const dia = Number(ev.diamonds || ev.value || 1) || 0;
+    /* M2: diem ve cap cua CHINH NGUOI TANG truoc, khong co moi toi cap
+       tam diem (truoc day featured uu tien tuyet doi nen cap cua nguoi
+       tang khong bao gio nhan diem khi da co cap tren san khau). */
+    const featured = P.coupleOf(ev.user && ev.user.id) || P.featured();
+    if (featured && isFinite(dia) && dia > 0) coupleScore(featured, dia * 50);
     giftFx(dia);
     if (dia >= 99) showBanner(`🎁 ${ev.user ? ev.user.nickname : 'Khách quý'} VỪA MỪNG CƯỚI LỚN!`, 5200);
     A.bell(dia >= 30 ? 3 : 1);
     mcReact(giftVoicePrio(dia), MC.thank, { ten: ev.user ? ev.user.nickname : 'Bạn' });
     toast(`🎁 ${ev.user ? ev.user.nickname : 'Khách'} tặng ${src.giftName || 'quà'}${dia >= 99 ? ' — pháo hoa rực trời!' : ''}`, dia >= 30);
     addLedger(ev.user, src.giftName, dia);
-    if (cfg.uuTienQuaTang !== false) giftPriority(ev.user);
+    if (cfg.uuTienQuaTang !== false) giftPriority(ev.user, dia);
   }
   refreshBg(false);
 }
+/* L16 — server gui block dang {type:'block', user:{id,uniqueId}} (xem
+   LiveBridge/server.js), khong phai {userId,uniqueId} o top-level nhu
+   code cu doc — nen truoc day khong bao gio xoa duoc ai. Doc ca hai
+   dang de tuong thich. */
 function onBlock(m) {
-  for (const raw of [m && m.userId, m && m.uniqueId]) {
+  const u = (m && m.user) || {};
+  for (const raw of [m && m.userId, m && m.uniqueId, u.id, u.uniqueId]) {
     if (!raw) continue;
     for (const [id] of known) {
       if (id === raw) { P.removeUser(id); known.delete(id); }
@@ -1640,7 +1961,6 @@ function applyPanelPos() {
   const root = document.documentElement.style;
   const px = (v, base) => ((Number(v) || 0) / 100 * (base || 0)) + 'px';
   root.setProperty('--plx', px(cfg.khungTraiX, SW)); root.setProperty('--ply', px(cfg.khungTraiY, SH));
-  root.setProperty('--prx', px(cfg.khungPhaiX, SW)); root.setProperty('--pry', px(cfg.khungPhaiY, SH));
   root.setProperty('--mcx', px(cfg.khungMcX, SW)); root.setProperty('--mcy', px(cfg.khungMcY, SH));
   /* Vị trí + cỡ chữ TỪNG KHUNG (Nguyen yêu cầu 2026-11-04 23:41): mỗi
      khung một cặp lệch X/Y riêng (% khung hình, áp qua thuộc tính CSS
@@ -1680,8 +2000,19 @@ function applyConfig(c) {
      chứng các bản admin cũ) — asList ép hết về mảng chuỗi sạch. 1 key sai
      kiểu không được phép giết cả quá trình áp config/UI (lỗi 2026-11-04:
      màn hình mất hết khung/BXH/MC dù sự kiện vẫn chạy). */
-  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'rulesLines', 'guideLines', 'npcDanhSach']) {
+  for (const k of ['mcLines', 'mcFunny', 'mcCouple', 'mcThank', 'mcGreet', 'mcFollowLines', 'mcMilestone', 'mcTagVang', 'mcTagDaCoDoi', 'mcSapMoc', 'mcGuide', 'rulesLines', 'guideLines', 'npcDanhSach']) {
     cfg[k] = asList(cfg[k]).filter(x => typeof x === 'string');
+  }
+  /* M14b: xây TIERS từ cfg.bgRules (một nguồn sự thật); bgRules thiếu/
+     rỗng/không còn mục hợp lệ thì giữ TIERS hiện tại (fallback hardcode).
+     Preload nền của mốc mới (admin thêm mốc thì file chưa có trong đợt
+     preload lúc mở game); đặt lại BG.tier để refreshBg áp lại đúng
+     FX/vương miện/pool đồ theo TIERS mới thay vì giữ trạng thái cũ. */
+  const built = buildTiersFromBgRules(cfg.bgRules);
+  if (built) {
+    TIERS = built;
+    BG.tier = -1;
+    for (const t of TIERS) preloadOne(t.file);
   }
   if (cfg.mcName) MC.name = cfg.mcName;
   /* HAI MC LUÂN PHIÊN (Nguyen yêu cầu 2026-11-04): 1 nam + 1 nữ, hiện lên
@@ -1738,7 +2069,7 @@ function applyConfig(c) {
   }
   if (cfg.coupleSec) P.coupleSec = cfg.coupleSec;
   if (cfg.nhaCapTiepSauGiay) P.releaseSec = cfg.nhaCapTiepSauGiay;
-  P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, pairOffC: cfg.lechCapGiua, pairOffS: cfg.lechCapBen, spotSide: cfg.tamCapBen, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong, quietMax: cfg.phongVangDuoi });
+  P.setTune({ boost: cfg.phongToGoiTen, scaleC: cfg.coCapGiua, pairOffC: cfg.lechCapGiua, priorityOn: cfg.uuTienChoTrong !== false, crowdMin: cfg.nguongDongNguoi, staleMin: cfg.phutImMatCho, innerRatio: cfg.tyLeChoTrong, quietMax: cfg.phongVangDuoi, agingMs: cfg.choDoiLanThapGiay != null ? cfg.choDoiLanThapGiay * 1000 : undefined });
   FX.setTier(BG.tier < 0 ? 0 : BG.tier);
   applyPanelPos();
   try { applyShowAll(); } catch (e) { console.warn('[dam-cuoi] showall:', e.message); }
@@ -1769,11 +2100,13 @@ function resize() {
   const compact = navigator.webdriver || /live|obs/i.test(navigator.userAgent) || q.has('compact') ? 0 : 1;
   stageEl.style.width = sw + 'px'; stageEl.style.height = sh + 'px';
   if (compact) {
-    const top = Math.max(0, innerHeight * 0.10);
-    root.setProperty('--k', u0 < 2.8 && Hpx > Wpx ? '1.55' : '1');
-    root.setProperty('--safe', top + 'px');
+    /* L7: nguong cu (u0 < 2.8, tuc be ngang san khau < 280px) gan nhu khong
+       bao gio cham tren dien thoai that (360px tro len) nen nhanh tang co
+       chu compact chet — sua theo be ngang thuc: man hinh doc <= 400px
+       (dien thoai 360-390px) thi phong chu 1.55. */
+    root.setProperty('--k', sw < 400 && Hpx > Wpx ? '1.55' : '1');
   } else {
-    root.setProperty('--k', '1.2'); root.setProperty('--safe', '0px');
+    root.setProperty('--k', '1.2');
   }
   /* --side LUÔN = 0: các khung nằm TRONG #stage nên chỉ được bám mép sân
      khấu. Trước đây nhánh compact gán --side = fitW (khoảng trống NGOÀI sân
@@ -1831,12 +2164,16 @@ let audioInited = false;
 function initAudio() {
   if (audioInited) return;
   audioInited = true;
+  /* C2: noi trang thai am thanh vao hop chan doan __diag (co san o
+     index.html) de streamer biet game dang cam hay co tieng — chi ghi
+     vao object __diag, khong them field hien thi moi. */
+  A.onState = st => { try { if (window.__diag) window.__diag.audio = st; } catch (e) {} };
   A.init();
 }
 
 /* ============ Khởi động ============ */
 FX.init($('fx'));
-P.init($('people'), $('tables'));
+P.init($('people'));
 resize();
 Cam.home();
 refreshBg(false);
@@ -1861,13 +2198,14 @@ if (isDemo) {
     coupleSec: 9, nhaCapTiepSauGiay: 6,
     phongToGoiTen: 1.32, coCapGiua: 1.22,
     phongVangDuoi: 15, liaCamNguoiMoiKhiVang: true, liaCamNguoiMoiGiay: 4,
-    zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8, lechCapBen: 1.7, tamCapBen: 42,
+    zoomGoiTen: 1.18, zoomBamTheo: 1.08, lechCapGiua: 1.8,
     uuTienChoTrong: true, nguongDongNguoi: 70, phutImMatCho: 4, tyLeChoTrong: 0.45,
     mcMinSec: 16, mcMaxSec: 24,
     npcTuDong: true, npcNguongVang: 6, npcMoiBaoLauGiay: 25, npcNghiGiay: 60,
     npcDanhSach: ['Ngọc Linh', 'Tuấn Kiệt', 'Mỹ Duyên', 'Minh Đức', 'Hồng Nhung', 'Quốc Bảo', 'Thu Hằng', 'Hoàng Long', 'Phương Thảo', 'Tiến Dũng'],
     hieuUngChat: true, hienBangLenh: true, lenhHieuUngChoGiay: 8,
-    lenhHoaRoi: 'hoa,roi,tung,vui', lenhGhepDoi: true, tuKhoaGhepDoi: 'ghép đôi, ghep doi, ghep, doi, cưới, cuoi, kết hôn, ket hon', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
+    lenhHoaRoi: 'hoa,roi,tung,vui', lenhGhepDoi: true, tuKhoaGhepDoi: 'ghép đôi, ghep doi, cưới, cuoi, yêu, yeu, kết hôn, ket hon', lenhPhaoHoa: 'phao,chuc,mung', lenhPhaoGiay: 'giay,hanh,phuc,ve',
+    quaTangMocLon: 299, quaTangMocVua: 99, quaTangHieuUngLon: 10, quaTangHieuUngVua: 5, quaTangHieuUngNho: 1, donViHoaRoi: 100, donViPhaoHoa: 5, donViPhaoGiay: 100,
     khungHuongDanX: 0, khungHuongDanY: 0, khungMucTieuX: 0, khungMucTieuY: 0, khungDemCapX: 0, khungDemCapY: 0,
     khungBxhX: 1, khungBxhY: 0, khungSoMungX: 1, khungSoMungY: 5.8, khungBangLenhX: 1, khungBangLenhY: 1,
     coChuHuongDan: 110, coChuMucTieu: 100, coChuDemCap: 110, coChuBxh: 110, coChuSoMung: 110, coChuBangLenh: 130, coChuHangCho: 110, coChuMc: 100,
@@ -1892,7 +2230,7 @@ if (isDemo) {
     hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,
     fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20, hieuUngThaTim: true, timHieuUngChoGiay: 2, tuGhepDoiKhiRong: true, tuGhepDoiSauGiay: 5,
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
-    hangChoToiDa: 4,
+    hangChoToiDa: 4, choDoiLanThapGiay: 30,
     bannerY: 30,
     khungTraiX: 0, khungTraiY: 2, khungPhaiX: 0, khungPhaiY: 2, khungHangChoX: 1, khungHangChoY: 1, khungMcX: 0, khungMcY: -6,
     hienBongChat: true, bongChatGiay: 4, bongChatMaxKyTu: 60, bongChatAnKhiTuCamQua: 2,
@@ -1926,23 +2264,36 @@ if (isDemo) {
       'Ê {a}, {c} đang nhìn kìa! Còn tag {b} nữa là tối nay có người ngủ sofa đó!',
       '{b} đã có đôi rồi, {a} đừng buồn — sảnh cưới còn bao nhiêu người độc thân đang chờ {a} kìa!',
     , '{a} ơi, bước này hơi sai nhạc rồi: {b} đang là một nửa của {c}. Mình quay xe tìm người còn độc thân nhé!', 'MC xin phép nhắc khéo {a}: {b} và {c} đã khóa tim nhau rồi. Đừng gõ cửa nhà có chủ, sảnh còn nhiều cửa đang mở!', '{a} nhanh tay thật, nhưng {b} đã sánh đôi cùng {c}. Thôi thì chúc phúc cho họ rồi mình đi tìm duyên của riêng mình!', 'Tình huống khó xử quá: {a} tag {b}, còn {c} thì là bạn đời của {b} trong sảnh này. {a} đổi mục tiêu đi, MC cổ vũ!', '{b} đã có {c} kề bên rồi, {a} chen vào là thành vai phụ bất đắc dĩ đó. Ngoài kia còn nhiều người đang chờ được tag mà!', 'Thôi {a} đừng buồn, {b} thuộc về {c} là duyên của họ. Biết đâu người hợp với {a} đang đọc bình luận và chờ bạn gọi tên!'],
-    musicOn: true, musicVolume: 0.5, sfxOn: true, sfxVolume: 0.8,
+    musicOn: true, musicVolume: 35, sfxOn: true, sfxVolume: 55,
   });
   initAudio();
   startDemo();
+} else if (typeof LiveBridgeClient === 'undefined') {
+  /* H10/H10b: mo game khong qua dung goc LiveBridge (copy rieng thu muc
+     game, file client 404) -> LiveBridgeClient la undefined, new o duoi
+     se nem ReferenceError giua khoi dong (mcRandomLoop/W.handle/__diag/
+     initAudio khong chay). Bao ro ly do, ap cau hinh mac dinh tich hop
+     san roi mo audio — NPC chay binh thuong qua npcSync trong applyConfig
+     (khong can cho config tu LiveBridge). */
+  if (window.__diag) window.__diag.uiErr = 'thiếu file livebridge-client.js — chạy bằng cấu hình mặc định';
+  applyConfig({ ...DEFAULT_CFG });
+  initAudio();
 } else {
   // LiveBridgeClient dùng API .on('event'|'chat'|'hello'|'config'|'status'|'block'|'seen')
   // — bản cũ truyền onConfig/onEvent qua opts nên client BỎ QUA hết: live thật sẽ
   // không nhận được config lẫn sự kiện TikTok. URL lấy theo đúng cổng đang mở game.
   const bridgeUrl = 'ws://' + location.hostname + ':' + (location.port || '8787');
+  /* H10b: co theo doi config that — qua 8s chua thay thi ap cau hinh
+     mac dinh de NPC chay (xem timer sau .connect()). */
+  let gotRealConfig = false, fallbackTimer = null;
   const bridge = new LiveBridgeClient({ url: bridgeUrl, game: 'dam-cuoi' });
   if (window.NpcVoice) NpcVoice.attach(bridge);   // MC nói -> báo LiveBridge để voice khán giả tự tắt tiếng
   bridge
     .on('event', handle)
     .on('chat', onChat)
     .on('block', onBlock)
-    .on('config', m => applyConfig(m.config))
-    .on('hello', h => { if (h && h.config) applyConfig(h.config); })
+    .on('config', m => { gotRealConfig = true; if (fallbackTimer) clearTimeout(fallbackTimer); applyConfig(m.config); })
+    .on('hello', h => { if (h && h.config) { gotRealConfig = true; if (fallbackTimer) clearTimeout(fallbackTimer); applyConfig(h.config); } })
     .on('open', () => { if (window.__diag && window.__diag.stage !== 'config-ok') window.__diag.stage = 'ws-ok'; })
     .on('seen', m => { if (m && m.user) ensureGuest(m.user); })   // thả tim cũng tính là khách đến dự
     .on('reset-scores', resetAll)   // nút "Reset điểm" ở trang quản trị LiveBridge
@@ -1953,6 +2304,11 @@ if (isDemo) {
       else say('Đang chờ kết nối LIVE…', '');
     })
     .connect();
+  /* H10b: LiveBridge co nhung 8s van chua tra config (server cham/khong
+     tra) -> ap cau hinh mac dinh, NPC chay; config that den muon thi
+     applyConfig chay lai va ghi de, npcSync co guard NPC.started nen
+     khong spawn trung NPC. */
+  fallbackTimer = setTimeout(() => { if (!gotRealConfig) applyConfig({ ...DEFAULT_CFG }); }, 8000);
   setTimeout(initAudio, 300);
 }
 mcRandomLoop(true);

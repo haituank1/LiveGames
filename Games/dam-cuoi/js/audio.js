@@ -26,9 +26,15 @@ A.init = async function () {
   }
   const unlock = () => A.resume();
   addEventListener('pointerdown', unlock); addEventListener('keydown', unlock);
+  /* C2 — OBS / LIVE Studio khong bao gio co gesture (pointerdown /
+     keydown) nen AudioContext ket o 'suspended' mai: tu resume dinh ky
+     moi giay + ngay khi tab hien lai. A.resume() da guard ctx null nen
+     goi som cung an toan. */
+  setInterval(() => A.resume(), 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) A.resume(); });
   let media = null;
   try { const r = await fetch('/api/media?game=' + GAME_ID); if (r.ok) media = await r.json(); } catch (_) { /* không chạy qua LiveBridge */ }
-  playlist = media ? media.music : [];
+  playlist = (media && media.music) || [];
   startMusic();
 };
 A.state = () => (ctx && ctx.state === 'suspended') || bgmBlocked ? 'suspended' : 'running';
@@ -40,6 +46,10 @@ A.resume = function () {
 function notify() { if (A.onState) A.onState(A.state()); }
 A.setConfig = function (c) {
   for (const k of Object.keys(cfg)) if (c[k] != null) cfg[k] = c[k];
+  /* C3 — phong thu nham thang volume: neu gia tri truyen theo thang
+     0-1 (vd demo cu musicVolume 0.5 / sfxVolume 0.8) thi nhan 100 ve
+     thang 0-100 ma applyVolumes() dung; gia tri > 1 giu nguyen. */
+  for (const k of ['musicVolume', 'sfxVolume']) if (cfg[k] > 0 && cfg[k] <= 1) cfg[k] = cfg[k] * 100;
   applyVolumes();
   if (!cfg.musicOn) { if (bgm) bgm.pause(); ambientStop(); }
   else startMusic();
@@ -100,6 +110,11 @@ function ambientStart() {
   let step = 0;
   const bar = () => {
     if (!ambientOn) return;
+    /* C2: ctx dang 'suspended' thi currentTime dung yen — len lich not
+       theo gio tuong se don nhieu bar ve cung 1 moc thoi gian ctx, luc
+       resume se phat chap nhieu hop am. Hoan bar lai 1s, chua dat
+       ambientTimer kieu cu. */
+    if (!ctx || ctx.state !== 'running') { ambientTimer = setTimeout(bar, 1000); return; }
     const c = CHORDS[step % CHORDS.length], t = ctx.currentTime + 0.05;
     pluck(c.bass, t, 0.20, 3.6);
     c.notes.forEach((f, i) => pluck(f, t + i * 0.42, 0.13, 3));
@@ -127,7 +142,15 @@ const ready = (name, gap) => {
   if (now - (last[name] || -1e9) < gap) return false;
   last[name] = now; return true;
 };
-A.bell = function () { if (ready('bell', 1.2)) { bell(659.25, 0.30, 3.2); bell(987.77, 0.16, 2.4, ctx.currentTime + 0.14); } };
+A.bell = function (times) {
+  if (!ready('bell', 1.2)) return;   // M9 — 1 lần gọi = 1 tràng chuông, kể cả chuông nhiều lần
+  const n = Math.max(1, Math.min(5, Math.floor(times) || 1));
+  const t0 = ctx.currentTime;
+  for (let i = 0; i < n; i++) {   // mỗi lần cách nhau 1s: đủ nghe rõ từng tiếng, không dồn vào nhạc nền
+    const t = t0 + i * 1.0;
+    bell(659.25, 0.30, 3.2, t); bell(987.77, 0.16, 2.4, t + 0.14);
+  }
+};
 A.boom = function () {
   if (!ready('boom', 0.35)) return;
   const t = ctx.currentTime;

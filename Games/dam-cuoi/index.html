@@ -19,7 +19,7 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   window.addEventListener('unhandledrejection', function (e) { rec('promise: ' + ((e.reason && e.reason.message) || e.reason)); });
   var ce = console.error.bind(console);
   console.error = function () { try { rec(Array.prototype.map.call(arguments, function (a) { return (a && a.message) || String(a); }).join(' ')); } catch (_) {} return ce.apply(null, arguments); };
-  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
   var t = 0;
   var iv = setInterval(function () {
     t++;
@@ -41,10 +41,10 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
 })();
 </script>
 <style>
-  :root{--u0:4px;--k:1.2;--u:var(--u0);--safe:0px;--side:0px}
+  :root{--u0:4px;--k:1.2;--u:var(--u0);--side:0px}
   #left,#side,#mc,#queue{--u:calc(var(--u0)*var(--k))}
   html,body{margin:0;height:100%;overflow:hidden;background:#2a0a18;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;background:#2a0a18}
+  #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100vw;height:100vh;overflow:hidden;background:#2a0a18}
   #bootdiag{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:99999;max-width:94%;background:rgba(20,0,8,.93);color:#ffd9e2;border:1px solid #ff5b7f;border-radius:10px;padding:8px 10px;font-size:11px;line-height:1.55;text-align:center;display:none;pointer-events:none}
   /* ---------- Phòng cưới rộng + camera lia ---------- */
   #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;background:#430b18}
@@ -224,7 +224,7 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   </div>
   <div id="beams"><div class="rays"></div><div class="spot l"></div><div class="spot c"></div><div class="spot r"></div></div>
   <div id="royalglow"></div>
-  <canvas id="fx"></canvas>
+  <canvas id="fx" aria-hidden="true"></canvas>
   <div id="banner"></div>
   <div id="flash"></div>
   <div id="left">
@@ -244,7 +244,7 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
     <div class="pic">
       <img src="img/mc.png" alt="MC">
     </div>
-    <div class="say"><b>MC</b><span></span></div>
+    <div class="say" aria-live="polite"><b>MC</b><span></span></div>
   </div>
 </div>
 

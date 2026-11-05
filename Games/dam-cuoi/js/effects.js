@@ -5,6 +5,21 @@
 const W = (window.Wedding = window.Wedding || {});
 const E = (W.effects = {});
 let cv, ctx, w = 1, h = 1;
+let rafId = 0, fxHidden = document.hidden, fwTimers = [];   // M11 — id rAF + handle timeout pháo hoa đang chờ
+function startLoop() { if (!rafId) { lastT = 0; rafId = requestAnimationFrame(loop); } }
+function stopLoop() { if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
+/* M11 — tab ẩn: rAF vốn đã dừng nhưng setInterval ở main.js vẫn gọi FX.*
+   nên hạt cứ tích vào mảng (tối đa 1400) rồi nổ dồn khi quay lại tab.
+   Ẩn thì dừng hẳn vòng lặp + hủy timeout pháo hoa đang chờ + chặn spawn
+   mới (xem add()); hiện thì chạy lại. API FX.* mà main.js gọi giữ nguyên. */
+document.addEventListener('visibilitychange', () => {
+  fxHidden = document.hidden;
+  if (fxHidden) {
+    stopLoop();
+    for (const t of fwTimers) clearTimeout(t);
+    fwTimers.length = 0;
+  } else startLoop();
+});
 const P = [];            // hạt chung: {kind, x,y,vx,vy,life,max,size,color,rot,vr,grav,drag}
 let tier = 0, sparkleAcc = 0, lastT = 0, petalAcc = 0, bokehAcc = 0, dustAcc = 0, streakT = 6, royalT = 14, bflyT = 3, orbAcc = 0;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -14,9 +29,10 @@ const CONFETTI = ['#ffd76a', '#ff7eb0', '#7ed6ff', '#b8f26d', '#ffffff', '#c3a6f
 
 E.init = function (canvas) {
   cv = canvas; ctx = cv.getContext('2d');
-  requestAnimationFrame(loop);
+  startLoop();
 };
 E.resize = function (W2, H2, dpr) {
+  if (!cv) return;   // L12 — resize() có thể chạy trước init (setInterval 2s ở main.js)
   w = W2; h = H2;
   cv.width = Math.round(W2 * dpr); cv.height = Math.round(H2 * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -24,7 +40,7 @@ E.resize = function (W2, H2, dpr) {
 E.setTier = t => { tier = t; };
 E.fireworks = function (n = 3) { E.fireworksShow(n); };
 
-function add(p) { if (P.length < 1400) P.push(p); }
+function add(p) { if (fxHidden) return; if (P.length < 1400) P.push(p); }
 
 /* ---------- Pháo hoa 2.0 ----------
    Ban len nhu that: qua phao BAY LEN tu duoi san (keo vet kim tuyen) roi moi
@@ -123,7 +139,10 @@ E.firework = function (x, y, color) {
   add({ kind: 'rocket', x: sx, y: h + 6, tx, ty, sx, vx: 0, vy: 0, life: 0, max: rand(0.65, 0.9), size: 2.6, color: col, grav: 0, drag: 0 });
 };
 E.fireworksShow = function (count = 5, gap = 260) {
-  for (let i = 0; i < count; i++) setTimeout(() => E.firework(), i * gap + rand(0, 120));
+  for (let i = 0; i < count; i++) {
+    const id = setTimeout(() => { const k = fwTimers.indexOf(id); if (k >= 0) fwTimers.splice(k, 1); E.firework(); }, i * gap + rand(0, 120));
+    fwTimers.push(id);   // M11 — lưu handle để hủy khi tab ẩn
+  }
 };
 
 /* ---------- Mưa cánh hoa / giấy màu / tim ---------- */
@@ -234,25 +253,6 @@ E.lanterns = function (n = 5) {
   }
 };
 
-/* Mưa theo tổng xu của lần tặng (mốc càng cao càng rực rỡ, như GIFT_TIERS ở game chùa) */
-const GIFT_TIERS = [
-  { min: 500, petals: 260, confetti: 160, fw: 6 },
-  { min: 99, petals: 180, confetti: 110, fw: 4 },
-  { min: 30, petals: 130, confetti: 60, fw: 2 },
-  { min: 10, petals: 90, confetti: 30, fw: 1 },
-  { min: 5, petals: 55, confetti: 0, fw: 0 },
-  { min: 0, petals: 30, confetti: 0, fw: 0 },
-];
-E.giftRain = function (diamonds) {
-  const t = GIFT_TIERS.find(x => diamonds >= x.min);
-  if (t.petals) E.petals(t.petals);
-  if (t.confetti) E.confetti(t.confetti);
-  if (t.fw) E.fireworksShow(t.fw, 300);
-  if (diamonds >= 10) E.glitter(Math.min(120, 20 + diamonds));
-  if (diamonds >= 99) { E.bokeh(10); E.lanterns(5); }
-  return GIFT_TIERS.length - 1 - GIFT_TIERS.indexOf(t);
-};
-
 /* ---------- Vẽ ---------- */
 function drawHeart(x, y, s, color, alpha) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s / 10, s / 10); ctx.globalAlpha = alpha;
@@ -263,7 +263,7 @@ function drawHeart(x, y, s, color, alpha) {
   ctx.fill(); ctx.restore();
 }
 function loop(t) {
-  requestAnimationFrame(loop);
+  rafId = requestAnimationFrame(loop);
   const dt = Math.min(0.05, lastT ? (t - lastT) / 1000 : 0.016); lastT = t;
   ctx.clearRect(0, 0, w, h);
   // lấp lánh ambient: mốc càng cao càng dày (1.1 → 5.4 hạt/giây), thỉnh thoảng
@@ -479,7 +479,7 @@ function loop(t) {
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot || 0); ctx.globalAlpha = Math.max(0, fade);
       const ew = p.size, eh = p.size * 1.45;
       ctx.fillStyle = '#c8102e';
-      ctx.beginPath(); ctx.roundRect(-ew / 2, -eh / 2, ew, eh, 2.5); ctx.fill();
+      ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-ew / 2, -eh / 2, ew, eh, 2.5); else ctx.rect(-ew / 2, -eh / 2, ew, eh); ctx.fill();   // L5 — CEF cũ không có roundRect (Chrome <99)
       ctx.fillStyle = '#e8334d'; ctx.fillRect(-ew / 2, -eh / 2, ew, eh * 0.3);
       ctx.fillStyle = '#ffd76a';
       ctx.beginPath(); ctx.arc(0, eh * 0.12, ew * 0.3, 0, 6.3); ctx.fill();

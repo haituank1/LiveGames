@@ -29,7 +29,7 @@ cho đúng tên file, kiểm phủ ellipse/ghế lên tranh và chạy test vị
 |---|---|
 | Mặt bục | y từ ≈32% (sát vòm hoa) tới ≈42% (mép trước bục) |
 | Đường đứng làm lễ | y = 37.2% |
-| 3 vị trí cặp đôi | tâm x = **42% · 50% · 58%**; trong cặp 2 người cách nhau 3.4–3.6% (xích gần), cặp giữa to 1.18×, hai bên 0.95× và thấp hơn 0.55% |
+| 1 vị trí duy nhất ở giữa | tâm x = **50%**; trong cặp 2 người cách nhau 3.4–3.6% (xích gần) |
 | Vùng được phép đứng | x từ 34% → 66%, không thấp quá đường lễ +1.6% |
 
 Vùng CẤM đứng (phải vẽ trống, nhân vật không bao giờ đặt chân vào):
@@ -61,11 +61,16 @@ Bàn tròn phủ khăn, tâm có hoa trang trí. Bàn xa nhỏ, bàn gần to (p
 bảng). Bàn ở mép (x 0.8/99.2, 1.5/98.5) bị cắt nửa ngoài khung — vẫn phải có
 mặt trong bảng để chặn đường đi và tính ghế.
 
-## Hồ sơ riêng: `bg-sanh-moi.webp` — sảnh vàng mẫu mới (ĐÃ GÁN: mốc 20.000)
+## Hồ sơ riêng: `bg-sanh-moi.webp` — sảnh vàng mẫu mới (ĐÃ GÁN: mốc 200)
 
-Chủ phòng chốt 2026-11-04: sảnh này là nền của mốc cao nhất **20.000 — Đám
-Cưới Hoàng Gia** (TIERS trong main.js + bgRules ở mapping + demo đều trỏ về
-`bg-sanh-moi.webp`; file `bg-20000.webp` cũ không còn được dùng).
+Chủ phòng chốt 2026-11-04: sảnh này là nền của mốc cao nhất **200 — Đám
+Cưới Hoàng Gia** (bgRules ở mapping + demo đều trỏ về `bg-sanh-moi.webp`;
+file `bg-20000.webp` cũ đã xóa khỏi repo). Từ 2026-11-05 (M14b): TIERS
+không hardcode trong main.js nữa mà được xây từ `bgRules` lúc nhận config
+— mỗi mục bgRules `{viewers, file, label, royal}` cho ra 1 mốc (label =
+tên mốc, royal 0 = thường / 1 = vàng / 2 = hoàng gia); mốc 0 (sảnh mặc
+định `bg-full.webp`) tự thêm nếu bgRules không có; bgRules thiếu/rỗng thì
+game giữ bộ mốc mặc định cũ.
 
 Đã đo trực tiếp trên tranh 1440×1760 bằng lưới tọa độ % và kiểm phủ
 ellipse + điểm ghế. Đây là bố cục khác nền cũ nên có khung riêng:

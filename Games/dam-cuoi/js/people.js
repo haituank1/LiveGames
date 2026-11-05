@@ -2,7 +2,7 @@
    Đám Cưới Online — nhân vật trong KHÔNG GIAN PHÒNG RỘNG (people.js)
    - Phòng cưới lớn hơn màn hình: mỗi người vào phòng nhận 1 vị trí
      trống NGẪU NHIÊN (ghế quanh bàn tiệc hoặc điểm đứng) và ở cố định đó.
-   - Giới hạn 2000 nhân vật.
+   - Giới hạn theo pool vị trí thật (~400 chỗ — xem MAX_PEOPLE, H2).
    - Ghép đôi: (main lia camera tới) → đổi trang phục cưới tại chỗ +
      phóng to + vòng sáng quanh 2 người → đi thảm đỏ lên sân khấu →
      hết giờ quay về vị trí của mình (ngồi cạnh nhau nếu còn chỗ).
@@ -13,12 +13,16 @@ const P = {};
 (window.Wedding = window.Wedding || {}).people = P;
 window.Wedding.peopleApi = P;
 
-const MAX_PEOPLE = 2000;
+/* H2: gioi han that = kich thuoc pool vi tri (gan sau khi dung pool xong
+   o buildPositions) — pool chi ~400 cho nen phong day o ~400 nguoi chu
+   khong phai 2000; spawn vuot qua thi tra null + ghi chan doan. */
+let MAX_PEOPLE = 2000;
+let poolFullLogged = false;   // chi ghi chan doan phong day 1 lan cho toi khi co cho trong lai
 let FLOOR_Y = 44;                // sàn tiệc bắt đầu từ đây (% chiều cao phòng) — THAY THEO KHUNG của từng file nền (P.setBgFile)
 let SEAT_TOP = 43.5;             // ghế quanh bàn không vượt lên trên mức này (né bậc thang/sân khấu) — cũng theo khung nền
 let Ww = 2700, Hw = 3840;        // kích thước phòng (px) — main cập nhật qua P.resize
 let FH = 192;                    // chiều cao nhân vật gốc (px trong phòng)
-let box = null, tablesBox = null;
+let box = null;
 let stageY = 17.3;               // điểm đứng trên sân khấu (% chiều cao phòng)
 
 const people = new Map();        // id -> person
@@ -26,7 +30,11 @@ const couples = [];
 /* HANG CHO SAN KHAU CHIA 4 LAN UU TIEN (Nguyen chot 2026-11-05):
    boc len san khau theo thu tu lan 1 -> 2 -> 3 -> 4, lan tren rong moi
    boc lan duoi:
-   1 'gift'   — ghep doi tu TANG QUA (uu tien cao nhat)
+   1 'gift'   — cap co nguoi TANG QUA: trong lan thi xep theo MUC QUA
+                CAO NHAT giam dan (Nguyen 2026-11-05) — ai tang cao nhat
+                len dau, it nhat xuong cuoi; cung muc thi ai vao hang
+                truoc len truoc. Muc qua = mon qua lon nhat (1 lan tang)
+                cua cap, ghi o c.giftBest khi bump.
    2 'tag'    — TAG TEN bang @ (va goi ten khong @: cung la chi dinh
                 dung nguoi cu the, khong phai ngau nhien)
    3 'random' — BAT CAP NGAU NHIEN tu nguoi choi: lenh chat "ghep doi /
@@ -53,16 +61,47 @@ function queueRemove(c) {
 function queuePush(c, front) {
   queueRemove(c);
   const lane = laneOf(c);
+  /* N5 — chong doi: ghi moc vao hang de queueShiftNext biet cap nao
+     cho lau (chi ghi lan dau, giu nguyen khi cap duoc day len dau
+     hang / xep lai). */
+  if (c.enqueuedAt == null) c.enqueuedAt = Date.now();
   if (front || c.giftPriority) stageQueues[lane].unshift(c); else stageQueues[lane].push(c);
+  /* Lan qua xep theo muc qua CAO NHAT giam dan (Nguyen 2026-11-05):
+     ai tang cao nhat len dau, it nhat xuong cuoi; cung muc thi ai vao
+     hang truoc len truoc (sort on dinh). */
+  if (lane === 'gift') stageQueues.gift.sort(giftLaneCmp);
   c.lane = lane;
 }
+/* So sanh 2 cap trong lan qua: muc qua cao nhat (c.giftBest, xu cua
+   mon qua lon nhat 1 lan tang) giam dan, cung muc thi vao hang truoc
+   thang. */
+function giftLaneCmp(a, b) {
+  const d = (b.giftBest || 0) - (a.giftBest || 0);
+  if (d) return d;
+  return (a.enqueuedAt || 0) - (b.enqueuedAt || 0);
+}
 function queueShiftNext() {
+  /* N5 — chong doi: cap o lan thap (random / npc) cho qua nguong aging
+     (P.tune.agingMs, mac dinh 30s — config choDoiLanThapGiay, 0 = tat)
+     duoc boc TRUOC, ke ca khi lan tren (gift / tag) dang co cap cho — khong
+     thi luong qua don dap se cho lan thap doi vinh vien. Lay cap cho lau
+     nhat trong 2 lan thap. */
+  const now = Date.now();
+  let old = null;
+  const agingMs = P.tune.agingMs || 0;
+  if (agingMs > 0) for (const l of ['random', 'npc']) for (const c of stageQueues[l]) {
+    if (now - (c.enqueuedAt || now) > agingMs && (!old || (c.enqueuedAt || 0) < (old.enqueuedAt || 0))) old = c;
+  }
+  if (old) { queueRemove(old); return old; }
   for (const l of LANE_ORDER) if (stageQueues[l].length) return stageQueues[l].shift();
   return null;
 }
 function queueOrdered() { const out = []; for (const l of LANE_ORDER) out.push(...stageQueues[l]); return out; }
 P.queueSnapshot = function () { const o = {}; for (const l of LANE_ORDER) o[l] = stageQueues[l].map(c => c.key); return o; };
-const stageSlots = [null, null, null];
+/* M8: CHI 1 VI TRI SAN KHAU (giua) — co che 3 vi tri da chet: chi
+   stageSlots[0] bao gio duoc gan, slotPose chi goi voi i=0, SPOTS /
+   CARPETS khong cho nao dung. Da grep xac nhan truoc khi xoa. */
+const stageSlots = [null];
 /* ================= KHUNG SÂN KHẤU / KHÁN ĐÀI CỐ ĐỊNH (xem BG-LAYOUT.md) =================
    Bục vẽ sẵn trong ảnh: mặt bục từ y≈32% (sát vòm hoa) tới y≈42% (mép trước).
    Cặp đôi CHỈ đứng trong vùng an toàn dưới đây — không đè lên bánh cưới
@@ -71,19 +110,18 @@ const stageSlots = [null, null, null];
 const STAGE_FRAME = {
   zoneX: [34, 66],        // khoảng x được phép đứng trên bục
   zoneDropMax: 1.6,       // đứng thấp hơn đường lễ tối đa (vẫn trên mặt bục)
-  spots: [50, 42, 58],    // tâm 3 vị trí cặp: giữa + 2 bên (khoảng trống giữa các cặp đã thu hẹp ~50%)
-  pairOff: [1.8, 1.7, 1.7],   // nửa khoảng cách 2 người trong cặp: đứng SÁT nhau, âu yếm
-  sideDrop: 0.55,         // cặp 2 bên đứng thấp hơn cặp giữa một chút
+  spot: 50,               // M8: tam vi tri cap DUY NHAT: giua san khau (spots[1,2] da xoa)
+  pairOff: 1.8,           // M8: nua khoang cach 2 nguoi trong cap (pairOff[1,2] da xoa)
   groomDrop: 0.5,         // chú rể đứng hơi thấp hơn (trước) cô dâu
 };
-const SPOTS = STAGE_FRAME.spots.map(x => ({ x }));
-const CARPETS = [22, 50, 78];    // 3 thảm đỏ (% chiều rộng phòng)
+/* M8: SPOTS (3 tam cap) va CARPETS (3 tham do) da xoa — khong cho nao
+   dung; tham do giua duy nhat van duoc ve san trong anh nen. */
 
 function rand(a, b) { return a + Math.random() * (b - a); }
 function hash(s) { let h = 0; s = String(s || ''); for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
 function avatarColor(id) { const hues = [340, 262, 200, 158, 24, 288, 96, 0, 210, 45]; return `hsl(${hues[hash(id) % hues.length]} 65% 45%)`; }
 function initials(name) { const w = String(name || '?').trim().split(/\s+/); return ((w[0] || '?')[0] + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase(); }
-function esc(s) { return String(s || '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
+function esc(s) { return String(s || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }   // L9: them ' -> &#39; cho khop escapeHtml day du
 
 /* ---------- Ảnh chibi: BỘ ĐỒ CƯỚI PHỐI SẴN theo phong cách ----------
    Cô dâu & chú rể của 1 cặp LUÔN mặc cùng 1 BỘ (cùng phong cách) — không bao
@@ -137,11 +175,14 @@ function defAvatarForUser(user) {
   const pool = girl ? AV_GIRLS : AV_BOYS;
   return pool[hash(user.id || user.nickname) % pool.length];
 }
-let tierLevel = 0;
-P.setTierLevel = function (n) { tierLevel = n | 0; };
+/* M14b: pool đồ hoàng gia bật theo CỜ ROYAL của mốc hiện tại (royal >= 1),
+   không theo số thứ tự tier nữa — admin thêm/bớt/đổi thứ tự mốc thì mốc
+   vàng/hoàng gia vẫn đúng. setTierLevel nhận royal từ main.js (TIERS[tier].royal). */
+let tierLevel = 0, tierRoyal = 0;
+P.setTierLevel = function (n, royal) { tierLevel = n | 0; tierRoyal = royal | 0; };
 function setPool() {
-  // Mốc Hoàng Gia (10.000+): chỉ dùng bộ hoàng gia + bộ trắng chủ lực
-  return tierLevel >= 4 ? [...SETS_ROYAL, SETS_BASE[0]] : SETS_BASE;
+  // Mốc có cờ royal (mốc 100/200 view mặc định): chỉ dùng bộ hoàng gia + bộ trắng chủ lực
+  return tierRoyal >= 1 ? [...SETS_ROYAL, SETS_BASE[0]] : SETS_BASE;
 }
 function pickSet(c) {
   const pool = setPool();
@@ -166,8 +207,11 @@ function genderScore(name) {
   if (!w.length) return 0;
   const given = w[w.length - 1];
   let s = 0;
-  if (given === 'van') s += 2;
-  else if (w.includes('van')) s -= 3;
+  /* M1: 'Van' du la ten dem (Van Duc) hay ten chinh (Nguyen Van) thi
+     van la dau hieu NAM (-3) — nhan cu 'given === van -> +2 (nu)' nguoc
+     ca chu thich 'Van (nam) manh nhat'. Chi tru khi co 'Thi' (nu manh
+     hon, vd ten co ca Thi lan Van). */
+  if (w.includes('van') && !w.includes('thi')) s -= 3;
   if (w.includes('thi')) s += 3;
   if (FEMALE_GIVEN.has(given)) s += 2;
   if (MALE_GIVEN.has(given)) s -= 2;
@@ -432,6 +476,7 @@ function buildPositions() {
       // Ghế: chân đứng NGOÀI mép bàn + lề an toàn (1.7% ngang, 1.3% dọc)
       const sx = t.x + Math.cos(a) * (t.rx + 1.7);
       const sy = Math.max(SEAT_TOP, t.y + Math.sin(a) * (t.ry + 1.3));
+      if (sx < 1 || sx > 99) continue;   // H1: ghe ngoai phong (x<1 hoac x>99) thi bo, nhu da kep sy bang SEAT_TOP — truoc day ghe kieu nay dung ngoai khung/mat nguoi
       const ownX = (sx - t.x) / (t.rx + 0.9), ownY = (sy - t.y) / (t.ry + 0.7);
       if (ownX * ownX + ownY * ownY < 1) continue;   // SEAT_TOP kéo ghế lọt vào chính bàn của nó -> bỏ
       if (inTable(sx, sy, 0.9, 0.7, t)) continue;   // ghế này lại chui vào bàn bên cạnh -> bỏ
@@ -497,6 +542,7 @@ function buildPositions() {
   for (const p of positions) p.key = p.strip ? stripOrder.get(p) : 1000 + fillKey(p);
   freePool = positions.slice().sort((p1, p2) => p1.key - p2.key);
   freePool.forEach((p, i) => { p.rank = i; });   // rank 0 = chỗ đẹp nhất (trong cùng, gần sân khấu)
+  MAX_PEOPLE = positions.length;   // H2: gioi han that = pool vua dung xong (mac-dinh ~405, sanh-moi ~361), khong phai 2000
   return tables;
 }
 /* RẢI ĐỀU KHI ĐÔNG NGƯỜI (Nguyen yêu cầu 2026-11-04 17:53): từ SPREAD_MIN
@@ -511,14 +557,17 @@ function takePosition() {
     /* Điểm của 1 chỗ trống = khoảng cách tới chỗ CÓ NGƯỜI gần nhất (càng xa
        càng tốt, chững ở SPREAD_CAP) trừ ưu thế gần sân khấu theo key. Chỗ
        thắng cuộc vừa rải đều vừa hơi thiên về phía sân khấu. */
+    /* M13a: lay danh sach cho DA CO NGUOI 1 lan truoc vong lap — truoc
+       day moi slot trong lai quet het positions (O(n^2)); diem so giong
+       het (khoang cach toi cho co nguoi gan nhat). */
+    const taken = positions.filter(q => q.taken);
     let best = null, bestScore = -Infinity;
     const stripFree = freePool.some(q => !q.taken && q.strip);   // dải ưu tiên còn chỗ -> rải đều CHỈ trong dải
     for (const pos of freePool) {
       if (pos.taken) continue;
       if (stripFree && !pos.strip) continue;
       let md = Infinity;
-      for (const q of positions) {
-        if (!q.taken) continue;
+      for (const q of taken) {
         const dx = pos.x - q.x, dy = (pos.y - q.y) * 1.3;
         const d = dx * dx + dy * dy;
         if (d < md) md = d;
@@ -612,9 +661,9 @@ function routeAround(x1, y1, x2, y2) {
   if (segClear(x1, y1, x2, y2)) return [];
   const [sx, sy] = nearestCell(x1, y1), [tx, ty] = nearestCell(x2, y2);
   const key = (x, y) => x + ',' + y;
-  const prev = new Map([[key(sx, sy), null]]); const q = [[sx, sy]];
-  while (q.length) {
-    const [cx, cy] = q.shift();
+  const prev = new Map([[key(sx, sy), null]]); const q = [[sx, sy]]; let qi = 0;   // M13b: con tro index thay q.shift() (shift tren mang dai la O(n) moi lan)
+  while (qi < q.length) {
+    const [cx, cy] = q[qi++];
     if (cx === tx && cy === ty) break;
     for (const [ax, ay] of [[cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]]) {
       if (ax < 0 || ay < 0 || ax >= GRID.nx || ay >= GRID.ny) continue;
@@ -668,6 +717,13 @@ function stepPerson(p, dt) {
     p.idleFor = rand(5, 14);
     p.dirty = true;
     if (done) done();
+    /* M5: callback 've toi nha' cua leaveStage nam rieng o p.homeDone,
+       KHONG nam trong p.done — walkPath/walkTo/makeCouple co ghi de
+       p.done bao nhieu lan thi no van con; chi chay khi nguoi that su
+       ve toi dung home cua minh (di len san khau/di cho khac khong
+       chay). */
+    const homeDone = p.homeDone;
+    if (homeDone && p.home && Math.abs(p.x - p.home.x) < 0.01 && Math.abs(p.y - p.home.y) < 0.01) { p.homeDone = null; homeDone(); }
     return;
   }
   const step = Math.min(dist, p.speedPx * dt);
@@ -803,12 +859,19 @@ P.spawn = function (user) {
   if (!user || !user.id) return null;
   const old = people.get(user.id);
   if (old) return old;
-  if (people.size >= MAX_PEOPLE) return null;
+  if (people.size >= MAX_PEOPLE) {   // H2: pool can — bao ro thay vi tra null lang le (chi ghi 1 lan toi khi co cho trong lai)
+    if (!poolFullLogged) { poolFullLogged = true; diagErr('phong day: het cho dung (' + people.size + '/' + MAX_PEOPLE + ') — khach ' + (user.nickname || user.id) + ' vao khong co cho'); }
+    return null;
+  }
+  poolFullLogged = false;
   /* Phòng vắng (dưới ngưỡng quietMax): ưu tiên chỗ TRỌNG TÂM cho khách mới */
   let home = null;
   if ((P.tune.quietMax || 0) > 0 && people.size < P.tune.quietMax) home = takeCentralPosition();
   if (!home) home = takePosition();
-  if (!home) return null;
+  if (!home) {   // H2: pool can (khong con slot trong) — bao ro thay vi tra null lang le
+    if (!poolFullLogged) { poolFullLogged = true; diagErr('phong day: het cho dung (pool can, ' + people.size + '/' + MAX_PEOPLE + ') — khach ' + (user.nickname || user.id) + ' vao khong co cho'); }
+    return null;
+  }
   /* ƯU TIÊN KHÁCH MỚI KHI ĐÔNG NGƯỜI (yêu cầu của chủ phòng): khách vừa tới mà
      chỉ còn chỗ ngoài, trong khi khách im lặng rất lâu (kiểu đã out mà live
      không bắt được sự kiện rời đi) đang giữ chỗ trong -> ĐỔI CHỖ: khách mới
@@ -823,7 +886,8 @@ P.spawn = function (user) {
     }
   }
   const p = {
-    user, el: makeEl(user), x: home.x + rand(-2.4, 2.4), y: 99.4, home, outfit: 'casual',
+    user, npc: !!user.npc,   // M16: co NPC phai set NGAY tai spawn — coupleScore dua hoan toan vao p.npc, truoc day chi ensureGuest (main.js) set nen duong spawn NPC moi la diem/BXH bi nhiem
+    el: makeEl(user), x: home.x + rand(-2.4, 2.4), y: 99.4, home, outfit: 'casual',
     state: 'walk', target: null, path: [], done: null, faceLeft: false,
     couple: null, idleFor: rand(2, 9), boost: 1, spotScale: 1, dirty: true, speedPx: 200,
     zSeed: Math.abs(hash(user.id || user.nickname || '')) % 8,   // phá hoà z-index ổn định, chống chớp lớp
@@ -890,22 +954,26 @@ P.tourTarget = function () {
 
 /* ---------- Ghép đôi: lia cam → đổi đồ cưới → lên sân khấu ---------- */
 function notifyQueue() { if (P.onQueueChange) P.onQueueChange(queueOrdered().map(c => `${c.giftPriority ? '🎁 ' : ''}${c.a.user.nickname} ❤ ${c.b.user.nickname}`)); }
-/* Uu tien hang cho cho cap cua NGUOI TANG QUA (yeu cau Nguyen 2026-11-04):
-   cap dang cho -> dua len DAU hang (se la cap KE TIEP len san khau, khong chen
-   ngang cap dang dien); cap con dang o phan gioi thieu chua vao hang -> danh
-   dau de khi vao hang thi vao thang dau hang. Tra ve true neu da uu tien. */
-P.bumpCouple = function (c) {
+/* Uu tien hang cho cho cap cua NGUOI TANG QUA (yeu cau Nguyen 2026-11-04,
+   sua 2026-11-05): cap dang cho -> dua vao LAN QUA, xep theo MUC QUA
+   CAO NHAT giam dan (ai tang cao nhat len dau, it nhat xuong cuoi —
+   xem giftLaneCmp o queuePush); cap con dang o phan gioi thieu chua vao
+   hang -> danh dau de khi vao hang thi vao lan qua. Tra ve true neu da
+   uu tien. dia = so xu cua mon qua vua tang (ghi vao c.giftBest). */
+P.bumpCouple = function (c, dia) {
   if (!c) return false;
+  /* Chi ghi muc qua khi cap that su duoc uu tien (dang cho / dang gioi
+     thieu) — cap dang dien hay da ve nha thi qua do khong tinh vao
+     luot xep hang sau. */
+  const best = (dia != null) ? Math.max(c.giftBest || 0, Number(dia) || 0) : (c.giftBest || 0);
   if (queueIncludes(c)) {
-    /* Cap dang cho o bat ky lan nao: tang qua la dua sang DAU LAN 1
-       (lan qua) — cap ke tiep duoc boc len san khau se la cap nay,
-       khong chen ngang cap dang dien. */
+    c.giftBest = best;
     c.giftPriority = true;
     queuePush(c, true);
     notifyQueue();
     return true;
   }
-  if (c.state === 'focus') { c.giftPriority = true; return true; }
+  if (c.state === 'focus') { c.giftBest = best; c.giftPriority = true; return true; }
   return false;
 };
 function effGenderScore(p) {
@@ -955,13 +1023,31 @@ P.makeCouple = function (userA, userB, origin) {
   setTimeout(() => {                                      // rồi nắm tay nhau ra thảm đỏ lên sân khấu
     if (!couples.includes(c)) return;
     a.boost = b.boost = 1; a.dirty = b.dirty = true;
-    if (P.stageCooldownRemain(c) > 0) {                   // một trong hai còn đang nghỉ sau lần lên trước -> KHÔNG vào hàng chờ
-      c.state = 'court';
-      for (const p of [a, b]) {
-        p.el.classList.remove('pairfx');
-        walkTo(p, { x: p.home.x, y: p.home.y }, 'walk', () => { p.state = 'home'; });
-      }
-      if (P.onStageSkipped) P.onStageSkipped(c);
+    if (P.stageCooldownRemain(c) > 0) {
+      /* N1: mot trong hai con dang nghi sau lan len truoc -> KHONG day
+         ve 'court' nua (ve do la mo coi: khong timer nao goi len lai,
+         npcTick/autoPairTick deu loai nguoi da co cap). Giu cap o trang
+         thai cho ('focus') + hen gio thu lai khi het cooldown; het gio
+         thi tu vao hang cho. Cap van chua lam le — toast phai noi dung
+         su that do (xem P.onCooldownWait o main.js), khong dung
+         onStageSkipped (chi danh cho cap DA lam le xong). */
+      c.state = 'focus';
+      if (P.onCooldownWait) P.onCooldownWait(c, P.stageCooldownRemain(c));
+      /* Kiem tra lai moi toi da 5s thay vi hen 1 phat het gio nghi:
+         neu giua chung hang cho can sach (san khau trong) thi
+         stageCooldownRemain duoc MIEN ve 0 — cap vao hang ngay thay vi
+         ngoi cho het 300s trong khi san khau bo trong. */
+      const retry = () => {
+        if (!couples.includes(c)) return;
+        const remain = P.stageCooldownRemain(c);
+        if (remain > 0) { c.coolTimer = setTimeout(retry, Math.min(remain, 5) * 1000); return; }
+        c.coolTimer = null;
+        c.state = 'queue';
+        queuePush(c);
+        notifyQueue();
+        promoteStage();
+      };
+      c.coolTimer = setTimeout(retry, Math.min(P.stageCooldownRemain(c), 5) * 1000);
       return;
     }
     c.state = 'queue';
@@ -978,20 +1064,19 @@ P.makeCouple = function (userA, userB, origin) {
    biến hình, để camera bắt trọn khoảnh khắc đổi đồ cô dâu chú rể. */
 const REVEAL_Y = 68;
 
-/* Tư thế đứng của 1 cặp ở ô sân khấu i: ai đứng trái/phải + toạ độ đích
-   của từng người. Xếp NỮ KỀ NỮ, NAM KỀ NAM ở đường giáp giữa các cặp:
-   cặp giữa: nam trái – nữ phải; cặp 2 bên: nữ trái – nam phải. Đích được
-   kẹp vào đúng vùng an toàn trên bục (khung cố định). */
-function slotPose(c, i) {
-  const y = stageY + (i ? STAGE_FRAME.sideDrop : 0);
-  const off = STAGE_FRAME.pairOff[i];
-  const leftP = i === 0 ? c.groom : c.bride;
-  const rightP = i === 0 ? c.bride : c.groom;
+/* Tư thế đứng của 1 cặp ở ô sân khấu DUY NHẤT (giữa): nam trái – nữ
+   phải. Đích được kẹp vào đúng vùng an toàn trên bục (khung cố định).
+   M8: bo tham so i (chi goi voi i=0) + nhanh cap ben (sideDrop). */
+function slotPose(c) {
+  const y = stageY;
+  const off = STAGE_FRAME.pairOff;
+  const leftP = c.groom;
+  const rightP = c.bride;
   const yL = y + (leftP === c.groom ? STAGE_FRAME.groomDrop : 0);
   const yR = y + (rightP === c.groom ? STAGE_FRAME.groomDrop : 0);
   const clampX = v => Math.max(STAGE_FRAME.zoneX[0], Math.min(STAGE_FRAME.zoneX[1], v));
   const yMax = stageY + STAGE_FRAME.zoneDropMax;
-  return { leftP, rightP, l: { x: clampX(STAGE_FRAME.spots[i] - off), y: Math.min(yMax, yL) }, r: { x: clampX(STAGE_FRAME.spots[i] + off), y: Math.min(yMax, yR) } };
+  return { leftP, rightP, l: { x: clampX(STAGE_FRAME.spot - off), y: Math.min(yMax, yL) }, r: { x: clampX(STAGE_FRAME.spot + off), y: Math.min(yMax, yR) } };
 }
 /* Độ dài đường đi còn lại của 1 người (px) theo path hiện tại */
 function pairPathLen(p) {
@@ -1041,7 +1126,7 @@ function promoteStage() {
     }
   }
   if (journeying || freshPerforming) return;
-  const c = queueShiftNext(); if (!c) return; c.giftPriority = false; notifyQueue();   // boc theo thu tu lan: gift -> tag -> random -> npc
+  const c = queueShiftNext(); if (!c) return; c.giftPriority = false; c.giftBest = 0; notifyQueue();   // het luot uu tien theo qua — luot sau (neu len lai) tinh muc qua lai tu dau; boc theo thu tu lan: gift -> tag -> random -> npc
   c.state = 'toStage'; c.spot = -1;
   c.a.spotScale = c.b.spotScale = P.tune.scaleC;
   /* TOI LUOT cap nay — nhung CHUA thay do voi: hai nguoi mac do
@@ -1095,7 +1180,7 @@ function driveLeg3(c) {
      cung khong doi cap moi toi noi han. Camera khong bi cuop theo
      cap xuong: khoa tam diem dang bao ve hanh trinh cua cap moi. */
   for (const o of couples) if (o !== c && o.state === 'stage') leaveStage(o);
-  const pose = slotPose(c, 0);
+  const pose = slotPose(c);
   const tgt = p => (p === pose.leftP ? pose.l : pose.r);
   c._arrive = 0;
   const onArr = () => { if (++c._arrive === 2 && couples.includes(c) && c.state === 'toStage') arriveStage(c); };
@@ -1123,7 +1208,7 @@ setInterval(() => {
     const nearStage = c.a.y <= stageY + 12 && c.b.y <= stageY + 12;
     const transformed = c.groom.outfit === 'groom' && c.bride.outfit === 'bride';
     if (nearStage) {
-      const pose = slotPose(c, 0);
+      const pose = slotPose(c);
       for (const [pp, tt] of [[pose.leftP, pose.l], [pose.rightP, pose.r]]) { pp.x = tt.x; pp.y = tt.y; pp.target = null; pp.path = []; pp.done = null; pp.dirty = true; }
       arriveStage(c);
     } else if ((c._heals || 0) >= 3) {
@@ -1221,12 +1306,11 @@ function leaveStage(c) {
   let back = 0;
   for (const p of [c.a, c.b]) {
     p.el.classList.remove('pairfx');
-    // Xuống LIỀN và thoát hẳn khỏi tâm điểm (Nguyen chê 2026-11-04
-    // 19:14: cặp trên lề mề, nhìn như vẫn đứng trái phải trên sân
-    // khấu): bước CHÉO RA HAI BÊN rồi vòng xuống dưới bục — không còn
-    // dồn về điểm giữa 47/53 ngay trước sân khấu như trước — và đi
-    // nhanh hơn ~1.5 lần để kịp nhường giữa cho cặp đang lên gần tới.
-    walkPath(p, [{ x: p.x < 50 ? 40 : 60, y: stageY + 7 }, { x: p.home.x, y: p.home.y }], 'walk', () => {
+    /* M5: dem ve nha dang ky qua p.homeDone (xem stepPerson) thay vi
+       done cua walkPath — ghep lai / dissolve / doi khung ghi de
+       p.done thi bo dem nay van chay khi nguoi ve toi home; chi khi
+       ca 2 ve du moi doi do thuong + goi onPairHome (nha camera). */
+    p.homeDone = () => {
       p.state = 'home';
       if (++back === 2) {
         /* Về tới bàn thì thay lại đồ thường: trên sân khấu lúc nào
@@ -1236,38 +1320,52 @@ function leaveStage(c) {
         setOutfit(c.a, 'casual'); setOutfit(c.b, 'casual');
         if (P.onPairHome) P.onPairHome(c);
       }
-    });
+    };
+    // Xuống LIỀN và thoát hẳn khỏi tâm điểm (Nguyen chê 2026-11-04
+    // 19:14: cặp trên lề mề, nhìn như vẫn đứng trái phải trên sân
+    // khấu): bước CHÉO RA HAI BÊN rồi vòng xuống dưới bục — không còn
+    // dồn về điểm giữa 47/53 ngay trước sân khấu như trước — và đi
+    // nhanh hơn ~1.5 lần để kịp nhường giữa cho cặp đang lên gần tới.
+    walkPath(p, [{ x: p.x < 50 ? 40 : 60, y: stageY + 7 }, { x: p.home.x, y: p.home.y }], 'walk');
     if (p.speedPx) p.speedPx = Math.min(1250, Math.round(p.speedPx * 1.55));
   }
   if (P.onPairReturn) { try { P.onPairReturn(c); } catch (e) { diagErr('onPairReturn: ' + e.message); } }   // camera bám theo khi đi về chỗ
   promoteStage();
 }
 function dissolveCouple(c, leaving) {
+  if (!c) return;
   const i = couples.indexOf(c); if (i >= 0) couples.splice(i, 1);
   if (queueRemove(c)) notifyQueue();
   if (c.spot >= 0 && stageSlots[c.spot] === c) stageSlots[c.spot] = null;
+  c.state = 'dead';   // cap da tan: khong con la focus/queue/toStage/stage — cac cho doc trang thai khong tuong la cap con song
+  if (c.coolTimer) { clearTimeout(c.coolTimer); c.coolTimer = null; }   // N1: huy hen len lai cua cap nay
+  pairCdUntil.delete(c.key);   // N9: khong giu moc cooldown cua cap da chet
+  if (P.unregisterCouple) P.unregisterCouple(c.key);   // C4 (phuong an A): xoa khoi so coupleByKey + courtSince ngay luc tan
   promoteStage();
-  const other = leaving === c.a ? c.b : c.a;
-  if (other && people.get(other.user.id) === other) {
-    other.couple = null; other.boost = 1;
-    other.el.classList.remove('pairfx');
-    setOutfit(other, 'casual');
-    walkTo(other, { x: other.home.x, y: other.home.y }, 'walk', () => { other.state = 'home'; });
+  /* C4/N4: giai phong CA HAI phia (truoc day chi 'other', 'leaving' van
+     giu c.couple = c nen guard c.a.couple === c tuong cap con song —
+     goc cua loi block user giua hang cho lam chet NPC/tu ghep). Nguoi
+     nao da bi xoa khoi phong (removeUser) thi bo qua — chi giai phong
+     nguoi van con trong phong. */
+  for (const p of [c.a, c.b]) {
+    if (!p || people.get(p.user.id) !== p) continue;
+    p.couple = null; p.boost = 1;
+    p.el.classList.remove('pairfx');
+    setOutfit(p, 'casual');
+    walkTo(p, { x: p.home.x, y: p.home.y }, 'walk', () => { p.state = 'home'; });
   }
+  /* M6: tan cap (ke ca block user giua hang cho / dang dien) thi nha
+     camera ngay qua onPairHome — truoc day Cam.followC chi duoc xoa o
+     onPairHome (khi ca 2 ve toi nha) va unfollow nen camera bam mai
+     theo cap ma. Guard vi hook do main.js gan. */
+  if (P.onPairHome) P.onPairHome(c);
 }
-/* Tan ca cap + giai phong CA HAI nguoi (dissolveCouple chi giai phong
-   phia 'other') — main.js dung cho cap NPC tu tan de xoay vong doi cap,
-   makeCouple dung lai khi tha cap cu cho ghep cap moi. */
+/* Tan ca cap + giai phong CA HAI nguoi — dissolveCouple nay da giai
+   phong ca hai phia nen chi can goi thang no (truoc day phai them khoi
+   giai phong 'a' rieng vi dissolveCouple chi giai phong 'other'). */
 function dissolveFull(c) {
   if (!c) return;
-  const a = c.a;
-  dissolveCouple(c, a);
-  if (a && people.get(a.user.id) === a) {
-    a.couple = null; a.boost = 1;
-    a.el.classList.remove('pairfx');
-    setOutfit(a, 'casual');
-    walkTo(a, { x: a.home.x, y: a.home.y }, 'walk', () => { a.state = 'home'; });
-  }
+  dissolveCouple(c, c.a);
 }
 P.dissolveCoupleFull = dissolveFull;
 
@@ -1276,16 +1374,18 @@ P.dissolveCoupleFull = dissolveFull;
    (dien xong, dung giu san khau vi chua co cap ke). Dang focus / trong
    hang cho / dang di len / dang dien thi khong tha.
    NGOAI LE (Nguyen chot 2026-11-05, sau phan tich chong cheo): TAG TAY
-   cua khach that (newOrigin = 'manual') duoc GIANH mot cap THUAN TU
+   cua khach that (newOrigin = 'manual' / 'tag') duoc GIANH mot cap THUAN TU
    DONG (origin 'npc' / 'autopair') dang nam trong HANG CHO — cap tu
    dong chi de lap cho trong luc vang, khong duoc chan y muon that cua
    khach. Cap tu dong dang DI LEN / dang DIEN van khong gianh (hong
    chuoi hanh trinh); cap cua khach that/follow/qua dang cho van duoc
-   bao ve nhu cu. */
+   bao ve nhu cu. 'random' (go tu khoa ghep doi / event couple khong
+   tag) KHONG duoc gianh — neu khong 1 cau dua 'dam cuoi vui qua' cung
+   pha duoc cap tu dong dang cho (N6). */
 function coupleReleasable(c, newOrigin) {
   if (!c) return false;
   if (c.state === 'court' || (c.state === 'stage' && c.hold)) return true;
-  const manualReq = newOrigin === 'manual' || newOrigin === 'tag' || newOrigin === 'random';
+  const manualReq = newOrigin === 'manual' || newOrigin === 'tag';
   if (manualReq && (c.origin === 'npc' || c.origin === 'autopair') && c.state === 'queue') return true;
   return false;
 }
@@ -1299,7 +1399,12 @@ function releaseOldCouple(c) {
   const i = couples.indexOf(c); if (i >= 0) couples.splice(i, 1);
   if (queueRemove(c)) notifyQueue();
   if (c.spot >= 0 && stageSlots[c.spot] === c) stageSlots[c.spot] = null;
-  c.spot = -1; c.hold = false;
+  c.spot = -1; c.hold = false; c.state = 'dead';
+  if (c.coolTimer) { clearTimeout(c.coolTimer); c.coolTimer = null; }
+  /* C4: nhanh nay khong qua dissolveCouple nen go dang ky truc tiep —
+     khong xoa pairCdUntil vi stampStageCooldown vua dat moc nghi cho
+     cap nay (nghi xong moi duoc len lai). */
+  if (P.unregisterCouple) P.unregisterCouple(c.key);
   for (const p of [c.a, c.b]) {
     if (people.get(p.user.id) !== p) continue;
     p.couple = null; p.boost = 1; p.spotScale = 1;
@@ -1313,7 +1418,7 @@ function releaseOldCouple(c) {
 P.featured = () => stageSlots[0];
 P.staged = () => stageSlots.map((c, i) => c ? { couple: c, spot: i } : null).filter(Boolean);
 /* Thông số tinh chỉnh — main.js nạp từ config (mapping) qua setTune */
-P.tune = { boost: 1.32, scaleC: 1.22, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45, quietMax: 15 };
+P.tune = { boost: 1.32, scaleC: 1.22, priorityOn: true, crowdMin: 70, staleMin: 4, innerRatio: 0.45, quietMax: 15, agingMs: 30000 };
 P.setTune = function (t) {
   if (!t) return;
   for (const k of ['boost', 'scaleC']) {
@@ -1325,27 +1430,44 @@ P.setTune = function (t) {
     const v = Number(t[k]);
     if (isFinite(v) && v > 0) P.tune[k] = v;
   }
+  /* N5 — ngưỡng aging của hàng chờ (ms): cặp làn thấp chờ quá ngưỡng thì
+     được bóc trước cặp quà. 0 = tắt aging. main.js truyền từ config
+     choDoiLanThapGiay (giây); config không có key thì giữ giá trị cũ. */
+  const ag = Number(t.agingMs);
+  if (isFinite(ag) && ag >= 0) P.tune.agingMs = ag;
   const ir = Number(t.innerRatio);
   if (isFinite(ir) && ir > 0.1 && ir < 0.9) P.tune.innerRatio = ir;
   if (typeof t.priorityOn === 'boolean') P.tune.priorityOn = t.priorityOn;
-  // Khoảng cách đội hình trên bục cũng chỉnh được từ config
-  const offC = Number(t.pairOffC), offS = Number(t.pairOffS), side = Number(t.spotSide);
-  if (isFinite(offC) && offC > 0) STAGE_FRAME.pairOff[0] = offC;
-  if (isFinite(offS) && offS > 0) { STAGE_FRAME.pairOff[1] = offS; STAGE_FRAME.pairOff[2] = offS; }
-  if (isFinite(side) && side > 20 && side < 50) { STAGE_FRAME.spots[1] = side; STAGE_FRAME.spots[2] = 100 - side; }
+  // Khoảng cách đội hình trên bục cũng chỉnh được từ config — M8: chi
+  // giu lechCapGiua (cap giua duy nhat); lechCapBen/tamCapBen da chet
+  // theo 2 o ben (main.js van truyen xuong, cu bo qua tai day).
+  const offC = Number(t.pairOffC);
+  if (isFinite(offC) && offC > 0) STAGE_FRAME.pairOff = offC;
 };
 P.coupleOf = function (uid) { const p = people.get(uid); return p ? p.couple : null; };
 P.danceAll = function (sec = 5) {
-  for (const p of people.values()) { p.el.classList.add('dance'); setTimeout(() => p.el.classList.remove('dance'), sec * 1000); }
+  /* M13d: 1 setTimeout duy nhat cho ca phong thay vi 1 timeout/nguoi. */
+  const els = [];
+  for (const p of people.values()) { p.el.classList.add('dance'); els.push(p.el); }
+  setTimeout(() => { for (const el of els) el.classList.remove('dance'); }, sec * 1000);
 };
+/* M13c: chi go vuong mien cu DA BIET (luu tham chieu) thay vi quet toan
+   DOM moi lan doi diem — querySelectorAll('.person .crown') cu chay
+   tren ca tram node moi lan. */
+let crownEls = [];
 P.setCrown = function (couple) {
-  document.querySelectorAll('.person .crown').forEach(e => e.remove());
+  for (const e of crownEls) e.remove();
+  crownEls = [];
   if (!couple) return;
+  /* C4 — phong thu: cap da tan (2 nguoi khong con tro ve cap nay) thi
+     khong doi vuong mien, ke ca khi so coupleByKey con sot muc cu. */
+  if (couple.a.couple !== couple || couple.b.couple !== couple) return;
   for (const p of [couple.a, couple.b]) {
     if (!p || !p.el) continue;
     const s = document.createElement('span');
     s.className = 'crown'; s.textContent = '👑';
     p.el.appendChild(s);
+    crownEls.push(s);
   }
 };
 /* Tắt hoạt ảnh nhân vật ngoài khung camera cho nhẹ máy — có TRỄ 2 ngưỡng:
@@ -1361,25 +1483,18 @@ P.cull = function (x0, y0, x1, y1) {
 };
 
 /* ---------- Khởi tạo ---------- */
-P.init = function (container, tablesEl) {
-  box = container; tablesBox = tablesEl || null;
-  const tables = buildPositions();
-  if (tablesBox) {
-    tablesBox.innerHTML = '';
-    for (const t of tables) {
-      const d = document.createElement('div');
-      d.className = 'wtable';
-      d.style.left = t.x + '%'; d.style.top = t.y + '%';
-      tablesBox.appendChild(d);
-    }
-  }
+/* L2: bo code debug ban chet dung tablesBox — index.html khong co
+   id="tables" nen tablesBox luon null, lop phu nay khong bao gio ve.
+   Tham so tablesEl cung bo (main.js van truyen thua, JS bo qua). */
+P.init = function (container) {
+  box = container;
+  buildPositions();
   requestAnimationFrame(loop);
 };
 P.resize = function (w, h) { Ww = w; Hw = h; FH = h * 0.05; for (const p of people.values()) p.dirty = true; };
 P.setStageY = function (y) { stageY = y; };
 /* Nạp KHUNG theo file nền: đường đứng sân khấu + mép sàn + bảng bàn + lưới tìm
-   đường + pool vị trí đều khớp với tranh của nền đó. Người đang đứng mà vị trí
-   cũ lọt vào bàn theo khung mới thì được dời sang vị trí an toàn gần nhất. */
+   đường + pool vị trí đều khớp với tranh của nền đó. */
 P.setBgFile = function (file) {
   const fid = TABLE_FRAMES[file] ? file : 'mac-dinh';
   const fr = TABLE_FRAMES[fid];
@@ -1390,12 +1505,32 @@ P.setBgFile = function (file) {
   applyFrameTables();
   BLOCKED = buildBlocked();
   buildPositions();
+  /* H4: pool moi dung lai tu dau (moi slot taken=null) nen phai gan lai
+     home cua MOI nguoi vao slot moi + danh dau taken, neu khong slot
+     moi trung toa do voi nguoi dang dung van con trong — khach moi se
+     duoc cap dung cho do -> 2 nguoi chong nhau. Slot cu chi duoc tha
+     qua freePosition (khong gan truc tiep taken=null): slot khung cu
+     khong duoc cho vao lai pool moi (freePosition tu chan theo frame).
+     Slot moi nao cung hop le san (buildPositions da loc ban / tham /
+     bac) nen chi can chon slot trong GAN home cu nhat. */
   for (const p of people.values()) {
-    if (p.couple || p.state !== 'home') continue;
-    if (inTable(p.home.x, p.home.y, 0.2, 0.15, null) || inKeepClear(p.home.x, p.home.y) || inAisle(p.home.x, p.home.y)) {
-      const np = takePosition();
-      if (np) { p.home.taken = null; np.taken = p; p.home = np; walkTo(p, { x: np.x, y: np.y }, 'walk', () => { p.state = 'home'; }); }
+    const old = p.home;
+    if (!old) continue;
+    let best = null, bd = Infinity;
+    for (const q of positions) {
+      if (q.taken) continue;
+      const dx = q.x - old.x, dy = (q.y - old.y) * 1.3;
+      const d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = q; }
     }
+    if (!best) continue;   // pool moi het cho: giu home cu, dung yen tai cho
+    freePosition(old);
+    best.taken = p; p.home = best;
+    const fi = freePool.indexOf(best);
+    if (fi >= 0) freePool.splice(fi, 1);
+    if (p.couple) continue;   // dang co doi (tren san khau / di len / di ve): chi doi home, luc ve se di ve home moi
+    if (p.state === 'home' && bd <= 2.25) { p.x = best.x; p.y = best.y; p.dirty = true; continue; }   // lech <=1.5%: chot toa do ve dung slot moi, khong di chuyen
+    walkTo(p, { x: best.x, y: best.y }, 'walk', () => { p.state = 'home'; });   // ca nguoi dang di (walk) cung duoc doi huong ve home moi
   }
 };
 P.coupleSec = 25;

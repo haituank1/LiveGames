@@ -41,7 +41,7 @@ const SHOW_KEYS = ['feedChat', 'feedGift', 'feedJoin', 'feedFollow', 'feedLike',
   'bubbleChat', 'floatPoints', 'nameTags', 'rulesBox', 'boardTop10', 'toastTop', 'liveLabel', 'monkGreet', 'monkThank', 'monkFollow'];
 // các ô "mỗi dòng một câu": để trống = dùng câu mặc định (defaults trong file mapping)
 const LINE_KEYS = ['monkLines', 'monkGreet', 'monkThank', 'monkFollowThanks', 'guideLines', 'rulesLines',
-  'mcLines', 'mcGreet', 'mcCouple', 'mcThank', 'mcFollowLines', 'mcFunny', 'mcMilestone', 'mcTagVang', 'mcGuide', 'funnyLines', 'npcDanhSach', 'lenhHoaRoi', 'lenhPhaoHoa', 'lenhPhaoGiay', 'tuKhoaGhepDoi'];
+  'mcLines', 'mcGreet', 'mcCouple', 'mcThank', 'mcFollowLines', 'mcFunny', 'mcMilestone', 'mcTagVang', 'mcGuide', 'funnyLines', 'npcDanhSach', 'lenhHoaRoi', 'lenhPhaoHoa', 'lenhPhaoGiay', 'tuKhoaGhepDoi', 'mcTagDaCoDoi', 'mcSapMoc'];
 const num = (v, min, max, def) => { const n = Number(v); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def; };
 
 class Settings {
@@ -162,12 +162,12 @@ class Settings {
     // key riêng đều bị bỏ qua (trang quản trị báo "chưa hiểu"). [min, max, mặc định] cho số.
     const NUM_BY_GAME = {
       'dam-cuoi': { coupleSec: [5, 600, 9], nhaCapTiepSauGiay: [1, 60, 6], phongToGoiTen: [1, 2, 1.32], zoomGoiTen: [1, 2, 1.18], zoomBamTheo: [1, 2, 1.08],
-        coCapGiua: [0.5, 2, 1.22], lechCapGiua: [0, 10, 1.8], lechCapBen: [0, 10, 1.7], tamCapBen: [0, 100, 42], bannerY: [0, 60, 30],
-        mcMinSec: [5, 3600, 18], mcMaxSec: [5, 3600, 26], hangChoToiDa: [0, 20, 4], nguongDongNguoi: [0, 10000, 70], phutImMatCho: [0, 120, 4], tyLeChoTrong: [0, 1, 0.45],
+        coCapGiua: [0.5, 2, 1.22], lechCapGiua: [0, 10, 1.8], bannerY: [0, 60, 30],
+        mcMinSec: [5, 3600, 18], mcMaxSec: [5, 3600, 26], mcSapMocConLai: [0, 1000, 20], mcCheGheuChoGiay: [0, 600, 20], hangChoToiDa: [0, 20, 4], nguongDongNguoi: [0, 10000, 70], phutImMatCho: [0, 120, 4], tyLeChoTrong: [0, 1, 0.45], phongVangDuoi: [0, 600, 15],
         choLenSanKhauCoBan: [0, 3600, 90], choLenSanKhauMin: [0, 3600, 20], choLenSanKhauMax: [0, 7200, 300], choNguoiGiay: [0, 300, 30], choCongMoiCapCho: [0, 600, 15],
         choCongMoiCapGhep: [0, 600, 8], choMienGhep: [0, 100, 2], choNguongVang: [0, 100000, 300], choHeSoVang: [0, 2, 0.6],
-        choNguongDong: [0, 1000000, 1500], choHeSoDong: [0, 3, 1.3], hieuUngNgauNhienTuGiay: [1, 3600, 12], hieuUngNgauNhienDenGiay: [1, 3600, 25], fxHoaRoiMoiGiay: [0, 3600, 10], fxPhaoHoaMoiGiay: [0, 3600, 20], fxPhaoGiayMoiGiay: [0, 3600, 20], timHieuUngChoGiay: [0, 60, 2], tuGhepDoiSauGiay: [3, 120, 5],
-        doiTrangPhucChoGiay: [0, 120, 5], bongChatGiay: [1, 30, 4], bongChatMaxKyTu: [10, 200, 60], bongChatAnKhiTuCamQua: [0, 20, 2],
+        choNguongDong: [0, 1000000, 1500], choHeSoDong: [0, 3, 1.3], hieuUngNgauNhienTuGiay: [1, 3600, 12], hieuUngNgauNhienDenGiay: [1, 3600, 25], fxHoaRoiMoiGiay: [0, 3600, 10], fxPhaoHoaMoiGiay: [0, 3600, 20], fxPhaoGiayMoiGiay: [0, 3600, 20], quaTangMocLon: [0, 100000, 299], quaTangMocVua: [0, 100000, 99], quaTangHieuUngLon: [0, 50, 10], quaTangHieuUngVua: [0, 50, 5], quaTangHieuUngNho: [0, 50, 1], donViHoaRoi: [1, 500, 100], donViPhaoHoa: [1, 50, 5], donViPhaoGiay: [1, 500, 100], timHieuUngChoGiay: [0, 60, 2], tuGhepDoiSauGiay: [3, 120, 5],
+        doiTrangPhucChoGiay: [0, 120, 5], bongChatGiay: [1, 30, 4], bongChatMaxKyTu: [10, 200, 60], bongChatAnKhiTuCamQua: [0, 20, 2], choDoiLanThapGiay: [0, 600, 30],
         khungTraiX: [-20, 20, 0], khungTraiY: [-20, 20, 2], khungPhaiX: [-20, 20, 0], khungPhaiY: [-20, 20, 2],
         khungHangChoX: [0, 90, 1], khungHangChoY: [0, 95, 1], khungMcX: [-20, 20, 0], khungMcY: [-20, 20, -6], npcNguongVang: [0, 100, 6], npcMoiBaoLauGiay: [10, 3600, 25], npcNghiGiay: [10, 3600, 60], lenhHieuUngChoGiay: [0, 120, 8], khungHuongDanX: [-40, 40, 0], khungHuongDanY: [-40, 40, 0], khungMucTieuX: [-40, 40, 0], khungMucTieuY: [-40, 40, 0], khungDemCapX: [-40, 40, 0], khungDemCapY: [-40, 40, 0], khungBxhX: [0, 90, 1], khungBxhY: [0, 95, 0], khungSoMungX: [0, 90, 1], khungSoMungY: [0, 95, 5.8], khungBangLenhX: [0, 90, 1], khungBangLenhY: [0, 95, 1], coChuHuongDan: [50, 300, 110], coChuMucTieu: [50, 300, 100], coChuDemCap: [50, 300, 110], coChuBxh: [50, 300, 110], coChuSoMung: [50, 300, 110], coChuBangLenh: [50, 300, 130], coChuHangCho: [50, 300, 110], coChuMc: [50, 300, 100] },
       'san-nhay': { anticsIntervalSec: [1, 120, 7], camHomeZoom: [0.3, 1.5, 0.62], directorMinHoldSec: [0, 10, 1.2], djDoiSauGiay: [5, 600, 24],
@@ -188,7 +188,7 @@ class Settings {
       'san-nhay': { tocDoNhay: [['cham', 'thuong', 'nhanh'], 'thuong'], hieuUngManHinh: [['song', 'vong', 'led'], 'vong'] },
     };
     for (const [k, [mn, mx, def]] of Object.entries(NUM_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = num(cfg[k], mn, mx, def);
-    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'lenhHieuUngChoGiay', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])
+    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'lenhHieuUngChoGiay', 'phongVangDuoi', 'mcSapMocConLai', 'mcCheGheuChoGiay', 'choDoiLanThapGiay', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])
       if (clean[k] != null) clean[k] = Math.round(clean[k]);
     for (const k of BOOL_BY_GAME[id] || []) if (cfg[k] != null) clean[k] = !!cfg[k];
     for (const [k, [opts, def]] of Object.entries(CHOICE_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = opts.includes(cfg[k]) ? cfg[k] : def;
@@ -210,7 +210,15 @@ class Settings {
     if (Array.isArray(cfg.bgRules)) clean.bgRules = cfg.bgRules.map(r => {
       const bg = String((r && (r.bg || r.file)) || '').trim(), views = need(r && (r.views != null ? r.views : r.viewers), 0, 1e9);
       if (!/^bg[\w.-]*\.webp$/i.test(bg) || views == null) return null;
-      return id === 'dam-cuoi' ? { viewers: views, file: bg } : { views, bg };
+      if (id !== 'dam-cuoi') return { views, bg };
+      // M14b: đám cưới giữ thêm label (tên mốc) + royal (0 thường / 1 vàng / 2 hoàng gia)
+      // để game xây TIERS từ bgRules — trước đây 2 trường này bị rơi khi lưu qua admin.
+      const out = { viewers: views, file: bg };
+      const label = r && typeof r.label === 'string' ? r.label.trim().slice(0, 40) : '';
+      if (label) out.label = label;
+      let royal = r && r.royal === true ? 1 : r && r.royal === false ? 0 : Number(r && r.royal);
+      if (isFinite(royal)) out.royal = Math.max(0, Math.min(2, Math.round(royal)));
+      return out;
     }).filter(Boolean).slice(0, 50);
     const cur = { ...(this.data.games[id] || {}), ...clean };
     for (const k of drop) delete cur[k];

@@ -544,8 +544,6 @@ const GAME_SCHEMAS = {
       { k: 'zoomBamTheo', l: 'Zoom camera bám theo cặp (x)', t: 'num', min: 1, max: 2, step: 0.01 },
       { k: 'coCapGiua', l: 'Cỡ cặp giữa (x)', t: 'num', min: 0.5, max: 2, step: 0.01 },
       { k: 'lechCapGiua', l: 'Lệch cặp giữa', t: 'num', min: 0, max: 10, step: 0.1 },
-      { k: 'lechCapBen', l: 'Lệch cặp bên', t: 'num', min: 0, max: 10, step: 0.1 },
-      { k: 'tamCapBen', l: 'Tâm cặp bên (%)', t: 'num', min: 0, max: 100 },
       { k: 'bannerY', l: 'Banner "Lễ thành hôn" — cao từ mép trên (%)', t: 'num', min: 0, max: 60 },
     ] },
     { title: '🎤 MC & câu thoại', wide: true, fields: [
@@ -553,6 +551,8 @@ const GAME_SCHEMAS = {
       { k: 'mcNameNu', l: 'Tên MC nữ', t: 'txt' },
       { k: 'mcMinSec', l: 'MC nói cách nhau từ (giây)', t: 'num', min: 5, max: 3600 },
       { k: 'mcMaxSec', l: 'đến (giây)', t: 'num', min: 5, max: 3600 },
+      { k: 'mcSapMocConLai', l: 'MC hô "sắp đạt mốc" khi còn (lượt xem)', t: 'num', min: 0, max: 1000, step: 1 },
+      { k: 'mcCheGheuChoGiay', l: 'MC chế giễu tag trúng người đã có đôi — chờ (giây) mới nói lại', t: 'num', min: 0, max: 600, step: 1 },
       { k: 'mcLines', l: 'Câu MC nói ngẫu nhiên ({ten} = tên khách)', t: 'lines', rows: 6 },
       { k: 'mcGreet', l: 'Câu chào khách mới ({ten})', t: 'lines', rows: 4 },
       { k: 'mcCouple', l: 'Câu giới thiệu cặp đôi ({a}, {b})', t: 'lines', rows: 4 },
@@ -560,15 +560,19 @@ const GAME_SCHEMAS = {
       { k: 'mcFollowLines', l: 'Câu khi có người follow ({ten})', t: 'lines', rows: 3 },
       { k: 'mcFunny', l: 'Câu hài hước của MC', t: 'lines', rows: 4 },
       { k: 'mcMilestone', l: 'Câu khi sảnh nâng cấp mốc ({moc})', t: 'lines', rows: 3 },
+      { k: 'mcSapMoc', l: 'Câu MC hô sắp đạt mốc ({moc} = mốc, {con} = còn thiếu, {sanh} = tên sảnh mới)', t: 'lines', rows: 4 },
       { k: 'mcTagVang', l: 'Câu khi tag người vắng mặt ({a} gọi, {ten} vắng, {b} ghép tạm)', t: 'lines', rows: 3 },
+      { k: 'mcTagDaCoDoi', l: 'Câu MC khi tag trúng người đã có đôi ({a} = người tag, {b} = người bị tag, {c} = bạn đời của {b})', t: 'lines', rows: 6 },
       { k: 'mcGuide', l: 'Dòng MC hướng dẫn cách chơi', t: 'lines', rows: 4 },
     ] },
     { title: '💌 Ghép đôi & hàng chờ', fields: [
       { k: 'ghepDoiNgauNhien', l: 'Tag người vắng → ghép tạm với khách độc thân khác giới', t: 'chk', defTrue: true },
       { k: 'uuTienQuaTang', l: 'Người tặng quà được ưu tiên lên trước', t: 'chk', defTrue: true },
       { k: 'uuTienChoTrong', l: 'Ưu tiên cặp chờ lâu khi vắng', t: 'chk', defTrue: true },
+      { k: 'choDoiLanThapGiay', l: 'Cặp làn thấp (random/NPC) chờ quá (giây) thì được lên trước cặp quà (0 = tắt)', t: 'num', min: 0, max: 600, step: 1 },
       { k: 'hangChoToiDa', l: 'Số cặp hiện trong khung hàng chờ', t: 'num', min: 0, max: 20, step: 1 },
       { k: 'nguongDongNguoi', l: 'Ngưỡng "đông người" (số khách)', t: 'num', min: 0, max: 10000 },
+      { k: 'phongVangDuoi', l: 'Dưới (người) thì tính là phòng vắng — khách mới được ưu tiên chỗ giữa', t: 'num', min: 0, max: 600, step: 1 },
       { k: 'phutImMatCho', l: 'Im lặng bao lâu thì ưu tiên cặp chờ (phút)', t: 'num', min: 0, max: 120, step: 0.5 },
       { k: 'tyLeChoTrong', l: 'Tỉ lệ giữ chỗ khi vắng (0–1)', t: 'num', min: 0, max: 1, step: 0.05 },
     ] },
@@ -598,6 +602,14 @@ const GAME_SCHEMAS = {
       { k: 'fxHoaRoiMoiGiay', l: '🌸 Hoa rơi tự động — mỗi (giây), 0 = tắt', t: 'num', min: 0, max: 3600, step: 1 },
       { k: 'fxPhaoHoaMoiGiay', l: '🎆 Pháo hoa tự động — mỗi (giây), 0 = tắt', t: 'num', min: 0, max: 3600, step: 1 },
       { k: 'fxPhaoGiayMoiGiay', l: '🎉 Pháo giấy tự động — mỗi (giây), 0 = tắt', t: 'num', min: 0, max: 3600, step: 1 },
+      { k: 'quaTangMocLon', l: '🎁 Quà TẶNG — từ N xu trở lên tính là quà LỚN (bắn nhiều hiệu ứng nhất)', t: 'num', min: 0, max: 100000, step: 1 },
+      { k: 'quaTangMocVua', l: '🎁 Quà TẶNG — từ N xu trở lên tính là quà VỪA (dưới mốc lớn)', t: 'num', min: 0, max: 100000, step: 1 },
+      { k: 'quaTangHieuUngLon', l: '🎁 Quà LỚN — bắn mỗi loại bao nhiêu hiệu ứng (hoa rơi + pháo hoa + pháo giấy cùng lúc)', t: 'num', min: 0, max: 50, step: 1 },
+      { k: 'quaTangHieuUngVua', l: '🎁 Quà VỪA — bắn mỗi loại bao nhiêu hiệu ứng', t: 'num', min: 0, max: 50, step: 1 },
+      { k: 'quaTangHieuUngNho', l: '🎁 Quà NHỎ (dưới mốc vừa) — bắn mỗi loại bao nhiêu hiệu ứng', t: 'num', min: 0, max: 50, step: 1 },
+      { k: 'donViHoaRoi', l: '🌸 1 hiệu ứng HOA RƠI = bao nhiêu cánh hoa', t: 'num', min: 1, max: 500, step: 1 },
+      { k: 'donViPhaoHoa', l: '🎆 1 hiệu ứng PHÁO HOA = bao nhiêu quả pháo bay lên', t: 'num', min: 1, max: 50, step: 1 },
+      { k: 'donViPhaoGiay', l: '🎉 1 hiệu ứng PHÁO GIẤY = bao nhiêu mảnh giấy', t: 'num', min: 1, max: 500, step: 1 },
       { k: 'hieuUngThaTim', l: '❤ Thả tim cũng nổ hiệu ứng (ngẫu nhiên hoa rơi / pháo hoa / pháo giấy — 1 tim cũng nổ)', t: 'chk', defTrue: true },
       { k: 'timHieuUngChoGiay', l: '❤ Thả tim — mỗi người cách nhau (giây) mới nổ tiếp (chống spam lag)', t: 'num', min: 0, max: 60, step: 0.5 },
       { k: 'hieuUngNgauNhienTuGiay', l: 'Hiệu ứng ngẫu nhiên mỗi từ (giây)', t: 'num', min: 1, max: 3600 },
@@ -740,7 +752,6 @@ const COMMON_GROUPS = [
   { title: '📱 Màn hình trên điện thoại', note: 'TikTok đè avatar chủ kênh / nút Follow lên phần trên và cắt hai mép trên điện thoại cao.', fields: [
     { k: 'safeTop', l: 'Chừa phía trên cho TikTok (%)', t: 'num', min: 0, max: 40 },
     { k: 'safeSide', l: 'Chừa hai bên (%)', t: 'num', min: 0, max: 25 },
-    { k: 'uiScale', l: 'Cỡ chữ (%)', t: 'num', min: 60, max: 200, step: 5 },
   ] },
 ];
 
@@ -766,10 +777,10 @@ function buildSchema(g, add, save, saveDef) {
       F[f.k] = { kind: 'txt', input: G.field(f.l, txtIn(c[f.k], f.ph), f.full) };
     } else if (f.t === 'bgWedding') {
       const bgOpts = (g.backgrounds || []).map(x => [x, x]);
-      const items = (c.bgRules || []).map(r => ({ viewers: r.viewers != null ? r.viewers : r.views, file: r.file || r.bg || '' }));
-      const L = ruleList('Mốc tổng lượt xem → ảnh sảnh', 'Dùng mốc cao nhất đang đạt; chưa đạt mốc nào thì dùng sảnh mặc định. Ảnh lấy từ mọi file bg*.webp trong Games/' + g.id + '.',
-        [{ key: 'viewers', kind: 'num', cap: 'Khi đạt (lượt xem)', w: 140 }, { key: 'file', kind: 'opt', cap: 'Ảnh nền', options: bgOpts }],
-        items, null, { viewers: 1000, file: bgOpts.length ? bgOpts[0][0] : '' });
+      const items = (c.bgRules || []).map(r => ({ viewers: r.viewers != null ? r.viewers : r.views, file: r.file || r.bg || '', label: r.label || '', royal: r.royal != null ? r.royal : 0 }));
+      const L = ruleList('Mốc tổng lượt xem → ảnh sảnh', 'Dùng mốc cao nhất đang đạt; chưa đạt mốc nào thì dùng sảnh mặc định. Ảnh lấy từ mọi file bg*.webp trong Games/' + g.id + '. Tên mốc hiện trên khung mục tiêu + lời MC; hạng sảnh: Thường = sảnh thường, Vàng = tia sáng + đồ hoàng gia, Hoàng gia = thêm phát sáng + pháo hoa định kỳ.',
+        [{ key: 'viewers', kind: 'num', cap: 'Khi đạt (lượt xem)', w: 110 }, { key: 'file', kind: 'opt', cap: 'Ảnh nền', options: bgOpts }, { key: 'label', kind: 'text', cap: 'Tên mốc', w: 130 }, { key: 'royal', kind: 'opt', cap: 'Hạng sảnh', options: [[0, 'Thường'], [1, 'Vàng'], [2, 'Hoàng gia']] }],
+        items, null, { viewers: 1000, file: bgOpts.length ? bgOpts[0][0] : '', label: '', royal: 0 });
       G.node(L.el); F[f.k] = { kind: 'read', read: () => L.read().filter(r => r.file && r.viewers != null) };
       if (!bgOpts.length) G.note('Chưa thấy file bg*.webp nào trong Games/' + g.id + '.');
     } else {
@@ -850,7 +861,7 @@ function actSelect(actions, value) {
 function optSelect(options, value) {
   const s = el('select');
   for (const [v, text] of options) s.append(new Option(text, v));
-  s.value = value || '';
+  s.value = value == null ? '' : String(value);   // value 0 là lựa chọn hợp lệ, không được rơi về '' như `value || ''`
   return s;
 }
 function ruleRow(cols, obj, actions, onDel) {
