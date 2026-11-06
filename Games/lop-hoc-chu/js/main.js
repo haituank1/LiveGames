@@ -525,7 +525,7 @@ function scheduleNpcAnswers() {
 
 /* ---------- Hiển thị ---------- */
 function catLabel(c) {
-  return { 'lich-su': 'Lịch sử', 'doi-song': 'Đời sống', 'do-an': 'Đồ ăn', 'dia-ly': 'Địa lý' }[c] || c || '';
+  return { 'lich-su': 'Lịch sử', 'doi-song': 'Đời sống', 'do-an': 'Đồ ăn', 'dia-ly': 'Địa lý', 'toan': 'Toán', 'tieng-viet': 'Tiếng Việt', 'khoa-hoc': 'Khoa học', 'tieng-anh': 'Tiếng Anh', 'do-vui': 'Đố vui' }[c] || c || '';
 }
 function phaseLabel(p) {
   return { answer: 'Gõ đáp án nhanh lên!', reveal: 'Đáp án đây!', gap: 'Câu tiếp theo...', break: 'Giờ ra chơi!' }[p] || p;
