@@ -1596,6 +1596,22 @@ P.setCrown = function (couple) {
     crownEls.push(s);
   }
 };
+/* Vong hoa vang tren dau nguoi vua follow (2026-11-06): hien sec giay
+   roi tu go; moi nguoi 1 vong rieng, follow lai trong luc vong con hien
+   thi gia han (xoa timeout cu). Giong vuong mien: vong nam tren dau
+   (CSS .wreath), theo nguoi khi di chuyen, khong che mat. */
+P.setWreath = function (id, sec) {
+  const p = people.get(id);
+  if (!p || !p.el) return;
+  if (p._wreathT) clearTimeout(p._wreathT);
+  let w = p.el.querySelector('.wreath');
+  if (!w) {
+    w = document.createElement('span');
+    w.className = 'wreath'; w.textContent = '🌼';
+    p.el.appendChild(w);
+  }
+  p._wreathT = setTimeout(() => { if (w.parentNode) w.remove(); p._wreathT = null; }, Math.max(1, sec || 6) * 1000);
+};
 /* Tắt hoạt ảnh nhân vật ngoài khung camera cho nhẹ máy — có TRỄ 2 ngưỡng:
    đang hiện thì phải ra xa viền thêm 4.5% mới tắt, đang tắt thì phải vào sâu
    hơn viền 1.5% mới bật lại; không còn cảnh nhân vật sát viền chớp tắt/bật
