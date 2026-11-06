@@ -3,7 +3,9 @@
    (xáo trộn có seed theo chỉ số câu, đã kiểm tra: đảo chữ là hoán vị đúng
    của đáp án, khác đáp án gốc; gợi ý không chứa đáp án).
    Trường: a = đáp án, s = đảo chữ, h = gợi ý, d = độ khó 1-3, c = chủ đề
-   (lich-su / doi-song / do-an / dia-ly). */
+   (lich-su / doi-song / do-an / dia-ly / toan / tieng-viet / khoa-hoc / tieng-anh / do-vui).
+   100 câu mới (121-220, 5 chủ đề x 20) sinh bằng /tmp/gen-lop-hoc-moi.js
+   (xáo có seed theo chỉ số câu, đã kiểm tra như trên + không trùng đáp án cũ). */
 (function () {
 'use strict';
 const W = (window.Classroom = window.Classroom || {});
@@ -410,7 +412,7 @@ W.QUESTIONS = [
   {
     "a": "NÓN LÁ",
     "s": "ÓNN ÁL",
-    "h": "Mũ hình nón làm bằng lá",
+    "h": "Mũ truyền thống của người Việt, che nắng che mưa",
     "d": 1,
     "c": "doi-song"
   },
@@ -847,6 +849,706 @@ W.QUESTIONS = [
     "h": "Tỉnh có hang Sơn Đoòng",
     "d": 2,
     "c": "dia-ly"
+  },
+  {
+    "a": "MƯỜI HAI",
+    "s": "MIƯỜ IAH",
+    "h": "Bảy cộng năm bằng bao nhiêu?",
+    "d": 1,
+    "c": "toan"
+  },
+  {
+    "a": "MƯỜI LĂM",
+    "s": "IỜƯM MLĂ",
+    "h": "Chín cộng sáu bằng bao nhiêu?",
+    "d": 1,
+    "c": "toan"
+  },
+  {
+    "a": "HAI MƯƠI",
+    "s": "IAH ƯƠMI",
+    "h": "Mười cộng mười bằng bao nhiêu?",
+    "d": 1,
+    "c": "toan"
+  },
+  {
+    "a": "MƯỜI TÁM",
+    "s": "ỜMIƯ TÁM",
+    "h": "Chín nhân hai bằng bao nhiêu?",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "BA MƯƠI",
+    "s": "BA IMƯƠ",
+    "h": "Sáu nhân năm bằng bao nhiêu?",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "MỘT TRĂM",
+    "s": "ỘMT TRMĂ",
+    "h": "Mười nhân mười bằng bao nhiêu?",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "BỐN MƯƠI",
+    "s": "ỐNB ƠIƯM",
+    "h": "Tám nhân năm bằng bao nhiêu?",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "NĂM MƯƠI",
+    "s": "ĂNM MIƠƯ",
+    "h": "Bảy mươi trừ hai mươi bằng bao nhiêu?",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "HAI MƯƠI LĂM",
+    "s": "HIA ƯMIƠ LĂM",
+    "h": "Năm nhân năm bằng bao nhiêu?",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "MƯỜI CHÍN",
+    "s": "ỜƯIM CHÍN",
+    "h": "Hai mươi trừ một bằng bao nhiêu?",
+    "d": 1,
+    "c": "toan"
+  },
+  {
+    "a": "PHÉP CỘNG",
+    "s": "PPHÉ NỘGC",
+    "h": "Phép tính lấy tổng của hai số",
+    "d": 1,
+    "c": "toan"
+  },
+  {
+    "a": "PHÉP TRỪ",
+    "s": "ÉPPH ỪRT",
+    "h": "Phép tính lấy hiệu của hai số",
+    "d": 1,
+    "c": "toan"
+  },
+  {
+    "a": "PHÉP NHÂN",
+    "s": "HÉPP ÂNHN",
+    "h": "Phép tính lấy tích của hai số",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "PHÉP CHIA",
+    "s": "PPÉH HAIC",
+    "h": "Phép tính lấy thương của hai số",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "HÌNH VUÔNG",
+    "s": "NHHÌ NUÔVG",
+    "h": "Hình có bốn cạnh bằng nhau, bốn góc vuông",
+    "d": 1,
+    "c": "toan"
+  },
+  {
+    "a": "HÌNH TRÒN",
+    "s": "HHÌN TÒNR",
+    "h": "Hình không có cạnh, không có góc",
+    "d": 1,
+    "c": "toan"
+  },
+  {
+    "a": "HÌNH TAM GIÁC",
+    "s": "HNHÌ TAM GIÁC",
+    "h": "Hình có ba cạnh, ba góc",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "SỐ CHẴN",
+    "s": "SỐ NẴHC",
+    "h": "Số chia hết cho hai, ví dụ số bốn",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "SỐ LẺ",
+    "s": "ỐS LẺ",
+    "h": "Số chia cho hai còn dư một, ví dụ số ba",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "GÓC VUÔNG",
+    "s": "GÓC UGNVÔ",
+    "h": "Góc bằng chín mươi độ, như góc của quyển vở",
+    "d": 2,
+    "c": "toan"
+  },
+  {
+    "a": "DANH TỪ",
+    "s": "NDAH TỪ",
+    "h": "Từ chỉ người, vật, hiện tượng, ví dụ từ bàn ghế",
+    "d": 2,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "ĐỘNG TỪ",
+    "s": "ĐGNỘ TỪ",
+    "h": "Từ chỉ hoạt động, ví dụ từ chạy nhảy",
+    "d": 2,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "TÍNH TỪ",
+    "s": "HNÍT ỪT",
+    "h": "Từ chỉ đặc điểm, ví dụ từ xinh đẹp",
+    "d": 2,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "CHỦ NGỮ",
+    "s": "HỦC NGỮ",
+    "h": "Thành phần chính của câu, trả lời câu hỏi ai, cái gì",
+    "d": 3,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "VỊ NGỮ",
+    "s": "VỊ NỮG",
+    "h": "Thành phần chính của câu, trả lời câu hỏi làm gì, thế nào",
+    "d": 3,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "CÂU KỂ",
+    "s": "CÂU ỂK",
+    "h": "Câu dùng để kể, tả hoặc giới thiệu sự việc",
+    "d": 1,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "CÂU HỎI",
+    "s": "ÂUC IỎH",
+    "h": "Câu dùng để hỏi, cuối câu có dấu chấm hỏi",
+    "d": 1,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "DẤU CHẤM",
+    "s": "DẤU ẤMCH",
+    "h": "Dấu kết thúc câu kể, đặt ở cuối câu",
+    "d": 1,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "DẤU PHẨY",
+    "s": "ẤUD HYẨP",
+    "h": "Dấu ngăn cách các bộ phận trong câu",
+    "d": 1,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "THÀNH NGỮ",
+    "s": "TNHHÀ GỮN",
+    "h": "Cụm từ cố định, ví dụ như gần mực thì đen",
+    "d": 3,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "TỤC NGỮ",
+    "s": "TCỤ NỮG",
+    "h": "Câu nói ngắn gọn của dân gian, ví dụ có công mài sắt",
+    "d": 3,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "CA DAO",
+    "s": "CA OAD",
+    "h": "Thơ dân gian truyền miệng, ví dụ công cha như núi Thái Sơn",
+    "d": 2,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "TRUYỆN CỔ TÍCH",
+    "s": "YRỆUNT CỔ CTHÍ",
+    "h": "Truyện dân gian có yếu tố thần kì, ví dụ Tấm Cám",
+    "d": 2,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "THƠ LỤC BÁT",
+    "s": "ƠHT ỤLC ÁTB",
+    "h": "Thể thơ sáu tám, câu sáu chữ rồi câu tám chữ",
+    "d": 3,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "NGUYÊN ÂM",
+    "s": "NUNYGÊ MÂ",
+    "h": "Âm mà khi phát ra luồng hơi thoát tự do, ví dụ a, e, i",
+    "d": 3,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "PHỤ ÂM",
+    "s": "PỤH ÂM",
+    "h": "Âm mà khi phát ra luồng hơi bị cản lại, ví dụ b, c, d",
+    "d": 3,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "ÂM TIẾT",
+    "s": "ÂM TTIẾ",
+    "h": "Đơn vị phát âm nhỏ nhất của tiếng Việt",
+    "d": 2,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "DẤU HỎI",
+    "s": "DUẤ IHỎ",
+    "h": "Dấu đặt cuối câu dùng để hỏi",
+    "d": 1,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "DẤU THAN",
+    "s": "ẤDU THAN",
+    "h": "Dấu đặt cuối câu cảm thán, thể hiện cảm xúc",
+    "d": 2,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "CÂU CẢM",
+    "s": "ÂUC CMẢ",
+    "h": "Câu bộc lộ cảm xúc, cuối câu có dấu chấm than",
+    "d": 2,
+    "c": "tieng-viet"
+  },
+  {
+    "a": "MẶT TRỜI",
+    "s": "TMẶ TRỜI",
+    "h": "Ngôi sao chiếu sáng ban ngày cho Trái Đất",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "MẶT TRĂNG",
+    "s": "TẶM NRTGĂ",
+    "h": "Vệ tinh tự nhiên duy nhất của Trái Đất",
+    "d": 2,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "TRÁI ĐẤT",
+    "s": "ÁRIT ẤTĐ",
+    "h": "Hành tinh thứ ba tính từ Mặt Trời, nơi chúng ta sống",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "NGÔI SAO",
+    "s": "NÔGI AOS",
+    "h": "Thiên thể tự phát sáng trên bầu trời đêm",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "QUANG HỢP",
+    "s": "UAGQN HỢP",
+    "h": "Quá trình cây xanh dùng ánh sáng tạo chất dinh dưỡng",
+    "d": 3,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "CÂY XANH",
+    "s": "ÂYC ANXH",
+    "h": "Sinh vật tạo ra khí ô xi nhờ ánh sáng mặt trời",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "KHÔNG KHÍ",
+    "s": "GHNKÔ KHÍ",
+    "h": "Hỗn hợp khí bao quanh Trái Đất, con người hít thở mỗi ngày",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "NƯỚC BIỂN",
+    "s": "CỚNƯ NIỂB",
+    "h": "Nước mặn ở đại dương, chiếm phần lớn bề mặt Trái Đất",
+    "d": 2,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "ĐỘNG VẬT",
+    "s": "GNỘĐ TVẬ",
+    "h": "Sinh vật có thể di chuyển, ví dụ chó mèo chim cá",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "THỰC VẬT",
+    "s": "CTỰH ẬTV",
+    "h": "Sinh vật không di chuyển, ví dụ cây cỏ hoa lá",
+    "d": 2,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "CÔN TRÙNG",
+    "s": "CNÔ RGÙTN",
+    "h": "Loài vật nhỏ có sáu chân, ví dụ kiến ong bướm",
+    "d": 2,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "CÁ VOI",
+    "s": "ÁC VOI",
+    "h": "Loài vật lớn nhất sống dưới biển, thở bằng phổi",
+    "d": 2,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "CHIM CÁNH CỤT",
+    "s": "MCIH ÁNHC ỤTC",
+    "h": "Loài chim không biết bay, sống ở vùng Nam Cực lạnh giá",
+    "d": 3,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "NÚI LỬA",
+    "s": "NIÚ AỬL",
+    "h": "Núi có thể phun ra dung nham nóng chảy",
+    "d": 2,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "CẦU VỒNG",
+    "s": "CẦU GVNỒ",
+    "h": "Dải màu cong xuất hiện trên trời sau cơn mưa",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "SẤM SÉT",
+    "s": "SẤM TSÉ",
+    "h": "Tiếng nổ và tia sáng trong cơn giông",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "TRỌNG LỰC",
+    "s": "ỌRGNT ỰCL",
+    "h": "Lực hút kéo mọi vật rơi xuống mặt đất",
+    "d": 3,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "MƯA ĐÁ",
+    "s": "ƯAM ĐÁ",
+    "h": "Hạt băng rơi từ trên trời xuống khi trời giông",
+    "d": 2,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "ONG MẬT",
+    "s": "GON ẬMT",
+    "h": "Loài côn trùng làm ra mật ngọt",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "BƯỚM",
+    "s": "ƯỚMB",
+    "h": "Côn trùng có đôi cánh sặc sỡ, bay lượn trên hoa",
+    "d": 1,
+    "c": "khoa-hoc"
+  },
+  {
+    "a": "APPLE",
+    "s": "PAELP",
+    "h": "Quả táo trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "BANANA",
+    "s": "NABANA",
+    "h": "Quả chuối trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "SCHOOL",
+    "s": "SOLOCH",
+    "h": "Trường học trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "TEACHER",
+    "s": "RCHTEEA",
+    "h": "Cô giáo trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "FRIEND",
+    "s": "DRNIEF",
+    "h": "Bạn bè trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "FAMILY",
+    "s": "YFMIAL",
+    "h": "Gia đình trong tiếng Anh",
+    "d": 2,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "SUNDAY",
+    "s": "YASNUD",
+    "h": "Ngày chủ nhật trong tiếng Anh",
+    "d": 2,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "MONDAY",
+    "s": "YOANDM",
+    "h": "Ngày thứ hai trong tiếng Anh",
+    "d": 2,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "FLOWER",
+    "s": "REFWLO",
+    "h": "Bông hoa trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "GARDEN",
+    "s": "DERANG",
+    "h": "Khu vườn trong tiếng Anh",
+    "d": 2,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "WINDOW",
+    "s": "WNIOWD",
+    "h": "Cửa sổ trong tiếng Anh",
+    "d": 2,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "PENCIL",
+    "s": "NIECLP",
+    "h": "Cây bút chì trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "ORANGE",
+    "s": "ENAOGR",
+    "h": "Quả cam trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "YELLOW",
+    "s": "LYOEWL",
+    "h": "Màu vàng trong tiếng Anh",
+    "d": 2,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "PURPLE",
+    "s": "LPEPUR",
+    "h": "Màu tím trong tiếng Anh",
+    "d": 3,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "HAPPY",
+    "s": "PAHYP",
+    "h": "Vui vẻ trong tiếng Anh",
+    "d": 2,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "WATER",
+    "s": "EWRAT",
+    "h": "Nước uống trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "TABLE",
+    "s": "BLATE",
+    "h": "Cái bàn trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "CHAIR",
+    "s": "HRIAC",
+    "h": "Cái ghế trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "BOOK",
+    "s": "OBKO",
+    "h": "Quyển sách trong tiếng Anh",
+    "d": 1,
+    "c": "tieng-anh"
+  },
+  {
+    "a": "CÁI LƯỢC",
+    "s": "CIÁ LƯỢC",
+    "h": "Cái gì có răng mà không cắn được ai?",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "NƯỚC",
+    "s": "ƯNCỚ",
+    "h": "Cái gì càng giặt càng bẩn?",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "TRÁI TIM",
+    "s": "ÁTRI IMT",
+    "h": "Cái gì đập thì sống, không đập thì chết?",
+    "d": 2,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÂY KIM",
+    "s": "CÂY MKI",
+    "h": "Cái gì có đầu mà không có tóc?",
+    "d": 2,
+    "c": "do-vui"
+  },
+  {
+    "a": "BÀN CHÂN",
+    "s": "NBÀ HCÂN",
+    "h": "Cái gì đi thì nằm, đứng thì nằm, nằm thì đứng?",
+    "d": 3,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI CHAI",
+    "s": "CIÁ AHCI",
+    "h": "Cái gì có cổ mà không có đầu?",
+    "d": 2,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI BÓNG",
+    "s": "IÁC ÓGBN",
+    "h": "Cái gì đi theo bạn cả ngày mà không bao giờ nói chuyện?",
+    "d": 2,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI QUẠT",
+    "s": "ÁIC UẠQT",
+    "h": "Cái gì quay tròn mà không đi đâu, giúp cả nhà mát mẻ?",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI BÁT",
+    "s": "CIÁ BÁT",
+    "h": "Cái gì có miệng mà không ăn được?",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI KÉO",
+    "s": "ÁCI ÉKO",
+    "h": "Dụng cụ có hai lưỡi, dùng để cắt giấy",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI ẤM",
+    "s": "CIÁ ẤM",
+    "h": "Đồ dùng đun nước, có quai mà không nghe được",
+    "d": 2,
+    "c": "do-vui"
+  },
+  {
+    "a": "CẦU THANG",
+    "s": "UCẦ NGATH",
+    "h": "Cái gì đi lên đi xuống mà không nhúc nhích?",
+    "d": 2,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI TRỐNG",
+    "s": "IÁC NGTỐR",
+    "h": "Cái gì đánh thì kêu, không đánh thì im?",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÂY BÚT",
+    "s": "CYÂ ÚBT",
+    "h": "Cái gì vừa đi vừa khóc?",
+    "d": 2,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI GƯƠNG",
+    "s": "ÁIC ƯNGGƠ",
+    "h": "Cái gì soi thấy mình mà không phải là người?",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI CHÌA KHÓA",
+    "s": "ÁIC ÌCAH AÓKH",
+    "h": "Cái gì nhỏ xíu mà mở được cửa lớn?",
+    "d": 2,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI ĐÀI",
+    "s": "ÁIC IĐÀ",
+    "h": "Cái gì có sóng mà không có biển?",
+    "d": 3,
+    "c": "do-vui"
+  },
+  {
+    "a": "ĐÁM MÂY",
+    "s": "MÁĐ MÂY",
+    "h": "Cái gì không cánh mà bay trên trời?",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "CÁI NẾN",
+    "s": "ICÁ NNẾ",
+    "h": "Cái gì càng cháy càng ngắn lại?",
+    "d": 1,
+    "c": "do-vui"
+  },
+  {
+    "a": "CON MÈO",
+    "s": "NOC MOÈ",
+    "h": "Con gì kêu meo meo, bắt chuột rất giỏi?",
+    "d": 1,
+    "c": "do-vui"
   }
 ];
 })();

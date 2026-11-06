@@ -116,7 +116,8 @@
     "voiceVolume": 90,
     "breakSec": 30,
     "breakRevealSec": 20,
-    "breakWinPoints": 50
+    "breakWinPoints": 50,
+    "cheDo": "tong-hop"
   },
   "description": "Lớp học chữ — cô Ngân ra câu đố đảo chữ, người xem gõ đáp án vào chat, ai nhanh nhất được nhiều điểm nhất, quà lớn được lên bảng nhận thưởng",
   "follow": {

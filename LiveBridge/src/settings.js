@@ -186,6 +186,7 @@ class Settings {
     };
     const CHOICE_BY_GAME = {   // key: [các giá trị cho phép, mặc định]
       'san-nhay': { tocDoNhay: [['cham', 'thuong', 'nhanh'], 'thuong'], hieuUngManHinh: [['song', 'vong', 'led'], 'vong'] },
+      'lop-hoc-chu': { cheDo: [['tong-hop', 'toan', 'tieng-viet', 'khoa-hoc', 'tieng-anh', 'do-vui', 'lich-su', 'doi-song', 'do-an', 'dia-ly', 'olympic'], 'tong-hop'] },
     };
     for (const [k, [mn, mx, def]] of Object.entries(NUM_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = num(cfg[k], mn, mx, def);
     for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'lenhHieuUngChoGiay', 'phongVangDuoi', 'mcSapMocConLai', 'mcCheGheuChoGiay', 'choDoiLanThapGiay', 'rongKhungMc', 'rongThongBao', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])

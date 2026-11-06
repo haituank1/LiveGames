@@ -733,6 +733,11 @@ const GAME_SCHEMAS = {
       { k: 'partyMaxNhanhHon', l: 'Party Max nhảy nhanh hơn', t: 'chk', defTrue: true },
     ] },
   ],
+  'lop-hoc-chu': [
+    { title: '📝 Chế độ chọn đề', live: true, note: 'Tổng hợp lấy ngẫu nhiên mọi chủ đề; chọn 1 chủ đề thì chỉ lấy câu trong chủ đề đó; Olympic lấy tổng hợp nhưng chỉ câu khó (độ khó 2–3). Đổi chế độ áp dụng từ câu tiếp theo (bộ đề xáo lại).', fields: [
+      { k: 'cheDo', l: 'Chế độ chọn đề', t: 'sel', opts: [['tong-hop', 'Tổng hợp — mọi chủ đề'], ['olympic', 'Thi Olympic — chỉ câu khó'], ['toan', 'Lớp Toán'], ['tieng-viet', 'Lớp Tiếng Việt'], ['khoa-hoc', 'Lớp Khoa học'], ['tieng-anh', 'Lớp Tiếng Anh'], ['do-vui', 'Lớp Đố vui'], ['lich-su', 'Lớp Lịch sử'], ['doi-song', 'Lớp Đời sống'], ['do-an', 'Lớp Đồ ăn'], ['dia-ly', 'Lớp Địa lý']] },
+    ] },
+  ],
 };
 /* nhóm dùng chung cho mọi game ngoài chùa: âm thanh (không có niệm), giọng NPC, màn hình */
 const COMMON_GROUPS = [

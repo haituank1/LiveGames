@@ -33,6 +33,7 @@ const DEFAULT_CFG = {
   mcName: 'MC Bong Bóng',
   npcVoiceOn: true, npcVoice: 'avocado_v2:rumi', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
   answerSec: 30, revealSec: 8, gapSec: 3,
+  cheDo: 'tong-hop', // chế độ chọn đề: tong-hop | <chủ đề> | olympic (xem nextQuestion)
   breakSec: 30, breakWinPoints: 50, breakRevealSec: 20,
   rankPoints: [100, 80, 60, 40, 40], latePoints: 20,
   streakMin: 3, streakMult: 2,
@@ -124,10 +125,22 @@ function saveFund() { lsSet(LS_FUND, JSON.stringify({ total: fundTotal, cats: fu
 loadFund();
 
 /* ---------- Vòng lặp câu hỏi ---------- */
+let deckMode = null; // chế độ (cfg.cheDo) mà bộ đề hiện tại được xáo theo
 function nextQuestion() {
   if (!QUESTIONS.length) return null;
-  if (!deck.length) {
-    deck = QUESTIONS.map((_, i) => i);
+  const mode = String(cfg.cheDo || 'tong-hop');
+  // Pool theo chế độ: tong-hop = mọi chủ đề; olympic = tổng hợp chỉ câu khó
+  // (d>=2); tên chủ đề = chỉ câu trong chủ đề đó. Pool rỗng (chủ đề lạ /
+  // chưa có câu) thì về tong-hop để game không chết.
+  let pool = QUESTIONS.map((_, i) => i);
+  if (mode === 'olympic') pool = pool.filter(i => (QUESTIONS[i].d || 1) >= 2);
+  else if (mode !== 'tong-hop') {
+    const byTopic = pool.filter(i => QUESTIONS[i].c === mode);
+    if (byTopic.length) pool = byTopic;
+  }
+  if (!deck.length || deckMode !== mode) {
+    deck = pool.slice();
+    deckMode = mode;
     for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
   }
   const idx = deck.pop();
