@@ -230,6 +230,14 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   .person .chip .av.def{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ffffff' fill-opacity='.92' d='M12 11.2a4.6 4.6 0 1 0-4.6-4.6A4.6 4.6 0 0 0 12 11.2zm0 1.8c-3.8 0-7.6 1.9-7.6 4.3V21h15.2v-3.7c0-2.4-3.8-4.3-7.6-4.3z'/></svg>");background-size:74%;background-position:center;background-repeat:no-repeat}
   .person .crown{position:absolute;top:calc(var(--fh,120px)*-.16);font-size:calc(var(--fh,120px)*.26);z-index:3;
     filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));animation:bob 2.2s ease-in-out infinite}
+  /* Vong hoa vang tren dau nguoi vua follow (2026-11-06): vong tron vang
+     co hoa o giua, doi tren dau nhu vuong mien, tu go sau 6 giay. */
+  .person .wreath{position:absolute;top:calc(var(--fh,120px)*-.16);left:50%;transform:translateX(-50%);z-index:3;
+    width:calc(var(--fh,120px)*.30);height:calc(var(--fh,120px)*.30);border-radius:50%;
+    border:calc(var(--fh,120px)*.035) solid #ffd76a;
+    box-shadow:0 0 calc(var(--fh,120px)*.08) rgba(255,215,106,.9),inset 0 0 calc(var(--fh,120px)*.05) rgba(255,215,106,.6);
+    display:grid;place-items:center;font-size:calc(var(--fh,120px)*.18);
+    animation:bob 2.2s ease-in-out infinite}
 
   /* ---------- Khung trên ---------- */
   #left{position:absolute;top:calc(var(--ply,0px));left:calc(var(--side) + var(--u)*1 + var(--plx,0px));display:flex;flex-direction:column;align-items:flex-start;gap:calc(var(--u)*.6);max-width:calc(100% - var(--side)*2 - var(--u)*42);z-index:2000;

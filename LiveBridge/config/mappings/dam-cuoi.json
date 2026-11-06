@@ -226,7 +226,10 @@
     "rulesLines": [
       "💌 Tag @tên người thương → cùng lên sân khấu",
       "🎁 Quà càng lớn, pháo hoa càng to",
-      "👁 Tổng lượt xem càng cao → sảnh cưới càng xịn"
+      "👁 Tổng lượt xem càng cao → sảnh cưới càng xịn",
+      "❤️ Cứ 10 tim → mưa hoa + pháo hoa + pháo giấy",
+      "❤️ Thả tim tăng điểm cho cặp của bạn (tối đa 100 điểm)",
+      "➕ Follow → vòng hoa vàng + tim bay chào mừng"
     ],
     "sfxOn": true,
     "sfxVolume": 55,
@@ -401,6 +404,12 @@
     "fxPhaoGiayMoiGiay": 20,
     "hieuUngThaTim": true,
     "timHieuUngChoGiay": 2,
+    "mocTimHieuUng": 10,
+    "diemMoiTim": 1,
+    "diemTimToiDa": 100,
+    "timHoaRoi": 50,
+    "timPhaoHoa": 3,
+    "timPhaoGiay": 50,
     "lenhDoiGioiTinh": true,
     "lenhDoiTrangPhuc": true,
     "doiTrangPhucChoGiay": 5,

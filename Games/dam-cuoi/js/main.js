@@ -215,10 +215,15 @@ const DEFAULT_CFG = {
     { viewers: 100, file: 'bg-10000.webp', label: 'Đại Tiệc Vàng', royal: 1 },
     { viewers: 200, file: 'bg-sanh-moi.webp', label: 'Đám Cưới Hoàng Gia', royal: 2 },
   ],
-  rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
+  rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn', '❤️ Cứ 10 tim → mưa hoa + pháo hoa + pháo giấy', '❤️ Thả tim tăng điểm cho cặp của bạn (tối đa 100 điểm)', '➕ Follow → vòng hoa vàng + tim bay chào mừng'],
   guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view', '👗 Gõ "nam" / "nữ" / "đổi đồ" → đổi nhân vật, trang phục'],
   musicOn: true, musicVolume: 35, sfxOn: true, sfxVolume: 55,
   choDoiLanThapGiay: 30, hangChoToiDa: 4, tuGhepDoiKhiRong: true, tuGhepDoiSauGiay: 5,
+  /* TIM + FOLLOW (2026-11-06): mocTimHieuUng tim/nguoi thi no ca 3 hieu
+     ung (lieu timHoaRoi/timPhaoHoa/timPhaoGiay — tim mien phi nen lieu
+     nho hon qua tra tien) + cong diemMoiTim diem/tim vao cap cua nguoi
+     tha, cap diemTimToiDa diem/nguoi/cap. */
+  mocTimHieuUng: 10, diemMoiTim: 1, diemTimToiDa: 100, timHoaRoi: 50, timPhaoHoa: 3, timPhaoGiay: 50,
   rongKhungMc: 100, rongThongBao: 100, khungThongBaoX: 0, khungThongBaoY: 0,
 };
 const known = new Map();       // user.id -> user (để parse tag theo tên)
@@ -1917,12 +1922,40 @@ setInterval(autoPairTick, 1000);
    ghi "KHONG hien" la sai (H9). */
 const likeFxAt = new Map();
 const likeTotals = new Map();
+const likePtsGiven = new Map();   // TIM (2026-11-06): `${userId}::${coupleKey}` -> diem tim da cong (cap diemTimToiDa/nguoi/cap)
 function onLike(ev) {
   const u = ev.user; if (!u || !u.id) return;
   const n = Math.max(1, Number(ev.count) || 1);
   const tot = (likeTotals.get(u.id) || 0) + n;
   mapSetCapped(likeTotals, u.id, tot);
   if (Math.floor(tot / 50) > Math.floor((tot - n) / 50)) P.danceAll(5);
+  /* TIM MOC 10 (2026-11-06): cu moi mocTimHieuUng tim/nguoi thi no ca 3
+     hieu ung nhu qua (mua hoa + phao hoa + phao giay) voi lieu nho hon
+     qua tra tien (tim mien phi, nhieu nguoi cung tha) + cong diem vao
+     cap cua chinh nguoi tha qua dung duong coupleScore nhu diem qua de
+     BXH cap nhat; cap diemTimToiDa diem/nguoi/cap. Chua co doi thi cong
+     cho cap dang dien tren san khau; khong co cap nao tren san khau thi
+     khong cong diem (hieu ung van no). Diem cong bat ke hieuUngThaTim
+     (diem la luat choi, khong phai hieu ung hinh); chi dot no hinh moi
+     ton trong hieuUngThaTim. 1 su kien tha nhieu tim vuot 2 moc thi cong
+     du diem ca 2 moc nhung chi no 1 dot (chong spam FX). */
+  const step = Math.max(1, Math.round(giftNum('mocTimHieuUng', 10)));
+  const crossed = Math.floor(tot / step) - Math.floor((tot - n) / step);
+  if (crossed > 0) {
+    const target = P.coupleOf(u.id) || P.featured();
+    const want = crossed * step * Math.max(0, giftNum('diemMoiTim', 1));
+    if (target && !(target.a.npc || target.b.npc) && want > 0) {
+      const key = u.id + '::' + target.key;
+      const given = likePtsGiven.get(key) || 0;
+      const add = Math.min(want, Math.max(0, Math.round(giftNum('diemTimToiDa', 100)) - given));
+      if (add > 0) { mapSetCapped(likePtsGiven, key, given + add); coupleScore(target, add); }
+    }
+    if (cfg.hieuUngThaTim !== false) {
+      FX.petals(giftNum('timHoaRoi', 50));
+      FX.fireworks(giftNum('timPhaoHoa', 3));
+      FX.confetti(giftNum('timPhaoGiay', 50));
+    }
+  }
   if (cfg.hieuUngThaTim === false) return;
   const now = performance.now();
   const cdMs = (cfg.timHieuUngChoGiay != null ? cfg.timHieuUngChoGiay : 2) * 1000;
@@ -1932,6 +1965,25 @@ function onLike(ev) {
   if (r < 1 / 3) FX.petals(55);
   else if (r < 2 / 3) FX.fireworks(1);
   else FX.confetti(45);
+}
+/* FOLLOW — VONG HOA + TIM BAY (2026-11-06, user chot): vong hoa vang
+   tren dau nguoi follow 6 giay (theo nguoi khi di chuyen, nhu vuong
+   mien Top 1 — nam tren dau, khong che mat) + vong tim no quanh chinh
+   nguoi do (dung lai FX co san de huong luat an toan mat V4:
+   ringHearts/hearts co x,y -> noteCoupleAnchor). Re: 24 tim canvas +
+   1 vong DOM — follow mien phi nen khong dung dot no lon nhu qua.
+   Nguoi chua co nhan vat (phong thu) thi no tim giua san nhu cu. */
+function followCelebrate(user) {
+  if (!user || !user.id) return;
+  P.setWreath(user.id, 6);
+  const p = P.get(user.id);
+  if (p && FX.ringHearts) {
+    const sp = Cam.toScreen(p.x, p.y);
+    FX.ringHearts(sp.fx, sp.fy - 0.05);
+    if (FX.hearts) FX.hearts(10, sp.fx, sp.fy - 0.05);
+  } else if (FX.hearts) {
+    FX.hearts(12, 0.5, 0.6);
+  }
 }
 function handle(ev) {
   const src = ev.source || {};
@@ -1954,7 +2006,10 @@ function handle(ev) {
       mapSetCapped(followPairAt, ev.user.id, nowF);
       const partner = randomSingleOpp(ev.user) || randomSingle(ev.user);
       if (partner) requestCouple(ev.user, partner, 'follow');
-      else FX.hearts(12, 0.5, 0.6);
+      /* FOLLOW (2026-11-06, user chot: vong hoa + tim bay): chi chay
+         trong nhanh qua cooldown 20s nen moi follow chi no 1 lan, du
+         ghep duoc hay khong. */
+      followCelebrate(ev.user);
     }
     mcReact(2.9, MC.follow, { ten: ev.user.nickname });   // follow xếp SAU mọi câu cảm ơn quà (Nguyen yêu cầu 2026-11-04)
   } else if (ev.action === 'dance') {
@@ -2285,7 +2340,7 @@ if (isDemo) {
       { viewers: 10, file: 'bg-500.webp' }, { viewers: 30, file: 'bg-2000.webp' },
       { viewers: 50, file: 'bg-5000.webp' }, { viewers: 100, file: 'bg-10000.webp' }, { viewers: 200, file: 'bg-sanh-moi.webp' },
     ],
-    rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn'],
+    rulesLines: ['💌 Tag @tên người thương → cùng lên sân khấu', '🎁 Quà càng lớn, pháo hoa càng to', '👁 Tổng lượt xem càng cao → sảnh cưới càng xịn', '❤️ Cứ 10 tim → mưa hoa + pháo hoa + pháo giấy', '❤️ Thả tim tăng điểm cho cặp của bạn (tối đa 100 điểm)', '➕ Follow → vòng hoa vàng + tim bay chào mừng'],
     guideLines: ['💌 Gõ "@tên người thương" → 2 bạn lên sân khấu', '🎁 Tặng quà → pháo hoa cho cặp đôi tâm điểm', '👑 Cặp được tặng nhiều quà nhất sẽ đội vương miện', '👗 Gõ "nam" / "nữ" / "đổi đồ" → đổi nhân vật, trang phục', '👁 Kéo bạn bè vào xem → sảnh nâng cấp theo tổng lượt view'],
     mcLines: ['Một đám cưới vui là khi khách mời cười nhiều hơn cô dâu chú rể.', 'Tình yêu không cần hoàn hảo, chỉ cần hai người cùng tag nhau lên sân khấu là đủ.', 'Cả nhà thả tim thật nhiều để chúc phúc cho các cặp đôi nhé!', 'Đám cưới online mà vui như offline — chỉ thiếu mỗi phong bao của bạn thôi đó!', 'Ai chưa tag người thương thì tag lẹ đi, sân khấu đang trống nè!', 'Sảnh cưới hôm nay rộn ràng quá — MC dẫn mà cũng muốn cưới theo luôn!', 'Cả nhà nhớ thả tim đều tay nhé, tim càng nhiều cặp đôi càng hạnh phúc!', 'Ai đang thầm thương ai thì cứ tag thẳng lên đây; sân khấu này sinh ra để biến lời thầm thương thành lễ cưới.', 'Thả tim đều tay nào cả nhà! Tim bay càng nhiều, hoa rơi càng đẹp, cặp đôi càng có thêm vía hạnh phúc.', 'Muốn xem hoa rơi thì bình luận đúng câu thần chú nhé; muốn lên sân khấu thì tag ngay người làm bạn cười nhiều nhất.', 'Phòng đang yên không có nghĩa là hết vui; chỉ cần một cú tag đúng người là cả sảnh lại rộn ràng ngay.', 'Follow phòng để lần sau vào không lạc đường, còn hôm nay cứ ở lại xem hết lễ rồi hãy về nhé cả nhà.', 'Cặp nào đang chờ lượt thì cứ yên tâm, MC nhớ hết. Khách mới cứ thả tim, tag bạn bè vào chung vui trước đã.', 'Một bình luận dễ thương, một lượt thả tim, một cái tên được tag — ba thứ nhỏ mà làm nên một đám cưới rất vui.', 'Sảnh cưới còn nhiều ghế đẹp và sân khấu còn nhiều lượt trống. Ai chưa có đôi thì mạnh dạn gọi tên người thương đi nào.'],
     mcFunny: ['MC dặn nhỏ: tag người yêu cũ vào đây MC tính phí gấp đôi nhé!', 'Ai còn độc thân giơ tay, MC nhìn thấy hết đấy, đừng trốn sau hàng ghế nữa!', 'Đi ăn cưới online mà không mất tiền mừng, thời đại này sướng thật!', 'Luật của sảnh: vào đây là phải vui, ai buồn MC cho lên sân khấu cưới luôn!', 'MC đếm rồi: phòng mình còn nhiều người độc thân lắm — tag nhau đi kẻo MC mai mối đại đó!', 'Ăn cưới online sướng nhất là không phải rửa chén — cứ ngồi xem và thả tim thôi!', 'Ai tag trúng người yêu cũ thì MC không chịu trách nhiệm đâu nha, MC chỉ se duyên thôi!', 'Đi ăn cưới online có một lợi thế lớn: nghe MC nói nhiều mà vẫn được ngồi nhà ăn thêm chén cơm.', 'Người ta ế lâu gọi là kén chọn; ế mà vào sảnh này thì gọi là đang chờ MC phát người thương.', 'Tình yêu thời nay không cần sóng khỏe, chỉ cần đúng người và đúng lúc người ta cũng đang cầm điện thoại.', 'Cưới xong mới hiểu: lãng mạn là hoa hồng, còn bền lâu là nhớ hỏi nhau hôm nay ăn gì.', 'Nhẫn cưới bé xíu mà uy lực lớn lắm; đeo vào là tự nhiên biết nhường nhịn và biết đường về nhà sớm.', 'MC giữ mic lâu vậy không phải tham nói, mà vì chưa thấy ai dám lên giành cô dâu chú rể về đội mình.', 'Thả thính mà đối phương không hiểu thì gọi là thơ; thả đúng vào sảnh cưới thì gọi là chuẩn bị làm lễ.', 'Có người nói chờ đúng người rất lâu. MC thấy không lâu đâu, lâu là chờ người ta trả lời tin nhắn sau khi đã xem.', 'Đám cưới là ngày hai người cười rất nhiều, khách thì thả tim rất nhiều, còn MC thì khát nước cũng rất nhiều.', 'Độc thân không đáng sợ; đáng sợ là bạn bè đều tag người thương, còn mình chỉ tag nhầm… chính mình!'],
@@ -2300,6 +2355,7 @@ if (isDemo) {
     choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
     hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,
     fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20, hieuUngThaTim: true, timHieuUngChoGiay: 2, tuGhepDoiKhiRong: true, tuGhepDoiSauGiay: 5,
+    mocTimHieuUng: 10, diemMoiTim: 1, diemTimToiDa: 100, timHoaRoi: 50, timPhaoHoa: 3, timPhaoGiay: 50,
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4, choDoiLanThapGiay: 30,
     bannerY: 30,
