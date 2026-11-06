@@ -80,8 +80,11 @@
     font-size: 23px; line-height: 1.25; color: #fff; text-align: center;
     margin-top: 32px; text-shadow: 0 2px 4px rgba(0,0,0,.55);
     /* Bảng v17 rộng hơn (x 12-88%) nên chừa 110px bên trái để câu đố
-       không chạy ra sau đầu cô Ngân (đầu cô tới ~x 31%). */
-    padding: 0 10px 0 110px;
+       không chạy ra sau đầu cô Ngân (đầu cô tới ~x 31%). Chừa thêm
+       70px bên phải: mép phải bảng (x > 565px stage) nằm DƯỚI cột phải,
+       gợi ý dài (> ~33 chữ, 31/120 câu) bị cột phải cắt mất đuôi chữ
+       (vd "Trang phục truyền thống của Việt Nam" mất chữ "m"). */
+    padding: 0 70px 0 110px;
   }
   #qScrambled { text-align: center; margin-top: 12px; }
   .tile {
