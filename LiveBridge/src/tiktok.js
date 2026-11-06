@@ -27,10 +27,12 @@ function normUser(d) {
   };
 }
 
-/* createTime của webcast (lúc TikTok tạo sự kiện). Connector có thể trả giây hoặc ms
-   tuỳ phiên bản → chuẩn hoá về ms epoch. Trả 0 khi không có (không đo được fanout). */
+/* createTime của webcast (lúc TikTok tạo sự kiện). Nằm ở d.common.createTime
+   (CommonMessageData, dạng chuỗi số ms epoch) trên đường v2/v3; đường v1 cũ có
+   d.createTime ở mức ngoài cùng. Trả 0 khi không có (không đo được fanout). */
 const eventStamp = d => {
-  const t = Number(d && d.createTime);
+  const raw = (d && d.common && d.common.createTime) || (d && d.createTime);
+  const t = Number(raw);
   const eventTs = !Number.isFinite(t) || t <= 0 ? 0 : (t < 1e12 ? t * 1000 : t);
   return { eventTs, receivedAt: Date.now() };   // receivedAt = lúc callback connector chạy = lúc sự kiện tới máy này
 };
