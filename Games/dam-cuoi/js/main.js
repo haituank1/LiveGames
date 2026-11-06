@@ -580,13 +580,13 @@ function renderCmdBoard() {
   if (cfg.hienBangLenh === false) { el.style.display = 'none'; return; }
   const fxOff = cfg.hieuUngChat === false;
   el.innerHTML = '<h4>💬 Lệnh chat</h4><ul>'
+    + '<li><span>❤️ thả tim ×10</span><em>nổ 3 hiệu ứng + điểm</em></li>'
     + (fxOff ? '' : '<li><span>🌸 "hoa rơi"</span><em>mưa hoa</em></li>'
       + '<li><span>🎆 "pháo hoa"</span><em>pháo hoa</em></li>'
       + '<li><span>🎉 "pháo giấy"</span><em>pháo giấy</em></li>')
     + '<li><span>💌 gõ tên người thương</span><em>lên sân khấu</em></li>'
     + '<li><span>👗 "đổi đồ"</span><em>đổi trang phục</em></li>'
-    + '<li><span>🎁 tặng quà</span><em>pháo + điểm</em></li>'
-    + '<li><span>❤️ thả tim ×10</span><em>nổ 3 hiệu ứng + điểm</em></li></ul>';
+    + '<li><span>🎁 tặng quà</span><em>pháo + điểm</em></li></ul>';
   el.style.display = '';
 }
 
