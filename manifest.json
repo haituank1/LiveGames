@@ -1,7 +1,7 @@
 {
-  "commit": "6c23c9a5e8b2100c4b20b8754ce30a219e20db1c",
-  "short": "6c23c9a",
-  "generatedAt": "2026-11-06T07:41:24.071Z",
+  "commit": "c5cc842889a6e25f96128ec1555fb44807c615e3",
+  "short": "c5cc842",
+  "generatedAt": "2026-11-06T08:39:39.751Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -217,6 +217,16 @@
       "path": "Games/dam-cuoi/bg-sanh-moi.webp",
       "sha": "342767ac5b3c875c5cf526892df972cb83c241bb",
       "size": 430784
+    },
+    {
+      "path": "Games/dam-cuoi/demo-nhan-vat-moi/BRIEF.md",
+      "sha": "3af581fb318a746bb93e1293e7abf9f5b16c1b89",
+      "size": 8603
+    },
+    {
+      "path": "Games/dam-cuoi/demo-nhan-vat-moi/demo.html",
+      "sha": "31420c872267a035af00d02055271d2b5c19c6da",
+      "size": 3657
     },
     {
       "path": "Games/dam-cuoi/img/avatars/av-f1.webp",
@@ -444,159 +454,179 @@
       "size": 9284
     },
     {
+      "path": "Games/dam-cuoi/img/bride-aodai.png",
+      "sha": "d27830d34b8bf703c02d4fdc644e948b9bc60a13",
+      "size": 423717
+    },
+    {
+      "path": "Games/dam-cuoi/img/bride-moi.png",
+      "sha": "592922f70ac00667b1f09414aaa0da38aaebe939",
+      "size": 585535
+    },
+    {
       "path": "Games/dam-cuoi/img/bride.png",
-      "sha": "918ae358b22a73df27898995c19ac5268f92d63c",
-      "size": 577656
+      "sha": "592922f70ac00667b1f09414aaa0da38aaebe939",
+      "size": 585535
     },
     {
       "path": "Games/dam-cuoi/img/bride2.png",
-      "sha": "772da48b902d2e7a57cedb51ded6076af77ea703",
-      "size": 506425
+      "sha": "282564cc5d01242db07cebbc28f4562665baf7e1",
+      "size": 515756
     },
     {
       "path": "Games/dam-cuoi/img/bride3.png",
-      "sha": "acdd3527e9ff17375296b961986cb934291e2149",
-      "size": 353864
+      "sha": "312fe78fccbbd91fc46de47e0e3d5c8b32a35d09",
+      "size": 539912
     },
     {
       "path": "Games/dam-cuoi/img/bride4.png",
-      "sha": "0a1cbd147b914546055a0ed2552966bb9fb1cde8",
-      "size": 558661
+      "sha": "45f2106b82fe26efc63c98a15fcd149aaf7fe72e",
+      "size": 496353
     },
     {
       "path": "Games/dam-cuoi/img/bride5.png",
-      "sha": "d0759c707b554c8a1240aa9a06271bcb0cc3c8d0",
-      "size": 447232
+      "sha": "04cb10dc2502a8f87551bb553664be587e0852d2",
+      "size": 462422
     },
     {
       "path": "Games/dam-cuoi/img/bride6.png",
-      "sha": "d89b694c65c86e125d87c0172fca1cbcbe024ac6",
-      "size": 538720
+      "sha": "7500fba1d18a5af21bddcb721056e66357e0a284",
+      "size": 561655
     },
     {
       "path": "Games/dam-cuoi/img/bride7.png",
-      "sha": "de08df1dec7cee62fc4190d8018867bd1caf742e",
-      "size": 547169
+      "sha": "53791a54f6e8a89875007707259fd55b50b2b874",
+      "size": 550503
     },
     {
       "path": "Games/dam-cuoi/img/bride8.png",
-      "sha": "8d55235a5b1f6a5c45bc4bf16b8d39e0e4d2f2de",
-      "size": 628153
+      "sha": "0f8bd311c64d2c7bcf1253b0ebad5bdb4cbce511",
+      "size": 538438
     },
     {
       "path": "Games/dam-cuoi/img/bride9.png",
-      "sha": "08c66f98938db0b8f01e1206c08b94640bf4da1b",
-      "size": 553481
+      "sha": "15e09ada26242f9221d266423a19e21bc27edb95",
+      "size": 531144
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom-aodai.png",
+      "sha": "26e4ff25e761483e89e7a4046c8e179e1670a152",
+      "size": 385674
+    },
+    {
+      "path": "Games/dam-cuoi/img/groom-moi.png",
+      "sha": "8ad22cccb393c73dd820061bbfd57d29273dcf1f",
+      "size": 381715
     },
     {
       "path": "Games/dam-cuoi/img/groom.png",
-      "sha": "476ca2590fae4949f0cb98ae0ac3c993ea29f81e",
-      "size": 362963
+      "sha": "8ad22cccb393c73dd820061bbfd57d29273dcf1f",
+      "size": 381715
     },
     {
       "path": "Games/dam-cuoi/img/groom2.png",
-      "sha": "e4a71bc899858b4c813e4e7341f94e72c5181143",
-      "size": 375009
+      "sha": "9c8541f5730dabc36272f6c68b867d58f804a5de",
+      "size": 400084
     },
     {
       "path": "Games/dam-cuoi/img/groom3.png",
-      "sha": "a54baa6dcea156c033106d1a10dd0dbe49420a0b",
-      "size": 339161
+      "sha": "6e7b30dfbf0e06626a4f2ce0022855c6c6e3aa34",
+      "size": 378605
     },
     {
       "path": "Games/dam-cuoi/img/groom4.png",
-      "sha": "38325aef3680ad5e5910213f5ba52c40c9730b96",
-      "size": 356683
+      "sha": "efadd7e42ca9c1e59220403734e4c9f25d8e6db5",
+      "size": 393028
     },
     {
       "path": "Games/dam-cuoi/img/groom5.png",
-      "sha": "22cc95931cd0905620063176d6bed0079f635168",
-      "size": 390313
+      "sha": "1c9c57123bba2e80f3284375febc2fe74dc7a713",
+      "size": 460557
     },
     {
       "path": "Games/dam-cuoi/img/groom6.png",
-      "sha": "e38332320b7d99cb7b15b7d513a4582d53457902",
-      "size": 350946
+      "sha": "37037544782777246406bf4ab690df73c6f4778e",
+      "size": 402533
     },
     {
       "path": "Games/dam-cuoi/img/groom7.png",
-      "sha": "b4ca652623b87c8dc97c17f3f5b31c978c07fe4a",
-      "size": 245077
+      "sha": "eb508d5b55358ea6598d596970a872e8636f5ed1",
+      "size": 362584
     },
     {
       "path": "Games/dam-cuoi/img/groom8.png",
-      "sha": "3480445cc4ee06282622114f505aa16316f8d9ab",
-      "size": 335697
+      "sha": "0003e71826167afbac1252a899640e7784313483",
+      "size": 381873
     },
     {
       "path": "Games/dam-cuoi/img/groom9.png",
-      "sha": "ce9ee020811d9c1d93147cee2a389e7e61442637",
-      "size": 314822
+      "sha": "aa965682c820095f3c0ba38b15c304b1c6cb431b",
+      "size": 331565
     },
     {
       "path": "Games/dam-cuoi/img/guest-boy.png",
-      "sha": "13d58bb62b171c30b3a39b0790f8833b462a1ffd",
-      "size": 368797
+      "sha": "638ab955d81f62d6bf758e05adf26b3463860b69",
+      "size": 440033
     },
     {
       "path": "Games/dam-cuoi/img/guest-boy2.png",
-      "sha": "96e7084f4183974b3b17f9dde7dfc7df94a6dcd6",
-      "size": 444171
+      "sha": "0e676a9e0e0fa812a4dceaf867add17441e0c758",
+      "size": 470775
     },
     {
       "path": "Games/dam-cuoi/img/guest-boy3.png",
-      "sha": "11d364d0798292db4a721ff7d85556f9c98c89b0",
-      "size": 278137
+      "sha": "5f281eb5ed7b1454092777ccedaa6fd19125328b",
+      "size": 383617
     },
     {
       "path": "Games/dam-cuoi/img/guest-boy4.png",
-      "sha": "190aca9c86e18a15f232817ac964dcf4a6315049",
-      "size": 282471
+      "sha": "01d90209048db063fb93170b7144a8105c0b37a4",
+      "size": 410388
     },
     {
       "path": "Games/dam-cuoi/img/guest-boy5.png",
-      "sha": "bd8d36ea4ca7844457dc6e7f2dce9520b27783d6",
-      "size": 441921
+      "sha": "43a2ae1041d8c12d7b4f08f10c2664ccf2f88615",
+      "size": 470178
     },
     {
       "path": "Games/dam-cuoi/img/guest-boy6.png",
-      "sha": "b7a49f27c2994fd11b2a8c31aa0a0df113f9d975",
-      "size": 294951
+      "sha": "4ed5cca14f3e336e25b13fde1eb6e01da3afcdd6",
+      "size": 389052
     },
     {
       "path": "Games/dam-cuoi/img/guest-girl.png",
-      "sha": "de8bb01db30b91afa7ea049757b07d29eabfc442",
-      "size": 334744
+      "sha": "e623e321abd727e60bdd9cec4da304b52086ee7c",
+      "size": 384376
     },
     {
       "path": "Games/dam-cuoi/img/guest-girl2.png",
-      "sha": "99664994fbedea23024d1f70859130e0f907cac1",
-      "size": 346843
+      "sha": "aec85c7d80066ef977bef844fdfdc7b1760c8b73",
+      "size": 359015
     },
     {
       "path": "Games/dam-cuoi/img/guest-girl3.png",
-      "sha": "4bc3073617e1f3139e38c0d95e5b22038e39ead5",
-      "size": 414317
+      "sha": "88e04830e4aa2e638da086265e7073ddcd20b6b9",
+      "size": 441810
     },
     {
       "path": "Games/dam-cuoi/img/guest-girl4.png",
-      "sha": "408af89ec759f10ccb8cb6075762db9812baf33c",
-      "size": 322128
+      "sha": "66e2181bfc140b6c1759d26665fd1a1e13d3e458",
+      "size": 345559
     },
     {
       "path": "Games/dam-cuoi/img/guest-girl5.png",
-      "sha": "1199835f93652c5be116c4a6e3552f0a3d5b9d3d",
-      "size": 419790
+      "sha": "1045beed3d3f7500b92c48af4f96d3863630913d",
+      "size": 454647
     },
     {
       "path": "Games/dam-cuoi/img/guest-girl6.png",
-      "sha": "93db87aec7371028118efcf2d72831ce096c3075",
-      "size": 312150
+      "sha": "6781330ef75f9705daef41554d347ae2c9419656",
+      "size": 412437
     },
     {
       "path": "Games/dam-cuoi/img/guest-girl7.png",
-      "sha": "8ab94cd3f8f1e4632c423dc2e47b94514ef8181c",
-      "size": 558368
+      "sha": "c2fa28a80730afa5179136468e97aa748c314ebe",
+      "size": 636578
     },
     {
       "path": "Games/dam-cuoi/img/mc-nu.png",
@@ -610,78 +640,78 @@
     },
     {
       "path": "Games/dam-cuoi/img/royal-bride1.png",
-      "sha": "8f5f701f516e03f0438709525a92a91624442975",
-      "size": 531284
+      "sha": "a8e7a9d3b15b4bc6c77a9cee1957d70077e70c86",
+      "size": 546466
     },
     {
       "path": "Games/dam-cuoi/img/royal-bride2.png",
-      "sha": "3e17d825ea9e242d2a919c121a089fb641ad46ae",
-      "size": 469228
+      "sha": "84094b94ca344d2f00cf53b372014c99ba6b5ce3",
+      "size": 499859
     },
     {
       "path": "Games/dam-cuoi/img/royal-bride3.png",
-      "sha": "53d7efac65c44e50ba509b98071e7034fa824ee0",
-      "size": 407901
+      "sha": "8c2dca41e9fa059f42859b8a2bfac142ac3b3c29",
+      "size": 423704
     },
     {
       "path": "Games/dam-cuoi/img/royal-bride4.png",
-      "sha": "7a67cddfe06a4cff7d6222020f8016644192b13c",
-      "size": 507786
+      "sha": "9dc174d7e084e70ba8347158379281a76b04aa35",
+      "size": 486074
     },
     {
       "path": "Games/dam-cuoi/img/royal-bride5.png",
-      "sha": "6df5230d50b9119c79b472e868d840b9cb531ab3",
-      "size": 470305
+      "sha": "f1aa9d426ce90114acf12ede39a0c68b558f0536",
+      "size": 483968
     },
     {
       "path": "Games/dam-cuoi/img/royal-bride6.png",
-      "sha": "1cb408fa76a1bf7c8d35c2761cb188c6a1c7724b",
-      "size": 473706
+      "sha": "8b7da6fc2e011f315f0b329e7e39267fcb094611",
+      "size": 486924
     },
     {
       "path": "Games/dam-cuoi/img/royal-bride7.png",
-      "sha": "01195ba901034cd6b24a44b3dc40d71fbc65eb31",
-      "size": 517728
+      "sha": "089757ddacd274f1289bb220a56c1ba387f464fb",
+      "size": 533454
     },
     {
       "path": "Games/dam-cuoi/img/royal-groom1.png",
-      "sha": "eca3abd99fee99141c0bf65573b28daa10850da0",
-      "size": 436326
+      "sha": "ba6359c95613e78b1e4893b696c0d2006d4e7474",
+      "size": 448336
     },
     {
       "path": "Games/dam-cuoi/img/royal-groom2.png",
-      "sha": "f336ce768155450d77a149aba51915545e9cd0d5",
-      "size": 344399
+      "sha": "680c7b43d90b2b6cd2fa1ef2d4cbbed5f68cc1ba",
+      "size": 374260
     },
     {
       "path": "Games/dam-cuoi/img/royal-groom3.png",
-      "sha": "3f587c6a825709347a1d63fd41a4c67f3a12c173",
-      "size": 313865
+      "sha": "ff129649a903518894051485a6943708c88a74ec",
+      "size": 385903
     },
     {
       "path": "Games/dam-cuoi/img/royal-groom4.png",
-      "sha": "00307cef7fe7e73338230bc575790dd2338aee98",
-      "size": 293821
+      "sha": "2f8371c09f54b703b62b595c5c34e10fb48779e8",
+      "size": 331114
     },
     {
       "path": "Games/dam-cuoi/img/royal-groom5.png",
-      "sha": "21f512ad5f51148be247968aef79abaa07095faf",
-      "size": 333851
+      "sha": "126631df2fb3925a42a5d6664b3bcf632e5e7c06",
+      "size": 351135
     },
     {
       "path": "Games/dam-cuoi/img/royal-groom6.png",
-      "sha": "be358a0a48922f88954bb62ad763ef9316cbf1c5",
-      "size": 286783
+      "sha": "046ffd1be6d17c405d1a3f7068ef950b4aec884f",
+      "size": 369325
     },
     {
       "path": "Games/dam-cuoi/img/royal-groom7.png",
-      "sha": "9891de7bd7a98cda7f1c875c489ee427d9f3b578",
-      "size": 307505
+      "sha": "9333464a6e4cc1258f572cd047903aea4afaf413",
+      "size": 337111
     },
     {
       "path": "Games/dam-cuoi/index.html",
-      "sha": "fbb8cfbaca67b9bf58b96a19192f327baf9682de",
-      "size": 21618
+      "sha": "4767afb86ca7ec524a0645fa1e89d792e2a453ba",
+      "size": 34456
     },
     {
       "path": "Games/dam-cuoi/js/audio.js",
@@ -690,18 +720,18 @@
     },
     {
       "path": "Games/dam-cuoi/js/effects.js",
-      "sha": "6af81c563219d1c4bba3a4cc1ecac52b729c56fe",
-      "size": 27703
+      "sha": "958704e5ff705fe3d7560949c6354cf8b30c6f68",
+      "size": 36181
     },
     {
       "path": "Games/dam-cuoi/js/main.js",
-      "sha": "0fedff500a3b2db24409d225a04e7e77e13b1476",
-      "size": 151730
+      "sha": "01416ab0f8f1b8b8439da78372346cd5dff7a78d",
+      "size": 159208
     },
     {
       "path": "Games/dam-cuoi/js/people.js",
-      "sha": "7b93c940eed99c51cec123bc3e409bc1306a2cb3",
-      "size": 87149
+      "sha": "61b1a7d6543b75b175846fcc23b7aa64046ae1d0",
+      "size": 96319
     },
     {
       "path": "Games/san-nhay/BAR-LAYOUT.md",
@@ -1590,8 +1620,8 @@
     },
     {
       "path": "LiveBridge/config/mappings/dam-cuoi.json",
-      "sha": "289a1b4013a85b4bd2b4adfd2fd9309db8e5847d",
-      "size": 28339
+      "sha": "e10efff6977d5b25f047b203d7cb1df00bec0420",
+      "size": 28692
     },
     {
       "path": "LiveBridge/config/mappings/san-nhay.json",
@@ -1610,8 +1640,8 @@
     },
     {
       "path": "LiveBridge/public/admin.html",
-      "sha": "3379338a69371e52378c7af42ce2ecc913c7f9a4",
-      "size": 75124
+      "sha": "ec8893a3ff6e8b9c91858887292dc1cf9246b9f9",
+      "size": 75931
     },
     {
       "path": "LiveBridge/public/livebridge-client.js",
@@ -1620,8 +1650,8 @@
     },
     {
       "path": "LiveBridge/public/npc-voice.js",
-      "sha": "a1e67b3a27fad41656fcf6f1362d63bd3a3877d2",
-      "size": 19019
+      "sha": "cd39f8ecfca342b7fd91ef78b5bcd7783f48659c",
+      "size": 19773
     },
     {
       "path": "LiveBridge/public/simulator.html",
@@ -1630,8 +1660,8 @@
     },
     {
       "path": "LiveBridge/server.js",
-      "sha": "a8c0c0442fefb588171fc3ff17d6c644e82d45cf",
-      "size": 15565
+      "sha": "6f8830f70b5814a5bb2c9ef0603e07579f7af561",
+      "size": 15666
     },
     {
       "path": "LiveBridge/src/chuan-hoa.js",
@@ -1645,8 +1675,8 @@
     },
     {
       "path": "LiveBridge/src/settings.js",
-      "sha": "e09c62128d296614e81fc8afcf35c802226ae326",
-      "size": 22216
+      "sha": "f5eb6a3c08e68210b156ec08af613f96b5c684e9",
+      "size": 22467
     },
     {
       "path": "LiveBridge/src/static.js",
@@ -1660,8 +1690,3113 @@
     },
     {
       "path": "LiveBridge/src/tts.js",
-      "sha": "5f0719b1ac925427e7bd03f20ec2f076aa5645f8",
-      "size": 9655
+      "sha": "91b81755c8842278da238f4d55755320d420f1ee",
+      "size": 11064
+    },
+    {
+      "path": "LiveBridge/voice-static/002997c460956a6b3b431dc1cfe9d13f.mp3",
+      "sha": "fb77d2b23fa855a1e1deb363900110ce7e09f802",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/006f4acb77a5662dac298732631ddcc0.mp3",
+      "sha": "ad9797320258c89c40f8eaffc4722c64782dc24d",
+      "size": 34416
+    },
+    {
+      "path": "LiveBridge/voice-static/00d4411c5e4249fd6eb5b986d2954444.mp3",
+      "sha": "decd88f56079f1978c98858deba06e682c760174",
+      "size": 19152
+    },
+    {
+      "path": "LiveBridge/voice-static/00deb3b34d9bb6250444a78616d1ac4b.mp3",
+      "sha": "65644d35c23486641840b20c89b5d94599b487fd",
+      "size": 39312
+    },
+    {
+      "path": "LiveBridge/voice-static/0120d58467c46964e724a166491e37fb.mp3",
+      "sha": "949ad92900b9ad8f54d0b23137580d215b5f5463",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/017832c69041c6979f03d8c25ed24bd7.mp3",
+      "sha": "9f9de38c30b1accdda455ee691c846f959ea11c3",
+      "size": 38160
+    },
+    {
+      "path": "LiveBridge/voice-static/01c3f729eeb5bf50237f275d571359df.mp3",
+      "sha": "efeac942bbb58b6aa4a5022d0e211ae6aa97b661",
+      "size": 18288
+    },
+    {
+      "path": "LiveBridge/voice-static/028236a63a4a130fda34aa2ce6d5de74.mp3",
+      "sha": "ea09bd158487302000c564966cb54371b8c21172",
+      "size": 16704
+    },
+    {
+      "path": "LiveBridge/voice-static/02bfb81fa8ab0fd0c06a801034f93ddb.mp3",
+      "sha": "ce8164508157d9dbdd223f642748bbdf6b73810b",
+      "size": 15552
+    },
+    {
+      "path": "LiveBridge/voice-static/02c9cb22c9637783090b7d0e2c48d76c.mp3",
+      "sha": "0a4f70bcee728d23385e693a97be25208320262e",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/054e7e553b570df00111794fd37141aa.mp3",
+      "sha": "ded6f1654ede22fc80fa253829f01636ce03aab9",
+      "size": 32256
+    },
+    {
+      "path": "LiveBridge/voice-static/06432f0b94d653db50c0e4c5eeae5d2b.mp3",
+      "sha": "4d6af07eb690e8ae647f691d7e445da5d571c914",
+      "size": 13536
+    },
+    {
+      "path": "LiveBridge/voice-static/06a52ad292ec2928012a9623e9d6d257.mp3",
+      "sha": "d3ebe88a6cb63ad783964be46577d24f06c16bcf",
+      "size": 28656
+    },
+    {
+      "path": "LiveBridge/voice-static/07443dc685c046671bbf830b83eef602.mp3",
+      "sha": "b2afe6a556a15a674fc14ca16b4aabacd25faa02",
+      "size": 31536
+    },
+    {
+      "path": "LiveBridge/voice-static/07abd626bcf759ac05b1f17336c76f9c.mp3",
+      "sha": "5f8932daf54f4512028c751384c0b792dc2cb41e",
+      "size": 19152
+    },
+    {
+      "path": "LiveBridge/voice-static/09a3d3ae4ed44dce4d819e8e9ea42a78.mp3",
+      "sha": "eb972b69baef8cd5ca082b6278d66abc5ea614b5",
+      "size": 17424
+    },
+    {
+      "path": "LiveBridge/voice-static/0a3c6b63d7d4897fc7fc1ae132734285.mp3",
+      "sha": "9fad82eafb2cd7f86956dfe5a9055c166e0ada5c",
+      "size": 37440
+    },
+    {
+      "path": "LiveBridge/voice-static/0a6a9fd26aea498d0b7ab188261ab749.mp3",
+      "sha": "a41457b4f8ae67a30b9c01e8dc1179ba2dffbefd",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/0ab1b4af7db18851c66714bd0e868294.mp3",
+      "sha": "d94f9bdecfc3dfd2d4a3631e105e70ffa878c7b5",
+      "size": 14544
+    },
+    {
+      "path": "LiveBridge/voice-static/0b287a42f70b86920eaad9ecec8bc9c8.mp3",
+      "sha": "c6da4d55a4d84436ef5153ea5702815f9e224b55",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/0b343d4b8fb4a2fa1e11c111d4c213bd.mp3",
+      "sha": "27365d3141b5f0fc56e24a24d7ad10521af89f0a",
+      "size": 40896
+    },
+    {
+      "path": "LiveBridge/voice-static/0b6b81c485eb7ab72f11eb49a823c721.mp3",
+      "sha": "e2192d018d40e0a4f9ba6646d52d2a51afcf3f4a",
+      "size": 20160
+    },
+    {
+      "path": "LiveBridge/voice-static/0b8f42f91f6dc225b0feb66707d6a6ca.mp3",
+      "sha": "ae15863c5a09033153b21c1a7c717a88f2b1fbb8",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/0c4b7ee39a22701a605e1f028b172da7.mp3",
+      "sha": "60e12347089464462cfb001fd7621e5e70d1894e",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/0cb2e44271efc5991efcae4e6bef0712.mp3",
+      "sha": "a7ccb4a347f8f97e2376e2dc8358a6e11e9712e9",
+      "size": 12384
+    },
+    {
+      "path": "LiveBridge/voice-static/0d52045abaf91dd0dbd112fe9485088c.mp3",
+      "sha": "75ba80192411b10b36e1bb5492cdb77a49ca05b7",
+      "size": 20880
+    },
+    {
+      "path": "LiveBridge/voice-static/0eab9fbb41855b78de5f6f9131c4f65e.mp3",
+      "sha": "562950815ce9b5cd3673b64874048b9020193b7b",
+      "size": 38592
+    },
+    {
+      "path": "LiveBridge/voice-static/0eaecb307155ff94aaca872ac0e8856d.mp3",
+      "sha": "6ce47ed1b8c1647be17ea1028361949245b6974d",
+      "size": 18288
+    },
+    {
+      "path": "LiveBridge/voice-static/0f1b1fb8306fda01937df39ff297c181.mp3",
+      "sha": "99cca392872670dd66fd341aec7bcb6761b84db3",
+      "size": 34992
+    },
+    {
+      "path": "LiveBridge/voice-static/0f21acccd6277a2849524b091329a9e6.mp3",
+      "sha": "ba00b3fc65a8de39afe3d592b63c6f2acc361105",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/0ff83eb9fd6c57ab39abd19d9c3e4c9f.mp3",
+      "sha": "3880094acdf1c5593eb19b883f929155771e860c",
+      "size": 45072
+    },
+    {
+      "path": "LiveBridge/voice-static/1107755c2ba9a3dfb0708779772de5dd.mp3",
+      "sha": "cfd51952f65bfa7748192772b174a7846ece4f72",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/1176671c3b1bd8c86f54455354369f70.mp3",
+      "sha": "c1eb68f948011576a191c1d771f59d76b2f67270",
+      "size": 25488
+    },
+    {
+      "path": "LiveBridge/voice-static/11b98a64ea41a7807613242715be9ed9.mp3",
+      "sha": "c27a806fcd1712295543875a9e43ef660c8480fc",
+      "size": 21744
+    },
+    {
+      "path": "LiveBridge/voice-static/120976728127c696497adc16600f7e4a.mp3",
+      "sha": "3c563e0a0517559b8b52c1a704cd9bc8caa6821d",
+      "size": 11520
+    },
+    {
+      "path": "LiveBridge/voice-static/121fc7d063784f949d55486f9f43322a.mp3",
+      "sha": "7c6d8ec0c7594bf1c4f41bb621b7c5fa38d63c3e",
+      "size": 22608
+    },
+    {
+      "path": "LiveBridge/voice-static/12312afb6e8a57e5e9c8d48bf817ffaa.mp3",
+      "sha": "c04bfc3a95c0749456f39a6907caa847985eb494",
+      "size": 20736
+    },
+    {
+      "path": "LiveBridge/voice-static/123235cd04374a8c33b0db5778296217.mp3",
+      "sha": "357c85857a10afd04ae659ef1c4fdb5b43019cbb",
+      "size": 44352
+    },
+    {
+      "path": "LiveBridge/voice-static/12c108005a03a5bf58c2f8e25e93af8d.mp3",
+      "sha": "a6e9104b515f06731cded34a195e1df4949da659",
+      "size": 30096
+    },
+    {
+      "path": "LiveBridge/voice-static/12d261ae708a8554b7061ec6bebcb9b7.mp3",
+      "sha": "3bf90750543e43bb86f1b1b446d89ac2d5a46fe9",
+      "size": 18864
+    },
+    {
+      "path": "LiveBridge/voice-static/12de6503b37a4cbd0b85b5aa5585af12.mp3",
+      "sha": "8a8a76347247e74db7845daa656b9e754c45c528",
+      "size": 28656
+    },
+    {
+      "path": "LiveBridge/voice-static/13c0ac0a6a069ed3e75babbb33787e4e.mp3",
+      "sha": "160ec38755e854d5cc1384a802a4c199a0b72494",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/14d7824b73098767bb8649455ac59795.mp3",
+      "sha": "10d9ca183cc26320e4208c144ee00304346b72dc",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/153d3284a0a94eb0b5c7ef6a1d16ebee.mp3",
+      "sha": "a314ce5f7c69848e2bc787b884689656f32f0dfd",
+      "size": 13680
+    },
+    {
+      "path": "LiveBridge/voice-static/1615633e91b69e5f227833cdd591a8e2.mp3",
+      "sha": "4d9a12dca8605d08b22bdae6653d37f043ed3ddf",
+      "size": 43632
+    },
+    {
+      "path": "LiveBridge/voice-static/162899de976d4f98b176f26de39a2aa5.mp3",
+      "sha": "abb4c09fdd1cb10ae7e32f5e4d77acedb873cae3",
+      "size": 40464
+    },
+    {
+      "path": "LiveBridge/voice-static/16e0cdbe8cfdeabccb62d24ba66b9ee3.mp3",
+      "sha": "d778f16289c33690ab2882b6b9ad2f7a49c79470",
+      "size": 14832
+    },
+    {
+      "path": "LiveBridge/voice-static/17d41cb139e9304c4dfe5e86f8d69b8f.mp3",
+      "sha": "60bc4c8bb068b178fbf1c8768969d7f80251a17c",
+      "size": 26784
+    },
+    {
+      "path": "LiveBridge/voice-static/19bc8dc50fa74360537a1458f246647c.mp3",
+      "sha": "0ccc21762d3bab6f5aeecd8b864615b657120c87",
+      "size": 25056
+    },
+    {
+      "path": "LiveBridge/voice-static/1a19a1b49d83646799076c2970263df4.mp3",
+      "sha": "efa9c6f29523ee9741de5dc102612376b8236831",
+      "size": 33696
+    },
+    {
+      "path": "LiveBridge/voice-static/1a23e12dd00f1ef46ee2703454e50c8d.mp3",
+      "sha": "6e51166dbf2b888769d503ba05dce108ee3f3200",
+      "size": 19584
+    },
+    {
+      "path": "LiveBridge/voice-static/1aa5dd46fc38500f4b230c212ac671d7.mp3",
+      "sha": "6d26a560e05a2d01e2b19c546399eea73e0db395",
+      "size": 32544
+    },
+    {
+      "path": "LiveBridge/voice-static/1aebfe13a8c5d13add7d57f97e1cf785.mp3",
+      "sha": "a7ac8e0370c1945331f05cc55b7a4244612129c6",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/1b46d9a79f055956bcdcb75b76e25688.mp3",
+      "sha": "be33c5de1557ab70037470f337dc33deb9be7fe8",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/1b62ad84dee24686fc962868d75e17bd.mp3",
+      "sha": "89e4664704e7f2315fdf2c251419b750e60f1e0f",
+      "size": 15120
+    },
+    {
+      "path": "LiveBridge/voice-static/1b97efb6436e393bb503e05fde0142ef.mp3",
+      "sha": "37427993776534a7f922d9fee8f9822a10624291",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/1baab158777f73a986105c13bd882834.mp3",
+      "sha": "416c6de0c257b63e89341e90c2935ef0e95755dd",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/1bfb2c367b44735327b556ec8d4d4377.mp3",
+      "sha": "6301bd0eee60d44f9b8f29224b1bc0aa6846e92c",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/1cecebec5118d94d741e58ee7fd0d50f.mp3",
+      "sha": "ec21b83562460304532a959223f5603cf209459b",
+      "size": 45216
+    },
+    {
+      "path": "LiveBridge/voice-static/1d0d091c6ddc377fd34ad91582af245a.mp3",
+      "sha": "d8cdc13d8d7f6d060047b694cd8d28a955bdb610",
+      "size": 22608
+    },
+    {
+      "path": "LiveBridge/voice-static/1d22e06499cef9fd32115d8eba7380e3.mp3",
+      "sha": "7dca2abc2287de05a36369907147c36fa746a358",
+      "size": 26352
+    },
+    {
+      "path": "LiveBridge/voice-static/1e87d0c83ca504727248f0e79316e86d.mp3",
+      "sha": "15ace3cdf2ce625d6f996b2010921fd470aafad1",
+      "size": 33408
+    },
+    {
+      "path": "LiveBridge/voice-static/1ea62d78759eb47743750efe52f2b956.mp3",
+      "sha": "421c0022f4ec9953a1f2259945227354781fcbf5",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/205dccfbac1e361c38d1250cfb8f75b2.mp3",
+      "sha": "e18b09aded2158cab8027a15dad7a61c6f101c96",
+      "size": 36000
+    },
+    {
+      "path": "LiveBridge/voice-static/2078fccb50e965c0df4379a87285e187.mp3",
+      "sha": "571471455644f22f4f4673544fcbcc1a039ecfe5",
+      "size": 13968
+    },
+    {
+      "path": "LiveBridge/voice-static/20812c3cb860cb9851e19c9e52364835.mp3",
+      "sha": "f5967a36056e65ad570f298e06c658ef8fc17380",
+      "size": 20880
+    },
+    {
+      "path": "LiveBridge/voice-static/20817db6ff1ba04bc7488e2b83575b42.mp3",
+      "sha": "76258576eecf4f7db935ece199a996b06f409264",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/2122d4a45b852884cd7667785d4dbf2c.mp3",
+      "sha": "f6da3bbe6d306358b5c8f28c909308ac0cd78916",
+      "size": 35424
+    },
+    {
+      "path": "LiveBridge/voice-static/2124789820f9333b2cf3296acc0250ef.mp3",
+      "sha": "5b5f12c9ed897858afa8c79e533565c5851896ae",
+      "size": 18288
+    },
+    {
+      "path": "LiveBridge/voice-static/2167a763809055c3503d899d306cb541.mp3",
+      "sha": "60b9f6fdaf8be77b1a16bbfda509be00a55e91af",
+      "size": 23184
+    },
+    {
+      "path": "LiveBridge/voice-static/218fc4fd00baf798423455b323fedf75.mp3",
+      "sha": "cbcc77e9eafe44891f36f6782a12ae91f38efbfa",
+      "size": 42768
+    },
+    {
+      "path": "LiveBridge/voice-static/2210022529d301dd2473a32fcef17ccc.mp3",
+      "sha": "7ba05d8521ae8e3b7d7ce8c11b96eb720a028e34",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/22e365ed7f2c9dd98c63211c3268c49c.mp3",
+      "sha": "afa111c87df7aaa90ebb129118516034ce5b7073",
+      "size": 12096
+    },
+    {
+      "path": "LiveBridge/voice-static/22fbde801a66446ab3ebcb594ac240e9.mp3",
+      "sha": "0e11770e467d321ff3151901cf6b99f9caa4904d",
+      "size": 14112
+    },
+    {
+      "path": "LiveBridge/voice-static/236b69e1849c863fece0ae21806b84ab.mp3",
+      "sha": "e2c5d91c8205e1e900b88453c0577051bb72989b",
+      "size": 32976
+    },
+    {
+      "path": "LiveBridge/voice-static/2429043bd3c9db75cb132349e7168d13.mp3",
+      "sha": "2f7b01c04d5d130917d048a908b1f38c2f38cb3a",
+      "size": 29088
+    },
+    {
+      "path": "LiveBridge/voice-static/243d7f980261cfdfc695837b8b3eddb0.mp3",
+      "sha": "891fab6da3f68978c784d8eb536edf2483e4f342",
+      "size": 28656
+    },
+    {
+      "path": "LiveBridge/voice-static/24991d66db5e02c708da8ae17013a1f4.mp3",
+      "sha": "6d45ffe30d1246da5688f8da1f54a7bfe94d1d38",
+      "size": 17712
+    },
+    {
+      "path": "LiveBridge/voice-static/259a2cd23cf37a469d56d24621c5f544.mp3",
+      "sha": "ad55fc298e6c3eaea3c50dea10254a7131992130",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/25aac1f669a7a70d8851ba2b9b1af07c.mp3",
+      "sha": "beae0769fa0e050b02e6a9b3500ab02f03e33ba5",
+      "size": 29088
+    },
+    {
+      "path": "LiveBridge/voice-static/25e0bf0cb7b8b036d05aa74bb68b598a.mp3",
+      "sha": "0fe00bc27392017c53a2c7a9d5ebcb2226c3e58c",
+      "size": 14688
+    },
+    {
+      "path": "LiveBridge/voice-static/26293f3f61bce20fa7d809bd68c25e03.mp3",
+      "sha": "6102120bc5fe6e169fbc20b872d1f125a5941812",
+      "size": 35568
+    },
+    {
+      "path": "LiveBridge/voice-static/26c6b43c6859072a5c7987bd5413ded0.mp3",
+      "sha": "6a5086cff3c2afa916701cc832118cb60042bf2a",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/2765d2127ed16af39cc9f110be3902da.mp3",
+      "sha": "614823d549da75ba2fa90a9e2ca04b23d8c45aa3",
+      "size": 37008
+    },
+    {
+      "path": "LiveBridge/voice-static/27cef425808dcc3229c1eaae81e5dacf.mp3",
+      "sha": "bde04a511c6184cca11780ab1b3fd120135be25c",
+      "size": 24192
+    },
+    {
+      "path": "LiveBridge/voice-static/2846b6fef9333431ee0f006de9888889.mp3",
+      "sha": "9fae2507a58f084892e737b045862a72a2b264ba",
+      "size": 32688
+    },
+    {
+      "path": "LiveBridge/voice-static/287f07024f2aceb5aa41103fcb58fbb1.mp3",
+      "sha": "2301548665a56a54b6a3711a1fbf102f4f15a45d",
+      "size": 22752
+    },
+    {
+      "path": "LiveBridge/voice-static/28aeb67bc4c6405213626793a70bb4d8.mp3",
+      "sha": "5cf1444e0e3bc4f2b09032b96e4ed5ccf5884629",
+      "size": 39744
+    },
+    {
+      "path": "LiveBridge/voice-static/28e4ba9e1019eea58f66b071f17d6890.mp3",
+      "sha": "d43529e0436a906d3972d74d7ea226d72ad5e818",
+      "size": 25056
+    },
+    {
+      "path": "LiveBridge/voice-static/2914db90ee8c82fbbc58dc8810405c63.mp3",
+      "sha": "3142d2acb94e8b0dfb5cb05de8d322d9f6eb985a",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/2a09784bfd9408e43449e1c0c6771f3e.mp3",
+      "sha": "8dc9cc96b14eb659953d5d9fa67e37d6fe5077f7",
+      "size": 17424
+    },
+    {
+      "path": "LiveBridge/voice-static/2a26d537560d10131252faa8349355b1.mp3",
+      "sha": "e46e0aecdaf4a1128c7c0858f74e425ad1df46d0",
+      "size": 16560
+    },
+    {
+      "path": "LiveBridge/voice-static/2a355e38e60646645ffddaf96943b0a7.mp3",
+      "sha": "39a46a427bfad5460b9b319bd0bc499aa21784f1",
+      "size": 18864
+    },
+    {
+      "path": "LiveBridge/voice-static/2a9eeef16d4c3235e8bfc6576a88a8ec.mp3",
+      "sha": "a3fbce46cda9cc9060ca3e064c94de93be89f661",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/2bc54cad2079354814edaa362b05a509.mp3",
+      "sha": "aee89caeb445f9d9eddfe46c19d0209a23f6b083",
+      "size": 23760
+    },
+    {
+      "path": "LiveBridge/voice-static/2bd745a72424ca80de76a6741cc2415b.mp3",
+      "sha": "482151d90b046267eb3f229a1919d9582205a2c1",
+      "size": 11952
+    },
+    {
+      "path": "LiveBridge/voice-static/2c22b799a2b26f42bf3c384dbb4e7454.mp3",
+      "sha": "6475519ed2bb42eb05bd2f60f5f903f4f4d794e8",
+      "size": 18864
+    },
+    {
+      "path": "LiveBridge/voice-static/2c5e492a77169e2ed0dc0736d32b39cc.mp3",
+      "sha": "61059c9dea36b908eff605afdcaf8b2318f9b9cc",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/2c8e8efaebca99d2ad20554460cf2c6b.mp3",
+      "sha": "b06b3064d79c41eee73330d119f6f60a615adaf3",
+      "size": 40752
+    },
+    {
+      "path": "LiveBridge/voice-static/2cc45c03808ea0f822956ae39b01d26a.mp3",
+      "sha": "b893bb7a8ebb5d37462f40b4e90123e298f46621",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/2cf5508df8d399df309e1c9b6358c6de.mp3",
+      "sha": "abe7b703c06477d39a63dd84fe23931bff20d7c3",
+      "size": 13536
+    },
+    {
+      "path": "LiveBridge/voice-static/2d893a3704952615ccdf18caa9383880.mp3",
+      "sha": "e334a8e574d41ca224cd233e639a92a2bc0e75b5",
+      "size": 17424
+    },
+    {
+      "path": "LiveBridge/voice-static/2de424a5fb8b4b4b3b9f695120995b09.mp3",
+      "sha": "ff13e4c2e28c1f3fcabcdfaf18ef598eea2853a2",
+      "size": 44352
+    },
+    {
+      "path": "LiveBridge/voice-static/2e5534ad09eaecd6d40a3efa75a192b4.mp3",
+      "sha": "7a713334aad5560ce7ebdbee6308a1a38ae81a49",
+      "size": 12528
+    },
+    {
+      "path": "LiveBridge/voice-static/2ebda262b6c2fc263cf258927cf1ebc2.mp3",
+      "sha": "b8365c95b38221a694f805af1c708d547cb7e13a",
+      "size": 23328
+    },
+    {
+      "path": "LiveBridge/voice-static/2ee443391e59d02e9ee14a2e4bc18e25.mp3",
+      "sha": "27536a7c9bf290876825f7e2c17d5965319cea65",
+      "size": 32400
+    },
+    {
+      "path": "LiveBridge/voice-static/2ef4dc38bf8c2999d1befd55271b7546.mp3",
+      "sha": "fde9aa050ed6c17fd8c2d727d69f8870fbaa9a41",
+      "size": 34704
+    },
+    {
+      "path": "LiveBridge/voice-static/2f1293b6031b9a42f6851336b3f14e67.mp3",
+      "sha": "bfecc97419db47e0c6977541d1058c25a2d4846c",
+      "size": 39312
+    },
+    {
+      "path": "LiveBridge/voice-static/2faf572528a76c73b6943e1410e4f167.mp3",
+      "sha": "2af2b54fdbca7b4b76ca17e71147cc71f49d6fd4",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/3067a4955ecae8a88a04a1aa02797bac.mp3",
+      "sha": "95d79410608b8c1c861bf4ad27bdebdd90417c26",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/3072ad0b5405930bca4f0a0de6a7892b.mp3",
+      "sha": "c176a07928e6c9b97a8f109c67172a2b4a79bb4c",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/311340e691409f25a5743e028f269718.mp3",
+      "sha": "ba6e6de4559a8deb3023e76de197f650939d68e8",
+      "size": 45072
+    },
+    {
+      "path": "LiveBridge/voice-static/3142944e6b19cfad17dfd5703dc4d4e6.mp3",
+      "sha": "bcd7c143545530f00ced85ac3efe1f8fa87b507d",
+      "size": 14976
+    },
+    {
+      "path": "LiveBridge/voice-static/31db5fe82efa8d55cbd0ae098c6a9a55.mp3",
+      "sha": "122ba3655841c51537bdf8af73a29a2fa0c9c4f5",
+      "size": 28368
+    },
+    {
+      "path": "LiveBridge/voice-static/323d937780a6c67a57a3da49c25bdd17.mp3",
+      "sha": "5c9645dd33a10b2f62367bd7af1b972fb3547916",
+      "size": 25488
+    },
+    {
+      "path": "LiveBridge/voice-static/32e1ca3614fab21b9149878277637de7.mp3",
+      "sha": "047e5ff6cf974033d722c6d55fe8424e1360460a",
+      "size": 26784
+    },
+    {
+      "path": "LiveBridge/voice-static/32e6c9bd8f725dcfde08fdae1ea4681f.mp3",
+      "sha": "c7173ffd2b9d42d2bc2d7b8215c049c40fc724b1",
+      "size": 16416
+    },
+    {
+      "path": "LiveBridge/voice-static/34c1badc8be8373fdac0468f2ab2003c.mp3",
+      "sha": "9a11ed60fb7c3a12b01156eb22cdb53d4ea32376",
+      "size": 16992
+    },
+    {
+      "path": "LiveBridge/voice-static/34d0e724a50a5bef250a6b7fbfd2075a.mp3",
+      "sha": "f968a7a14ced5e77a16565f85975ca0369b1f13a",
+      "size": 31536
+    },
+    {
+      "path": "LiveBridge/voice-static/34fa189d305a7073775eb554839f7cb5.mp3",
+      "sha": "818f0e80a693eab0decd845dfaea0e95e642b6ba",
+      "size": 40896
+    },
+    {
+      "path": "LiveBridge/voice-static/34fba986f22d4b79bf909b2354c00828.mp3",
+      "sha": "d2dc12a9937be858fa9b83b8b272fa44ef402f32",
+      "size": 46800
+    },
+    {
+      "path": "LiveBridge/voice-static/352ea81fb77f54a318bf91fb2716c8f8.mp3",
+      "sha": "a450e80d95a6381506360008efc3c7f4146e270a",
+      "size": 38880
+    },
+    {
+      "path": "LiveBridge/voice-static/35376753b1df0b846c5fd9576a96840d.mp3",
+      "sha": "43ad78531f77160a9f03ebb348588d0bc6019a6f",
+      "size": 13104
+    },
+    {
+      "path": "LiveBridge/voice-static/35dab7d64f134089e8f73166941825d5.mp3",
+      "sha": "249bf147ecdf4bf72d7bed8d33321e2bab0fb17c",
+      "size": 16272
+    },
+    {
+      "path": "LiveBridge/voice-static/363eec538984efb5cba1eafd749ac684.mp3",
+      "sha": "1d5b506af99af34d4d0e49cdbf1016c1b893f8bc",
+      "size": 27792
+    },
+    {
+      "path": "LiveBridge/voice-static/36dddddd0fdb7794a94cb8cca07d77c3.mp3",
+      "sha": "36367ae2a26935f15fb88df62078caa28644b10d",
+      "size": 16560
+    },
+    {
+      "path": "LiveBridge/voice-static/374c159d875e28669814d487d67d1dc4.mp3",
+      "sha": "43b04ecfa399b9b4a7626cca2ffb9451c5f25000",
+      "size": 18432
+    },
+    {
+      "path": "LiveBridge/voice-static/37ac7a8b96bc6aaeb869163b4b8fa1a3.mp3",
+      "sha": "082e9515b7360a33907224cbf835f3a39e7622b4",
+      "size": 31824
+    },
+    {
+      "path": "LiveBridge/voice-static/38adeaa33e456066e9a350285a607fa4.mp3",
+      "sha": "3dd7c39d4b8cf618f612dbbf55b271eb337eafb9",
+      "size": 13392
+    },
+    {
+      "path": "LiveBridge/voice-static/38ce5471edb50ad93b37ceded0c7c6e2.mp3",
+      "sha": "202317a37cde8aaf555b2790e30acc1fd53ce48a",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/38f01cb4ce531433ca3e7d0d6583ee70.mp3",
+      "sha": "25e7d41d72114dd534a0e6efdc02b5f841bd5a7d",
+      "size": 24912
+    },
+    {
+      "path": "LiveBridge/voice-static/39022afe9764e8022a7fdc258df3bf45.mp3",
+      "sha": "9a837d9c7eeec72155406620cce3283bac442271",
+      "size": 32688
+    },
+    {
+      "path": "LiveBridge/voice-static/390943ca70e13c4c583938902c81d048.mp3",
+      "sha": "a4026b500a4cc15671d5bcdf3bfc1e305d360214",
+      "size": 28800
+    },
+    {
+      "path": "LiveBridge/voice-static/39152356dc3d8c5d77d0552e848a7e47.mp3",
+      "sha": "cb02f59adf16a34fccb12a916eec89fc9606516b",
+      "size": 25344
+    },
+    {
+      "path": "LiveBridge/voice-static/39a285438da6393c36ee531892c1c653.mp3",
+      "sha": "673776c80ac60d154ea061c6a73442fabd8943a0",
+      "size": 22320
+    },
+    {
+      "path": "LiveBridge/voice-static/39d178ee5d5d333f3427ab5c338cf875.mp3",
+      "sha": "d264682053e931aee2d05e3c551b9b57ef8c582e",
+      "size": 11952
+    },
+    {
+      "path": "LiveBridge/voice-static/3a184ab038f340308e7c1bfefa98accc.mp3",
+      "sha": "a7abed47ecd4a9ab919a1330053f27e8b988ec68",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/3aa238df9214e701139960aae3bf3911.mp3",
+      "sha": "9a23871e7a6d6bdbb819dd41bc716b69ad9588ec",
+      "size": 19440
+    },
+    {
+      "path": "LiveBridge/voice-static/3aab2386f8b01e2fd128fd74c19f164a.mp3",
+      "sha": "9e7d9f9b04997d5e952573154a3ccbd8faf1a88b",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/3ac5a297d78e04eff4dfa3ff25b8ff29.mp3",
+      "sha": "c09eebfeafb1469b26d1067315e1d243d316b728",
+      "size": 15408
+    },
+    {
+      "path": "LiveBridge/voice-static/3b0c6dd551cb4297c1662e31bc4e3b64.mp3",
+      "sha": "1723c5c28833c7d5e8dedad1925f2e6ec2f80b88",
+      "size": 39888
+    },
+    {
+      "path": "LiveBridge/voice-static/3b60ecda0a28d1085c6cab0549176cd5.mp3",
+      "sha": "7ef06cd4f7ffdf4b13f31818833ade4028390d8a",
+      "size": 12096
+    },
+    {
+      "path": "LiveBridge/voice-static/3b8b3f13b727eb34eb9c4b3b5ecf009e.mp3",
+      "sha": "a1be4d4ca1ff6d962b9cc6936a515c3704dd7e93",
+      "size": 24192
+    },
+    {
+      "path": "LiveBridge/voice-static/3b93360e62a764d80e783d07375810ff.mp3",
+      "sha": "1ca6d0031476c09eb04dab2340beeafdf14bacbd",
+      "size": 22464
+    },
+    {
+      "path": "LiveBridge/voice-static/3b9937f6774f9be3cab11533e89d0a88.mp3",
+      "sha": "b88acbcd36084f6cc06674fe4cb44538ef28a60b",
+      "size": 20880
+    },
+    {
+      "path": "LiveBridge/voice-static/3d3f0090080b57c30730119ec4b92de8.mp3",
+      "sha": "44413e6d7f8d576975adf46c363dbb15b2b601dd",
+      "size": 22176
+    },
+    {
+      "path": "LiveBridge/voice-static/3d517e62efc724912ff8eea8dbd5572d.mp3",
+      "sha": "d1d0b59617f908d49bda145de9932743eedf78a3",
+      "size": 34416
+    },
+    {
+      "path": "LiveBridge/voice-static/3dbd5c2a950db7f639f675fe1dd77f97.mp3",
+      "sha": "ad3665d81765fcbd67b51b4a766b9d2049cbb2d2",
+      "size": 40608
+    },
+    {
+      "path": "LiveBridge/voice-static/3e0ec5ddff64c9a1a79994bb2322de05.mp3",
+      "sha": "f82d6cbad864da37c9f9e56bf7366a1e1b43a5be",
+      "size": 14544
+    },
+    {
+      "path": "LiveBridge/voice-static/3e27167bf55fed4d5ffc9d4acc2b9ee4.mp3",
+      "sha": "38aea7072ab380b2f778acc81c7aa90676392aff",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/3eff4ffd0855130d58b7880a3691ea07.mp3",
+      "sha": "82fe195b48aacf84b933952303da67831c06491d",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/3fdbc334634266b1a54b5e08867cb3fa.mp3",
+      "sha": "19af589c74923990cf2bc113865cb1e4564fa90d",
+      "size": 13680
+    },
+    {
+      "path": "LiveBridge/voice-static/4080601b461930807ce2d350e70b0872.mp3",
+      "sha": "716dfea803647fd2e4cf391659d6e352f639aa47",
+      "size": 33264
+    },
+    {
+      "path": "LiveBridge/voice-static/40955804ffca6b7e883af098077d12d8.mp3",
+      "sha": "9a24bece066f5b95641692388545c0dbd7efbd2c",
+      "size": 32544
+    },
+    {
+      "path": "LiveBridge/voice-static/40a2da1caaabd5f77f39f44e089da0a5.mp3",
+      "sha": "84e98aeff5d6a460ee553aba10ba4bad8af1c58f",
+      "size": 34848
+    },
+    {
+      "path": "LiveBridge/voice-static/414b6cacbfa8f428aefd3b30a5ece373.mp3",
+      "sha": "6015eeb25ad291200fba75911cd5adfd65b46e1f",
+      "size": 37296
+    },
+    {
+      "path": "LiveBridge/voice-static/41a4f2402abbc6a166bcc93cb1cc1329.mp3",
+      "sha": "eca2b02032e24b8f4ba3e2901b3d0c0b4eabac4e",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/41de827bbaaf6bac87c48c55cff17b5d.mp3",
+      "sha": "ca2cbca25ff4aaac375f57f58c9696c83e497d1f",
+      "size": 26064
+    },
+    {
+      "path": "LiveBridge/voice-static/420ac47b42e6207fdd3e99ec99d494fd.mp3",
+      "sha": "60026be8423feadcc251ae1d43dae326ebfd0406",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/421ecf2022c853f2daf483fea86dec7b.mp3",
+      "sha": "82e43a21b33dc081002eb9347a8e780a0973d45e",
+      "size": 16992
+    },
+    {
+      "path": "LiveBridge/voice-static/4292b184897e394f64b85e025b732f38.mp3",
+      "sha": "d3138009cfa6e65058d09aec1485e7d9e6ffacdb",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/429ad0e06b30e96c08aca27f34239da2.mp3",
+      "sha": "c2466e298e7cdcb7a7bc59bad8aeb1fabe89ed6f",
+      "size": 30240
+    },
+    {
+      "path": "LiveBridge/voice-static/432fce408ca4305efeb7f4da68fa6322.mp3",
+      "sha": "c817d7f9cd17a25ac7c1ba73322e3baeac0d7dea",
+      "size": 34416
+    },
+    {
+      "path": "LiveBridge/voice-static/4359a4f5959dbacf5285e2d935b64d3a.mp3",
+      "sha": "7658f8d74eb7068a87b3fbf3b1e6d9e5256ce1de",
+      "size": 39744
+    },
+    {
+      "path": "LiveBridge/voice-static/43b08e094190a23a2be802bd43dddb80.mp3",
+      "sha": "98c5929af2c594bf39a8f25c153fac5bebd54b75",
+      "size": 42768
+    },
+    {
+      "path": "LiveBridge/voice-static/44071f6d7a0669072612edbb04547c0c.mp3",
+      "sha": "f8676ddcd14f2ed2a76ae2082b8eec9dbdc4a169",
+      "size": 29520
+    },
+    {
+      "path": "LiveBridge/voice-static/441aa40a0494d51633e9515eae8e5cbc.mp3",
+      "sha": "6509b2ffc981ac633ac766be483194b2a3c29215",
+      "size": 35280
+    },
+    {
+      "path": "LiveBridge/voice-static/4523fca8930dc666ce2bc0cf96a620e0.mp3",
+      "sha": "dabc9d25f2ef1de857c1831f0ea15e0db0d7e891",
+      "size": 18720
+    },
+    {
+      "path": "LiveBridge/voice-static/4589c20ff8e06d2616c88ae823889a65.mp3",
+      "sha": "cdbec71e54e403fa26619d3990cee133a2358757",
+      "size": 13824
+    },
+    {
+      "path": "LiveBridge/voice-static/462adef5f245ed35cba2b6713d11abf3.mp3",
+      "sha": "ddda18ead4a594229e556b96236ac7e839ed3ad1",
+      "size": 33984
+    },
+    {
+      "path": "LiveBridge/voice-static/47ee185e59c7d77dc9d216258aee3e70.mp3",
+      "sha": "1573e08b443c190cf9989723f590835a025348b9",
+      "size": 21024
+    },
+    {
+      "path": "LiveBridge/voice-static/4807564c2f5b9659df5bbc990aa1dc50.mp3",
+      "sha": "f21d1f5dc5c2a34fd36739dd0f6a71fcb378d2b5",
+      "size": 23040
+    },
+    {
+      "path": "LiveBridge/voice-static/480f86a70aad14a97ccb8a28e3a08ff9.mp3",
+      "sha": "d40b7383d8bd7fd15ca385bcf8f44c0522854a28",
+      "size": 24624
+    },
+    {
+      "path": "LiveBridge/voice-static/483040514283da61df6c62be2873e59a.mp3",
+      "sha": "7fb2edb1ceec7250d2771c2704195c797412bc8d",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/4838391fc5e7a21a123ee93ec8c214e3.mp3",
+      "sha": "883cb9752d57502603d87c3fe2c8f515a429a90a",
+      "size": 15408
+    },
+    {
+      "path": "LiveBridge/voice-static/484165f25887a7d41af3a1601dc55bf0.mp3",
+      "sha": "280e56d75849bb80967b65f46e0adc2c5d719a67",
+      "size": 26496
+    },
+    {
+      "path": "LiveBridge/voice-static/488a3a971261f590acfb33f1537c5774.mp3",
+      "sha": "47f27614f6f1cce696d37631fc45e8a3a9be7360",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/48d5619e31d628d1bf6b108b14de5f39.mp3",
+      "sha": "ce3b9c9e19dd2710d74fc1b64ada743acb176ad6",
+      "size": 11664
+    },
+    {
+      "path": "LiveBridge/voice-static/48d8b5004ca46c5ae8d355503e370817.mp3",
+      "sha": "40aaff3917d5058fcbfaa8325bda92a747b681dd",
+      "size": 15120
+    },
+    {
+      "path": "LiveBridge/voice-static/492c677830ba3a53344994dbcf550c66.mp3",
+      "sha": "19c63a163b0b3cc4160a2531623a0ba79dd99731",
+      "size": 18000
+    },
+    {
+      "path": "LiveBridge/voice-static/49836bfc6216f00bdd1f983604701501.mp3",
+      "sha": "1c77111e3dfc97f7e084ad67a6cc5b860ee6ba37",
+      "size": 26208
+    },
+    {
+      "path": "LiveBridge/voice-static/4a0ae34dce09a910500b7d6caf6b342d.mp3",
+      "sha": "7fda2b52b5f39a780d7803c3316178da48332d56",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/4a85f39068953d0a851bc21dacdafbe3.mp3",
+      "sha": "f473bbef6e80db2e9e7c46307730e52a1e5fd83c",
+      "size": 26352
+    },
+    {
+      "path": "LiveBridge/voice-static/4a8ccaf17c39ac9f23f75db177bb8ab5.mp3",
+      "sha": "88c4a09553fb307712639a853745923392d2f028",
+      "size": 36864
+    },
+    {
+      "path": "LiveBridge/voice-static/4a91666c27070e5e80a9733dbcec24b1.mp3",
+      "sha": "6fd89f31e2f67eaf31981ad0fb7079458b8fc3c4",
+      "size": 23760
+    },
+    {
+      "path": "LiveBridge/voice-static/4b6c69cd9c6932ba274fc3d5339661d3.mp3",
+      "sha": "04ccf57fbf4200a62db6441bc5923fc25f06b5aa",
+      "size": 16992
+    },
+    {
+      "path": "LiveBridge/voice-static/4b89fe0727ef4669eac5ec8d030274f6.mp3",
+      "sha": "3bc3dca7fc506f1d93eabfbcfb8ee4b2f33c84af",
+      "size": 26640
+    },
+    {
+      "path": "LiveBridge/voice-static/4bf29f46fb1c4e94de3973e1f37afed4.mp3",
+      "sha": "8060088c00cc8a9e1b94d0a5184d77f660296480",
+      "size": 29952
+    },
+    {
+      "path": "LiveBridge/voice-static/4c359272573695fc7811aa0fe66f618d.mp3",
+      "sha": "68f0a0d29a00ef14a53070f50607c3b8c9efc75e",
+      "size": 38592
+    },
+    {
+      "path": "LiveBridge/voice-static/4d061a536cd47b59e702f8264176d96d.mp3",
+      "sha": "d159d09737f09bef6a1eac99605b3d7eb505430a",
+      "size": 19152
+    },
+    {
+      "path": "LiveBridge/voice-static/4dff085161ac707513e7a1f7457e6084.mp3",
+      "sha": "635649cddc276f048543ad461a3b3894513bcc19",
+      "size": 12960
+    },
+    {
+      "path": "LiveBridge/voice-static/4ef13428eae44402be8ad71b4d40f9ee.mp3",
+      "sha": "edf3d78c7bbb213df94a3508157e2e9ebbc3fe0b",
+      "size": 31104
+    },
+    {
+      "path": "LiveBridge/voice-static/4f6762a5b4453d024d27f0e00f93ef89.mp3",
+      "sha": "4223dda52e8640ccd5bd3fad44840837ce68d8f2",
+      "size": 38160
+    },
+    {
+      "path": "LiveBridge/voice-static/50ba3d135b13ce5e9db62931696f6e02.mp3",
+      "sha": "90c3f93f11aa6bdbd55c77f4ed3b248a3e2b4d57",
+      "size": 16560
+    },
+    {
+      "path": "LiveBridge/voice-static/5102322da4d2f9a9013f4b019019c6e8.mp3",
+      "sha": "85557f6bb248317c757e8b67b0039678eb5f18ba",
+      "size": 36288
+    },
+    {
+      "path": "LiveBridge/voice-static/51579dfd68f25ab7532457b9f0343af0.mp3",
+      "sha": "62357ee4738ea62238fbfbad5ec5e0df06a37302",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/518deb449d90443a72e829096926fe38.mp3",
+      "sha": "ff95756b285eeb63d7c0f94c8dde0b9088c53007",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/523ca6fe4c773991585a559e4260f284.mp3",
+      "sha": "f7aea216b5db1f8a356f92f981d5e565fc121d68",
+      "size": 36576
+    },
+    {
+      "path": "LiveBridge/voice-static/5260cc818b0175198537ff4f56486e0c.mp3",
+      "sha": "4eb1c5115c4df98ce85bad54fb05b283eed69cc3",
+      "size": 14544
+    },
+    {
+      "path": "LiveBridge/voice-static/5295af6692175d40a1f94d6816fff33d.mp3",
+      "sha": "f5d3619279fa2b3be5d20e267cf8dcd659300c8c",
+      "size": 14112
+    },
+    {
+      "path": "LiveBridge/voice-static/538c6694277d025532cfe62540500dd2.mp3",
+      "sha": "986a262df0a2607721671fff0ca7e4a997cf9b27",
+      "size": 19296
+    },
+    {
+      "path": "LiveBridge/voice-static/53bf1c90a98235c4a494220a634dcee7.mp3",
+      "sha": "7964cc6f249c737f0f09ee09d24bfe63d232178b",
+      "size": 19440
+    },
+    {
+      "path": "LiveBridge/voice-static/5531a6d8d7deaa1f88b964200a97e9f2.mp3",
+      "sha": "47dc3f16d5c3f550261fe78f2dc0b2a96c270665",
+      "size": 29952
+    },
+    {
+      "path": "LiveBridge/voice-static/55366bc3f8c77e18527fccf52871b924.mp3",
+      "sha": "dd45b56a2cb93ee37ba63af16bad0ae8d29a4802",
+      "size": 37584
+    },
+    {
+      "path": "LiveBridge/voice-static/55596b3338c3d1c8b3f3d1855e294bc1.mp3",
+      "sha": "0783d781f9e4bf03454af6598ae2c577f01afd95",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/5593ab22fdbab03127b5517e9a3dc4ed.mp3",
+      "sha": "5c78410b9000ad334886786d7993cd90c6cc7144",
+      "size": 14400
+    },
+    {
+      "path": "LiveBridge/voice-static/559fc72ad5f0ae69aac88e208da68d92.mp3",
+      "sha": "5b47e0db2854a534384d003a137b6c4652b6e1cf",
+      "size": 45936
+    },
+    {
+      "path": "LiveBridge/voice-static/55d4044bbd53b951ab46ab0273322307.mp3",
+      "sha": "7eb480610d75b6bcb7a81d332c1b546af6d5410d",
+      "size": 14400
+    },
+    {
+      "path": "LiveBridge/voice-static/561d4543312385318c9c337270e3e0fc.mp3",
+      "sha": "defd639d431dcd11bc77d66466056c88417b1229",
+      "size": 39312
+    },
+    {
+      "path": "LiveBridge/voice-static/56580d5958dbff75a44f404580bdf5b4.mp3",
+      "sha": "0dff9da9172566f8bb03cae549f6fc83036b7865",
+      "size": 18576
+    },
+    {
+      "path": "LiveBridge/voice-static/56e19f6d1429bf5a824ece67a460b3c0.mp3",
+      "sha": "4d3bc230b72a5332f2038648c71762957b4ab357",
+      "size": 30240
+    },
+    {
+      "path": "LiveBridge/voice-static/56ec77e0597aebe63ea8568cbe3fc7a9.mp3",
+      "sha": "0c366acfaa62ab7e3fa980a44d1116603e83b287",
+      "size": 12384
+    },
+    {
+      "path": "LiveBridge/voice-static/572f6364805163f18e251c8de63b2430.mp3",
+      "sha": "516f08f90feb6fa11c1e09a8fd36b92f61932759",
+      "size": 11952
+    },
+    {
+      "path": "LiveBridge/voice-static/575344f7826a61e60fa74c3da6a68c2a.mp3",
+      "sha": "6f1a59b6bbd4f9ea727516044ca650ec3f3bcad8",
+      "size": 11952
+    },
+    {
+      "path": "LiveBridge/voice-static/5779244638db272844de2bcca803c73b.mp3",
+      "sha": "ba3bd78cd568be259f54b92135f8a0dbb5ed5682",
+      "size": 27648
+    },
+    {
+      "path": "LiveBridge/voice-static/579770a59b65f05711ea2782247f68e8.mp3",
+      "sha": "1028f78788190f86d5694917eaf9626c1e3a5c4a",
+      "size": 14400
+    },
+    {
+      "path": "LiveBridge/voice-static/57bd860d587933ea85ba4a7550d5cdbe.mp3",
+      "sha": "91b4084d3b1cede546a9ba284aaf100a21614d1b",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/5828602486fa71bf6d88370e421d54c4.mp3",
+      "sha": "c1a82ebc7c47cbbe15b1980a31ba6f671be5f0fb",
+      "size": 21888
+    },
+    {
+      "path": "LiveBridge/voice-static/58521a6c81938ce00b1cda3379a9cd83.mp3",
+      "sha": "e1490d6ab34bb2039fff9691910065515e3b6b89",
+      "size": 38592
+    },
+    {
+      "path": "LiveBridge/voice-static/58e4d3e7dde94adedac5fcf5825aa648.mp3",
+      "sha": "22b4cd3ea6fbb2efaa26877414f1538ea53594b6",
+      "size": 31248
+    },
+    {
+      "path": "LiveBridge/voice-static/59b6dae9107230ec26efe6aa53461bf4.mp3",
+      "sha": "0a4ee4463dbda82a37fe1c7cf33b3d64d884dd12",
+      "size": 22608
+    },
+    {
+      "path": "LiveBridge/voice-static/59dcc7b1386d7757c19999ac9a08c7df.mp3",
+      "sha": "c27aa73975d4b3fe7cfc59bf81164d7506225367",
+      "size": 37008
+    },
+    {
+      "path": "LiveBridge/voice-static/5a897c1bd8e4f1ac40f85848b7910d08.mp3",
+      "sha": "430c6c630444f89082329c3cc89c7c1be2b9454a",
+      "size": 13536
+    },
+    {
+      "path": "LiveBridge/voice-static/5a9c3e1cd2190d49af138fb0f996935e.mp3",
+      "sha": "608610b9bf58b98de0fe43e0c46659d99ec1a0e1",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/5b11920f62b199daffc5bd05f35816b0.mp3",
+      "sha": "9c2d43a3ea88489f15b794c5ca340c87003b9373",
+      "size": 19152
+    },
+    {
+      "path": "LiveBridge/voice-static/5be4ba86185ed43db00b5a1fa7deefc5.mp3",
+      "sha": "099d88f23abaf2803ddb2e2b90115879e2e498db",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/5ce62c92176666cc17f77666beca8b29.mp3",
+      "sha": "b26d3c73212999f5a472e92462977511e5141e96",
+      "size": 41040
+    },
+    {
+      "path": "LiveBridge/voice-static/5d5484b0fe28a5a61fe8712e755e1a16.mp3",
+      "sha": "035b4a0b2e5bb5763230601577245f36d763ee79",
+      "size": 34848
+    },
+    {
+      "path": "LiveBridge/voice-static/5da57889ef217d92316c381b6afce3e6.mp3",
+      "sha": "5a95664d058e759e03cbeeb19ddb1198b693e0ba",
+      "size": 37440
+    },
+    {
+      "path": "LiveBridge/voice-static/5db4f61577515d07016d3569986ec81e.mp3",
+      "sha": "9cda84ccffed1bab2b380a4406f7556fc9a7b50e",
+      "size": 39168
+    },
+    {
+      "path": "LiveBridge/voice-static/5de3dc9c5c4ad2ed825398b27badcbcb.mp3",
+      "sha": "9d3b92d0c5bc23cdbc596e838ab68fb9f29c1cf3",
+      "size": 37008
+    },
+    {
+      "path": "LiveBridge/voice-static/5df98f1bb7686dd4cfddd2f27d1d8238.mp3",
+      "sha": "fa594bb58cac8ca191e0161e8c6ed675df6653ba",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/5e04a5a9eea7a55bde2330de47e19ff6.mp3",
+      "sha": "cb36077d6d120b2bf132c3e8d3d4e67b9452ec08",
+      "size": 11808
+    },
+    {
+      "path": "LiveBridge/voice-static/5f66bbf5d264eec209faedc08fea8194.mp3",
+      "sha": "0eabf30a277e7a5ce0f8ff431c6e80d2cfe000c9",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/5f7facc0e48f34f1285ab28416cae927.mp3",
+      "sha": "e1232a9dd3203cbb16fe1070b0ffd7174f0a952f",
+      "size": 32688
+    },
+    {
+      "path": "LiveBridge/voice-static/5fe6dc7850668a0729c35f3cfa50665e.mp3",
+      "sha": "2ee00cd6713c0c34e5ff98f7e4fb5ac757dad8bd",
+      "size": 34704
+    },
+    {
+      "path": "LiveBridge/voice-static/5fffd5d5efe4300f8d771bc1855d221c.mp3",
+      "sha": "8f14f61945e32d7112ad0246f53052acc000b07a",
+      "size": 22752
+    },
+    {
+      "path": "LiveBridge/voice-static/60dc4e1030eea498c9fb727928a4beb1.mp3",
+      "sha": "75865e5bba65489bf31b76cf1e9e5ff42f0086d4",
+      "size": 13680
+    },
+    {
+      "path": "LiveBridge/voice-static/613975e16d577ce9352e55d9a8bcf07e.mp3",
+      "sha": "dbdc4b15a3e4e2b665e067e59c8a8e44535c4f60",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/627d7d72a2ae27c440e108fd2760b688.mp3",
+      "sha": "9a8fe5ad521b2f1db401778414b3503e8e176767",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/628ac72ea6ac6c57ad4b9da7b423eaec.mp3",
+      "sha": "7f1d9c227550e0fe7dd395c987e1c57dfd6fbe49",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/62e8e17e50963f0d72ef34c251a91bba.mp3",
+      "sha": "cdda3ec67bf82a911e0b04b038ea8df81ffd69f7",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/62eacfc8ce91054a0ab41d88f2e3f7c3.mp3",
+      "sha": "3f6d4fe7a1b6c43970104e91f03efe653d84be03",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/631afecce54cb7d86d653ba06b65722a.mp3",
+      "sha": "62651810bad0d15daed1d501a052183b4c4fc30b",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6354ae824262b976b1f7dd9587cb2f1f.mp3",
+      "sha": "77a2f3aa92fa9b05a5c31eee405308b9bdb16dce",
+      "size": 25920
+    },
+    {
+      "path": "LiveBridge/voice-static/636274932fc99926fc46a299f178037e.mp3",
+      "sha": "357ba0876819e21cfad28145c28cfc7daa4fb4e5",
+      "size": 39456
+    },
+    {
+      "path": "LiveBridge/voice-static/63a3c29bfda2fd1f8041895e89398ea0.mp3",
+      "sha": "f053530435d992432b6a57e2c92560d038d72b08",
+      "size": 24624
+    },
+    {
+      "path": "LiveBridge/voice-static/643eee1c7205c0318d26dbb2009b1c5a.mp3",
+      "sha": "a40c3da24ce1094eb53398db797896a8906aed34",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/64461af4878d0d518fe3a469aa0bce9a.mp3",
+      "sha": "020081f77b08d741ffdbe8055bb61e8f4455d522",
+      "size": 37152
+    },
+    {
+      "path": "LiveBridge/voice-static/6498a4e871be1e1b69ea216f3432e22f.mp3",
+      "sha": "7efc06c76c5161d7e185853381dfc0ea95503096",
+      "size": 41328
+    },
+    {
+      "path": "LiveBridge/voice-static/651be267f0d38d93910b77a063255bfb.mp3",
+      "sha": "a735fbbcd3e6790290a848c0fbf447b14ce9ff15",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6544d1450744684d1df2cb2b202563ae.mp3",
+      "sha": "3bd93f27de4bc126141120df9314ba15b60ccee7",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6592780efab1b1d7e9e3dcb40010004e.mp3",
+      "sha": "26b43b928b3fc91f2d7d36e60825dfb6523bb996",
+      "size": 39024
+    },
+    {
+      "path": "LiveBridge/voice-static/65acf8926930dbb800d864ca9a3f25b5.mp3",
+      "sha": "c5e3d5f53cc6c7f7154412242f4236157869e253",
+      "size": 25344
+    },
+    {
+      "path": "LiveBridge/voice-static/66c59dec45b1cf968c902b7f0d8a4962.mp3",
+      "sha": "b70afb54d42c9a13c6207721c27d8334ff3e10d0",
+      "size": 18432
+    },
+    {
+      "path": "LiveBridge/voice-static/67fa46f40077762a264b32be5e95be23.mp3",
+      "sha": "5cf45a991b8b97862536fc832d9fbfaf11261f4b",
+      "size": 11952
+    },
+    {
+      "path": "LiveBridge/voice-static/68d07d0924860f8ed1667125bbd76723.mp3",
+      "sha": "df742b555df0fbb42b185dc43ffbe751d22489e8",
+      "size": 34272
+    },
+    {
+      "path": "LiveBridge/voice-static/6921bd47397147743d9397d2811719d5.mp3",
+      "sha": "c428ec5b7b5a46cd9c7f72029e39f46b9612743f",
+      "size": 19728
+    },
+    {
+      "path": "LiveBridge/voice-static/696d5e84b3e3b9fdc63c55886d7552b3.mp3",
+      "sha": "6de6fe7ebafa851137f9542977386a8a0c61e2ae",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/697d5f52746a33ea5679c2a5ed60c08d.mp3",
+      "sha": "eee31420db686fd9d83e51fb05bc5482e788db11",
+      "size": 13680
+    },
+    {
+      "path": "LiveBridge/voice-static/6a95b273e93264d4fac323700b426306.mp3",
+      "sha": "be369df19cafaadfe2b5e6a8d04ed2c8998033b3",
+      "size": 25920
+    },
+    {
+      "path": "LiveBridge/voice-static/6ab1598f3132f65eed7b335a73e959fc.mp3",
+      "sha": "2f5cb44decccccc9bf8e6e6cac86eef3aefaa710",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6ad0b298b7c1953fd777b37e1ba818dd.mp3",
+      "sha": "f3b0163a8287ca538c2c80b88e9fa77d73ee7ab5",
+      "size": 20592
+    },
+    {
+      "path": "LiveBridge/voice-static/6b09bf0f72b21981e361b250da398356.mp3",
+      "sha": "0edb023466b5c62f4f582cd3fff26bea9e2f917b",
+      "size": 12096
+    },
+    {
+      "path": "LiveBridge/voice-static/6b8366e989e432959cffdce9b364d3af.mp3",
+      "sha": "f5253082f60d4aa2c728d08bf4a6302a06e2b336",
+      "size": 27648
+    },
+    {
+      "path": "LiveBridge/voice-static/6bb2e03ee9772a18e1906bc36c225716.mp3",
+      "sha": "1aa634c12f17224b2929a4a2ceee087172b1b417",
+      "size": 25344
+    },
+    {
+      "path": "LiveBridge/voice-static/6beb30a723312a02b6392ef2a8cd9b95.mp3",
+      "sha": "b5c030401e79b5c5be230f8023a76b698befe6a4",
+      "size": 48672
+    },
+    {
+      "path": "LiveBridge/voice-static/6bfbe484766a8c42eb5b9f9892490297.mp3",
+      "sha": "6e55c77fae403ca1ae7a37d0cdd48309a2c9ac41",
+      "size": 11376
+    },
+    {
+      "path": "LiveBridge/voice-static/6c8ec963a027762d77dd1ee2ea323ac1.mp3",
+      "sha": "59d76669daf1c747d38e8a375b1a193e51e2b416",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6c91ef156ef27e6b5d309967e5a8cab6.mp3",
+      "sha": "aa67648f0ef5df636572a78c4abace361078088d",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6ce305f3dc5e40c99f3845b2d522e95f.mp3",
+      "sha": "8db7d5974393c35d9eb280979db440654e539722",
+      "size": 41904
+    },
+    {
+      "path": "LiveBridge/voice-static/6ce8b829ad65c41687fd2e74ddeda577.mp3",
+      "sha": "97ea7b96c854da52887bd3b31196e784f6fa1c5e",
+      "size": 32400
+    },
+    {
+      "path": "LiveBridge/voice-static/6d40b37f5fa7f68bd98ef87647d0d077.mp3",
+      "sha": "8267dcb1c522b19b7a323679d8b3c7c654d761d6",
+      "size": 11808
+    },
+    {
+      "path": "LiveBridge/voice-static/6d59e7d6e6ef1ebf5bb85bc36c066bdc.mp3",
+      "sha": "b99fd4c9d63ca716916fb3c85365ba628c63aa73",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6e5c1dad1b479309c874b9051b8704a7.mp3",
+      "sha": "8c90cb6fde9ad4221cb99d37da8236f33427755f",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6e8bc9edfb51fd378f5386cd7fe8db8c.mp3",
+      "sha": "fd4a85c681000284282b232d464f1b690acc5fe0",
+      "size": 21312
+    },
+    {
+      "path": "LiveBridge/voice-static/6ebd942a1128985f51b150cf8bfe8c9b.mp3",
+      "sha": "212925278c25540ce22eb448ab8d798f38dc6b34",
+      "size": 17424
+    },
+    {
+      "path": "LiveBridge/voice-static/6edde583bd4ea0497dd174fbe4a6fc7a.mp3",
+      "sha": "2ebc216ce35836b81a0bdad959a6e884d0d31256",
+      "size": 28656
+    },
+    {
+      "path": "LiveBridge/voice-static/6f70c1c38d42932c36cec2998c725af2.mp3",
+      "sha": "a4d25fddb9e386270f46392d2c2f8346aecc3a90",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/6ff4a508de67aadf09e3b2b0885bba18.mp3",
+      "sha": "0cf591e0c2734320cf4e07f796ece9698ce2ebcb",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/701c7395dc8708e5c0deae1d8ac69efc.mp3",
+      "sha": "a6aa080d72f8fb42ff86af6d67c432ed24a20743",
+      "size": 32400
+    },
+    {
+      "path": "LiveBridge/voice-static/702f774df562444ccb111d0fb045cf29.mp3",
+      "sha": "162cf645981354d512bbc34dd1d1d2a46043f782",
+      "size": 37296
+    },
+    {
+      "path": "LiveBridge/voice-static/7034dca20a18a195c868533b291bd05b.mp3",
+      "sha": "6caadfe473ea76786a456244e60ea3ec9029fb29",
+      "size": 17568
+    },
+    {
+      "path": "LiveBridge/voice-static/708b3da0aab7451b8cd2de5134d61bca.mp3",
+      "sha": "e06ff1dc86d9d853ced51cb4bd92ccb86cbadac3",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/708b66241df25236833ceae0e681a8af.mp3",
+      "sha": "3cf17848d085794272b68ae9c5079e3769cb1e44",
+      "size": 36144
+    },
+    {
+      "path": "LiveBridge/voice-static/70d82c45b80a422e53740120149fa81f.mp3",
+      "sha": "564a904e7efa313b294609a82c6ea1a0fb0f10c5",
+      "size": 35712
+    },
+    {
+      "path": "LiveBridge/voice-static/71138b8842d45b862bf778e4c4c58a44.mp3",
+      "sha": "205c6856e941c0c2d83522b0dfeb84af9bd79598",
+      "size": 17424
+    },
+    {
+      "path": "LiveBridge/voice-static/7154a830ee6335470bc771a202fea0bb.mp3",
+      "sha": "8535f1e788b55eed52a7d06944ffc010a77a6aeb",
+      "size": 26064
+    },
+    {
+      "path": "LiveBridge/voice-static/71b24bdf1cefa727db9642ffc1e1668c.mp3",
+      "sha": "1fc0947950f9e4a8b5941726977f94ef773d13bd",
+      "size": 27504
+    },
+    {
+      "path": "LiveBridge/voice-static/71c91862d16467f92a6e30e2033e4cdf.mp3",
+      "sha": "3702e7e5a5d17cdaaef0fc3032c9ef905ef367f5",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/726a602065ed18dce620f14035127153.mp3",
+      "sha": "f794b0c47615389124984f211a359ee6031c6aa5",
+      "size": 31824
+    },
+    {
+      "path": "LiveBridge/voice-static/7283df3ad8f46e949bb2700680a60c7d.mp3",
+      "sha": "00a9a3d1b07b0a49b30cc62740891987020ac68f",
+      "size": 45072
+    },
+    {
+      "path": "LiveBridge/voice-static/729b4a800aae43de1f4af3e7ba69dc5a.mp3",
+      "sha": "6efb2c8fef89be315232311aeaed5b6cde80095c",
+      "size": 25488
+    },
+    {
+      "path": "LiveBridge/voice-static/73142002c5104f1cc25a29512c99f246.mp3",
+      "sha": "7f2c68e961ff2012faa3030daadac6aa5ecd863c",
+      "size": 25776
+    },
+    {
+      "path": "LiveBridge/voice-static/73454e2bd87a6160d4bc4e0e4067675f.mp3",
+      "sha": "576c11d45955dde13b723a0409031ecaae04ce28",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/73621bfe5ddb9dc057d0f746a1989d80.mp3",
+      "sha": "fc27afef6cef9789433fe9afd7201af9c9cfa359",
+      "size": 18288
+    },
+    {
+      "path": "LiveBridge/voice-static/736b174508d8b9bc442a31e7bbd4fe0f.mp3",
+      "sha": "4df043267b8d51d832cba1d0f43b8c8aa4839c96",
+      "size": 15984
+    },
+    {
+      "path": "LiveBridge/voice-static/73b0aec29de3392b791024a19443c743.mp3",
+      "sha": "66cf281af39f584e857bdc76e834b38aa8a8b56e",
+      "size": 11520
+    },
+    {
+      "path": "LiveBridge/voice-static/757aa48f1e468d73b3f4405e0338fef3.mp3",
+      "sha": "56148706102e649ca4a99afff377b2f165ce4e8b",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/767849680d3dafbcf33235855e01abdc.mp3",
+      "sha": "347f00f826219b654d4496ae55b2ff55870d99c1",
+      "size": 33264
+    },
+    {
+      "path": "LiveBridge/voice-static/776dffe3fe22a01c33673c0ad11aea3f.mp3",
+      "sha": "739b8f8542f67a3b09447fd8e44433596bfabc0f",
+      "size": 11664
+    },
+    {
+      "path": "LiveBridge/voice-static/78146f582f9d361dbbc2e0a5d5f70a27.mp3",
+      "sha": "b5db10a773fec691e3b14d52356c9f96db854eb8",
+      "size": 37296
+    },
+    {
+      "path": "LiveBridge/voice-static/787712596aac1b2f6e3ffa2aa12812ff.mp3",
+      "sha": "c0320806dd8527cc0c1929edead0985ace2aa2d0",
+      "size": 25200
+    },
+    {
+      "path": "LiveBridge/voice-static/790910ba0daf0f046f58a54e156f4e10.mp3",
+      "sha": "dc43f371cb5590d748f77bd05b765dc6cd66d5cf",
+      "size": 14112
+    },
+    {
+      "path": "LiveBridge/voice-static/790eda3636d51fa38ed9936827bdacda.mp3",
+      "sha": "710eaadbfa04b5dffcc5c09ee29c7199255d1208",
+      "size": 27504
+    },
+    {
+      "path": "LiveBridge/voice-static/79e33888c93bd8c32e9ecc191a743331.mp3",
+      "sha": "9496007c80c9f95b5ff9c931825f44c80e65c9b8",
+      "size": 24480
+    },
+    {
+      "path": "LiveBridge/voice-static/7acae5f4c59c18855d7224740a9bff2f.mp3",
+      "sha": "2fe41faa1cccc9690332787fb366fa2ed204c8a9",
+      "size": 34992
+    },
+    {
+      "path": "LiveBridge/voice-static/7b1ea5c405dc3234d74cda04fbec2a00.mp3",
+      "sha": "e3e1554deece76c0846fb33ba21d06a592a43420",
+      "size": 14400
+    },
+    {
+      "path": "LiveBridge/voice-static/7cb877c2745fa71ef66ea0ec4260ec21.mp3",
+      "sha": "bdf3acaee1fd6d7aca80d1df16fbb76103380bf3",
+      "size": 17136
+    },
+    {
+      "path": "LiveBridge/voice-static/7cf00f64e5e48137808fb4c382359a63.mp3",
+      "sha": "b93362b092ac29857b8e0075ee8e55725127ef41",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/7e50e0dcfb020949b7206568a78cd472.mp3",
+      "sha": "d34b582dfbc3d35f3f774b863c7b3878b54a7c8c",
+      "size": 20880
+    },
+    {
+      "path": "LiveBridge/voice-static/7e64b904fbed1badcbee3efbf22821da.mp3",
+      "sha": "cf1c16d53828a96fc17c95a0cd426e703478590e",
+      "size": 23184
+    },
+    {
+      "path": "LiveBridge/voice-static/7e79f12e2b699ac2e3ca269e294696cd.mp3",
+      "sha": "1b2874992e636100027a783e14ae06af4613af66",
+      "size": 25920
+    },
+    {
+      "path": "LiveBridge/voice-static/7ebf9c421704ef67b4174c1cdbdfbd8f.mp3",
+      "sha": "e4d3dd385b2a30ce31503593340cf21ac5d35a7a",
+      "size": 39168
+    },
+    {
+      "path": "LiveBridge/voice-static/7f80789b74b454707ce787513c72eda0.mp3",
+      "sha": "793b872b0467c61c730d44f68d0be2a3cdfd5577",
+      "size": 14256
+    },
+    {
+      "path": "LiveBridge/voice-static/7fa157775bf462ab530a66ce953f8982.mp3",
+      "sha": "6a567f00565eea7bb2e360e9696d73a897b31d95",
+      "size": 12672
+    },
+    {
+      "path": "LiveBridge/voice-static/80717587b3e78f667da824500a4bfc24.mp3",
+      "sha": "42b27e38d43d619f8004f95dac3c1b353b38f9d1",
+      "size": 35280
+    },
+    {
+      "path": "LiveBridge/voice-static/80816931767409812bae6a06b2b1c66b.mp3",
+      "sha": "b76a34d7f04986692816cdf4161b2aed99d08489",
+      "size": 15552
+    },
+    {
+      "path": "LiveBridge/voice-static/8090e6842028b33fa41ff9a08bcb8710.mp3",
+      "sha": "f7395611bdf95e157788debee9a9d1695280e0a8",
+      "size": 15264
+    },
+    {
+      "path": "LiveBridge/voice-static/80a92c7440ed05331153cbc688a13794.mp3",
+      "sha": "eabf7cf67d2410219e66c7335073315af910431f",
+      "size": 37152
+    },
+    {
+      "path": "LiveBridge/voice-static/80b529a2efea6c6539c3380b6c803c1e.mp3",
+      "sha": "fdeb3926550fb2d5539eb8382259d668ab2948c5",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/80d172078f45089ec94ff9e0a6d89658.mp3",
+      "sha": "40d490213d2e56c58eac7e2088a97c4c8fa1c6b7",
+      "size": 26064
+    },
+    {
+      "path": "LiveBridge/voice-static/81cdd5ede9620445f2c546cf93c41270.mp3",
+      "sha": "0b48a9af134fc88314d8103402fe91f4985e19d2",
+      "size": 15984
+    },
+    {
+      "path": "LiveBridge/voice-static/81e814cb71b7f588eba8435acceef068.mp3",
+      "sha": "1e6de5173a73e7312dcfbab548c865e5aaab5f93",
+      "size": 12960
+    },
+    {
+      "path": "LiveBridge/voice-static/8219240e99428d3a3bf3eb490eca0e22.mp3",
+      "sha": "d092072536fd9eb64dde1465c4dba61eed9fb11f",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/823da4649cbeb39597a1851ce7a377c2.mp3",
+      "sha": "efe23e58ae8e2e11234af80edbb4ec82758ba180",
+      "size": 13248
+    },
+    {
+      "path": "LiveBridge/voice-static/839279cbfec2e513e2873f41d2fa72ba.mp3",
+      "sha": "5fce9af1b72232a2a63b6713c5981a9ad9cc892e",
+      "size": 39888
+    },
+    {
+      "path": "LiveBridge/voice-static/847fb9f5f85b0a1d2668251f9212c181.mp3",
+      "sha": "0707b759af74aa2ce2b5b7e552b2bbcef89c1c0e",
+      "size": 13248
+    },
+    {
+      "path": "LiveBridge/voice-static/84c41aabcf8478bf89e1013019843462.mp3",
+      "sha": "d86230a818cfcc61e3755d6080d0a71664baa9b1",
+      "size": 33552
+    },
+    {
+      "path": "LiveBridge/voice-static/84c79af699c8f91cdca26ef290fb0563.mp3",
+      "sha": "c28b34a3030d9e07b8c0b302943ed22f9ecf1be1",
+      "size": 40032
+    },
+    {
+      "path": "LiveBridge/voice-static/84ca15e3198f2dffd976ace32e015b65.mp3",
+      "sha": "5357019545b527beb281156956a97b9d594bdeae",
+      "size": 16704
+    },
+    {
+      "path": "LiveBridge/voice-static/84eb53ce99382a1d4ffe9dff9a865dcc.mp3",
+      "sha": "9bcb371de4fc36c83bfd4d0483adc215f82f1cd8",
+      "size": 23328
+    },
+    {
+      "path": "LiveBridge/voice-static/84ec718984e017016ff2cc22fbb7bf6b.mp3",
+      "sha": "565ae1869260a2b199accab7505aa3f7d7c0e78d",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/84f1332ff16a4b7d8f6713abd0237dc9.mp3",
+      "sha": "df138acf50a4e09387143e2f85711562173099e1",
+      "size": 33696
+    },
+    {
+      "path": "LiveBridge/voice-static/851e4fe8726046b4e961f27fdf628228.mp3",
+      "sha": "aa4f1ff34094e7f16d9a730f57448f9c06f627e8",
+      "size": 11808
+    },
+    {
+      "path": "LiveBridge/voice-static/85f2637a4ef5897b7ed0ba33a69ed3c3.mp3",
+      "sha": "0debfb8ba6a8a945065da588c9e8d7c70d53627a",
+      "size": 33120
+    },
+    {
+      "path": "LiveBridge/voice-static/861da6bff317b45de9068e1935c5290a.mp3",
+      "sha": "9b80b1e28f7544fe91bcb9742b2e193a8d3ac434",
+      "size": 19008
+    },
+    {
+      "path": "LiveBridge/voice-static/863e1021ff90ea1c9624dcbc8c995c10.mp3",
+      "sha": "1e5faf2982b4ef4d4c1bf9cbe21388e1393d41ac",
+      "size": 13392
+    },
+    {
+      "path": "LiveBridge/voice-static/86a7a2149d3f5ecea69b287922873b90.mp3",
+      "sha": "17db37029044ea699f1b30d3f25c5a07adab3782",
+      "size": 38304
+    },
+    {
+      "path": "LiveBridge/voice-static/86ba0d9f82a5542d44ca9ea31fe96303.mp3",
+      "sha": "9237a14df468f2281758657461d3d85a976816b8",
+      "size": 25200
+    },
+    {
+      "path": "LiveBridge/voice-static/87636d1cfea33d401e8bc2603d86785c.mp3",
+      "sha": "72a316d07f3b31104c4b3a0fa0d4905d5e962c97",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/87ba0fa388e5829ecf5ff158d59a1df4.mp3",
+      "sha": "822f712cd4d064eb035b4ec577a2ad73cc822b98",
+      "size": 12960
+    },
+    {
+      "path": "LiveBridge/voice-static/87bb9c7e7c4ff558a3d5b7d038427d03.mp3",
+      "sha": "61afa60bec0afece38d4a2303a077b6cee5306d5",
+      "size": 25344
+    },
+    {
+      "path": "LiveBridge/voice-static/87dcab247af9b7ed1a2639ba5339ab76.mp3",
+      "sha": "f322149ff65e11fd5ef6c66503c69d317724345d",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/89218210ea43e2fa50d037447db89307.mp3",
+      "sha": "5db2da17678891459f1c043cf04904d11dcdc95c",
+      "size": 21024
+    },
+    {
+      "path": "LiveBridge/voice-static/892a6a278666ea26ea2ab522805f9616.mp3",
+      "sha": "0ec0d7f652bf6fd5db5d76145f55fe3fde2adbf4",
+      "size": 21024
+    },
+    {
+      "path": "LiveBridge/voice-static/89cf3449dba7bf0e2c124813840c07ad.mp3",
+      "sha": "8f6211f4950f7aa10a7a94ae6838991152edea50",
+      "size": 21744
+    },
+    {
+      "path": "LiveBridge/voice-static/8a608057900f58ca2be100c3e227da17.mp3",
+      "sha": "ce5401e691faf25d97d20b9a95e172b9b48ca61e",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/8a762edc5840d1504f115bf4a3310c85.mp3",
+      "sha": "6da8d583d30d8941c457ff116412b02fa7010ea9",
+      "size": 33840
+    },
+    {
+      "path": "LiveBridge/voice-static/8aa9ed6882a98ff4ab7f745df16c28a4.mp3",
+      "sha": "414afd51f6581f15ca33284c108b8125e06688a3",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/8ac71797e28a4f63a73c049ca95a82dd.mp3",
+      "sha": "05c99fd9565fdcfdbbd7a5fb3ff4dffe1ab352c8",
+      "size": 11664
+    },
+    {
+      "path": "LiveBridge/voice-static/8b78d3d8016a857870263c205888a9b5.mp3",
+      "sha": "0db68fbfa88b8c5021e6a970fa8e6f3b1257bb0b",
+      "size": 31680
+    },
+    {
+      "path": "LiveBridge/voice-static/8c313c2f9b9849044d1f0d3637c055cf.mp3",
+      "sha": "92906dc0296900f19d0e1918361e612ab35f11fc",
+      "size": 36720
+    },
+    {
+      "path": "LiveBridge/voice-static/8cc1b93950245009c711ec8925387bb8.mp3",
+      "sha": "d425dcf4482deb50c89d68162ff9ae822495dbaf",
+      "size": 13680
+    },
+    {
+      "path": "LiveBridge/voice-static/8e8993f243de61c70b65976a4f03028b.mp3",
+      "sha": "ad95c89d9460dbefe404daaa64006e1490c347c4",
+      "size": 11376
+    },
+    {
+      "path": "LiveBridge/voice-static/8e8a372f8f4bbc111bb07a5015582940.mp3",
+      "sha": "8fb3331f863d8d81a501ca321ed5b65173d33e80",
+      "size": 12384
+    },
+    {
+      "path": "LiveBridge/voice-static/8f14f6339b4180afcbdbd762555e52a7.mp3",
+      "sha": "ddc1d66234bccc6d512676bd2191b75c526d8861",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/90a720a6de1690b912be1a76844aef5c.mp3",
+      "sha": "f74b9f3ddf0d519ca2f8e56da699bda1d9f37141",
+      "size": 11952
+    },
+    {
+      "path": "LiveBridge/voice-static/90c362bc188a91d877a81340bec6566a.mp3",
+      "sha": "deeca61e72846148ee9c52913fe069f07feece97",
+      "size": 33840
+    },
+    {
+      "path": "LiveBridge/voice-static/9125dfe9a6d4c406dbd46382b2163494.mp3",
+      "sha": "3981418a812e74c3e667f20e5b2e6c1ddd7f3975",
+      "size": 34992
+    },
+    {
+      "path": "LiveBridge/voice-static/9165234172df63684b1358d4a3558db1.mp3",
+      "sha": "31dc85c4328e7209be427f06d3d75a1314c506bb",
+      "size": 31248
+    },
+    {
+      "path": "LiveBridge/voice-static/91ae67f8209eced738485ba7afe30c97.mp3",
+      "sha": "81c04bd17d2ba107b1c453cae75e6db1e7cb632a",
+      "size": 49824
+    },
+    {
+      "path": "LiveBridge/voice-static/92662306925fc4c6a2642b4f0cb410de.mp3",
+      "sha": "2ccd9383da476216e9fdc2584e4c636e8ade3f12",
+      "size": 39312
+    },
+    {
+      "path": "LiveBridge/voice-static/93286528dc146b362e1b752a243557c9.mp3",
+      "sha": "15208b7498492643ece513b3a8e8b9cf3162703c",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/934d80dba359ab6b941a010ce757cbe4.mp3",
+      "sha": "9912e2bba26cab8aa98208cc3a6cbd30d74c0eb7",
+      "size": 29376
+    },
+    {
+      "path": "LiveBridge/voice-static/935685ba24d2cad895da72813b1211ab.mp3",
+      "sha": "b90aa67c4c95b3d4de848797b23c9c46394adbef",
+      "size": 14688
+    },
+    {
+      "path": "LiveBridge/voice-static/936529e8dea95707cefcc4b405cbdcfb.mp3",
+      "sha": "cbcae9618193b0e3bebc9fd2b6afb14f4a60dc7a",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/938fc33bd26e531e77d743954fa0382e.mp3",
+      "sha": "4cc0c3da31c08b5f5a3dbe20cf6956b800d214ab",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/93f10183b9e7581fcf37b163d4efc441.mp3",
+      "sha": "f2077d097afc1d5c45ece62ea9b0e22561cc86a0",
+      "size": 46800
+    },
+    {
+      "path": "LiveBridge/voice-static/946ed87ddd2a8a56073837f439d9cfb0.mp3",
+      "sha": "fa70088ae49bd2ac1942cbadc8dbda2ccb073a19",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/94b0d503e9906db80f1fe5538c84c174.mp3",
+      "sha": "5bfa312029054eec7ec5493a77d99a912c985dd7",
+      "size": 13392
+    },
+    {
+      "path": "LiveBridge/voice-static/94feb4ae758176e4c862ae5b247523cb.mp3",
+      "sha": "c13a58c38ce61d5b7a578cf3e77d8ef8c0459653",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/95e385f04b3365129d5de3cdf4fbaecb.mp3",
+      "sha": "3060b7ccbc9e6738e33a2b59734a2752cb7600fc",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/95fb57ae7914551e4939ba5b8bb45e34.mp3",
+      "sha": "f754cebb652f940973774313882dbe9b71e0e436",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/9645b5f33aee56c52bf6c1ce4be689e6.mp3",
+      "sha": "48a9770f41f821f7a4c8d68378cc1529c38a342e",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/9682f70a2aaa18a2ea6f7e0864cda6f0.mp3",
+      "sha": "69a6d0881314755014f9fc452096e986bb42f54d",
+      "size": 19152
+    },
+    {
+      "path": "LiveBridge/voice-static/96d51533078cdb197a7734aead262145.mp3",
+      "sha": "28b0ff290a4dcbbd16b12677eb4147229d96bbcd",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/97cd9dec019767da1546d36e562be669.mp3",
+      "sha": "337c4ac8a09a168980ecfbeb27a28c5fe5225f2e",
+      "size": 11952
+    },
+    {
+      "path": "LiveBridge/voice-static/97dc4baa25b3bce40b221c99647d3cf2.mp3",
+      "sha": "ad0d8a5169b7ce12f1702eda0d231d8347d075a2",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/9846475cd189b66d4ebcc6f9047a84f3.mp3",
+      "sha": "afb15f346e25a803dd66561115955f3aad81ba2c",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/997ff0c082799c04f890237a3920524c.mp3",
+      "sha": "f802e5d9c1ba3913727522b0f564500432fe866e",
+      "size": 14256
+    },
+    {
+      "path": "LiveBridge/voice-static/9afa7a016376f4f2a2eb71610c91510e.mp3",
+      "sha": "9c233a7aacfdafda61a7bc41252a2cd76565f8e4",
+      "size": 37872
+    },
+    {
+      "path": "LiveBridge/voice-static/9b426842d51dea3b07105a32e4f7af76.mp3",
+      "sha": "e4a7ce2d1a86b6de0415d7b9c141b71b080c28e1",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/9b516bdb4095dedf74aa28975aa77978.mp3",
+      "sha": "cf648bf810083d9edb3c7126ae128c9e86ade8ff",
+      "size": 38016
+    },
+    {
+      "path": "LiveBridge/voice-static/9b932b421137f1a16b45e2307052ea1d.mp3",
+      "sha": "ecff6300ed232f7ba3aa92f355680ae9f19f5ab6",
+      "size": 21024
+    },
+    {
+      "path": "LiveBridge/voice-static/9c1d482e2ba9edb63c30e0b638a43684.mp3",
+      "sha": "7b6da31bd7e44a11c7a8ab060453f289e90b7365",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/9c2475cb97d07e3f9121eaf30b080e61.mp3",
+      "sha": "13b31fdb6d6406b3ef210826a50d88cc0a87abb4",
+      "size": 16992
+    },
+    {
+      "path": "LiveBridge/voice-static/9c2c6df8f4fadddd0ff2b911611f3d76.mp3",
+      "sha": "41e614fed28f1a2e6603007954dba3bf8c4c86ea",
+      "size": 17568
+    },
+    {
+      "path": "LiveBridge/voice-static/9c412097e6c4ee8395061ba82a57f2f2.mp3",
+      "sha": "dd4887c095bdda7a7e8e2a7be524933f2caaae06",
+      "size": 11664
+    },
+    {
+      "path": "LiveBridge/voice-static/9c5ef4009940cf44685d7c2f11c426e2.mp3",
+      "sha": "a40b136dda1617cceab8c643153f0f6b67397d0b",
+      "size": 21888
+    },
+    {
+      "path": "LiveBridge/voice-static/9c7003e89c06cd31d0c4ce953c7e8964.mp3",
+      "sha": "35cf22b99ca038735a281f52c4c2dfb8f1cc2e9f",
+      "size": 32832
+    },
+    {
+      "path": "LiveBridge/voice-static/9dc15789b809a3537d1c287e97440377.mp3",
+      "sha": "bbfe27ed1fdfcbb133e68f1305ee08a8c567d9a2",
+      "size": 40320
+    },
+    {
+      "path": "LiveBridge/voice-static/9dd3b5d75a486452ee9a4b49d373cfe1.mp3",
+      "sha": "e8e8fe46612a5d9843f9e622c49cd922ddfeb9cf",
+      "size": 36576
+    },
+    {
+      "path": "LiveBridge/voice-static/9e6721a31e69bfe94b74f8f0b45d6e43.mp3",
+      "sha": "338aa2e471c162fda9180e462451614b0fae8dae",
+      "size": 20592
+    },
+    {
+      "path": "LiveBridge/voice-static/9ea696c4e017c52b13cee1455f3cfa5c.mp3",
+      "sha": "6cfac531e9615c55c725708e588620fdffba0aab",
+      "size": 20592
+    },
+    {
+      "path": "LiveBridge/voice-static/9ecc73fd42ef63c875e92639c5c604d3.mp3",
+      "sha": "da63dd8badaad1ee1830121781bee6c5e2153416",
+      "size": 18144
+    },
+    {
+      "path": "LiveBridge/voice-static/9f7afbdca588fb13142c0fb981bce066.mp3",
+      "sha": "59c219750affaf7ec73f26b60b5465c3df6a24f9",
+      "size": 14400
+    },
+    {
+      "path": "LiveBridge/voice-static/9fc010d83271dd1826776023f7d47a05.mp3",
+      "sha": "ed35e96c5d037497984651f20065386818e02117",
+      "size": 16272
+    },
+    {
+      "path": "LiveBridge/voice-static/9fc54d5a02b2d2a79705d197d622db66.mp3",
+      "sha": "8bf56cfc49b6285e4c014aae85fc7291021c5a66",
+      "size": 14400
+    },
+    {
+      "path": "LiveBridge/voice-static/9fc830f3a6c72af2d5661da509691c5d.mp3",
+      "sha": "d940a158d45f3c4824656c06a00b980990d9ff96",
+      "size": 23616
+    },
+    {
+      "path": "LiveBridge/voice-static/a0282ad9db44286c49b759a1e2464318.mp3",
+      "sha": "1b26f0339611fe953af80b0a32827c4547220d30",
+      "size": 33552
+    },
+    {
+      "path": "LiveBridge/voice-static/a0cee07004f1cec4d0c813a412eb269e.mp3",
+      "sha": "110a1ecb49c26ead6eb17f9fb2a39b931b40d6e5",
+      "size": 34272
+    },
+    {
+      "path": "LiveBridge/voice-static/a0e7a21c954533d985f60b46072904e4.mp3",
+      "sha": "66f1d9bf33075625be1e3ec972c44a8103a30f13",
+      "size": 12960
+    },
+    {
+      "path": "LiveBridge/voice-static/a0ecfc86a4aa1d5425f8efe5eef35b0c.mp3",
+      "sha": "5736a4c6a59264bcc23edfe9a5e6dfd07ea8d419",
+      "size": 16128
+    },
+    {
+      "path": "LiveBridge/voice-static/a15170c2b418c545974680d46d8ad912.mp3",
+      "sha": "7289c9a52696818a093a425ba3adb770ee42d515",
+      "size": 31968
+    },
+    {
+      "path": "LiveBridge/voice-static/a1f563af0daa0d003d51992af3011d7b.mp3",
+      "sha": "71bac0547d361719f7c0eadf58b738105ac5894c",
+      "size": 19008
+    },
+    {
+      "path": "LiveBridge/voice-static/a21d4377f29dc846858d4a5df9ca191a.mp3",
+      "sha": "1fa0e5ef5b8c28f9593fba5bbda38a820ac4d7ae",
+      "size": 35856
+    },
+    {
+      "path": "LiveBridge/voice-static/a24cb44bb5a9538e440ae1c2418bf363.mp3",
+      "sha": "6b3e74cdea6cff617b35a61dbc7f29d1ba772f70",
+      "size": 19872
+    },
+    {
+      "path": "LiveBridge/voice-static/a25f9bf222e59e552e5066115b1d9c21.mp3",
+      "sha": "8cdba807d00923af2c61c0b576bd6d0d01f9b8ee",
+      "size": 14832
+    },
+    {
+      "path": "LiveBridge/voice-static/a3117d536503287fb90b2eb01c941b9d.mp3",
+      "sha": "d220212a03b58d39fda03cc8b33039aa4210028b",
+      "size": 17568
+    },
+    {
+      "path": "LiveBridge/voice-static/a36a7b50deb23dc2a4142d3c952ac82f.mp3",
+      "sha": "a8949e89137ac1e41f0b2e4868d5670916f2c359",
+      "size": 13248
+    },
+    {
+      "path": "LiveBridge/voice-static/a39bce202a4cdfd8641f9bca5e9b9209.mp3",
+      "sha": "ec845cd67cec02461f0df880bb5b550030d72b4b",
+      "size": 49104
+    },
+    {
+      "path": "LiveBridge/voice-static/a3a758f596b67d615f2f2dd498b39d05.mp3",
+      "sha": "b4a481b88a083d57e84a123eb809fa6bca1d3ad0",
+      "size": 38016
+    },
+    {
+      "path": "LiveBridge/voice-static/a4a30e072a0ad96dd6c8bca1438d6658.mp3",
+      "sha": "3d3190b8cb8c6df9d97885f2b9471594281d1a03",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/a4a327d953dadf47705db4e3815fd779.mp3",
+      "sha": "78756900eb12584b0c52e6e3347af4570649efa2",
+      "size": 16416
+    },
+    {
+      "path": "LiveBridge/voice-static/a4f9c08431c8b8518766f7c6f882c10e.mp3",
+      "sha": "d2b4e7282e4f6ac6e910f57379c9e5f36b3bf274",
+      "size": 35136
+    },
+    {
+      "path": "LiveBridge/voice-static/a54bd4aeb1d20b26cc0208b00d7ab0aa.mp3",
+      "sha": "a966dcc077e250ab5464f5197c1fc0df94449394",
+      "size": 12816
+    },
+    {
+      "path": "LiveBridge/voice-static/a5f70c66b81a203396ce7a83a60576b2.mp3",
+      "sha": "fc7c1d1bbb55b18644e15b7153821c41b4938c42",
+      "size": 23904
+    },
+    {
+      "path": "LiveBridge/voice-static/a61d1c75b27dababec7ce024328317c1.mp3",
+      "sha": "89de4698c3ce431a6763113d278f3e0092e6cb90",
+      "size": 17568
+    },
+    {
+      "path": "LiveBridge/voice-static/a645bb8b02e17c432c41323411f4032f.mp3",
+      "sha": "d3706e9a7e91c1de3e3fab10161cf20a45ef55da",
+      "size": 12672
+    },
+    {
+      "path": "LiveBridge/voice-static/a66399854079f0f9d624b1a4417fe279.mp3",
+      "sha": "dfe328a0754d902ff1c25e55c4813e5b5036af08",
+      "size": 32688
+    },
+    {
+      "path": "LiveBridge/voice-static/a6e13dff72feb929ae7dff87afd1cdd9.mp3",
+      "sha": "ac558e5574173e86ef161c6099d30a14e5b25ea6",
+      "size": 19296
+    },
+    {
+      "path": "LiveBridge/voice-static/a834b06cd1a64f5bc21ff87f59d1ef4e.mp3",
+      "sha": "736e7077d0061e100a82c3d51b25e482200989a3",
+      "size": 38448
+    },
+    {
+      "path": "LiveBridge/voice-static/a87e54072c50eb0dfa4ce04bc23824e8.mp3",
+      "sha": "40c7e2a3422f30c6aceab867b9f37b0132b8f0ef",
+      "size": 23616
+    },
+    {
+      "path": "LiveBridge/voice-static/a8b55e48249d3bac7b5e9e633f851751.mp3",
+      "sha": "a5586e655f2729c124a2c2103121bd73d184b013",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/a916aff62f680161ffda7147476d4cd2.mp3",
+      "sha": "1817137b26da3a1a38b15b5b15eeb255b103cc41",
+      "size": 22752
+    },
+    {
+      "path": "LiveBridge/voice-static/a9978dfd9694fdc81a51e241c3f29d2e.mp3",
+      "sha": "3b18836da272701e92817d1bda761a3ef53f7886",
+      "size": 15984
+    },
+    {
+      "path": "LiveBridge/voice-static/a9a5bc47de6e680b8bf5488f229310f5.mp3",
+      "sha": "4960bf4c78d78b26123dab9f5a1785c1c07a4cf9",
+      "size": 15984
+    },
+    {
+      "path": "LiveBridge/voice-static/a9fc798be34e0508e5f387f7306acbb5.mp3",
+      "sha": "9eb5380d7a5ec72fd67303285d31d7ec735b87dd",
+      "size": 24480
+    },
+    {
+      "path": "LiveBridge/voice-static/ab206f88127a9493b316a0999a3b549d.mp3",
+      "sha": "d498fdf9af07ce0e7d1248e13c95da701ac4c6c2",
+      "size": 39600
+    },
+    {
+      "path": "LiveBridge/voice-static/abc47ad0e2977ddab08ca5a1e956b407.mp3",
+      "sha": "043adea431e38d488bd2094f17119002e56f21ad",
+      "size": 38448
+    },
+    {
+      "path": "LiveBridge/voice-static/ac81f0d3ac5a4cb3b9d61c921921befd.mp3",
+      "sha": "bd0b273c9f216efd00edb523fba2efeee31692dd",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/ad5052ad6025152f1a0cdb233c693072.mp3",
+      "sha": "dab36e3fe6769d2cf084d78d7288a39b7962f1dd",
+      "size": 30384
+    },
+    {
+      "path": "LiveBridge/voice-static/ae6e7bd5c9001671943477bc893d37c5.mp3",
+      "sha": "7e6b6badb8dc4f3d5037ec1b9427123a6a8ce1ba",
+      "size": 19728
+    },
+    {
+      "path": "LiveBridge/voice-static/aececf8cec69c6c4098de04202231b57.mp3",
+      "sha": "8b5bd6f9f6a86a6e2dbd41d1a1d8a52b02851290",
+      "size": 37440
+    },
+    {
+      "path": "LiveBridge/voice-static/af346e821b7a5cf597fa0a4b653560b9.mp3",
+      "sha": "7e901521fe6db832c589c2345b95682ef1a94435",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/af522e19fc32f2c786f2bc579bdb3557.mp3",
+      "sha": "46e7b0b5ebd133b92ea19be2999a6f60be2e4f73",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/af55ae23ecfe71f59dead14bbe97a225.mp3",
+      "sha": "9027f7c6667b0a34281bc358f4e56abdf88f65a8",
+      "size": 26064
+    },
+    {
+      "path": "LiveBridge/voice-static/afda8e1238fd92e68b32d91372643d1b.mp3",
+      "sha": "adc3fa35c46e41e4eb167ec1e8ff5c77a91c6e6e",
+      "size": 17712
+    },
+    {
+      "path": "LiveBridge/voice-static/b06a733e0fc680ea8b139e7187edf476.mp3",
+      "sha": "2fb27f3d0e7184810eba7d667ad16b5cf64386ef",
+      "size": 14688
+    },
+    {
+      "path": "LiveBridge/voice-static/b17198cada05642ff6a01a08b613fc94.mp3",
+      "sha": "5a15a11af8f0f62c05bd2fbae67698346d9a3233",
+      "size": 16992
+    },
+    {
+      "path": "LiveBridge/voice-static/b19c80103673668eb145b183b6aa7fd5.mp3",
+      "sha": "2903d4e8391e990d00e93a6d8ab9cfee5e5f27d1",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/b275b9870efa6fbd6b6d3fab9026d439.mp3",
+      "sha": "1f75db03ad7c623150fa824ef84f8a2e2a476658",
+      "size": 13968
+    },
+    {
+      "path": "LiveBridge/voice-static/b2b033cd704d10d7cc3861184c50fa72.mp3",
+      "sha": "7ee93d62e1cf065bd5faad54964920479c1ddeb9",
+      "size": 19008
+    },
+    {
+      "path": "LiveBridge/voice-static/b3a3d6efb3bf6d612e5c6d3c0064207b.mp3",
+      "sha": "fb6ef766abb8b228212bd1fca6b31e30ecf51f5a",
+      "size": 32688
+    },
+    {
+      "path": "LiveBridge/voice-static/b4b8687841a9525559910b291178c460.mp3",
+      "sha": "25e225c392213baa2cea1e287808c9995155c28c",
+      "size": 38592
+    },
+    {
+      "path": "LiveBridge/voice-static/b62bf1d69cf1aaa454dad8f3550ae6cb.mp3",
+      "sha": "686e773dfa7a17b9b1b1844e8e076a3185116bfa",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/b66e13686f211c92ba21adbf4f1568c8.mp3",
+      "sha": "1a1b3c6f0af34b15e59b0db431c289e9ee47d574",
+      "size": 12240
+    },
+    {
+      "path": "LiveBridge/voice-static/b672f1bdffdc8a9fc092813086d69e19.mp3",
+      "sha": "987c5f4f9e821d0e28e8aaae8f7f7860fee46d26",
+      "size": 35568
+    },
+    {
+      "path": "LiveBridge/voice-static/b77c8f4f4196304b63a740808d5d0bd1.mp3",
+      "sha": "496a8d1dc5d8d3c91549b19c544ec35b60142101",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/b7839aa7ef31e6addab9fd5594812e09.mp3",
+      "sha": "d3cba199064af618db06ca773596c6bfc588fec6",
+      "size": 34128
+    },
+    {
+      "path": "LiveBridge/voice-static/b7f56b7a4ca8505d472d333a12e6c3b6.mp3",
+      "sha": "b5dd771e19bfb85d106bbcc9fc51ba8551bf92ee",
+      "size": 20304
+    },
+    {
+      "path": "LiveBridge/voice-static/b842fbbff8c73c45d57643dc01e3692a.mp3",
+      "sha": "08fc19ba7a7ba236c1776c8b48318e671ba5c9aa",
+      "size": 12816
+    },
+    {
+      "path": "LiveBridge/voice-static/b91b188efef3c3b7896681861813a690.mp3",
+      "sha": "0939c5cc5486d48474aff1ad02358110f305c9ad",
+      "size": 18720
+    },
+    {
+      "path": "LiveBridge/voice-static/b998c273a78edaf36527ced14f207a96.mp3",
+      "sha": "e71f515ce3ce7e59a6691f936e7b121ff4bcf19e",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/b9e3b0ca496ba358cdd5486369533f2d.mp3",
+      "sha": "ddac3d158fe8ab5767bb1a60fcbd2a9c14304d08",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/ba1936a8b3a01a418f414bbc453e9d48.mp3",
+      "sha": "d06d8437fd6e59742eb241ba64191b0566441b5a",
+      "size": 31248
+    },
+    {
+      "path": "LiveBridge/voice-static/ba5dbb666a5b6bea7cac8ac45b6d7fc8.mp3",
+      "sha": "c13c32c31697aa4a041aad7da54f851ccb7dc935",
+      "size": 22752
+    },
+    {
+      "path": "LiveBridge/voice-static/ba92275e811ad174aa8543f6684a4bc7.mp3",
+      "sha": "fe994452642388ba96d5d4102142a1ef68803143",
+      "size": 29376
+    },
+    {
+      "path": "LiveBridge/voice-static/babb0553bac0e11686f20db8044fcda6.mp3",
+      "sha": "2d5e8b9f98deb53caedc675bc6edb8b7c741e5ff",
+      "size": 13536
+    },
+    {
+      "path": "LiveBridge/voice-static/bac584b2e9109375bfbb197d63c5d7d6.mp3",
+      "sha": "5fad6181f0c763213394228bfa2ed59796219073",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/bb35db1bd780c8ef2dabab58d551c85c.mp3",
+      "sha": "5e693f7381742939b3de04d8f867124081cf4904",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/bb827e04ba7bdea60caccb52ef9c1ccf.mp3",
+      "sha": "7c4103e267df3d2b02ec00a2e4a33363099030a7",
+      "size": 26640
+    },
+    {
+      "path": "LiveBridge/voice-static/bbeda439781b1cfb606026e6650dc1d9.mp3",
+      "sha": "185794590613eb525698f670aa5a4dc5a36e5093",
+      "size": 19728
+    },
+    {
+      "path": "LiveBridge/voice-static/bc2a4485b406041b8c2256e18304bd9c.mp3",
+      "sha": "190868338df44c599b36701f441a491cf44ba75a",
+      "size": 14832
+    },
+    {
+      "path": "LiveBridge/voice-static/bd7c44a1ea01153e312d6d293e1a5317.mp3",
+      "sha": "37843fdea438bb4bb5fc0c16914be2cdb902d7bb",
+      "size": 34272
+    },
+    {
+      "path": "LiveBridge/voice-static/bd9ad9e8a95e772d7beec9cc58d5cdc2.mp3",
+      "sha": "dec6ba2d3a3ed392a63f46dfc8b8c2a25ab1d265",
+      "size": 20880
+    },
+    {
+      "path": "LiveBridge/voice-static/bdade1a22c01d27e410a9a212ac6bc8a.mp3",
+      "sha": "0617da1e950cacdb4f339750830544f1b42506e9",
+      "size": 14400
+    },
+    {
+      "path": "LiveBridge/voice-static/bdd59339b492893135dd9b11b2ccdf61.mp3",
+      "sha": "34c6a1c2946e3e43f7dc94060767a7dd6d08885b",
+      "size": 16272
+    },
+    {
+      "path": "LiveBridge/voice-static/bdefbbbe847f7d0f8853269fb83f9872.mp3",
+      "sha": "72a6f74a4ca9cc03e0fd355f34bbf22aef5f334a",
+      "size": 38016
+    },
+    {
+      "path": "LiveBridge/voice-static/be1ef5cb2dfc31ab4a36769a3f3a5255.mp3",
+      "sha": "e48f8144f66afe8a12d55b2725a40dd0b526a66e",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/bf6c7e839fc4fc73f2ba2683513a5157.mp3",
+      "sha": "607d0ee65ec3404f4ba26cc71f05e816513e2fa6",
+      "size": 13680
+    },
+    {
+      "path": "LiveBridge/voice-static/c0a4c209502530565f4a8998c7073dbb.mp3",
+      "sha": "66e74e0e555157485e2f74674e71cd1c0f117ba7",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/c0db1530db82f9e99ea96e6977bbdcb0.mp3",
+      "sha": "218922450c910eaadf9aa533cdd67508e6f83b07",
+      "size": 25920
+    },
+    {
+      "path": "LiveBridge/voice-static/c0e0a957f59824819055564581175d61.mp3",
+      "sha": "769221e94859f6fc025c2314a359b4286834408d",
+      "size": 27648
+    },
+    {
+      "path": "LiveBridge/voice-static/c10516b658354a85fad5de4417fdd70e.mp3",
+      "sha": "0a1cd1682f09762ce4bb15cae2566351b8a3daed",
+      "size": 11520
+    },
+    {
+      "path": "LiveBridge/voice-static/c11be090a012805f7823a02311ca44b4.mp3",
+      "sha": "92384162f20ac3c455ea376fb7e292ef01147a26",
+      "size": 33840
+    },
+    {
+      "path": "LiveBridge/voice-static/c11c5b4c69cfb4964035f486f02b403d.mp3",
+      "sha": "ef9ed0e9891dd008b6b7d1ec74c7c706163c6d84",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/c133517f296a7ea2252e2a307c55fdce.mp3",
+      "sha": "1c6ef53a87263690ce9b3cb95f0827b0cfe0a1e8",
+      "size": 20304
+    },
+    {
+      "path": "LiveBridge/voice-static/c195c455803f9db0b30b605563bd77e9.mp3",
+      "sha": "fcaeee02890955f90042591fa6b4343a431c6c9e",
+      "size": 30672
+    },
+    {
+      "path": "LiveBridge/voice-static/c1db2fe2bce3f65d08c6813c1749aaff.mp3",
+      "sha": "3e17ac4370cba94bd90b942614afd682dcd7eb50",
+      "size": 14112
+    },
+    {
+      "path": "LiveBridge/voice-static/c31d54e4568939ee65a09d89d811a17f.mp3",
+      "sha": "3a6930ace5dc34dbfadf0bf8248db571f63b5f95",
+      "size": 21600
+    },
+    {
+      "path": "LiveBridge/voice-static/c45032a2c5a7216d6a46fa316549221d.mp3",
+      "sha": "1d748f4dfefaf3f5149ad882082b417e4c744432",
+      "size": 18864
+    },
+    {
+      "path": "LiveBridge/voice-static/c4814e9fdecefa2fd199e445d2e7bde9.mp3",
+      "sha": "23eb74d8d7fca19a063b029be6a6f9f96c92dd57",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/c52b0481d72078bb787d7ea1d6f196a9.mp3",
+      "sha": "2cb5b9693ef170fcc681ef1f9cff33a071c61cba",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/c5746e9f82715a9541c7959a41a8a026.mp3",
+      "sha": "3a3dd599211c5ac19a0363ab2caef90876d8a557",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/c5a2f865fa3dc11e9bb8de6d0ec60f6b.mp3",
+      "sha": "6f97c0256efbadacbc0d1f15bb8776a2b5c3cbc7",
+      "size": 27504
+    },
+    {
+      "path": "LiveBridge/voice-static/c5b9ef71acd0993ed881f1cb27627ba8.mp3",
+      "sha": "ebf797b45b963b72b683d98023b79ba098970ff4",
+      "size": 14256
+    },
+    {
+      "path": "LiveBridge/voice-static/c5dfa688a7a791cf9d34e079c1965735.mp3",
+      "sha": "7059a2b05ab2acde6adbdfff20a7ee45a22bd9c2",
+      "size": 40464
+    },
+    {
+      "path": "LiveBridge/voice-static/c5f1a6dffacc62c4ad630c08e98f12bc.mp3",
+      "sha": "a9acd493bc14a131e3d3d5685ece98235a28d770",
+      "size": 37296
+    },
+    {
+      "path": "LiveBridge/voice-static/c66f13acd24df9c26b16f5af04a1f13c.mp3",
+      "sha": "52d540d054d37239fd66cc74dde2404da34d4eff",
+      "size": 17712
+    },
+    {
+      "path": "LiveBridge/voice-static/c79b9f7be6b5331416179494b582d820.mp3",
+      "sha": "b98cc5547667f1cfe7bf32c8fefbc9100d782021",
+      "size": 15840
+    },
+    {
+      "path": "LiveBridge/voice-static/c7fa82ce12c3fb3ef9fc5c921e420c54.mp3",
+      "sha": "f7179e7c4909cd8cdc23543818a1cedf8c0e9e9e",
+      "size": 26064
+    },
+    {
+      "path": "LiveBridge/voice-static/c855f9560c8fc4be229b974ebefe3144.mp3",
+      "sha": "f298744ef1dbe054f472d59fed4ad379c5511f2b",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/c8dd089bc716259bfefdb9202c2171bd.mp3",
+      "sha": "f47cc3e4a37c0c59bd44d485524900445aee8d22",
+      "size": 15264
+    },
+    {
+      "path": "LiveBridge/voice-static/c93b956b4c5295bab360d37b0b085d47.mp3",
+      "sha": "5555fd4add1273945147e86be77798ec0d101dfb",
+      "size": 24480
+    },
+    {
+      "path": "LiveBridge/voice-static/c95bbb6bc2b04d76cf8454adbae711ff.mp3",
+      "sha": "f70e273baf6812295577f217c2b861d2a6a7e885",
+      "size": 13536
+    },
+    {
+      "path": "LiveBridge/voice-static/c96461fb27db6131655f93b66a48c732.mp3",
+      "sha": "4646f605cbba7cbf0d2d51e228b47c3b154bd4ca",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/c9aee39cc4da979ab75c5374f8ec63eb.mp3",
+      "sha": "1e13f8f191ed023df5ddfccdf0f6b6fa21962e01",
+      "size": 19728
+    },
+    {
+      "path": "LiveBridge/voice-static/ca876784e1844409d87c2abc1e978ac3.mp3",
+      "sha": "4e1c38763d9d946e7c07e2429da81f92b4e8b906",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/ca8b7199ede6e40c9c77177678e58c54.mp3",
+      "sha": "f8a384f0327946beb97fd379135ea8167c982e10",
+      "size": 12816
+    },
+    {
+      "path": "LiveBridge/voice-static/cb03d490f15a4657ad5038e4f7558bba.mp3",
+      "sha": "49008c8112d2d01f42f9e696461986638665ec2b",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/cb284aba035d4b4427d759b8c805fd20.mp3",
+      "sha": "7e4d855044a5248767db6d36904f8abcb0a74af4",
+      "size": 22464
+    },
+    {
+      "path": "LiveBridge/voice-static/cb59011a9051ab065c6e9cdd04c17989.mp3",
+      "sha": "fad059c1c1fcc5b4203b14cdd05a0230e34c91a8",
+      "size": 24768
+    },
+    {
+      "path": "LiveBridge/voice-static/cb5f70c66266a3cec875224ef7df4685.mp3",
+      "sha": "cfbdc906410a0bd9def9521783b9676f6329c06a",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/cbc5ac2b09e18a08ed54e476d274d124.mp3",
+      "sha": "c03b6c9af972b2055aba912ba8920e20916acc79",
+      "size": 17712
+    },
+    {
+      "path": "LiveBridge/voice-static/cbdf4b83255047f5c40b976795850b51.mp3",
+      "sha": "13b160cd6b56fd85a05eda9f3eea9625260a8746",
+      "size": 30960
+    },
+    {
+      "path": "LiveBridge/voice-static/cbe583e676aa8e16e07426bc0a381916.mp3",
+      "sha": "e8b3dfe0d2fa6430f0eb7d5919abd9b181ba5854",
+      "size": 15264
+    },
+    {
+      "path": "LiveBridge/voice-static/cbf13046289ea1cd6db6a0baca307ca2.mp3",
+      "sha": "043f97089e01d227a59de13aad4bef612f720409",
+      "size": 15120
+    },
+    {
+      "path": "LiveBridge/voice-static/cbf4a7f7129dc041f29acfdc223fc096.mp3",
+      "sha": "6bfaeb708d50fc88a3fa5131bee1bfbfe5b91af2",
+      "size": 23904
+    },
+    {
+      "path": "LiveBridge/voice-static/cc27add6b78c29247d12614137282961.mp3",
+      "sha": "bc3458b0d415909d0513cb98c78bee3c0ff1c182",
+      "size": 34416
+    },
+    {
+      "path": "LiveBridge/voice-static/ce7ca5711c04b6dc705d35a37c75aefe.mp3",
+      "sha": "71f91e9013c93067470db7574f88d27ed66b2c49",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/ce7d2e9d45b2df941d9f960b1a8babb2.mp3",
+      "sha": "a4ac20299a8263d0dd3f8d7986e1b78a6f70c88e",
+      "size": 14544
+    },
+    {
+      "path": "LiveBridge/voice-static/cfb2461f87237fabd4af87ff79796e47.mp3",
+      "sha": "4d34e3e4d8f4a73f4f9c3fb38a4069e0a472f485",
+      "size": 40320
+    },
+    {
+      "path": "LiveBridge/voice-static/d02301e14576e18cea49ea7ed4b8debf.mp3",
+      "sha": "da00763ab9ab0caa77dfab143d8af70406887fd1",
+      "size": 27648
+    },
+    {
+      "path": "LiveBridge/voice-static/d101097aa004720c3233973ff70844e8.mp3",
+      "sha": "c1893e273b53a0db856cfaf4269a4596038944a5",
+      "size": 12384
+    },
+    {
+      "path": "LiveBridge/voice-static/d11fbeeb9e8137a0d4b0d045503a398e.mp3",
+      "sha": "e606218710653abee2be8f5c0c86c0ff9c87afeb",
+      "size": 32256
+    },
+    {
+      "path": "LiveBridge/voice-static/d17c70a52e642dc513b36d99f17dd66d.mp3",
+      "sha": "f49cd65ace1b002bc82d6be06774f18a9df402f4",
+      "size": 11808
+    },
+    {
+      "path": "LiveBridge/voice-static/d214ebba612d89200355bf5104422804.mp3",
+      "sha": "a049dc5fad826e849f390e3ea7c6bd0a417e8eb9",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/d21e0cedf7da27276e5595fcf7f31399.mp3",
+      "sha": "5368ca3080da4c6b301aba7d025dce8016bae73b",
+      "size": 32976
+    },
+    {
+      "path": "LiveBridge/voice-static/d2445ae06ddf264018bcf30f588ab9bc.mp3",
+      "sha": "5c110ea5fdff0a6c20733c7662fac146b6a566fe",
+      "size": 19872
+    },
+    {
+      "path": "LiveBridge/voice-static/d2bb37ec7de106349dec43a4906b27bc.mp3",
+      "sha": "a8c52e335a8e441d9d1374f7d4ca9c9e317bec31",
+      "size": 16992
+    },
+    {
+      "path": "LiveBridge/voice-static/d4369cee8ceb739cce7db96c270e3e27.mp3",
+      "sha": "79b6bd050c96928f64b32d72dbff70b9e2bd2b0c",
+      "size": 22608
+    },
+    {
+      "path": "LiveBridge/voice-static/d442d6ab35024d5e4bfac770c09b05cf.mp3",
+      "sha": "822b3935ad204e7ee2387c4a1b694d902c6baa8c",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/d4806ca3b6e52dac6de6e5a1ca416232.mp3",
+      "sha": "a03aa0a488086a64542cfab8ba4a7d03947ebb42",
+      "size": 13392
+    },
+    {
+      "path": "LiveBridge/voice-static/d4c43008a65e9f41dc83e619ac7cf1ce.mp3",
+      "sha": "6f8a32d445794c059873bf95877462fe6d7a79b8",
+      "size": 12816
+    },
+    {
+      "path": "LiveBridge/voice-static/d54ca5b4981e48d2f97880faee145f50.mp3",
+      "sha": "be0ecf5371ef5deba4c7f448f2c8b1e7ef675e27",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/d584334d7bd9ee61e8a6c3657f9870f7.mp3",
+      "sha": "b25d48caf0dd3e9dfe554a2289afd47580ae9432",
+      "size": 12240
+    },
+    {
+      "path": "LiveBridge/voice-static/d59e11975d9aefd6f904f3c1996126bd.mp3",
+      "sha": "bda2e75ab1379514386e430df771c99d4df5f812",
+      "size": 28080
+    },
+    {
+      "path": "LiveBridge/voice-static/d61ebe6308464ad428783cb77770c2d5.mp3",
+      "sha": "a0902778df2e2886e8eb51d363afa19a6bec7782",
+      "size": 29520
+    },
+    {
+      "path": "LiveBridge/voice-static/d63026f3837eb9c405e5999bf9602280.mp3",
+      "sha": "f88e259f2cf1db6f069fb6ec738855555bea627c",
+      "size": 36432
+    },
+    {
+      "path": "LiveBridge/voice-static/d6430c95c499175d6f2fa754a49b2813.mp3",
+      "sha": "a99e2ce10d6c4c64551cfe6cc25db3c50e2e501a",
+      "size": 13680
+    },
+    {
+      "path": "LiveBridge/voice-static/d70fcc116eb17fd6f98bc6cdead21b52.mp3",
+      "sha": "f62c3dd4e5d71f9a08a44e643a11165cc76db99f",
+      "size": 14112
+    },
+    {
+      "path": "LiveBridge/voice-static/d74ddbec8be4b8b6716390914b9a8473.mp3",
+      "sha": "8a673bf5e258e7ebab2482712bfe6f82e9a2f61d",
+      "size": 45072
+    },
+    {
+      "path": "LiveBridge/voice-static/d75d3b86b0821152aa53a16684c8b34d.mp3",
+      "sha": "bf2b9e4f9826bcda335208bbc21e1af2efd36c14",
+      "size": 20304
+    },
+    {
+      "path": "LiveBridge/voice-static/d76dab12ea0c0abd73ee6d3dfb675118.mp3",
+      "sha": "937a21e3cb3475a2b78519422e46045c9cfcbbce",
+      "size": 32256
+    },
+    {
+      "path": "LiveBridge/voice-static/d79d0ea93ce14dfea006e5d0b4f66c2b.mp3",
+      "sha": "0e1955c93e0914ce5f13690c95895debdcf2ff93",
+      "size": 40896
+    },
+    {
+      "path": "LiveBridge/voice-static/d7ad73e8edebbb4e5701bfed710de455.mp3",
+      "sha": "d650a1ca06d8638ede4cb3901f57e1bf47a59fba",
+      "size": 28656
+    },
+    {
+      "path": "LiveBridge/voice-static/d81ba9ddec403ab03b8eabaed4fb47ec.mp3",
+      "sha": "362800b6c9916787cd20fd541f4c19774d8487a4",
+      "size": 29664
+    },
+    {
+      "path": "LiveBridge/voice-static/d885a398b7a0178630ecd0549f353747.mp3",
+      "sha": "e4ee96ef84876a01905ed2c5a55d0b8794e85dd6",
+      "size": 39600
+    },
+    {
+      "path": "LiveBridge/voice-static/d89fc2f14a8f2a29fbc68833dfe68973.mp3",
+      "sha": "addf20dee5c3255fe03a3f4f0eece9b24615c2cb",
+      "size": 37584
+    },
+    {
+      "path": "LiveBridge/voice-static/d8ae56b8baf8cf39775fd13730c8aa69.mp3",
+      "sha": "f7a8dae3d8b3611ae86530b99b6576bac3d2a19f",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/d8b1e0d1beb9b08bfba3ce6e00956e78.mp3",
+      "sha": "6728e0dce041e4873449cb052719a7db6c362305",
+      "size": 19872
+    },
+    {
+      "path": "LiveBridge/voice-static/d8b8541cb42c267eb0adedf2590249eb.mp3",
+      "sha": "3d700677c8ed35ce2724985685ab442f756d8e08",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/d9bf3bf5cee71b5ba55ab1109ca6df10.mp3",
+      "sha": "ca81b84423584c0b70d72a1ef0857e51b19d0ae4",
+      "size": 33264
+    },
+    {
+      "path": "LiveBridge/voice-static/daba7b420af3ac42fb5eb844ce160866.mp3",
+      "sha": "560bbbd6f3df6a0c25a8f95c8d5a69b6cb2eeadf",
+      "size": 40608
+    },
+    {
+      "path": "LiveBridge/voice-static/dacd29164bf1dc1606590f7b84d6576b.mp3",
+      "sha": "a1d10c4cec9f1bf42dcaf5633df7591ae3158025",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/dad9ecdd71ee4f78befbaa8d0f30076c.mp3",
+      "sha": "6d104e96a6cf6da98b9def5f1d19afdf93409905",
+      "size": 21456
+    },
+    {
+      "path": "LiveBridge/voice-static/db5145820b0e221efd5a0c8d134f9588.mp3",
+      "sha": "a78b3f8dc291e4af51c6f5aa9c2d0cb690888327",
+      "size": 19008
+    },
+    {
+      "path": "LiveBridge/voice-static/dbaad8ec7d8b22dc615933fe1b33ccc7.mp3",
+      "sha": "9eb350910c8dd0f98c89c5ac4314c2b5376d49a2",
+      "size": 29808
+    },
+    {
+      "path": "LiveBridge/voice-static/dbf7ca9c1e110a45927f676bb15e1a99.mp3",
+      "sha": "8ecfa56ca482de1bd099e6ca10c85fe49b88ca3a",
+      "size": 17568
+    },
+    {
+      "path": "LiveBridge/voice-static/dc0f7c627ab6b59b26fdf3a2e1511583.mp3",
+      "sha": "e95f03f0e59808390f30567c9020222c4287ff31",
+      "size": 17568
+    },
+    {
+      "path": "LiveBridge/voice-static/dd8c1cb2397ac155f79e2c4451e40972.mp3",
+      "sha": "aea0b30c195c386a4c682fb77fee0012762f43db",
+      "size": 35712
+    },
+    {
+      "path": "LiveBridge/voice-static/ddfb4a0d67011938532ce361d21fc05f.mp3",
+      "sha": "f90357e9bd60a86c813a9277ec138272245fc434",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/dec16fcfe557d76e9890860b89e54cbd.mp3",
+      "sha": "456d33a1b95ea9d2352f5a603535b44b177c4974",
+      "size": 30816
+    },
+    {
+      "path": "LiveBridge/voice-static/ded5df8a64fbc378e701a74b8f2f4a1e.mp3",
+      "sha": "af50ed52d03f219959a6ad3a21f25ff92b6d7e05",
+      "size": 28944
+    },
+    {
+      "path": "LiveBridge/voice-static/dfac8e57e340e94c2b4702dc1a1c7f08.mp3",
+      "sha": "d4bf8e6f8b81cd5358ab222037afab0191b855dd",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/e06ba03de29e254f5d808a42cc105055.mp3",
+      "sha": "21885f908112939c0d99f49f6ad649bc84f6ef3d",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/e06c9b02629afde2d0ed66e7f9a58ee4.mp3",
+      "sha": "76f1ffc6d06a40295b568ba7989e4abf6e7b47bb",
+      "size": 43488
+    },
+    {
+      "path": "LiveBridge/voice-static/e08080ad6cc411437e4df2485effeafb.mp3",
+      "sha": "af92428226ea2dca0faa3413f436c0fd0320f769",
+      "size": 38592
+    },
+    {
+      "path": "LiveBridge/voice-static/e1131150dc5c6b567f8b4923b6bb8827.mp3",
+      "sha": "f6e0c1c1c1b8743449e7bf973a8fbd2f955d0ef5",
+      "size": 12096
+    },
+    {
+      "path": "LiveBridge/voice-static/e1563abb35cdc068fa31544a2bb337b6.mp3",
+      "sha": "373dc678c61712617b734ede2f381b4c3d92015c",
+      "size": 17568
+    },
+    {
+      "path": "LiveBridge/voice-static/e261c59e8ba4987d2f1fd92cab067026.mp3",
+      "sha": "5f9a054f1346e6de176965d461eaaf76ee1af1df",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/e2b14daf543e12160acdd9fb95ee74b8.mp3",
+      "sha": "7ec0888a6f784ed2740f7d2f3214b576930dc4da",
+      "size": 25200
+    },
+    {
+      "path": "LiveBridge/voice-static/e2cd2c7d9a67af0435057cc40c9f9d44.mp3",
+      "sha": "9237b5937eede15a04a447f4a374922ee7613348",
+      "size": 32688
+    },
+    {
+      "path": "LiveBridge/voice-static/e30ff1895808484813f9bdb104b60074.mp3",
+      "sha": "bf75986cae4b50ceaae957b46628dcb870f5500c",
+      "size": 20304
+    },
+    {
+      "path": "LiveBridge/voice-static/e389f781981f87cdda199a41c0e5ef9a.mp3",
+      "sha": "b941dc94878a6492f48a931ff27d52dec80950da",
+      "size": 37584
+    },
+    {
+      "path": "LiveBridge/voice-static/e3a3503b55e3461b55a931fc9927eb81.mp3",
+      "sha": "91642db742b4a70e39939515c8e3f9a182001e87",
+      "size": 12240
+    },
+    {
+      "path": "LiveBridge/voice-static/e58f8585497cb597e5d94ac484a16f78.mp3",
+      "sha": "fbb4e69b6cabb7aa1b476a44ac708038f15a6e42",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/e6613d4aa35d9911ab7f39c79895f566.mp3",
+      "sha": "a45adfd5c65ca506555907852018a5c355dea28c",
+      "size": 16992
+    },
+    {
+      "path": "LiveBridge/voice-static/e698158462bff23646824f4c9d787f03.mp3",
+      "sha": "6addc1c51c4c456b5914e47bdbd5e50c86b31c0b",
+      "size": 32112
+    },
+    {
+      "path": "LiveBridge/voice-static/e6e6f3c84fe2550aab32924be87767fb.mp3",
+      "sha": "8ff0a187d16281fd59134f45c259aa03ee392017",
+      "size": 23616
+    },
+    {
+      "path": "LiveBridge/voice-static/e70c80cb2bf9b9cf33898de74d8dc83c.mp3",
+      "sha": "bb6a76198a635f528c6c8e6955752efc52493511",
+      "size": 45936
+    },
+    {
+      "path": "LiveBridge/voice-static/e74551ec9751986ac9c3bd407379f798.mp3",
+      "sha": "3d330cd6a34328a968b56d515f0e453e34ee95d1",
+      "size": 16128
+    },
+    {
+      "path": "LiveBridge/voice-static/e769ddedbe6fd35838a93b9e94d6bf02.mp3",
+      "sha": "228b3689db507baf85cd84fe9e07321464d383bb",
+      "size": 33552
+    },
+    {
+      "path": "LiveBridge/voice-static/e79515edd18a59343107cead704c55df.mp3",
+      "sha": "904c7631c389f6a32489b2b004f78169fcecbdbc",
+      "size": 14112
+    },
+    {
+      "path": "LiveBridge/voice-static/e7971ae068ed194ff8a6f3181f23dc1c.mp3",
+      "sha": "6de4e1e68c9f50999929bc06134f39068e068cf3",
+      "size": 39456
+    },
+    {
+      "path": "LiveBridge/voice-static/e7c20e6c9367e8856fcccee03dcb3d1a.mp3",
+      "sha": "c2adcda6c60a5b2f06dec077914a5f31dc503ef7",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/e8682da8d7fe705b7e0b04f7e805ead6.mp3",
+      "sha": "1b43838710211866349511c87564cb73c1c12299",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/e9c55db3501e9f596590ba9ce55c2a3c.mp3",
+      "sha": "18be21c5abb75912059b8ac414e8b4652657a5ed",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/e9fb9a040c8f5177c3b776b949757f36.mp3",
+      "sha": "bcebb9ee74c206ce47033663041b70ecd324203f",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/ea2717a735362ed68d472eb448f5874f.mp3",
+      "sha": "d7c4ebb6e0bdd8655d492acf667cada6a9590c37",
+      "size": 23040
+    },
+    {
+      "path": "LiveBridge/voice-static/ec0b9ec93a536f5aef99510efc238f3c.mp3",
+      "sha": "9f4f8d3c677ac1d95d8c4f24fb6c1a87249e03ff",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/ec2f303511cb32ef320fbc50cc52721d.mp3",
+      "sha": "ac62b8d681b4e7227997e7f9b15479c6ebef2f91",
+      "size": 17856
+    },
+    {
+      "path": "LiveBridge/voice-static/ec7349ee0bc24226445740b5a0bdb48e.mp3",
+      "sha": "dad7dadd533206878690f8440cc906940185844b",
+      "size": 32400
+    },
+    {
+      "path": "LiveBridge/voice-static/ec9b3d7f372b9b86a48189f0ba3d2413.mp3",
+      "sha": "3d32d89a61bb3d992aed3355b5b7f8ed95a1426c",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/edbf9dc7a02c0ef12bd0dde2c0dce361.mp3",
+      "sha": "e4c9a0a86e9a24f0451057ade9863c018f187734",
+      "size": 42912
+    },
+    {
+      "path": "LiveBridge/voice-static/ee153ed56163182164adb473456c2ed6.mp3",
+      "sha": "0b752efe9a5e0731350f6f8e706cc23edba56e36",
+      "size": 13104
+    },
+    {
+      "path": "LiveBridge/voice-static/eefc3603b180dd88d9ab016003555333.mp3",
+      "sha": "e99d694d482a92e7c2e4716ecbdc4c817d93100f",
+      "size": 14544
+    },
+    {
+      "path": "LiveBridge/voice-static/ef73c350c94812785014d8661986f8a0.mp3",
+      "sha": "a836667bfd3652e2a0163e6b10290e5fe70cf28a",
+      "size": 12816
+    },
+    {
+      "path": "LiveBridge/voice-static/efcb85cf009b51ae159108202d6668ed.mp3",
+      "sha": "fd5454b13bb717b23469b35eba216472494b3eae",
+      "size": 19584
+    },
+    {
+      "path": "LiveBridge/voice-static/f0a979f200584285cf4b0c39f5a06376.mp3",
+      "sha": "10c449ef97d5f6111bb303b6727d20c54e1d4677",
+      "size": 12096
+    },
+    {
+      "path": "LiveBridge/voice-static/f0ab2ca489d3b9dafae301db6d10ccac.mp3",
+      "sha": "efa8d7bccbe0d7d213ca7a5ec3d964bb09f4536d",
+      "size": 22896
+    },
+    {
+      "path": "LiveBridge/voice-static/f13fb3af33e01e9e724bcab0f170098c.mp3",
+      "sha": "044317fd782c371e04c018e27c4403506404830a",
+      "size": 29952
+    },
+    {
+      "path": "LiveBridge/voice-static/f1b55dbb523c77b40d8b4ecea586cf90.mp3",
+      "sha": "22196ae769f818edeb647514dcc9785cc898e8cb",
+      "size": 31968
+    },
+    {
+      "path": "LiveBridge/voice-static/f1ead79552c8df5fc0eb60619c073dee.mp3",
+      "sha": "d6f67761a065dc590f750e22f4902e038957feb3",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/f2b0d7a69d5dd2571ec5d33c81a5d026.mp3",
+      "sha": "b8d5302add5fada01c9cd90e599a39c2cc1aafbc",
+      "size": 17712
+    },
+    {
+      "path": "LiveBridge/voice-static/f40cc0ce161d3ddaa8c8058885a1b1fc.mp3",
+      "sha": "aa53a5eb05151001b53713c29034493519158a5b",
+      "size": 43488
+    },
+    {
+      "path": "LiveBridge/voice-static/f490cb1d7b983ef1918877dc5e96d914.mp3",
+      "sha": "63e0183439354db24bd6298c507fa0c55d34e5b6",
+      "size": 29952
+    },
+    {
+      "path": "LiveBridge/voice-static/f4c79a4269f9ae2e07674b6f68d41577.mp3",
+      "sha": "1eee33405677744f97ff203777e84a4e9363d662",
+      "size": 21888
+    },
+    {
+      "path": "LiveBridge/voice-static/f53fad21ebf61ce64d6748c672f9ced2.mp3",
+      "sha": "763abd38aad7c3c0652f73292ae1a46917bcdab5",
+      "size": 14112
+    },
+    {
+      "path": "LiveBridge/voice-static/f5b22191539e0665f1456ec7c822f55f.mp3",
+      "sha": "69321af6811ba812d1cc56b4fb2195088d2f87c4",
+      "size": 15696
+    },
+    {
+      "path": "LiveBridge/voice-static/f5fbb71e0c8ec6fe443ed56361d80e40.mp3",
+      "sha": "543945393d29b08539b2f3ef09eac4c4b5717f64",
+      "size": 13680
+    },
+    {
+      "path": "LiveBridge/voice-static/f657be7459917efd4beeffe0cbca1df7.mp3",
+      "sha": "e0ea1e8a30e3ea384f5dc7ffd4df0efa4f3a69d3",
+      "size": 37728
+    },
+    {
+      "path": "LiveBridge/voice-static/f773a7d5b0375f474401c0e3459c4bc4.mp3",
+      "sha": "64adce237c8a604ca38d5b3edbcb3f818af0d75f",
+      "size": 12240
+    },
+    {
+      "path": "LiveBridge/voice-static/f77b64f365724b856e3404ab0ded3a2b.mp3",
+      "sha": "2ea5eb28e1590795309c2be5992f68de69b4deff",
+      "size": 18720
+    },
+    {
+      "path": "LiveBridge/voice-static/f82c7412e542a8bd8364d83a0992a67b.mp3",
+      "sha": "7e1bdb9c857fea110299e5a8c5a3d8ec4dc100e8",
+      "size": 35280
+    },
+    {
+      "path": "LiveBridge/voice-static/f83c9ef22a1aeed4a2cdb4ff0e3f0932.mp3",
+      "sha": "d576ebcf4390a5aa36cf88783662cc3a12828bd6",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/f85e9ec4bf4dd7b8b3f78775c98ea5f9.mp3",
+      "sha": "672fa3601fac99a00d6125ca3a6b6d06efaaa280",
+      "size": 33984
+    },
+    {
+      "path": "LiveBridge/voice-static/fb059c561107abf1fffa3de8fb3b873c.mp3",
+      "sha": "e479e303c2c602b2e24c13b364d5bd2bd6f4aefa",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/fc159ed6e38b76fa22cd7a004fb9b625.mp3",
+      "sha": "288c84c0462fca56b46ebcb583373c6fe402cd7b",
+      "size": 39312
+    },
+    {
+      "path": "LiveBridge/voice-static/fd405195155e000010813d24c9ba5e0c.mp3",
+      "sha": "b6578f9efd50a2399cc3b8d8adf3957de02d1d49",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/fda2adc5024385754ab65d4789b2935b.mp3",
+      "sha": "1d728c8efa5ad1a7ee3e5eb3e309c3971dfb2e7b",
+      "size": 11232
+    },
+    {
+      "path": "LiveBridge/voice-static/fe07ddeab0200d6612638415c0eea94f.mp3",
+      "sha": "4f71fa51de5db1d48190ac8e7a1b7a25f3530784",
+      "size": 23904
+    },
+    {
+      "path": "LiveBridge/voice-static/fe25e4d87727a370158007ab62635e4b.mp3",
+      "sha": "980405be28dce3b9089fe0d159cf9f1eb4ee25c0",
+      "size": 18720
+    },
+    {
+      "path": "LiveBridge/voice-static/fe6033e58a1c52bfd2c5ab749c6a7a34.mp3",
+      "sha": "bbba7a8bc19cca2bfb016331ab6b262d3cde684a",
+      "size": 36720
+    },
+    {
+      "path": "LiveBridge/voice-static/fea79907d91188d2033f76d2c1364e78.mp3",
+      "sha": "c1f6721101f4559b93822570fbfbdd0db9b47673",
+      "size": 30816
+    },
+    {
+      "path": "LiveBridge/voice-static/fecb47de629e38d3c9c036ef636ae7b8.mp3",
+      "sha": "e505451451a82876f9b48c0ffebec3f272ff9456",
+      "size": 26928
+    },
+    {
+      "path": "LiveBridge/voice-static/ffc8435ef66d7089dc0ebaa3d88b9056.mp3",
+      "sha": "a634c0dfae9f117b61c771e6ea59a239abac4127",
+      "size": 38448
+    },
+    {
+      "path": "LiveBridge/voice-static/ffe5da17772102d84a3315b820b2fe4d.mp3",
+      "sha": "4aaca15f3023ff7a741e2b82a680f901ada1eb71",
+      "size": 17856
+    },
+    {
+      "path": "LiveBridge/voice-static/index.json",
+      "sha": "586493df8bb96a37f0d74debc03078c3940e02b5",
+      "size": 123366
     },
     {
       "path": "README.md",
@@ -1680,7 +4815,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "56aae29008503d1e495d09f86eba484470b56802",
+      "sha": "25ff08e5cbd4508de3d7f03c00b63a7bd1400cdc",
       "size": 50339
     },
     {
@@ -1709,14 +4844,19 @@
       "size": 6608
     },
     {
+      "path": "tools/tao-giong-tinh.js",
+      "sha": "c9dd5b639ba76baa085046f8bbfa3dc51539df53",
+      "size": 6515
+    },
+    {
       "path": "tools/tao-version.js",
       "sha": "b3bba873273a572aff7294a29fc11779e606b795",
       "size": 2580
     },
     {
       "path": "version.json",
-      "sha": "299d970ace9a1fd535febefd398bc0409a9efc63",
-      "size": 288
+      "sha": "2585efe53b8f669e6fdc988b7a1afe53fa6389f6",
+      "size": 261
     }
   ]
 }
