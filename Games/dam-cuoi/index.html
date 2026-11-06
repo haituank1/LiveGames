@@ -55,13 +55,24 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
      khấu vẫn sáng; hai bên tối nhẹ làm điểm nghỉ mắt. Nằm dưới #people (z 3)
      nên chỉ dịu màu NỀN, không làm tối / xỉn màu nhân vật. Không dùng
      backdrop-filter để chạy được cả trên CEF cũ của OBS. */
+  /* V12b: toi 2 ben manh hon (.24 -> .32) de sanh toi hon tham cung do
+     cao — truoc day sanh sang hon tham toi -52 do sang o giua tham do
+     nen cam thach sang + khach dung 2 ben deu sang. Lop nay nam duoi
+     #people nen chi toi nen, khong toi nguoi. */
   #grade{position:absolute;inset:0;z-index:2;pointer-events:none;
     background:
-      linear-gradient(90deg,rgba(24,12,22,.24),rgba(24,12,22,0) 15%,rgba(24,12,22,0) 85%,rgba(24,12,22,.24)),
+      linear-gradient(90deg,rgba(24,12,22,.32),rgba(24,12,22,0) 15%,rgba(24,12,22,0) 85%,rgba(24,12,22,.32)),
       linear-gradient(180deg,transparent 36%,rgba(66,54,66,.07) 60%,rgba(60,48,58,.15) 100%)}
   #people{position:absolute;inset:0;z-index:3}
-  #spot{position:absolute;left:50%;top:13%;width:31%;height:27%;transform:translateX(-50%);pointer-events:none;z-index:2;
-    background:radial-gradient(ellipse at 50% 88%,rgba(255,225,150,.5),rgba(255,225,150,.14) 55%,transparent 75%);
+  /* V12b vong 2 — #spot NAM TRONG #world (the-gioi) chu khong phai man
+     hinh: hop cu (top 18%, cao 27%) dat tam radial o the-gioi y ~41%,
+     roi ngoai khung khi camera zoom vao cap (the-gioi y ~61%). Doi hop
+     xuong top 38% (bao the-gioi y 38-65%) de tam radial (50% 88%) roi
+     dung y ~62% tren nguoi cap. Khi cap dien camera luon bam cap nen
+     hop moi la dung cho; luc khong dien spot tat (opacity 0) nen khong
+     anh huong khung rong. */
+  #spot{position:absolute;left:50%;top:38%;width:31%;height:27%;transform:translateX(-50%);pointer-events:none;z-index:2;
+    background:radial-gradient(ellipse at 50% 88%,rgba(255,225,150,var(--spot-a)),rgba(255,225,150,.12) 42%,transparent 72%);
     opacity:0;transition:opacity .8s}
   #spot.on{opacity:1;animation:spotPulse 2.6s ease-in-out infinite}
   /* V3 (nv3, 2026-11-05): cap dang dien tren san khau phai nhin thay ngay.
@@ -74,7 +85,7 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
     background:radial-gradient(ellipse 62% 48% at 50% 40%,transparent 52%,rgba(26,2,14,.38) 100%)}
   #stage.couple-on #stageDim{opacity:1}
   #stage.couple-on #spot{width:34%;opacity:1;
-    background:radial-gradient(ellipse at 50% 88%,rgba(255,232,170,.55),rgba(255,225,150,.22) 55%,transparent 78%)}
+    background:radial-gradient(ellipse at 50% 88%,rgba(255,232,170,.45),rgba(255,225,150,.18) 42%,transparent 72%)}
   #stage.couple-on #beams{opacity:1}
   #coupleName{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%) scale(.92);z-index:2140;pointer-events:none;
     max-width:94%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -120,17 +131,22 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   @keyframes raysway{from{transform:translate(-50%,-50%) rotate(-2.2deg)}to{transform:translate(-50%,-50%) rotate(2.2deg)}}
   #beams .spot{position:absolute;top:-5%;height:82%;width:34%;transform-origin:50% 0;mix-blend-mode:screen;filter:blur(6px);
     clip-path:polygon(45% 0,55% 0,97% 100%,3% 100%)}
-  #beams .spot.l{left:0;background:linear-gradient(to bottom, rgba(255,244,214,.50), rgba(255,244,214,.10) 55%, transparent 78%);animation:spotl 8.5s ease-in-out infinite alternate}
-  #beams .spot.c{left:33%;background:linear-gradient(to bottom, rgba(255,226,150,.40), rgba(255,226,150,.08) 55%, transparent 78%);animation:spotc 7s ease-in-out infinite alternate}
-  #beams .spot.r{right:0;background:linear-gradient(to bottom, rgba(255,214,230,.44), rgba(255,214,230,.09) 55%, transparent 78%);animation:spotr 9.5s ease-in-out infinite alternate}
+  /* V12b: tia phai mo dan THEO HUONG TIA (sang o san khau, nhat dan
+     xuong tham) — truoc day gradient sang nhat o DINH khung (y~0, tren
+     ca san khau) va trong suot tu ~60% tro xuong, nguoc voi mo hinh
+     "san khau la nguon". Gio dinh o 55% chieu cao tia (~y40% khung,
+     ngay san khau), mo dan ca 2 phia, duoi mo dai toi 96% (~y74%). */
+  #beams .spot.l{left:0;background:linear-gradient(to bottom,transparent 0%,rgba(255,244,214,.14) 32%,rgba(255,244,214,.50) 55%,rgba(255,244,214,.18) 74%,transparent 96%);animation:spotl 8.5s ease-in-out infinite alternate}
+  #beams .spot.c{left:33%;background:linear-gradient(to bottom,transparent 0%,rgba(255,226,150,.10) 32%,rgba(255,226,150,.40) 55%,rgba(255,226,150,.14) 74%,transparent 96%);animation:spotc 7s ease-in-out infinite alternate}
+  #beams .spot.r{right:0;background:linear-gradient(to bottom,transparent 0%,rgba(255,214,230,.12) 32%,rgba(255,214,230,.44) 55%,rgba(255,214,230,.16) 74%,transparent 96%);animation:spotr 9.5s ease-in-out infinite alternate}
   @keyframes spotl{from{transform:rotate(12deg)}to{transform:rotate(4deg)}}
   @keyframes spotc{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
   @keyframes spotr{from{transform:rotate(-4deg)}to{transform:rotate(-12deg)}}
   #royalglow{position:absolute;inset:0;opacity:0;transition:opacity 2s;pointer-events:none;
-    /* V12 (2026-11-06): .34 -> .18, ban kinh 55% -> 48% — lop nay trung
-       tam voi #spot + #tiergrade nen truoc day gop phan rua vang nua tren
-       khung; van giu anh sang hoang gia nhung chi la quầng nhe. */
-    background:radial-gradient(circle at 50% 30%,rgba(255,225,140,.18),rgba(255,190,90,0) 48%)}
+    /* V12b: tam doi ve san khau/cap (50% 42%, truoc 50% 30% — tren ca
+       san khau) + roi 2 nac doc (.18 -> .06 o 30% -> trong suot 55%):
+       quang hoang gia van o dung cho sang nhat, mo dan ra xa. */
+    background:radial-gradient(circle at 50% 42%,rgba(255,225,140,.18),rgba(255,225,140,.06) 30%,transparent 55%)}
   #royalglow.on{opacity:1;animation:pulseGlow 3.2s ease-in-out infinite}
   @keyframes pulseGlow{50%{opacity:.55}}
   /* ---------- Grade theo mốc sảnh (VĐ1) ----------
@@ -147,17 +163,24 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   #stage[data-tier="1"]{--tg-stage:.2;--tg-tint:rgba(255,150,190,.09);--tg-side:.12;--ab-op:.32;--sc-op:.5;--spot-a:.55}
   #stage[data-tier="2"]{--tg-stage:.3;--tg-tint:rgba(255,205,110,.11);--tg-side:.16;--ab-op:.42;--sc-op:.65;--spot-a:.6}
   #stage[data-tier="3"]{--tg-stage:.4;--tg-tint:rgba(255,190,140,.13);--tg-side:.2;--ab-op:.5;--sc-op:.8;--spot-a:.65}
-  #stage[data-tier="4"]{--tg-stage:.45;--tg-tint:rgba(255,190,80,.12);--tg-side:.22;--ab-op:.5;--sc-op:.9;--spot-a:.7}
-  /* V12 (2026-11-06): giam mang vang o 2 moc cao nhat — nen hoang gia von
-     da sang, 4 lop radial (tiergrade + spot + royalglow + aislebeam) chong
-     len nhau o cung tam san khau + tia #beams mo (blur 6px, screen) lam
-     khung bi rua vang va mo tren dien thoai. Giam alpha nhung van giu
-     tien trinh moc 4 < moc 5 (stage .45->.5, tint .12->.08). */
-  #stage[data-tier="5"]{--tg-stage:.5;--tg-tint:rgba(255,170,70,.08);--tg-side:.1;--ab-op:.5;--sc-op:.25;--spot-a:.75}
+  #stage[data-tier="4"]{--tg-stage:.4;--tg-tint:rgba(255,190,80,.12);--tg-side:.22;--ab-op:.5;--sc-op:.9;--spot-a:.7}
+  /* V12b vong 3 — Giam cuong do (neo da dung, gio sang tap trung qua
+     manh): --tg-stage moc 5 .5 -> .45 (moc 4 .45 -> .4, giu tien trinh);
+     --ab-op moc 5 .75 -> .6 (moc 4 ve .5). */
+  #stage[data-tier="5"]{--tg-stage:.45;--tg-tint:rgba(255,170,70,.08);--tg-side:.24;--ab-op:.6;--sc-op:.25;--spot-a:.75}
   #tiergrade{position:absolute;inset:0;z-index:2;pointer-events:none;
     background:
-      radial-gradient(ellipse 36% 24% at 50% 38%,rgba(255,226,150,var(--tg-stage)),transparent 70%),
-      linear-gradient(to bottom,var(--tg-tint),transparent 35%),
+      /* V12b vong 2 — NGUYEN NHAN GOC vua tim ra: cac lop sang the-gioi
+         truoc day neo o y 38-42% (san khau trong anh nen), nhung khi cap
+         dien camera zoom ~3.45x va chi thay vung the-gioi y 43-86% — tam
+         sang roi HOAN TOAN NGOAI KHUNG, cap (the-gioi y ~61%) khong duoc
+         chieu truc tiep. Doi tam radial ve y 54% (giua san khau va cho
+         cap dung dien) + mo rong ban kinh 22% -> 26% de duoi toi giua
+         tham. Roi DOC gan nguon (tam -> 40% o 38% ban kinh) roi duoi mo
+         dai toi 78%. */
+      radial-gradient(ellipse 36% 26% at 50% 54%,rgba(255,226,150,var(--tg-stage)),rgba(255,220,160,calc(var(--tg-stage)*.4)) 38%,transparent 78%),
+      /* Lop 2 — tint am rong: cung tam moi (y 54%), mo dan ra xa, het o 70%. */
+      radial-gradient(ellipse 60% 48% at 50% 54%,var(--tg-tint),transparent 70%),
       linear-gradient(90deg,rgba(24,4,16,var(--tg-side)) 0%,transparent 16%,transparent 84%,rgba(24,4,16,var(--tg-side)) 100%)}
   /* Ánh sáng dọc thảm đỏ giữa — SỬA sau chẩn đoán 2026-11-05 (xem dưới):
      bản cũ là hình thang clip-path + gradient dọc + screen ở opacity 1
@@ -169,11 +192,15 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
      4 phía) + mask dọc làm mờ dần cả đầu trên lẫn cuối dưới — không
      còn đường thẳng nào. Hẹp hơn (rộng 16%, ôm sát thảm giữa) và đỉnh
      ở mốc cao đã giảm (xem --ab-op: mốc 5 chỉ còn .5 sau V12). */
+  /* V12b vong 2 — doi tam radial xuong 28% hop (the-gioi y ~54%, giua
+     san khau va cho cap dung) + mo rong ban kinh doc 46% -> 58% de duoi
+     sang toi tham duoi (d/e) trong khung camera zoom. Tam cu (12% hop,
+     the-gioi y ~44%) roi ngoai khung khi camera zoom vao cap. */
   #aislebeam{position:absolute;left:42%;top:36%;width:16%;height:64%;z-index:2;pointer-events:none;
-    background:radial-gradient(ellipse 50% 42% at 50% 28%,rgba(255,238,190,.45),rgba(255,214,140,.2) 55%,transparent 75%);
+    background:radial-gradient(ellipse 50% 58% at 50% 28%,rgba(255,238,190,.55),rgba(255,214,140,.22) 42%,transparent 82%);
     mix-blend-mode:screen;opacity:var(--ab-op);transition:opacity 2s;
-    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 18%,#000 72%,transparent 100%);
-    mask-image:linear-gradient(to bottom,transparent 0%,#000 18%,#000 72%,transparent 100%)}
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 8%,#000 58%,transparent 88%);
+    mask-image:linear-gradient(to bottom,transparent 0%,#000 8%,#000 58%,transparent 88%)}
   /* Làm mờ nhẹ 2 dải thảm đỏ bên (hình thang theo phối cảnh nền mac-dinh:
      trái đỉnh x 36–42% → đáy x 26–38%, phải đối xứng). Ở mốc hoàng gia
      (sảnh mới chỉ có 1 thảm giữa) độ mờ giảm gần về 0 để khỏi tối bàn vàng. */

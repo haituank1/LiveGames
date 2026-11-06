@@ -20,7 +20,7 @@ const TIER_AMBIENT = [
   { sparkle: 2.8, dust: 1.5, petal: 0.8,  bokeh: 0.3,  orb: 0.22, glit: 0.9, bfly: 2 },
   { sparkle: 3.7, dust: 1.9, petal: 1.2,  bokeh: 0.6,  orb: 0.35, glit: 1.6, bfly: 3 },
   { sparkle: 4.6, dust: 2.3, petal: 1.6,  bokeh: 0.9,  orb: 0.5,  glit: 2.6, bfly: 3 },
-  { sparkle: 4.5, dust: 1.8, petal: 2.0,  bokeh: 0.7,  orb: 0.6,  glit: 2.6, bfly: 3 },  /* V12 (2026-11-06): giam hat MO — bokeh/bui la hat mem, tren dien thoai doc nhu suong mo phu khung; sparkle/glit nho va sac nen giu gan nhu cu, chi giam nhe */
+  { sparkle: 4.5, dust: 1.8, petal: 2.0,  bokeh: 0.5,  orb: 0.6,  glit: 2.6, bfly: 3 },  /* V12b vong 3: bokeh 0.7 -> 0.5 (bot bong mo); giu cac gia tri V12 khac */
 ];
 const amb = () => TIER_AMBIENT[Math.max(0, Math.min(TIER_AMBIENT.length - 1, tier))];
 function startLoop() { if (!rafId) { lastT = 0; rafId = requestAnimationFrame(loop); } }
@@ -398,7 +398,7 @@ function loop(t) {
   dustAcc += dt * amb().dust;
   while (dustAcc >= 1) {
     dustAcc--;
-    add({ kind: 'dust', x: rand(0, w), y: rand(h * 0.25, h * 1.02), vx: rand(-7, 7), vy: -rand(5, 15),
+    add({ kind: 'dust', x: rand(0, w), y: rand(h * 0.2, h * 0.85), vx: rand(-7, 7), vy: -rand(5, 15),  /* V12b: 0.25-1.02 -> 0.2-0.85, bui bot xuong day khung (dau xa) */
       life: 0, max: rand(6, 11), size: rand(4, 9), color: '#ffd76a', grav: 0, drag: 0, sway: rand(0, 6.3) });  /* V12: 5-13 -> 4-9, hat bui nho hon, bot mo */
   }
   // sao băng xẹt qua vòm hoa ở hai mốc cao nhất (mốc hoàng gia dày hơn)
@@ -428,7 +428,7 @@ function loop(t) {
     bokehAcc += dt * amb().bokeh;
     while (bokehAcc >= 1) {
       bokehAcc--;
-      add({ kind: 'bokeh', x: rand(0, w), y: rand(h * 0.55, h * 1.02), vx: rand(-6, 6), vy: -rand(9, 22),
+      add({ kind: 'bokeh', x: rand(0, w), y: rand(h * 0.55, h * 1.02), vx: rand(-6, 6), vy: -rand(9, 22),  /* V12b vong 3: tra lai vung goc 0.55-1.02 — bokeh mem thuoc ve nua duoi (duoi mo dai), khong cum quanh cap */
         life: 0, max: rand(5, 9), size: rand(8, 18), color: ['#ffd9ec', '#ffe9a8', '#cfe8ff'][Math.floor(Math.random() * 3)], grav: 0, drag: 0, sway: rand(0, 6.3) });  /* V12: 10-28 -> 8-18, vong bokeh nho hon, bot che mat */
     }
     // đèn lồng ấm bay lên — sảnh cao cấp lúc nào cũng có ánh sáng chuyển động
