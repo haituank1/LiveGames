@@ -1,7 +1,7 @@
 {
-  "commit": "58153c297a0f33b9221d19377d3bd7e1cc0511e6",
-  "short": "58153c2",
-  "generatedAt": "2026-11-06T11:37:20.904Z",
+  "commit": "bf7c971119afed2a1354472d74b2878c44f91cb9",
+  "short": "bf7c971",
+  "generatedAt": "2026-11-06T15:19:00.761Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -725,8 +725,8 @@
     },
     {
       "path": "Games/dam-cuoi/js/main.js",
-      "sha": "7f16c9333f8d556a24abdbd1151e995c4a96228d",
-      "size": 161339
+      "sha": "40bc9120fa1b49c6d754d90948c72e02af03635c",
+      "size": 161663
     },
     {
       "path": "Games/dam-cuoi/js/people.js",
@@ -4815,8 +4815,8 @@
     },
     {
       "path": "manifest.json",
-      "sha": "0a76dad590e28d3ba1983b99c13cc16f1d55267f",
-      "size": 155638
+      "sha": "2395637db4c80c5db5dfcbd9bddd49108fe569f4",
+      "size": 155639
     },
     {
       "path": "start-livebridge.bat",
@@ -4855,8 +4855,8 @@
     },
     {
       "path": "version.json",
-      "sha": "474430b1169840bfd2eaa03fe7caf296b48b2870",
-      "size": 233
+      "sha": "ab0d9887bc12bcb48e2056d27c8129d79b4caf7e",
+      "size": 263
     }
   ]
 }
