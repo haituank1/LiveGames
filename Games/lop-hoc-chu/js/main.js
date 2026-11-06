@@ -266,12 +266,13 @@ function endBreak() {
   startRound();
 }
 function renderBreakBoard() {
-  const qEl = $('qScrambled'), hEl = $('qHint'), cEl = $('qCat'), pEl = $('phaseLabel'), aEl = $('qAnswer');
+  const boardEl = $('board');
+  if (boardEl) boardEl.classList.add('board-break');
+  const qEl = $('qScrambled'), hEl = $('qHint'), pEl = $('phaseLabel'), aEl = $('qAnswer');
   const c = breakCounts();
-  if (cEl) cEl.textContent = '✊✌️✋ Oẳn tù tì với cô';
-  if (hEl) hEl.textContent = round.revealed
-    ? 'Cô ra: ' + RPS[round.teacherChoice].emoji + ' ' + RPS[round.teacherChoice].label + '!'
-    : 'Gõ búa / kéo / bao vào chat nè!';
+  // Ảnh mẫu: tiêu đề phấn "Oẳn tù tì với cô" ở giữa bảng (dòng gợi ý),
+  // không có pill chủ đề góc trái — pill ẩn bằng .board-break.
+  if (hEl) hEl.textContent = 'Oẳn tù tì với cô';
   if (qEl) {
     qEl.innerHTML = ['bua', 'keo', 'bao'].map(k =>
       '<div class="rps-choice"><span class="rps-emoji">' + RPS[k].emoji + '</span>'
@@ -279,10 +280,11 @@ function renderBreakBoard() {
       + '<span class="rps-count">' + c[k] + '</span></div>').join('');
   }
   const dEl = $('qDashes');
-  // Dòng vạch đáp án bỏ trống lúc giờ ra chơi: câu "Cô ra: ✌️ Kéo!" đã
-  // hiện ở gợi ý phía trên — để lại thì bảng tràn xuống, dòng thắng
-  // bị thanh đồng hồ che mất (lỗi thấy ở verify v16b).
-  if (dEl) dEl.textContent = '';
+  // Ảnh mẫu: "Cô ra: bao" là dòng CUỐI bảng, dưới 3 ô chọn — không để
+  // ở dòng gợi ý như trước (v17). Chưa công bố thì để trống.
+  if (dEl) dEl.textContent = round.revealed
+    ? 'Cô ra: ' + RPS[round.teacherChoice].emoji + ' ' + RPS[round.teacherChoice].label + '!'
+    : '';
   const rEl = $('qRound');
   if (rEl) rEl.textContent = '☕';
   if (pEl) pEl.textContent = phaseLabel('break');
@@ -531,6 +533,8 @@ function phaseLabel(p) {
 function renderBoard() {
   if (!round) return;
   if (round.phase === 'break') { renderBreakBoard(); renderSign(); renderFastest(); renderRevealList(); renderTimer(); return; }
+  const boardEl = $('board');
+  if (boardEl) boardEl.classList.remove('board-break');
   const qEl = $('qScrambled'), hEl = $('qHint'), cEl = $('qCat'), pEl = $('phaseLabel'), aEl = $('qAnswer');
   const qq = round.q;
   if (qEl) {
