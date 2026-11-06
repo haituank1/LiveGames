@@ -20,7 +20,7 @@ const TIER_AMBIENT = [
   { sparkle: 2.8, dust: 1.5, petal: 0.8,  bokeh: 0.3,  orb: 0.22, glit: 0.9, bfly: 2 },
   { sparkle: 3.7, dust: 1.9, petal: 1.2,  bokeh: 0.6,  orb: 0.35, glit: 1.6, bfly: 3 },
   { sparkle: 4.6, dust: 2.3, petal: 1.6,  bokeh: 0.9,  orb: 0.5,  glit: 2.6, bfly: 3 },
-  { sparkle: 5.6, dust: 2.7, petal: 2.0,  bokeh: 1.2,  orb: 0.6,  glit: 3.4, bfly: 3 },
+  { sparkle: 4.5, dust: 1.8, petal: 2.0,  bokeh: 0.7,  orb: 0.6,  glit: 2.6, bfly: 3 },  /* V12 (2026-11-06): giam hat MO — bokeh/bui la hat mem, tren dien thoai doc nhu suong mo phu khung; sparkle/glit nho va sac nen giu gan nhu cu, chi giam nhe */
 ];
 const amb = () => TIER_AMBIENT[Math.max(0, Math.min(TIER_AMBIENT.length - 1, tier))];
 function startLoop() { if (!rafId) { lastT = 0; rafId = requestAnimationFrame(loop); } }
@@ -399,7 +399,7 @@ function loop(t) {
   while (dustAcc >= 1) {
     dustAcc--;
     add({ kind: 'dust', x: rand(0, w), y: rand(h * 0.25, h * 1.02), vx: rand(-7, 7), vy: -rand(5, 15),
-      life: 0, max: rand(6, 11), size: rand(5, 13), color: '#ffd76a', grav: 0, drag: 0, sway: rand(0, 6.3) });
+      life: 0, max: rand(6, 11), size: rand(4, 9), color: '#ffd76a', grav: 0, drag: 0, sway: rand(0, 6.3) });  /* V12: 5-13 -> 4-9, hat bui nho hon, bot mo */
   }
   // sao băng xẹt qua vòm hoa ở hai mốc cao nhất (mốc hoàng gia dày hơn)
   if (tier >= 4) {
@@ -429,7 +429,7 @@ function loop(t) {
     while (bokehAcc >= 1) {
       bokehAcc--;
       add({ kind: 'bokeh', x: rand(0, w), y: rand(h * 0.55, h * 1.02), vx: rand(-6, 6), vy: -rand(9, 22),
-        life: 0, max: rand(5, 9), size: rand(10, 28), color: ['#ffd9ec', '#ffe9a8', '#cfe8ff'][Math.floor(Math.random() * 3)], grav: 0, drag: 0, sway: rand(0, 6.3) });
+        life: 0, max: rand(5, 9), size: rand(8, 18), color: ['#ffd9ec', '#ffe9a8', '#cfe8ff'][Math.floor(Math.random() * 3)], grav: 0, drag: 0, sway: rand(0, 6.3) });  /* V12: 10-28 -> 8-18, vong bokeh nho hon, bot che mat */
     }
     // đèn lồng ấm bay lên — sảnh cao cấp lúc nào cũng có ánh sáng chuyển động
     orbAcc += dt * amb().orb;

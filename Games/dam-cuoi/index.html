@@ -73,8 +73,8 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   #stageDim{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .8s;
     background:radial-gradient(ellipse 62% 48% at 50% 40%,transparent 52%,rgba(26,2,14,.38) 100%)}
   #stage.couple-on #stageDim{opacity:1}
-  #stage.couple-on #spot{width:40%;opacity:1;
-    background:radial-gradient(ellipse at 50% 88%,rgba(255,232,170,.75),rgba(255,225,150,.28) 55%,transparent 78%)}
+  #stage.couple-on #spot{width:34%;opacity:1;
+    background:radial-gradient(ellipse at 50% 88%,rgba(255,232,170,.55),rgba(255,225,150,.22) 55%,transparent 78%)}
   #stage.couple-on #beams{opacity:1}
   #coupleName{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%) scale(.92);z-index:2140;pointer-events:none;
     max-width:94%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -89,15 +89,19 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
      an, banner tat thi ten hien den het buoi le. */
   #stage.couple-on.banner-on #coupleName{opacity:0;transform:translate(-50%,-50%) scale(.92)}
   @keyframes spotPulse{0%,100%{opacity:.75}50%{opacity:1}}
-  .person.pairfx .figwrap{position:relative;filter:drop-shadow(0 0 14px rgba(255,120,180,1)) drop-shadow(0 0 34px rgba(255,190,90,.95)) drop-shadow(0 0 70px rgba(255,160,60,.55))}
+  .person.pairfx .figwrap{position:relative;filter:drop-shadow(0 0 10px rgba(255,120,180,.9)) drop-shadow(0 0 22px rgba(255,190,90,.8)) drop-shadow(0 0 40px rgba(255,160,60,.35))}
   .person.pairfx::before{content:'';position:absolute;left:50%;bottom:-4%;width:150%;aspect-ratio:1;transform:translateX(-50%);
     border-radius:50%;border:3px solid rgba(255,150,200,.85);animation:pairRing 1.15s ease-out infinite;pointer-events:none}
   .person.pairfx .figwrap::after{content:'';position:absolute;left:50%;bottom:-9%;width:150%;aspect-ratio:1;transform:translateX(-50%);
     border-radius:50%;border:3px solid rgba(255,214,110,.9);animation:pairRing 1.15s .57s ease-out infinite;pointer-events:none}
-  .person.pairfx::after{content:'';position:absolute;left:50%;top:42%;width:235%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:-1;
+  .person.pairfx::after{content:'';position:absolute;left:50%;top:42%;width:180%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:-1;
     border-radius:50%;pointer-events:none;
-    background:repeating-conic-gradient(from 0deg,rgba(255,214,100,.55) 0deg 9deg,transparent 9deg 22deg,rgba(255,150,200,.42) 22deg 28deg,transparent 28deg 45deg);
-    -webkit-mask-image:radial-gradient(circle,#000 26%,transparent 68%);mask-image:radial-gradient(circle,#000 26%,transparent 68%);
+    /* V12 (2026-11-06): 235% -> 180%, alpha .55/.42 -> .35/.28, mask hep
+       lai (68% -> 62%) — hao quang xoay conic truoc day cung voi tia xoay
+       cua #beams tao thanh mat troi vang khoi lo sau cap, at het nen san
+       khau. Van giu vong sang xoay quanh cap, chi nho va mo hon. */
+    background:repeating-conic-gradient(from 0deg,rgba(255,214,100,.35) 0deg 9deg,transparent 9deg 22deg,rgba(255,150,200,.28) 22deg 28deg,transparent 28deg 45deg);
+    -webkit-mask-image:radial-gradient(circle,#000 30%,transparent 62%);mask-image:radial-gradient(circle,#000 30%,transparent 62%);
     animation:auraSpin 9s linear infinite}
   @keyframes auraSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
   @keyframes pairRing{from{transform:translateX(-50%) scale(.45);opacity:1}to{transform:translateX(-50%) scale(1.15);opacity:0}}
@@ -123,7 +127,10 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   @keyframes spotc{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
   @keyframes spotr{from{transform:rotate(-4deg)}to{transform:rotate(-12deg)}}
   #royalglow{position:absolute;inset:0;opacity:0;transition:opacity 2s;pointer-events:none;
-    background:radial-gradient(circle at 50% 30%,rgba(255,225,140,.34),rgba(255,190,90,0) 55%)}
+    /* V12 (2026-11-06): .34 -> .18, ban kinh 55% -> 48% — lop nay trung
+       tam voi #spot + #tiergrade nen truoc day gop phan rua vang nua tren
+       khung; van giu anh sang hoang gia nhung chi la quầng nhe. */
+    background:radial-gradient(circle at 50% 30%,rgba(255,225,140,.18),rgba(255,190,90,0) 48%)}
   #royalglow.on{opacity:1;animation:pulseGlow 3.2s ease-in-out infinite}
   @keyframes pulseGlow{50%{opacity:.55}}
   /* ---------- Grade theo mốc sảnh (VĐ1) ----------
@@ -140,12 +147,17 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   #stage[data-tier="1"]{--tg-stage:.2;--tg-tint:rgba(255,150,190,.09);--tg-side:.12;--ab-op:.32;--sc-op:.5;--spot-a:.55}
   #stage[data-tier="2"]{--tg-stage:.3;--tg-tint:rgba(255,205,110,.11);--tg-side:.16;--ab-op:.42;--sc-op:.65;--spot-a:.6}
   #stage[data-tier="3"]{--tg-stage:.4;--tg-tint:rgba(255,190,140,.13);--tg-side:.2;--ab-op:.5;--sc-op:.8;--spot-a:.65}
-  #stage[data-tier="4"]{--tg-stage:.52;--tg-tint:rgba(255,190,80,.16);--tg-side:.22;--ab-op:.58;--sc-op:.9;--spot-a:.75}
-  #stage[data-tier="5"]{--tg-stage:.62;--tg-tint:rgba(255,170,70,.18);--tg-side:.1;--ab-op:.65;--sc-op:.25;--spot-a:.9}
+  #stage[data-tier="4"]{--tg-stage:.45;--tg-tint:rgba(255,190,80,.12);--tg-side:.22;--ab-op:.5;--sc-op:.9;--spot-a:.7}
+  /* V12 (2026-11-06): giam mang vang o 2 moc cao nhat — nen hoang gia von
+     da sang, 4 lop radial (tiergrade + spot + royalglow + aislebeam) chong
+     len nhau o cung tam san khau + tia #beams mo (blur 6px, screen) lam
+     khung bi rua vang va mo tren dien thoai. Giam alpha nhung van giu
+     tien trinh moc 4 < moc 5 (stage .45->.5, tint .12->.08). */
+  #stage[data-tier="5"]{--tg-stage:.5;--tg-tint:rgba(255,170,70,.08);--tg-side:.1;--ab-op:.5;--sc-op:.25;--spot-a:.75}
   #tiergrade{position:absolute;inset:0;z-index:2;pointer-events:none;
     background:
       radial-gradient(ellipse 36% 24% at 50% 38%,rgba(255,226,150,var(--tg-stage)),transparent 70%),
-      linear-gradient(to bottom,var(--tg-tint),transparent 45%),
+      linear-gradient(to bottom,var(--tg-tint),transparent 35%),
       linear-gradient(90deg,rgba(24,4,16,var(--tg-side)) 0%,transparent 16%,transparent 84%,rgba(24,4,16,var(--tg-side)) 100%)}
   /* Ánh sáng dọc thảm đỏ giữa — SỬA sau chẩn đoán 2026-11-05 (xem dưới):
      bản cũ là hình thang clip-path + gradient dọc + screen ở opacity 1
@@ -156,7 +168,7 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
      chỉ còn 1 quầng sáng bầu dục (radial, tâm ở sân khấu, mờ dần ra
      4 phía) + mask dọc làm mờ dần cả đầu trên lẫn cuối dưới — không
      còn đường thẳng nào. Hẹp hơn (rộng 16%, ôm sát thảm giữa) và đỉnh
-     ở mốc cao đã giảm (xem --ab-op: mốc 5 chỉ còn .65). */
+     ở mốc cao đã giảm (xem --ab-op: mốc 5 chỉ còn .5 sau V12). */
   #aislebeam{position:absolute;left:42%;top:36%;width:16%;height:64%;z-index:2;pointer-events:none;
     background:radial-gradient(ellipse 50% 42% at 50% 28%,rgba(255,238,190,.45),rgba(255,214,140,.2) 55%,transparent 75%);
     mix-blend-mode:screen;opacity:var(--ab-op);transition:opacity 2s;
@@ -173,7 +185,15 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
      khấu #spot sáng dần theo mốc. Đặt sau rule gốc nên thắng khi .on. */
   #stage[data-tier="2"] #beams.on{opacity:.55}
   #stage[data-tier="3"] #beams.on{opacity:.7}
-  #stage[data-tier="4"] #beams.on{opacity:.85}
+  #stage[data-tier="4"] #beams.on{opacity:.6}
+  /* V12 (2026-11-06): tier 5 truoc day khong co rule rieng nen roi ve
+     #beams.on{opacity:1} (va couple-on cung ep 1) — 3 tia sang mo (blur
+     6px, screen) + tia xoay conic chong len nhau thanh mang vang phu ca
+     khung tren nen hoang gia von da sang. Gioi han .4 o tier 5: tia van
+     doc duoc la anh sang san khau, khong rua trang khung. Rule moc thang
+     rule couple-on (specificity cao hon) nen cap len san khau cung chi
+     toi .4 o tier 5. */
+  #stage[data-tier="5"] #beams.on{opacity:.4}
   #spot{background:radial-gradient(ellipse at 50% 88%,rgba(255,225,150,var(--spot-a)),rgba(255,225,150,.14) 55%,transparent 75%)}
   #banner{position:absolute;left:50%;top:calc(var(--by,30)*1%);transform:translate(-50%,-50%) scale(.8);z-index:2150;pointer-events:none;
     background:linear-gradient(100deg,#a5123f,#d81b60 55%,#a5123f);color:#fff;font-weight:800;letter-spacing:.4px;
