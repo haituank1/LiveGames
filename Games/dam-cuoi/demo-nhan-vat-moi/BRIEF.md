@@ -74,26 +74,47 @@ GIỮ NGUYÊN (không đổi):
   vàng + hoa hồng cài áo + đồng hồ; thêu vàng trên vest đậm + dày hơn.
 - Mục tiêu: ở cỡ hiển thị nhỏ vẫn đọc được 3 mảng màu (trắng/đỏ/vàng).
 
-## 5. Kết quả thử 1 cặp (đã làm, xem demo.html)
+## 5. Kết quả thử 1 cặp — VÒNG 1 (chỉ trang phục; đã thay bằng vòng 2)
 
-- Cô dâu mới (`bride-moi.png`, 401×720, 549KB): mặt GIỮ ĐƯỢC RẤT TỐT
-  (tóc vàng, mắt nâu, nụ cười, vương miện, voan gần như y cũ). Dải đỏ qua
-  vai → eo + nơ đỏ + hồng đỏ nổi bật, thêu vàng dày hơn — ở cỡ sảnh nhỏ
-  vẫn đọc được 3 mảng màu. Lệch nhỏ: voan hơi ngả xanh lá (mới, không có
-  ở bản cũ); váy hơi xòe rộng hơn; góc dưới-trái alpha 111 (đuôi voan
-  chạm sàn, đọc như tà voan trải đất chứ không phải lỗi nền).
-- Chú rể mới (`groom-moi.png`, 352×720, 350KB): mặt GIỮ ĐƯỢC (tóc nâu,
-  mắt nâu, nụ cười, hộp nhẫn, nơ vàng, đồng hồ) nhưng ĐẦU TO HƠN rõ so
-  với bản cũ (tỉ lệ đầu/thân tăng, trông trẻ hơn — lệch phong cách nhẹ,
-  là điểm chưa khớp lớn nhất). Dải đỏ ngang eo + khăn túi đỏ đọc rất rõ.
-  Thêm vài tia lấp lánh trên tóc (mới, nhỏ).
-- Hậu xử lý: ảnh sinh ra RGB không alpha (1120×2016 / 1056×2160) → tách
-  nền flood-fill từ mép (ngưỡng gần-trắng min>=248, độ bão hòa<=12) +
-  cắt sát content + resize về cao 720. Kiểm tra: 4 góc alpha 0 (trừ góc
-  dưới-trái cô dâu 111 như trên), chân chạm mép dưới.
-- Kết luận thử: hướng nâng cấp ĐÚNG (tương phản + silhouette), cặp thử
-  dùng được sau khi sửa tỉ lệ đầu chú rể (sinh lại hoặc chấp nhận lệch
-  nhẹ). Không cần đổi mặt, không cần thêm chi tiết.
+- Cô dâu vòng 1 (401×720, 549KB): mặt giữ được rất tốt, dải đỏ + hồng đỏ
+  + thêu vàng dày hơn; lệch nhỏ: voan hơi ngả xanh lá, váy hơi xòe rộng
+  hơn, góc dưới-trái alpha 111 (đuôi voan chạm sàn).
+- Chú rể vòng 1 (352×720, 350KB): mặt giữ được nhưng ĐẦU TO HƠN rõ so
+  với bản cũ (điểm chưa khớp lớn nhất vòng 1).
+
+## 5b. Brief MỚI của user (11:13, BOSS chuyển): làm đẹp TOÀN BỘ nhân vật
+
+Mặt + tóc + phụ kiện CŨNG nằm trong phạm vi làm đẹp, không chỉ trang phục:
+mặt đẹp hơn, dễ thương hơn (mắt to có hồn, da/tóc có bóng đổ mềm), tóc
+nhiều chi tiết + highlight, phụ kiện tóc/vương miện/trang sức đầy đủ —
+NHƯNG vẫn phải nhận ra là nhân vật của mình: giữ khuôn mặt, màu tóc, kiểu
+tóc gốc, làm đẹp lên chứ không đổi thành mặt của game trong ảnh mẫu.
+
+## 5c. Kết quả thử 1 cặp — VÒNG 2 (theo brief mới, file hiện tại)
+
+- Cô dâu mới (`bride-moi.png`, 402×720, 557KB): VẪN NHẬN RA NGAY — cùng
+  khuôn mặt, tóc vàng xoăn, nụ cười. Mắt to hơn có hồn (thêm highlight),
+  da/tóc có bóng đổ mềm, tóc nhiều sợi + highlight hơn; vương miện giàu
+  hơn (đá hồng — mới, trước đây đá trắng/trong); khuyên tai + dây chuyền
+  đá hồng đầy đủ. Dải đỏ + hồng đỏ + thêu vàng giữ như vòng 1. Lệch nhỏ:
+  voan vẫn hơi ngả xanh lá; đá vương miện đổi sang hồng là thay đổi nhỏ
+  trong câu chuyện màu.
+- Chú rể mới (`groom-moi.png`, 352×720, 373KB): VẪN NHẬN RA NGAY — cùng
+  khuôn mặt, tóc nâu rẽ ngôi, nụ cười. Mắt to hơn có hồn, tóc nhiều sợi +
+  highlight hơn; thêu vàng dày hơn nhiều (ve áo, vai, cổ tay), hoa hồng
+  cài áo to hơn có lá, đồng hồ nay có mặt số. Dải đỏ ngang eo có thêm
+  hoa văn vàng + chốt hoa. TỈ LỆ ĐẦU ĐÃ KHỚP LẠI với bản cũ (điểm lệch
+  lớn nhất vòng 1 đã hết). Lệch nhỏ: vài tia lấp lánh trên tóc (mới);
+  hoa cài áo hơi to, che một phần ngực.
+- Mức độ lệch mặt (đánh giá thẳng): THẤP ở cả hai — mắt to hơn + chi
+  tiết hơn nhưng khuôn mặt, màu tóc, kiểu tóc, nụ cười giữ nguyên, không
+  ai nhìn nhầm thành nhân vật khác. Không đổi thành mặt game mẫu.
+- Hậu xử lý (cả 2 vòng): ảnh sinh ra RGB không alpha (1120×2016 /
+  1056×2160) → tách nền flood-fill từ mép (ngưỡng gần-trắng min>=248,
+  độ bão hòa<=12) + cắt sát content + resize về cao 720. Kiểm tra vòng 2:
+  4 góc alpha 0 cả hai file, chân chạm mép dưới.
+- Kết luận thử: hướng làm đẹp toàn bộ ĐÚNG brief mới, cặp thử dùng được.
+  Vòng 2 tốt hơn vòng 1 ở cả mặt lẫn tỉ lệ đầu chú rể.
 
 ## 6. Rủi ro đã biết trước khi thử
 
