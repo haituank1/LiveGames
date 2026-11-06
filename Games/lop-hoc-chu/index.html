@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lớp học chữ — Cô Ngân</title>
+<link rel="preload" as="image" href="img/lop-hoc-bg.png">
+<link rel="preload" as="image" href="img/co-ngan.png">
+<link rel="preload" as="image" href="img/hoc-sinh-sau-1.png">
+<link rel="preload" as="image" href="img/hoc-sinh-sau-2.png">
+<link rel="preload" as="image" href="img/hoc-sinh-sau-3.png">
+<link rel="preload" as="image" href="img/hoc-sinh-sau-4.png">
+<link rel="preload" as="image" href="img/hoc-sinh-sau-5.png">
+<link rel="preload" as="image" href="img/hoc-sinh-sau-6.png">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #1a1a2e; overflow: hidden; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  #stage {
+    position: relative; width: 720px; height: 1280px; margin: 0 auto;
+    /* Nen lop hoc ve kin 720x1280 (tran, den, cua so, dam dong, ban ghe);
+       gradient duoi la du phong neu anh nen loi */
+    background: url(img/lop-hoc-bg.png) center / 100% 100% no-repeat,
+      linear-gradient(#fff8dd 0%, #ffe082 45%, #e8913a 55%, #c06a1e 100%);
+    overflow: hidden; color: #222;
+  }
+  /* Bong bóng chat của học sinh: lớp riêng trên cùng của #stage
+     (z 30) — không bao giờ bị panel/bảng che (v16c: bong bóng nằm
+     trong #room (z 7) nên bị panel Nhanh nhất + dải mặt bàn cắt). */
+  #bubbleLayer { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+  #bubbleLayer .bubble { left: 0; bottom: auto; transform: translate(-50%, -100%); }
+  #fx { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 40; pointer-events: none; }
+  #room { position: absolute; inset: 0; z-index: 7; }
+  /* Lớp chip tên+điểm riêng: nằm trên mọi học sinh trong #room (z 12 > 7)
+     để đầu học sinh hàng sau không bao giờ che chip hàng trước. */
+  #chipLayer { position: absolute; inset: 0; z-index: 12; pointer-events: none; }
+
+  /* Bang hieu lop treo tren cung (trang, vien nau) */
+  #classSign {
+    position: absolute; left: 30%; top: 0.8%; width: 40%; z-index: 9;
+    background: linear-gradient(#fffdf5, #ffefc4); border: 3px solid #8a5a2b; border-radius: 14px;
+    text-align: center; padding: 3px 8px 4px; box-shadow: 0 4px 10px rgba(0,0,0,.25);
+  }
+  #signLine1 { font-size: 29px; font-weight: 900; color: #5d4037; letter-spacing: 1px; line-height: 1.1; }
+  #signLine2 { font-size: 15px; font-weight: 700; color: #8a5a2b; }
+
+  /* Banner khau hieu do/vang ngay duoi bang hieu */
+  #mottoBar {
+    position: absolute; left: 2%; top: 6.8%; width: 96%; z-index: 9;
+    background: linear-gradient(#e53935, #b71c1c); color: #ffeb3b;
+    font-size: 25px; font-weight: 900; letter-spacing: 2px; text-align: center;
+    padding: 5px 0; border-radius: 8px; border: 2px solid #ffd54f;
+    box-shadow: 0 4px 12px rgba(150,20,0,.35); text-shadow: 0 2px 0 rgba(0,0,0,.3);
+  }
+
+  /* Bang xanh la — de len dung bang xanh trong anh nen v16
+     (khung bang ve: x 20,5-78,5% × y 16,5-35,5%, xem BG-LAYOUT.md) */
+  /* Bảng v17 (2026-11-06 tối): bảng XANH VẼ SẴN TRONG ẢNH NỀN (có tia
+     nắng chiếu qua) — #board HTML chỉ còn là KHUNG TRONG SUỐT chứa chữ,
+     khớp đúng khung bảng vẽ (x 12-88%, y 15,5-32,5%). Chữ phấn trắng
+     thêm bóng đậm để đọc được trên tia nắng. */
+  #board {
+    position: absolute; left: 12%; top: 15.5%; width: 76%; height: 17%;
+    background: transparent;
+    border: none; outline: none; border-radius: 0; box-shadow: none;
+    padding: 6px 12px; color: #fff; z-index: 6;
+  }
+  #qCat {
+    position: absolute; top: 6px; left: 12px; /* dau co Ngan o ben trai bang, khong che goc tren-trai bang */
+    display: inline-block; border: 2px solid rgba(255,255,255,.85); border-radius: 999px;
+    padding: 2px 10px; font-size: 15px; font-weight: 700; color: #fff; background: rgba(255,255,255,.12);
+  }
+  #qRound {
+    position: absolute; top: 6px; right: 10px; width: 32px; height: 32px;
+    border: 2px solid rgba(255,255,255,.85); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: #fff;
+  }
+  #qHint {
+    font-family: "Comic Sans MS", "Chalkboard SE", "Segoe Print", cursive;
+    font-size: 23px; line-height: 1.25; color: #fff; text-align: center;
+    margin-top: 32px; text-shadow: 0 2px 4px rgba(0,0,0,.55);
+    /* Bảng v17 rộng hơn (x 12-88%) nên chừa 110px bên trái để câu đố
+       không chạy ra sau đầu cô Ngân (đầu cô tới ~x 31%). */
+    padding: 0 10px 0 110px;
+  }
+  #qScrambled { text-align: center; margin-top: 12px; }
+  .tile {
+    display: inline-block; min-width: 30px; height: 36px; line-height: 36px;
+    background: linear-gradient(#fff8dc, #ffe9a8); color: #6d4c41; border-radius: 7px;
+    font-size: 22px; font-weight: 800; margin: 2px; padding: 0 2px; text-align: center;
+    box-shadow: 0 2px 0 rgba(0,0,0,.3);
+  }
+  #qDashes { text-align: center; margin-top: 10px; color: #fff; font-size: 20px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,.55); }
+  .dash-group { display: inline-block; margin: 0 7px; }
+  /* Oẳn tù tì giờ ra chơi (M5): 3 ô chọn trong #qScrambled */
+  #qScrambled .rps-choice {
+    display: inline-block; width: 30%; vertical-align: top;
+    background: linear-gradient(#fff8dc, #ffe9a8); color: #6d4c41;
+    border-radius: 10px; padding: 4px 0 3px; margin: 0 4px;
+    box-shadow: 0 2px 0 rgba(0,0,0,.3);
+  }
+  .rps-emoji { display: block; font-size: 30px; line-height: 1.1; }
+  .rps-name { display: block; font-size: 16px; font-weight: 800; }
+  .rps-count { display: block; font-size: 20px; font-weight: 900; color: #e65100; }
+  #qAnswer { font-size: 24px; font-weight: 800; color: #ffd76a; text-align: center; margin-top: 4px; display: none; text-shadow: 0 2px 4px rgba(0,0,0,.55); }
+  #qAnswer.show { display: block; }
+  #timerBarWrap { position: absolute; left: 12%; top: 36.8%; width: 76%; height: 8px; background: rgba(60,30,0,.35); border-radius: 5px; z-index: 6; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,.35); }
+  #timerBar { height: 100%; width: 100%; background: linear-gradient(90deg, #ffb300, #ff7043); border-radius: 5px; transition: width .2s linear; box-shadow: 0 0 8px rgba(255,179,0,.7); }
+
+  /* BXH "xuat sac hom nay" ben trai, hep nhu anh ho (x 2-20%) */
+  #topPanel {
+    position: absolute; left: 2%; top: 12.5%; width: 18%; z-index: 9;
+    background: linear-gradient(#fffdf5, #fff3d6);
+    border: 3px solid #ffb300; border-radius: 16px; padding: 6px 8px;
+    box-shadow: 0 6px 16px rgba(90,50,10,.22), inset 0 1px 0 #fff;
+  }
+  .panel-title { font-size: 13px; font-weight: 800; color: #b45309; margin-bottom: 3px; }
+  .top-row { font-size: 13px; padding: 2px 0; display: flex; align-items: baseline; gap: 4px; }
+  .top-row b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top-row .pts { flex-shrink: 0; font-weight: 700; color: #e65100; }
+  .empty { font-size: 12px; color: #888; }
+
+  /* Cot phai 4 panel nhu anh ho: Su kien / Thi dua to / Quy lop / Top Tuong tac */
+  #rightRail {
+    position: absolute; right: 1.5%; top: 1%; width: 20%; z-index: 9;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .rail-panel {
+    background: linear-gradient(#fffdf5, #fff3d6);
+    border: 3px solid #fb8c00; border-radius: 14px; padding: 6px 8px;
+    box-shadow: 0 6px 16px rgba(90,50,10,.22), inset 0 1px 0 #fff;
+  }
+  .rail-panel .panel-title { color: #e65100; font-size: 13px; white-space: nowrap; }
+  #eventPanel { border-color: #7e57c2; }
+  #eventPanel .panel-title { color: #5e35b1; font-size: 12px; }
+  .ev-row { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ev-live {
+    display: inline-block; background: linear-gradient(#e53935, #b71c1c); color: #fff;
+    font-size: 11px; font-weight: 800; border-radius: 6px; padding: 2px 8px; margin-top: 3px;
+  }
+  .gv-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; font-weight: 800; color: #fff; border-radius: 7px;
+    padding: 3px 8px; margin-top: 3px;
+  }
+  .gv-row .cnt { font-weight: 700; font-size: 11px; opacity: .9; }
+  .gv-blue { background: linear-gradient(#42a5f5, #1e88e5); }
+  .gv-green { background: linear-gradient(#66bb6a, #43a047); }
+  .gv-red { background: linear-gradient(#ef5350, #e53935); }
+  .gv-orange { background: linear-gradient(#ffa726, #fb8c00); }
+  #fundPanel .panel-title { color: #c2185b; }
+  .fund-num { font-size: 26px; font-weight: 900; color: #c2185b; text-align: center; line-height: 1.1; }
+  .fund-line { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fund-cnt { float: right; color: #c2185b; font-weight: 900; }
+  #interactPanel .panel-title { color: #e65100; }
+
+  /* Panel "Nhanh nhat" ngay duoi bang */
+  #fastestPanel {
+    position: absolute; left: 12%; top: 38.5%; width: 76%; z-index: 9;
+    background: linear-gradient(#fffdf5, #fff3d6);
+    border: 3px solid #8a5a2b; border-radius: 14px; padding: 4px 10px;
+    box-shadow: 0 6px 16px rgba(90,50,10,.25); display: none;
+  }
+  .f-head {
+    display: flex; justify-content: space-between; align-items: center;
+    background: linear-gradient(#8a5a2b, #6d4c41); color: #ffe082;
+    font-size: 15px; font-weight: 800; margin: -4px -10px 4px; padding: 3px 10px;
+    border-radius: 11px 11px 0 0;
+  }
+  .f-cols { display: flex; justify-content: space-around; flex-wrap: nowrap; }
+  .f-col { display: flex; align-items: center; gap: 5px; min-width: 0; flex: 1 1 0; justify-content: center; }
+  .f-av { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 2px solid #ffb300; background: #fff; flex-shrink: 0; }
+  .f-av-none { display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .f-name { font-size: 12px; font-weight: 700; max-width: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .f-pts { font-size: 13px; font-weight: 800; color: #e65100; white-space: nowrap; }
+  .f-note { font-size: 12px; color: #888; text-align: center; margin-top: 2px; }
+
+  /* Banner luật chơi xoay dòng: dải dưới cùng, trên hàng bàn trống cuối
+     (như v14) — để khoảng dưới bảng cho panel Nhanh nhất + bong bóng cô */
+  #guideBar {
+    position: absolute; left: 14%; top: auto; bottom: 9.5%; width: 72%; text-align: center; z-index: 9;
+    font-size: 16px; font-weight: 800; color: #ffeb3b; background: linear-gradient(90deg, #e53935, #b71c1c);
+    border: 2px solid #ffd54f; border-radius: 999px; padding: 5px 10px;
+    text-shadow: 0 1px 0 rgba(0,0,0,.3); box-shadow: 0 4px 12px rgba(150,20,0,.35);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* Panel chỉnh ghế (chỉ hiện khi ?seats=1, demo): user tự canh vị trí
+     từng học sinh — bấm vào 1 học sinh để chọn ghế, kéo để di chuyển,
+     hoặc gõ số. Lưu localStorage, nút Copy ra JSON để chép vào SEATS. */
+  #seatEditor {
+    position: absolute; left: 2%; bottom: 1%; width: 46%; z-index: 60;
+    background: rgba(255,253,245,.97); border: 2px solid #e65100; border-radius: 12px;
+    padding: 6px 8px; font-size: 13px; line-height: 1.5; color: #4e342e;
+    box-shadow: 0 4px 12px rgba(90,50,10,.25);
+  }
+  #seatEditor .se-title { font-weight: 900; color: #e65100; font-size: 13px; }
+  #seatEditor input { width: 56px; font-size: 13px; padding: 2px 4px; border: 1px solid #bcaaa4; border-radius: 6px; }
+  #seatEditor select { width: 118px; font-size: 13px; padding: 2px 4px; border: 1px solid #bcaaa4; border-radius: 6px; }
+  #seatEditor button { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 8px; border: 1px solid #e65100; background: #fff3e0; color: #e65100; cursor: pointer; }
+  #seatEditor .se-sel { outline: 3px solid #ff9800 !important; }
+  .student.editable { cursor: grab; }
+  .student.editable.se-sel { outline: 3px solid #ff9800; outline-offset: 2px; }
+  .student.editable:active { cursor: grabbing; }
+  .student.dragging { transition: none !important; }
+  #giftPanel {
+    position: absolute; right: 2%; bottom: 1%; width: 46%; height: 7.5%; z-index: 9;
+    background: rgba(255,253,245,.94); border: 2px solid #fb8c00; border-radius: 12px;
+    padding: 5px 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(90,50,10,.18);
+  }
+  #giftPanel .panel-title { color: #e65100; font-size: 14px; }
+  .gift-row { font-size: 13px; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Co giao + hoc sinh: ANH PNG (co Ngan chi ngang vao o chu).
+     Học sinh neo translate(-50%,-100%): ĐÁY hình (ngực cắt) nằm ĐÚNG
+     mép bàn (seat y = đỉnh bàn) — người ngồi sau bàn như ảnh họ, không
+     còn dải mặt bàn / mặt nạ / cắt nào nữa (v16c, user chốt bỏ vụ cắt).
+     Cô Ngân giữ -85% (chân chạm sàn ở y ~46%). */
+  .teacher, .student { position: absolute; z-index: 7; }
+  .teacher { transform: translate(-50%, -85%); }
+  .student { transform: translate(-50%, -100%); }
+  .teacher { width: 185px; left: 13%; top: 42.5%; z-index: 8; filter: drop-shadow(0 6px 8px rgba(60,30,0,.28)); }
+  .student { transition: left 1.2s ease, top 1.2s ease, width 1.2s ease; filter: drop-shadow(0 4px 5px rgba(60,30,0,.22)); }
+  .student.onboard { z-index: 20; transform: translate(-50%, -100%) scale(1.25); }
+  /* Bóng dưới chân: chỉ cô Ngân (đứng trên sàn); học sinh ngồi sau
+     bàn thì không có bóng (đáy hình đã chạm mép bàn). */
+  .student .gshadow { display: none; }
+  .figwrap { width: 100%; animation: bob 2.6s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  .student .figwrap img, .teacher .figwrap img { width: 100%; height: auto; display: block; }
+  /* Anh co An moi: chi thang sang PHAI ve phia bang, khong can lat ngang.
+     Ngon tay tro toi o chu dau tien cua bang (x ~258px, y ~474px). */
+  .gshadow {
+    position: absolute; left: 50%; bottom: -8px; width: 78%; height: 12px; transform: translateX(-50%);
+    background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(60,30,0,.38), rgba(60,30,0,0) 72%);
+    border-radius: 50%; z-index: -1;
+  }
+  .teacher .gshadow { width: 86%; bottom: -6px; }
+  .student.onboard .gshadow { display: none; }
+  /* Chip ten + diem duoi moi ban (pill trang) */
+  .chip {
+    position: absolute; transform: translateX(-50%);
+    background: #fff; border: 2px solid #9e9e9e;
+    border-radius: 999px; padding: 2px 7px;
+    font-size: 12px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 6px rgba(60,30,0,.28);
+    max-width: 110px; color: #4e342e; display: flex; gap: 4px; align-items: center;
+  }
+  .chip .nm { overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+  .chip .pts { color: #e65100; font-weight: 800; flex-shrink: 0; }
+  .chip.top1 { background: linear-gradient(#ffe082, #ffd76a); border-color: #e65100; }
+  .chip.top1::before { content: "⭐ "; }
+  .chip.correct { background: #c8e6c9; border-color: #43a047; }
+  /* Dau ✓ xanh la khi tra loi dung + tay gio len */
+  .dot {
+    position: absolute; right: -2px; top: -6px; width: 20px; height: 20px; border-radius: 50%;
+    background: #43a047; color: #fff; font-size: 13px; font-weight: 900;
+    border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); display: none; z-index: 31;
+    align-items: center; justify-content: center;
+  }
+  .student.correct .dot { display: flex; }
+  .hand {
+    position: absolute; right: -10px; top: -22px; font-size: 28px; display: none; z-index: 31;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,.3));
+  }
+  .student.raise .hand { display: block; animation: wave .5s ease-in-out infinite alternate; }
+  @keyframes wave { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } }
+  .bubble {
+    position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%);
+    background: #fff; border: 2px solid #2e7d32; border-radius: 14px; padding: 6px 10px;
+    font-size: 15px; font-weight: 600; max-width: 200px; text-align: center;
+    display: none; z-index: 30; box-shadow: 0 4px 12px rgba(0,0,0,.25);
+  }
+  .bubble.on { display: block; }
+  /* Bong bóng cô Ngân: dải trống dưới khẩu hiệu, trên bảng — giữa
+     khung, không che câu đố/ô chữ trên bảng, không che đầu cô */
+  .teacher-bubble { left: 50%; top: 11%; bottom: auto; transform: translateX(-50%); width: fit-content; max-width: 55%; font-size: 14px; text-align: center; }
+  .teacher.happy .figwrap { animation: jump .5s ease-in-out 4; }
+  .student.happy .figwrap { animation: jump .45s ease-in-out 5; }
+  .student.raise .figwrap { animation: bob .5s ease-in-out infinite; }
+  @keyframes jump { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+  /* Bang cong bo Top 5 cu — nay dung panel Nhanh nhat thay the, an di */
+  #revealList { display: none !important; }
+
+  /* Banner + toast */
+  /* Popup thông báo lớn + toast: kiểu thẻ trắng như ảnh họ (pill trắng,
+     chữ nâu đậm, viền màu, bóng mềm) — bỏ nền đỏ/cam chói + chữ vàng
+     (v16c, user chốt: popup giống trong hình cho đẹp). */
+  #banner {
+    position: absolute; left: 50%; top: 46%; transform: translateX(-50%); z-index: 45;
+    background: #fffdf5; color: #4e342e; font-size: 22px; font-weight: 800; padding: 11px 24px;
+    border-radius: 999px; box-shadow: 0 8px 22px rgba(90,50,10,.35); display: none; white-space: nowrap; border: 3px solid #ff9800;
+  }
+  #banner.show { display: block; }
+  #toast {
+    position: absolute; left: 2%; bottom: 14.5%; transform: none; z-index: 45; text-align: left;
+    background: #fffdf5; color: #4e342e; font-size: 18px; font-weight: 700; padding: 9px 20px;
+    border-radius: 999px; display: none; white-space: nowrap; max-width: 60%; box-shadow: 0 6px 16px rgba(90,50,10,.3);
+    border: 2px solid #43a047;
+  }
+  #toast.show { display: block; }
+  #toast.vip { background: #fff3e0; border-color: #e65100; }
+
+  #startBtn {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 60;
+    font-size: 26px; font-weight: 800; padding: 18px 34px; border: none; border-radius: 999px;
+    background: linear-gradient(#43a047, #2e7d32); color: #fff; cursor: pointer; box-shadow: 0 10px 28px rgba(46,125,50,.5), inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  #startBtn:hover { background: linear-gradient(#4caf50, #388e3c); }
+  @media (prefers-reduced-motion: reduce) {
+    .figwrap, .teacher.happy .figwrap, .student.happy .figwrap, .hand { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="fx"></canvas>
+  <div id="room"></div>
+  <div id="bubbleLayer"></div>
+
+  <div id="classSign">
+    <div id="signLine1">LỚP HỌC CHỮ</div>
+    <div id="signLine2">Tiết 1 · Câu 1/20 · 0 bạn</div>
+  </div>
+  <div id="mottoBar">TIÊN HỌC LỄ – HẬU HỌC VĂN</div>
+
+  <div id="board">
+    <div id="qCat">Cô Ngân đang chuẩn bị câu đố…</div>
+    <div id="qRound">1</div>
+    <div id="qHint">💡 Gõ đáp án vào chat — ai nhanh nhất được nhiều điểm nhất!</div>
+    <div id="qScrambled">LỚP HỌC CHỮ</div>
+    <div id="qDashes"></div>
+    <div id="qAnswer"></div>
+  </div>
+  <div id="timerBarWrap"><div id="timerBar"></div></div>
+
+  <div id="topPanel">
+    <div class="panel-title">🏆 Học sinh xuất sắc</div>
+    <div id="topList"><div class="empty">Chưa có ai — trả lời đúng để lên bảng nè!</div></div>
+  </div>
+
+  <div id="rightRail">
+    <div class="rail-panel" id="eventPanel">
+      <div class="panel-title">SỰ KIỆN TRONG LỚP</div>
+      <div class="ev-row">🏔️ Đường lên đỉnh Everest</div>
+      <div class="ev-row">🔔 Rung Chuông Vàng</div>
+      <div><span class="ev-live">ĐANG DIỄN RA</span></div>
+    </div>
+    <div class="rail-panel" id="teamPanel">
+      <div class="panel-title">🚩 Thi đua tổ</div>
+      <div class="gv-row gv-blue"><span>Tổ 2</span><span class="cnt">4 bạn</span><span>0đ</span></div>
+      <div class="gv-row gv-green"><span>Tổ 3</span><span class="cnt">4 bạn</span><span>0đ</span></div>
+      <div class="gv-row gv-red"><span>Tổ 1</span><span class="cnt">3 bạn</span><span>0đ</span></div>
+      <div class="gv-row gv-orange"><span>Tổ 4</span><span class="cnt">4 bạn</span><span>0đ</span></div>
+    </div>
+    <div class="rail-panel" id="fundPanel">
+      <div class="panel-title">❤️ Quỹ lớp</div>
+      <div class="fund-num" id="fundTotal">0</div>
+      <div class="fund-line" id="fundCatTang">🎁 Gửi tặng cô <b class="fund-cnt">0</b></div>
+      <div class="fund-line" id="fundCatHoa">🌸 Tặng cô hoa <b class="fund-cnt">0</b></div>
+      <div class="fund-line" id="fundCatTim">💗 Bắn tim cho cô <b class="fund-cnt">0</b></div>
+      <div class="fund-line" id="fundCatBanh">🍰 Mời cô ăn bánh <b class="fund-cnt">0</b></div>
+    </div>
+    <div class="rail-panel" id="interactPanel">
+      <div class="panel-title">🔥 Top Tương tác</div>
+      <div id="interactList"><div class="empty">Tương tác để lên top nè!</div></div>
+    </div>
+  </div>
+
+  <div id="fastestPanel"></div>
+  <div id="guideBar">⭐ Đoán nhanh, điểm cao được vào lớp ngồi!</div>
+
+  <div id="giftPanel">
+    <div class="panel-title">🎁 Sổ quà lớp</div>
+    <div id="giftList"><div class="empty">Chưa có quà — tặng quà để lên bảng nè!</div></div>
+  </div>
+  <div id="seatEditor" style="display:none">
+    <div class="se-title">🎯 Chỉnh ghế — bấm vào 1 học sinh để chọn, kéo để di chuyển</div>
+    <div>Ghế <select id="seSeat"></select> X <input id="seX" type="number" step="0.5"> % &nbsp;Y <input id="seY" type="number" step="0.5"> % &nbsp;Rộng <input id="seW" type="number" step="1"> px</div>
+    <div><button id="seCopy" type="button">Sao chép JSON ghế</button> <button id="seReset" type="button">Đặt lại mặc định</button> <span id="seMsg"></span></div>
+  </div>
+
+  <div id="revealList"></div>
+  <div id="banner"></div>
+  <div id="toast"></div>
+
+  <button id="startBtn">▶ Bắt đầu lớp học (bật tiếng)</button>
+</div>
+<script>window.__diag = { build: 'lop-hoc-chu-v1', stages: [['html', Date.now()]] };</script>
+<script src="../../LiveBridge/public/livebridge-client.js"></script>
+<script src="../../LiveBridge/public/npc-voice.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/people.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

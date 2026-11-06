@@ -1,0 +1,1464 @@
+{
+  "voice": "static",
+  "rate": 0,
+  "lines": [
+    {
+      "id": "hello-1",
+      "key": "61f6ac5f4864a2e00697964255d74aa453743351a79dc1fe39410d1afbcc7259",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Chào cả lớp nè, cô Ngân đây, hôm nay mình cùng đảo chữ cho vui nha!",
+      "file": "61f6ac5f4864a2e006979642.mp3",
+      "durationSec": 4.2
+    },
+    {
+      "id": "hello-2",
+      "key": "d4e4be8f6d3bf34bca9217c5156139f32ad5599f8bd0a8efbddac95ab3a130b7",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cả lớp ơi, vào lớp hết chưa nè, cô điểm danh rồi mình chơi liền luôn!",
+      "file": "d4e4be8f6d3bf34bca9217c5.mp3",
+      "durationSec": 4.4
+    },
+    {
+      "id": "hello-3",
+      "key": "abaa42ff6a8301d336be898cba40a2c15cdd891b7d993e15125b47ff92ded8fa",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Chào các bạn mới vào lớp nha, ngồi xuống đi, câu đố sắp ra rồi đó!",
+      "file": "abaa42ff6a8301d336be898c.mp3",
+      "durationSec": 4.3
+    },
+    {
+      "id": "hello-4",
+      "key": "c52a4db3968b08404aef1e4be96c619527c206e186cac0304f268cddc2a54f38",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Lớp mình hôm nay đông vui quá, cô Ngân mừng lắm luôn nè!",
+      "file": "c52a4db3968b08404aef1e4b.mp3",
+      "durationSec": 3.5
+    },
+    {
+      "id": "ask-1",
+      "key": "5cb53f4ae2d5c862f54fca5358f3c38a6775804876c72efa4e4bc76fca46457b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu mới đây nè, các bạn nhìn bảng rồi đảo chữ nhanh tay lên nha!",
+      "file": "5cb53f4ae2d5c862f54fca53.mp3",
+      "durationSec": 4
+    },
+    {
+      "id": "ask-2",
+      "key": "3a318806d19f1e537f857c9e08b4c0e790081b10f69073511397181064f4514d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Đảo chữ này hơi khó đó, ai nhanh tay thì lên top liền luôn!",
+      "file": "3a318806d19f1e537f857c9e.mp3",
+      "durationSec": 3.8
+    },
+    {
+      "id": "ask-3",
+      "key": "7ec284795a6130c129bd7d484d09e1132cf063445f7c8409e6e3a7ba448097c7",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cô ra câu mới rồi nè, gõ đáp án vào khung chat nhanh lên nha!",
+      "file": "7ec284795a6130c129bd7d48.mp3",
+      "durationSec": 4
+    },
+    {
+      "id": "ask-4",
+      "key": "b8f843e0ffdc69168f7eb40eff311c4e59a28d8f21e1f36be0fa243112d2eac5",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu này dễ lắm luôn, cả lớp cùng đoán đi nè!",
+      "file": "b8f843e0ffdc69168f7eb40e.mp3",
+      "durationSec": 3.2
+    },
+    {
+      "id": "ask-5",
+      "key": "f64e3940d98b4732238090597630811cbb187f022b6fc7c8bea0eb338bfd9adc",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Chữ trên bảng đang lộn xộn quá, ai xếp lại đúng giúp cô nào!",
+      "file": "f64e3940d98b473223809059.mp3",
+      "durationSec": 3.7
+    },
+    {
+      "id": "ask-6",
+      "key": "d1964bc15841d0119673b252a71c3618ab0af330c645f4cd554b24ca16464d22",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Tập trung nè, câu đố mới ra rồi, thời gian đang chạy đó nha!",
+      "file": "d1964bc15841d0119673b252.mp3",
+      "durationSec": 4
+    },
+    {
+      "id": "hint-1",
+      "key": "4a7c46d498ba09a53334695d9f706b7d7d615cc9556e058c8456588ee6f09e47",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Gợi ý nè, đáp án liên quan tới bài mình vừa học đó!",
+      "file": "4a7c46d498ba09a53334695d.mp3",
+      "durationSec": 3.6
+    },
+    {
+      "id": "hint-2",
+      "key": "9309eeafbd79599f2d3b0f10dcfd923eb2c82699af72987154ab7a0d92ad10c6",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cô nhắc nhẹ nha, đáp án có hai chữ thôi, đoán tiếp đi!",
+      "file": "9309eeafbd79599f2d3b0f10.mp3",
+      "durationSec": 4
+    },
+    {
+      "id": "hint-3",
+      "key": "cb48a10af2058773ead4d3ee0a92875b2be78328c22414cb8bdbe8ed2cdc5539",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Gợi ý cuối nè, nghĩ tới món ăn quen thuộc là ra liền luôn!",
+      "file": "cb48a10af2058773ead4d3ee.mp3",
+      "durationSec": 3.8
+    },
+    {
+      "id": "correct-1",
+      "key": "83413cf75c10d0f318a6d0c205bbc83dab8e80fa504c5b56fd6d0a17b8b69f01",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Đúng rồi, giỏi quá đi, cả lớp vỗ tay nào!",
+      "file": "83413cf75c10d0f318a6d0c2.mp3",
+      "durationSec": 3.4
+    },
+    {
+      "id": "correct-2",
+      "key": "bf7ede99c4387fe97bef68b69eee0749a15b5355e1d2b2e649d6e41e84c7604a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Chính xác luôn nè, bạn này nhanh tay thiệt đó nha!",
+      "file": "bf7ede99c4387fe97bef68b6.mp3",
+      "durationSec": 3.3
+    },
+    {
+      "id": "correct-3",
+      "key": "de4d3b8ba557ab7a1903472912481191a68273ded4a2d568767351c9bc8274ae",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Đúng rồi đó, cô Ngân thưởng sao vàng liền luôn!",
+      "file": "de4d3b8ba557ab7a19034729.mp3",
+      "durationSec": 3
+    },
+    {
+      "id": "correct-4",
+      "key": "92831ae238f6c5bb01c28409b6a3e5f3d2cad713c5ceb3933498012abbbd319c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Hay quá, đáp án đúng rồi, cả lớp cùng chúc mừng nha!",
+      "file": "92831ae238f6c5bb01c28409.mp3",
+      "durationSec": 3.7
+    },
+    {
+      "id": "wrong-1",
+      "key": "34f93f70dce8145c2fb70a2a858735b0332c7698687e378c11dc99cd35b98069",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Chưa đúng rồi, đừng buồn nha, đoán lại đi nè!",
+      "file": "34f93f70dce8145c2fb70a2a.mp3",
+      "durationSec": 3.6
+    },
+    {
+      "id": "wrong-2",
+      "key": "5005277e1b84569d786f3de861f2c66d16f7c6c3f778daf510cc5e5719d07777",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Gần đúng rồi đó, thử đảo chữ lại một lần nữa xem nào!",
+      "file": "5005277e1b84569d786f3de8.mp3",
+      "durationSec": 3.3
+    },
+    {
+      "id": "wrong-3",
+      "key": "94961f7d96c26d9d6c416d8ae2f821e8301f3e9a41aba1ef4632b2ca66ffb7f0",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Sai rồi nè, không sao đâu, câu sau mình gỡ lại nha!",
+      "file": "94961f7d96c26d9d6c416d8a.mp3",
+      "durationSec": 3.8
+    },
+    {
+      "id": "reveal-1",
+      "key": "fcb1f985c9bc0b8534415ee150b563079e9cabb22baf22553d1aa12a2b92c8a8",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Hết giờ rồi, đáp án đúng là đây nè, cả lớp nhìn bảng nha!",
+      "file": "fcb1f985c9bc0b8534415ee1.mp3",
+      "durationSec": 4.2
+    },
+    {
+      "id": "reveal-2",
+      "key": "4089383ad696dd438399b7c2392fa834ab206ce25fda6d2b16e0ce587eef8975",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Công bố đáp án nè, ai đoán đúng thì chuẩn bị nhận điểm nha!",
+      "file": "4089383ad696dd438399b7c2.mp3",
+      "durationSec": 3.8
+    },
+    {
+      "id": "top-1",
+      "key": "72ae639977bb3d94ebf4e63e26ae12fe34a43d48ccb21cedf0b45227d5c85c19",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Top năm bạn nhanh nhất đây rồi, chúc mừng các bạn giỏi nhất lớp nha!",
+      "file": "72ae639977bb3d94ebf4e63e.mp3",
+      "durationSec": 3.8
+    },
+    {
+      "id": "top-2",
+      "key": "fe3a719492f45ecc3099de77c75edf7386f2ed0f8881ce0657b629c3d7d019b2",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Bảng điểm mới cập nhật rồi nè, ai đang dẫn đầu vậy ta!",
+      "file": "fe3a719492f45ecc3099de77.mp3",
+      "durationSec": 3.5
+    },
+    {
+      "id": "top-3",
+      "key": "b4e1062762c0e6231483b4a41920e9027143c1da7914ddd59d9615b55014dce8",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cô đọc tên top lớp đây, các bạn nghe có tên mình không nè!",
+      "file": "b4e1062762c0e6231483b4a4.mp3",
+      "durationSec": 3.6
+    },
+    {
+      "id": "attend-1",
+      "key": "2aca8c76a5dc2adaa97d9295821555887302456c2887100129d204c9d6e3c5bc",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Điểm danh nè, gõ chữ có mặt là được cộng năm mươi điểm liền luôn!",
+      "file": "2aca8c76a5dc2adaa97d9295.mp3",
+      "durationSec": 4
+    },
+    {
+      "id": "attend-2",
+      "key": "a1d4ae6e6cca39e5780c4830d434cd454b4dcfbaea11f1a3d105b097fcb52226",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Ai chưa điểm danh thì nhanh tay lên nha, sắp hết giờ rồi đó!",
+      "file": "a1d4ae6e6cca39e5780c4830.mp3",
+      "durationSec": 3.6
+    },
+    {
+      "id": "gift-1",
+      "key": "9aac4173b726e699bd0b35951877b6a4cb41751f52d26a4f81fe8f3e1b7f7a5d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cảm ơn bạn đã tặng quà cho lớp nè, cô Ngân ghi tên vào sổ vàng liền luôn!",
+      "file": "9aac4173b726e699bd0b3595.mp3",
+      "durationSec": 4.4
+    },
+    {
+      "id": "gift-2",
+      "key": "bb90834f38af444be5a7000caa541d1d07f9d04a4353ade6135290f88e67a91a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Quà tới rồi, cả lớp cùng cảm ơn bạn thật nhiều nha!",
+      "file": "bb90834f38af444be5a7000c.mp3",
+      "durationSec": 3.5
+    },
+    {
+      "id": "gift-3",
+      "key": "d60e4c20f44107291063d66098f6a39865fbc54c26d97df958cac6b5dd4ac399",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Bạn tặng quà to quá, mời bạn lên bảng nhận pháo giấy liền luôn!",
+      "file": "d60e4c20f44107291063d660.mp3",
+      "durationSec": 4
+    },
+    {
+      "id": "gift-4",
+      "key": "8a213c92f0905c018beb458af125d9d16ad113530d373e5db5bf942e5ce2d0e0",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cảm ơn quà của bạn nè, lớp mình vui hẳn lên luôn đó!",
+      "file": "8a213c92f0905c018beb458a.mp3",
+      "durationSec": 3.5
+    },
+    {
+      "id": "end-1",
+      "key": "391a5b432f6ff1d1a3a22cdaf2d79d8301445905ceab831cf4ebca9cea8d92af",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Hết tiết rồi nè, cảm ơn cả lớp đã chơi cùng cô Ngân nha!",
+      "file": "391a5b432f6ff1d1a3a22cda.mp3",
+      "durationSec": 3.6
+    },
+    {
+      "id": "end-2",
+      "key": "14d0da0a417edcf68eb4966e4a626345e6997c4e2a0c62f1f70c7039738526d6",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Tiết học hôm nay vui quá, hẹn cả lớp tiết sau nha!",
+      "file": "14d0da0a417edcf68eb4966e.mp3",
+      "durationSec": 3.3
+    },
+    {
+      "id": "end-3",
+      "key": "8e7f492256887499539b2c5e7e38834e691e3f277597b16c7fbf329792559f8f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cô Ngân chào cả lớp, nhớ follow lớp để mai mình gặp lại nè!",
+      "file": "8e7f492256887499539b2c5e.mp3",
+      "durationSec": 3.8
+    },
+    {
+      "id": "break-1",
+      "key": "ded84aae5c8f4fcf8309f786ed2c2f834b92ffa373ebd4eb097cca4dc3754b95",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Giờ ra chơi rồi nè, mình chơi Oẳn tù tì với cô nha! Gõ búa, kéo hay bao vào chat liền luôn!",
+      "file": "ded84aae5c8f4fcf8309f786.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "break-bua",
+      "key": "fe1168a541c42c55f8f64cb4cd2c1f64ab4c4081bf4264057058b0697a01d255",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cô ra búa nè! Ai ra bao thì thắng cô, được cộng năm mươi điểm liền luôn!",
+      "file": "fe1168a541c42c55f8f64cb4.mp3",
+      "durationSec": 4.8
+    },
+    {
+      "id": "break-keo",
+      "key": "fafeffd99c538e06c1cf73b0f1f09c60e7b33f81d4fc90dd6633a88f16827f51",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cô ra kéo nè! Ai ra búa thì thắng cô, được cộng năm mươi điểm liền luôn!",
+      "file": "fafeffd99c538e06c1cf73b0.mp3",
+      "durationSec": 4.8
+    },
+    {
+      "id": "break-bao",
+      "key": "5859ba062f63c0b19e60debb23e9c0cffdb0902835dbfa3bf0f5a9905b3a3fe1",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Cô ra bao nè! Ai ra kéo thì thắng cô, được cộng năm mươi điểm liền luôn!",
+      "file": "5859ba062f63c0b19e60debb.mp3",
+      "durationSec": 4.7
+    },
+    {
+      "id": "break-3",
+      "key": "a1e3d2a76abdbca9a56dd86e00c28d0c594d9ecfc204e58b0b4886f6f2255a70",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Hết giờ ra chơi rồi, vào tiết mới thôi nào, cả lớp tập trung nè!",
+      "file": "a1e3d2a76abdbca9a56dd86e.mp3",
+      "durationSec": 4.1
+    },
+    {
+      "id": "mc-1",
+      "key": "89f9c1792ca59d60eb25c713ea6ca95dc7edb889fea548b044bce8f01b89482c",
+      "voice": "avocado_v2:lumi",
+      "rate": 0,
+      "text": "Thông báo nè, mục tiêu follow của lớp sắp đạt rồi, cả nhà cùng đẩy lên nha!",
+      "file": "89f9c1792ca59d60eb25c713.mp3",
+      "durationSec": 4.7
+    },
+    {
+      "id": "mc-2",
+      "key": "e6842a6c33fce05f86508cde8dfed68166427e9ff27fcfe069771ff6936463bf",
+      "voice": "avocado_v2:lumi",
+      "rate": 0,
+      "text": "Sự kiện trong lớp sắp bắt đầu rồi, mọi người chuẩn bị tinh thần nha!",
+      "file": "e6842a6c33fce05f86508cde.mp3",
+      "durationSec": 3.8
+    },
+    {
+      "id": "mc-3",
+      "key": "a8c773c551d9870423a65d334a459a2748dd1eb31ab7935e84372d9bbfb58060",
+      "voice": "avocado_v2:lumi",
+      "rate": 0,
+      "text": "Chúc mừng bạn vừa follow lớp nè, chào mừng bạn vào lớp luôn!",
+      "file": "a8c773c551d9870423a65d33.mp3",
+      "durationSec": 3.6
+    },
+    {
+      "id": "q-001-doc",
+      "key": "6c5fb7d97e1bf134e6c9d04bf20a5cfe7ead399f3398e754e96ce64479f738ff",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vị vua đầu tiên của nhà Nguyễn. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6c5fb7d97e1bf134e6c9d04b.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-002-doc",
+      "key": "6b35709495898d5e0b451b85fd90a04f84db5c6fc351f073d6dda09bcfc1569c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vua áo vải đánh thắng quân Thanh ở Đống Đa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6b35709495898d5e0b451b85.mp3",
+      "durationSec": 6.5
+    },
+    {
+      "id": "q-003-doc",
+      "key": "9e7d1f1f15e9142f8ecb4d6b3b0bd984309208784a97016266f33fec7fcf8976",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hai chị em khởi nghĩa chống quân Hán. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9e7d1f1f15e9142f8ecb4d6b.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-004-doc",
+      "key": "9983d29e511867b7791ea368b212f8f08456de9ed6c0ef2d748f8374cf5d7f9d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vị tướng ba lần đánh thắng quân Nguyên Mông. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9983d29e511867b7791ea368.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-005-doc",
+      "key": "cf73c282948790218ae4f7cddb5e7a08ee28c8de2da01fd7d907f5829de5fa95",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vị vua khởi nghĩa Lam Sơn, trả gươm Hồ Gươm. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "cf73c282948790218ae4f7cd.mp3",
+      "durationSec": 6.8
+    },
+    {
+      "id": "q-006-doc",
+      "key": "93f3a1255da8955effac5724609da4784a9b547e1dbd8461c762c9a1a8ddd46f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tác giả Bình Ngô đại cáo. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "93f3a1255da8955effac5724.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-007-doc",
+      "key": "d06b47498f07c2764797e5d80f3a7eb62da9f40c68b7e2943ec0832b589acaf7",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vua dẹp loạn mười hai sứ quân. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "d06b47498f07c2764797e5d8.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-008-doc",
+      "key": "a18afea4bce47c6c3f996dc945d1ebf5c3624c74737636d7f1d8fc0fe8fdcbff",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vua dời đô về Thăng Long. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a18afea4bce47c6c3f996dc9.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-009-doc",
+      "key": "db4fd196648dd9dcda2eb622d9966d77d6d69f5319395fa156d61d68fe8df864",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vị lãnh tụ vĩ đại của dân tộc Việt Nam. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "db4fd196648dd9dcda2eb622.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-010-doc",
+      "key": "0053fe280d4830f08a32d6a4a5d390d057682a06e54e58bb3c577130fa16564b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vị đại tướng của chiến dịch Điện Biên Phủ. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0053fe280d4830f08a32d6a4.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-011-doc",
+      "key": "97ee15b370aeee6c71fe544c8cbb449ebf18fbbcfc7171cf8dc7e13c2d4a5ca8",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vị tướng đan sọt mà đọc binh thư. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "97ee15b370aeee6c71fe544c.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-012-doc",
+      "key": "60f0975854af0d4864973fd4868b61f951cd3b8605f55720b5a9486d6c9a0fc3",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tên thật của Hưng Đạo Vương. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "60f0975854af0d4864973fd4.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-013-doc",
+      "key": "1a1a2cce36cf019b234c2d144f7a1f737237fccb6cbdd9486baba842a707e347",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tên thật của vua Quang Trung. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "1a1a2cce36cf019b234c2d14.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-014-doc",
+      "key": "34e3dcdf3b73038e8d5bf330417a821abec29197d01fdfce3d0d0d1a3f076970",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dòng sông gắn với trận cọc gỗ của Ngô Quyền. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "34e3dcdf3b73038e8d5bf330.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-015-doc",
+      "key": "7d37bd8a1cf1a0aa9ce3a59e9e6e209f77c2415f6b88428f4353359ef5e6be8b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Chiến thắng lừng lẫy năm một chín năm tư. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "7d37bd8a1cf1a0aa9ce3a59e.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-016-doc",
+      "key": "09b93747cb9932598cf2337ebc5c8c6d80cdeeba55a3892d1c4a9d32be7cc9b6",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Ải quan nơi Liễu Thăng tử trận. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "09b93747cb9932598cf2337e.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-017-doc",
+      "key": "58703ddcb1ab709e31bd3574686dd72b3c2288bbcdc66aa8cb863461c2e84dfa",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Trận đánh mở màn đại phá quân Thanh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "58703ddcb1ab709e31bd3574.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-018-doc",
+      "key": "d9b2072a956cdc87825907e549016e0d4002f85cbe41efb1db68b3d9ec6ea218",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Gò gắn với chiến thắng mùng năm Tết. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "d9b2072a956cdc87825907e5.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-019-doc",
+      "key": "bd4a23c2dcc07a3a45290a97be69144a149b44ab37811959096245a318a43e2d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Trận thủy chiến của Nguyễn Huệ ở miền Tây. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "bd4a23c2dcc07a3a45290a97.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-020-doc",
+      "key": "f4f5710b18141e6e5c4becf5386960d4926fff6c4049bc58010575c642a623c8",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Trận đánh cùng cặp với Rạch Gầm. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "f4f5710b18141e6e5c4becf5.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-021-doc",
+      "key": "ec68b7104194b7766cec3bca102c63bf454cb24246b26e93e1b549e597371b94",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tên cũ của Hà Nội, nghĩa là rồng bay lên. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "ec68b7104194b7766cec3bca.mp3",
+      "durationSec": 6.7
+    },
+    {
+      "id": "q-022-doc",
+      "key": "1c7d23334dcb99e325524d1609a1555727f2a74fcea1919fd55e5f37b4a4dfb0",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quần đảo của Việt Nam ở Biển Đông. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "1c7d23334dcb99e325524d16.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-023-doc",
+      "key": "32c030a52e612ad60c8c9eb12d78cc6a358039a23b4b4da8c05b76a8ce3500f2",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quần đảo lớn nhất của Việt Nam ở Biển Đông. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "32c030a52e612ad60c8c9eb1.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-024-doc",
+      "key": "647c3c4d38bd32bc97f62f3f909be859542908bb0d19bf634a7c1f6e8e2835ab",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành cổ hình ốc của An Dương Vương. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "647c3c4d38bd32bc97f62f3f.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-025-doc",
+      "key": "8c4889fec992fb2a6d6046672403af4a5f48ebf8fc1b35b8afe6ed7769b5187b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vua xây thành Cổ Loa, có nỏ thần. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8c4889fec992fb2a6d604667.mp3",
+      "durationSec": 6.8
+    },
+    {
+      "id": "q-026-doc",
+      "key": "c1a22b8270235c054591a6fa6e09693e690f79af2c0b8b5d465223787292995b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vị vua đầu tiên của nước Văn Lang. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "c1a22b8270235c054591a6fa.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-027-doc",
+      "key": "013c4ea9cb7949d94e1b5bbb27e548d8b09084497212dece05d6e0c9ba8ea3f0",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vua thời Hồng Đức, nổi tiếng trị nước giỏi. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "013c4ea9cb7949d94e1b5bbb.mp3",
+      "durationSec": 6.8
+    },
+    {
+      "id": "q-028-doc",
+      "key": "90ae2544a783bd40c1396383e7ef30a95e6306f87364de3e8b7a54ccea2425e2",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tên vua Gia Long trước khi lên ngôi. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "90ae2544a783bd40c1396383.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-029-doc",
+      "key": "242a76b65b9abd5661087a4043b2f8188be480bdaa6f942afa842a4fca01e972",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vua nhà Nguyễn nổi tiếng nghiêm khắc. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "242a76b65b9abd5661087a40.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-030-doc",
+      "key": "eba9f0b22f101d6d83b2bc4bef8d92354770e9f54a49c01d330fe30953e82467",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vị vua nhà Nguyễn làm thơ rất hay. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "eba9f0b22f101d6d83b2bc4b.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-031-doc",
+      "key": "9aebf4e569c9b402a6f7479d16997554a755e6057771e422af2833fad8a37dbd",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dụng cụ vẽ hình tròn trong hộp bút. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9aebf4e569c9b402a6f7479d.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-032-doc",
+      "key": "4728fa6fc64af616e833267e430c16437f0d35faff50345fffeab676f81c4f6c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dụng cụ kẻ đường thẳng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "4728fa6fc64af616e833267e.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-033-doc",
+      "key": "c9a4fe0d18e51a4455354bdf21af104861eab6b1c1762d2776fea12d94228ab2",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Gõ chữ trên máy tính bằng thứ này. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "c9a4fe0d18e51a4455354bdf.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-034-doc",
+      "key": "0c78f5d6627e2f5fceb567e55beb11fb93ce4652f1130f08fe8e360676ff006d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Đồ dùng để ngồi học, có bốn chân. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0c78f5d6627e2f5fceb567e5.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-035-doc",
+      "key": "9ce1f4a1b9b40666e3f2310edeca93f803ea4afcd4755557a496ad812c6a6af5",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Ngồi học phải có thứ này. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9ce1f4a1b9b40666e3f2310e.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-036-doc",
+      "key": "85548e112a0402fd981fa2251cc3822da0196b5fef80c024feebbdc1b59f5d16",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bật lên khi học bài buổi tối. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "85548e112a0402fd981fa225.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-037-doc",
+      "key": "3b567d442462a75cd27ea1602e1a42013b3a1325765c89cd02c413093772d4b5",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Đeo sau lưng đi học mỗi ngày. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "3b567d442462a75cd27ea160.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-038-doc",
+      "key": "602879d1e484104c8e02a0caed82034242dd2d7848118c14f05e77e3ce222165",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Viết được, tẩy được. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "602879d1e484104c8e02a0ca.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-039-doc",
+      "key": "dd955be2a479aa33ce53a600e8fe0433786b48fe225780e1d939623626035cc1",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Viết ra mực xanh, mực tím. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "dd955be2a479aa33ce53a600.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-040-doc",
+      "key": "b9ca211031f1ea555e4ea9266101a151dd1f356e601520cec73384d2bda6889b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cục nhỏ dùng để tẩy chữ bút chì. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "b9ca211031f1ea555e4ea926.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-041-doc",
+      "key": "9e3831ec9f4bb8a87150cf94a39d22fa0c91d41e483a6a2456ff986cd0e68ab9",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quyển để ghi chép bài học. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9e3831ec9f4bb8a87150cf94.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-042-doc",
+      "key": "8bf0e134fe8e49afa95b1bf6ccb8cd7a3ea3a29d8e08649467a9feb955fa4102",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cô giáo viết bài lên đây. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8bf0e134fe8e49afa95b1bf6.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-043-doc",
+      "key": "a7c8fd10ac70231f9c88074c4f44768ded45333cd24e9a88f590e55764cc3f66",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Viên trắng viết lên bảng đen. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a7c8fd10ac70231f9c88074c.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-044-doc",
+      "key": "df1e61c9a6b35d4db7e40a474901ab50cb83ae6b75b264d1f4acb73c1ff4e411",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Giá để sách ngay ngắn trên bàn. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "df1e61c9a6b35d4db7e40a47.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-045-doc",
+      "key": "69ddd07d4c4edce47df1a177fde7b2d0b6f64b05b6b32c6d95923b1d01be311c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Xem giờ bằng thứ này. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "69ddd07d4c4edce47df1a177.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-046-doc",
+      "key": "3564618294cd1846aa05f2311e3a3e3464fd7f3ebedf3e1e06a389793b070ca7",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bật lên cho mát khi trời nóng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "3564618294cd1846aa05f231.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-047-doc",
+      "key": "4e107426b0e6e8e787ba0da5fc726464726eb450311d27694555ec447178dd0f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Đèn nhỏ đặt trên bàn học. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "4e107426b0e6e8e787ba0da5.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-048-doc",
+      "key": "a5672bf6a8e897606225b5be1f0980445fb7927f2a324b88831645ec92f6df29",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Ghế ngồi có bánh xe, xoay được. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a5672bf6a8e897606225b5be.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-049-doc",
+      "key": "09a10223192197e66570d06f65d6f71dcd3ba63f6fc7a290a2d38aba79a52704",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tủ đựng sách trong lớp học. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "09a10223192197e66570d06f.mp3",
+      "durationSec": 5.5
+    },
+    {
+      "id": "q-050-doc",
+      "key": "74275110837a223103b74591e81e3138158dc5e86f1e45fd96a281e4499a8594",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hộp đựng bút chì, bút mực. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "74275110837a223103b74591.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-051-doc",
+      "key": "e3393d9d3ab681dca61bf01386bdc168b6cf4ae3dd00f11839e2244c6749e78d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dụng cụ đo độ dài có vạch chia. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e3393d9d3ab681dca61bf013.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-052-doc",
+      "key": "3693bb8b92b865c703280b1255932929ff3d3a60e1e3576688b300af66f9729b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Máy để gõ văn bản, chơi game. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "3693bb8b92b865c703280b12.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-053-doc",
+      "key": "8484e7c455cc6f876df7f63dce41ffa9159bf4db857d921f0cbed05f1fef547b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Gọi điện, nhắn tin bằng thứ này. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8484e7c455cc6f876df7f63d.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-054-doc",
+      "key": "4b377c28c336a4271b205510cea7dbd94170ec08accffd6b7b50918151299a49",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hai bánh, đạp bằng chân. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "4b377c28c336a4271b205510.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-055-doc",
+      "key": "168e2a4ec7123d507ad5fc7ff587087932a2884bf94389aad16d2fcb807a790c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hai bánh, chạy bằng xăng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "168e2a4ec7123d507ad5fc7f.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-056-doc",
+      "key": "f72d96e68d502ff22fe1d603bb062bbaee6c0131f3250025cb2b6e6f0f60ca67",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Trang phục truyền thống của Việt Nam. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "f72d96e68d502ff22fe1d603.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-057-doc",
+      "key": "e841e4867f2a9516cf6d8f21b10b17ec50210f6c08cef5acbd384c3a07868a10",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Đồ đội viên đeo ở cổ, màu đỏ. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e841e4867f2a9516cf6d8f21.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-058-doc",
+      "key": "24c09f8b5f7c6156a217b159c97832ff5f8cff266837faa4e5b97ddc2f6b4385",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Mũ hình nón làm bằng lá. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "24c09f8b5f7c6156a217b159.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-059-doc",
+      "key": "afaf795f2e2c1e67950fa13a1156f7c75bf267f1ab6ce92b28470a894070299f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dép gỗ truyền thống ngày xưa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "afaf795f2e2c1e67950fa13a.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-060-doc",
+      "key": "9bde233f93bdf6d86282ebd4ef391f8103bd6a43d361cc20cccfa1b80ed53722",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Chiếu đan bằng tre, trải ra ngồi. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9bde233f93bdf6d86282ebd4.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-061-doc",
+      "key": "957a24efa294943aa3c003f32f7be25a359f1c89c6bf34e36bbe5cf9f381dbac",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món ăn kẹp thịt, pate nổi tiếng Việt Nam. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "957a24efa294943aa3c003f3.mp3",
+      "durationSec": 6.6
+    },
+    {
+      "id": "q-062-doc",
+      "key": "6c6983f14b2bbb7bab68f26b7870b5f4243854240cf3c026c01dced8c5caeb07",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món nước có bánh phở và thịt bò. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6c6983f14b2bbb7bab68f26b.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-063-doc",
+      "key": "f8c06cbb3f65fc2d3972f9b9277bdd9547812108cee9648471dbfb8f21219702",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món Hà Nội có bún và chả nướng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "f8c06cbb3f65fc2d3972f9b9.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-064-doc",
+      "key": "6a43bd7256eb655e0906bcb1968e55c5b004efef8e040165faf5ced7448ed10d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cơm với sườn nướng, bì, chả trứng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6a43bd7256eb655e0906bcb1.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-065-doc",
+      "key": "b605468a6f1dcbff087e2dce484f9fc043afb3d36ef40caaabdf3d2e405731d4",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bánh vuông gói lá dong ngày Tết. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "b605468a6f1dcbff087e2dce.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-066-doc",
+      "key": "be74999352929a721b88438a89fb25613c0edd04f3004a40b9298b0af4963505",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bánh vàng giòn, cuốn rau chấm nước mắm. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "be74999352929a721b88438a.mp3",
+      "durationSec": 6.7
+    },
+    {
+      "id": "q-067-doc",
+      "key": "763a77c670db345c3dbfe00d608d191dead9297c889076aa6cb67598ac1770db",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cuốn tôm thịt trong bánh tráng mỏng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "763a77c670db345c3dbfe00d.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-068-doc",
+      "key": "ce191cea810f1be313556cf0d1996a8183b37b7cea96f34abcc7d766e0d1ac84",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món chiên giòn, còn gọi là chả giò. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "ce191cea810f1be313556cf0.mp3",
+      "durationSec": 6.5
+    },
+    {
+      "id": "q-069-doc",
+      "key": "bcc0e88dd466952ddc4c80a46c28317a70dd562270bea78d5c2c042fa3f49065",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Chè có ba màu xanh đỏ vàng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "bcc0e88dd466952ddc4c80a4.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-070-doc",
+      "key": "feb967c25bb3102dc31a8bbbbec1fcd293f9a2d3f9bb1f9a6e0a6d0ddf950615",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thức uống có trân châu đen. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "feb967c25bb3102dc31a8bbb.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-071-doc",
+      "key": "90673bf827944644d98f7c70f4132bda116fba2705cd20a64e457e4dab6e0773",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thức uống đắng, buổi sáng hay uống. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "90673bf827944644d98f7c70.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-072-doc",
+      "key": "00fc8f96fd2a528cf58f944cc261366bfb9dc3d342c97afcc1093e5773cc520c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Trái cây xay với đá và sữa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "00fc8f96fd2a528cf58f944c.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-073-doc",
+      "key": "899930869efee810cdafada5ea8eed92f2d1c0ccd88e58464b126e49f40bd996",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bánh mềm mịn làm từ trứng và sữa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "899930869efee810cdafada5.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-074-doc",
+      "key": "58b11193c0b23a1b100927db7c29e28e2fb31e452674dd709b9b360557a240db",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Kem mát lạnh vị dừa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "58b11193c0b23a1b100927db.mp3",
+      "durationSec": 5.5
+    },
+    {
+      "id": "q-075-doc",
+      "key": "209943233f12731989f25833de26f69ddbc202b3f88725f65be9a22776443408",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Xôi màu đỏ cam, ăn ngày Tết. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "209943233f12731989f25833.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-076-doc",
+      "key": "5624b08412a944700b1b6fb0847631961e5da6b021969cbf36e066092d10384d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món mì đặc sản xứ Quảng, có tôm thịt và đậu phộng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "5624b08412a944700b1b6fb0.mp3",
+      "durationSec": 7.4
+    },
+    {
+      "id": "q-077-doc",
+      "key": "617ae31a834342284e0b8dcdb9c8a20c818df10f3d69fad581fdb064f0f5555f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món mì đặc sản của Hội An. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "617ae31a834342284e0b8dcd.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-078-doc",
+      "key": "83501cf817d99f94127b3c443ebc7d77a26635847fe8073e757064bb3d3fca40",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món bún xứ Huế có giò heo. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "83501cf817d99f94127b3c44.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-079-doc",
+      "key": "52a323d63be3bb6d038f78fa595203fd1e4938dc1ca2bfad6cf126bb5f2dd239",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món nước miền Nam có sợi dai. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "52a323d63be3bb6d038f78fa.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-080-doc",
+      "key": "e67e7b2d1e37186433c1b65da08cb3d07ec74f937866ce817de22a723b30cd36",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cháo nấu với thịt gà, ăn khi ốm. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e67e7b2d1e37186433c1b65d.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-081-doc",
+      "key": "80732a85e4aa81da905045f35edd1a0e0a47799ade66ba81c01f60fb17b445f4",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Gà chiên giòn, trẻ con rất thích. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "80732a85e4aa81da905045f3.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-082-doc",
+      "key": "e4279dbd4b433b92a843734bfabaa161e94972a5a43e4340f2f457096a949183",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Củ chiên giòn, ăn kèm tương cà. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e4279dbd4b433b92a843734b.mp3",
+      "durationSec": 6.6
+    },
+    {
+      "id": "q-083-doc",
+      "key": "a2f9da3e96f893df9fc9bda330e44b50f61d6384b315e444516163b149710007",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Gói snack giòn tan, trẻ con mê. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a2f9da3e96f893df9fc9bda3.mp3",
+      "durationSec": 6.7
+    },
+    {
+      "id": "q-084-doc",
+      "key": "5b49c28d08e909df511b401cafefdb860cabd555e9841da49a6b44e591b0e5c1",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Kẹo ngậm ngọt, hay có vào Tết. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "5b49c28d08e909df511b401c.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-085-doc",
+      "key": "572bd4df141614fc0cb189182cb204b336059f2c7df8cc57cb0507c7f9f927e9",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bánh giòn hình tròn, chấm sữa rất ngon. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "572bd4df141614fc0cb18918.mp3",
+      "durationSec": 6.6
+    },
+    {
+      "id": "q-086-doc",
+      "key": "d87bf39817d0623686d291ceb6bc289e6d3596b38f722df1e02bf723653bdff7",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Trà có đào ngâm, uống mát lạnh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "d87bf39817d0623686d291ce.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-087-doc",
+      "key": "1927b3f002e2f720948a1b8d6162e22d5b963a6d67a86b3b8f1e06f7c9946357",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Nước ép từ cây mía, uống mùa hè. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "1927b3f002e2f720948a1b8d.mp3",
+      "durationSec": 6.7
+    },
+    {
+      "id": "q-088-doc",
+      "key": "abe58bdebf7aaf11a6f1ec1dd73bfd5c52564625e123e332aa29866cf7023429",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Sữa lên men, chua chua ngọt ngọt. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "abe58bdebf7aaf11a6f1ec1d.mp3",
+      "durationSec": 6.6
+    },
+    {
+      "id": "q-089-doc",
+      "key": "8f104b7b8deec493d04075de32bb005e247eb3cbc451df36698c4a84d9290336",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Trứng nhỏ luộc, ăn với muối tiêu. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8f104b7b8deec493d04075de.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-090-doc",
+      "key": "fd8b37ca9adad2766dc45da179bc5aee913793b0246bc9552e9677f67450c504",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Món ốc chấm nước mắm gừng, ăn nóng mới ngon. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "fd8b37ca9adad2766dc45da1.mp3",
+      "durationSec": 6.8
+    },
+    {
+      "id": "q-091-doc",
+      "key": "0ade8855cb12562c17c41063bf87889d3f2e989a97e96bca053cf8b6f9b03eeb",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thủ đô của Việt Nam. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0ade8855cb12562c17c41063.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-092-doc",
+      "key": "c4081a0e19003358146e1675ba8533a6152da031f77f2391b9263b24b3cd856a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tên cũ của Thành phố Hồ Chí Minh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "c4081a0e19003358146e1675.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-093-doc",
+      "key": "e7fc4d4e729dbe14a23c1a462675d626a9f284841cd367770ef5d3fe03c4b947",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố có cầu Rồng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e7fc4d4e729dbe14a23c1a46.mp3",
+      "durationSec": 5.5
+    },
+    {
+      "id": "q-094-doc",
+      "key": "b7d087613f19e1094f187fbc9706d15afb3b60f0aa6e071b7f789786e68576f9",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cố đô, có sông Hương và kinh thành. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "b7d087613f19e1094f187fbc.mp3",
+      "durationSec": 6.5
+    },
+    {
+      "id": "q-095-doc",
+      "key": "c1de9547bf57de8e5e9dd354697337ccfaa7d6d1d547b41d4ea84d5b12d68df5",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Phố cổ có đèn lồng rất đẹp. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "c1de9547bf57de8e5e9dd354.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-096-doc",
+      "key": "da01ed405cf43d5fdb2971a66afb99e1a42343a54461a2b66ed0d2089f044629",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố biển có vịnh rất đẹp. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "da01ed405cf43d5fdb2971a6.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-097-doc",
+      "key": "21ec1d65342b443ae111e18ebfb1e8168138b8534fcdc76c24799f75a8841fcc",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố ngàn hoa, khí hậu mát lạnh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "21ec1d65342b443ae111e18e.mp3",
+      "durationSec": 6.9
+    },
+    {
+      "id": "q-098-doc",
+      "key": "d6ac120fa29af254126932357914992d964ef233bcd7e384aefcbbe605fe8767",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Nơi có ruộng bậc thang và đỉnh Fansipan. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "d6ac120fa29af25412693235.mp3",
+      "durationSec": 6.6
+    },
+    {
+      "id": "q-099-doc",
+      "key": "e9c6cfd9c469ae13db6bbb50dcd304851b0f2ea45b67707a21308996fc797657",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vịnh có hàng nghìn đảo đá vôi. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e9c6cfd9c469ae13db6bbb50.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-100-doc",
+      "key": "8d5bde0d7307a80ebd9b4b78e86ed771274c5fa9a71a8b08d2c857f339893cef",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Đảo ngọc, có nước mắm nổi tiếng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8d5bde0d7307a80ebd9b4b78.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-101-doc",
+      "key": "f0d1f3638aa10cbd38c570a84a8f3dd97b61dee590d2b7fdddc75d98d4715cf4",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố có chợ nổi Cái Răng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "f0d1f3638aa10cbd38c570a8.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-102-doc",
+      "key": "0a964d9f2799ef85f6e2d5ba5f77727e7dfe8ecc3a6283a0ceb1593c8bfba8a1",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố hoa phượng đỏ. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0a964d9f2799ef85f6e2d5ba.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-103-doc",
+      "key": "b26ae20b767096179d123ff15895e6259626c02b5c55335798fe7bb7dd78f3a3",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố lớn nhất tỉnh Nghệ An. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "b26ae20b767096179d123ff1.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-104-doc",
+      "key": "e4351141259d5da3b4f76e659323bec8060c68c6fe9d55e22a4f21b481cf9cea",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố biển của Bình Định. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e4351141259d5da3b4f76e65.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-105-doc",
+      "key": "a900a85ac476bc65b3ff045721ab87e6f018abe1f1fd6defd449144422554fec",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố cao nguyên Gia Lai. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a900a85ac476bc65b3ff0457.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-106-doc",
+      "key": "8757037b8470cafa082f8babdd0f96ec92dc55cbecd085f14c3e0874d44766dd",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thủ phủ cà phê của Việt Nam. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8757037b8470cafa082f8bab.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-107-doc",
+      "key": "af4dd4360ed8d4ae1996519ece508c537925f92e56ba6f3b6bf0b0dc260a5fa1",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh có thành phố Biên Hòa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "af4dd4360ed8d4ae1996519e.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-108-doc",
+      "key": "3a44ce48f7e39e5f56e431384f561bfce5a40084a70da3efb613ca58c16e18d5",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố biển gần Sài Gòn. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "3a44ce48f7e39e5f56e43138.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-109-doc",
+      "key": "1fc1a098b0ed280512dbdd769789693dc286da22e12c8f78fb7887e0388dde4e",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố của tỉnh Tiền Giang. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "1fc1a098b0ed280512dbdd76.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-110-doc",
+      "key": "39cad7eb4175184e2e4cce92e58b6948c18b1e6d852369a24b9296b8204e92ef",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phố của tỉnh An Giang. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "39cad7eb4175184e2e4cce92.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-111-doc",
+      "key": "22a5b7ced478dd95c5ccbd83406e686646411f528ed9f22e54f9494bcddb0dd7",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh ở cực Nam của đất nước. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "22a5b7ced478dd95c5ccbd83.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-112-doc",
+      "key": "a706873ab7b312f95be1e553334a6728379f1a11aca73c6c95461e684c24044b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh miền núi có hồ thủy điện lớn. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a706873ab7b312f95be1e553.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-113-doc",
+      "key": "b91c92b10e4fd2a4fefb21a95dc6b2e80b22de64af874ef6e52333b6ed6e22df",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh có chiến trường lừng lẫy năm một chín năm tư. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "b91c92b10e4fd2a4fefb21a9.mp3",
+      "durationSec": 7.3
+    },
+    {
+      "id": "q-114-doc",
+      "key": "ec4523c14776ae2c5db4de3a18bcfbddc740f468f7d3642dbd625c8894c7d6a1",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh biên giới Tây Bắc. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "ec4523c14776ae2c5db4de3a.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-115-doc",
+      "key": "21b9d9e6ae83e6aa16e0a104be5f1fe744b6a9bd45da7b2ce7df5cb6b9975aac",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh có cột cờ Lũng Cú. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "21b9d9e6ae83e6aa16e0a104.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-116-doc",
+      "key": "7ffa41f270c4623b8ab367c9ae1d2b565282eed7b29fa08c17c3798ff26c6594",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh có thác Bản Giốc. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "7ffa41f270c4623b8ab367c9.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-117-doc",
+      "key": "2efe5c5e770ad0c1dcf7a14cd91f04d05b747624c7e86621532ebd73546b3873",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh có cửa khẩu Hữu Nghị. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "2efe5c5e770ad0c1dcf7a14c.mp3",
+      "durationSec": 6.5
+    },
+    {
+      "id": "q-118-doc",
+      "key": "f038c58e304177974d1aaee5e51587d04385f58d435c2b44a414636c4e1b9951",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh có bãi biển Sầm Sơn. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "f038c58e304177974d1aaee5.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-119-doc",
+      "key": "921e6702cd608c2a05d648b18968f6e6838f85447f9c7ecf15134398d983bbf3",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quê hương của Bác Hồ. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "921e6702cd608c2a05d648b1.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-120-doc",
+      "key": "7b80d06612c68445810e9acbb7edc8ebf05641cbcdd3c331dd47f8a976af062a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tỉnh có hang Sơn Đoòng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "7b80d06612c68445810e9acb.mp3",
+      "durationSec": 5.9
+    }
+  ]
+}

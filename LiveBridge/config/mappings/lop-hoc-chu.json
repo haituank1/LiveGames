@@ -1,0 +1,198 @@
+{
+  "actions": {
+    "confetti": "Mưa giấy màu (chia sẻ / quà vừa)",
+    "dance": "Cả lớp nhảy mừng",
+    "fireworks": "Bắn pháo hoa (quà lớn / đủ follow / Giờ vàng)",
+    "gift": "Tặng quà — quà nhỏ giơ tay, quà vừa pháo giấy, quà lớn lên bảng",
+    "join": "Người xem vào lớp (cô Ngân chào, ngồi vào ghế)",
+    "like": "Thả tim — tim bay, 50 tim của một bạn thì cả lớp nhảy",
+    "petals": "Tim bay (hiệu ứng nhẹ)",
+    "spotlight": "Follow — tăng mục tiêu follow phiên, đủ mốc cả lớp nhảy mừng"
+  },
+  "chat": {
+    "cooldownSec": 5,
+    "rules": [
+      {
+        "action": "fireworks",
+        "match": "pháo hoa|phao hoa",
+        "value": 2
+      },
+      {
+        "action": "confetti",
+        "match": "giấy màu|giay mau|pháo giấy|phao giay",
+        "value": 2
+      }
+    ]
+  },
+  "defaults": {
+    "answerSec": 30,
+    "attendPoints": 50,
+    "eventEverySec": 600,
+    "eventRounds": 3,
+    "followGoal": 20,
+    "gapSec": 3,
+    "guideLines": [
+      "📝 Gõ đáp án đảo chữ vào chat → ai nhanh nhất được nhiều điểm nhất",
+      "✋ Gõ \"có mặt\" để điểm danh → +50 điểm 1 lần mỗi phiên",
+      "🎁 Tặng quà → học sinh giơ tay, quà lớn được lên bảng + pháo giấy",
+      "🔥 Trả lời đúng 3 câu liên tiếp → điểm nhân đôi",
+      "🎯 Follow đủ mục tiêu → cả lớp nhảy mừng",
+      "⭐ Tiên học lễ – hậu học văn!",
+      "⭐ Tương tác nhiều để lên top nha!"
+    ],
+    "latePoints": 20,
+    "mcFollowLines": [
+      "Cảm ơn {ten} đã follow! Từ nay bạn là học sinh chính thức của lớp nhé!",
+      "Hoan hô! {ten} vừa follow lớp — cô Ngân ghi tên vào sổ lớp rồi đó!",
+      "Cảm ơn {ten} đã theo dõi! Có bạn là lớp vui thêm hẳn luôn!",
+      "A, {ten} follow rồi nè! Từ nay câu đố nào hay là có mặt bạn hết nhé!"
+    ],
+    "mcGreet": [
+      "Chào {ten} đã vào lớp! Tìm ghế ngồi đẹp, chuẩn bị đảo chữ nhé!",
+      "Hoan nghênh {ten}! Vào rồi thì ở lại học cho vui, đừng về sớm đó nha!",
+      "A, {ten} tới rồi! Lớp học hôm nay đông vui quá — chào mừng bạn!",
+      "Chào mừng {ten} đến với lớp học chữ! Cứ tự nhiên như ở nhà nhé!",
+      "{ten} ơi, vào lớp là có duyên rồi — gõ đáp án nhanh lên nè!"
+    ],
+    "mcMaxSec": 26,
+    "mcMilestone": [
+      "🎉 Lớp mình vừa lên hạng {moc}! Càng đông càng vui — cảm ơn cả nhà!",
+      "Không khí quá tuyệt vời! Chúng ta đã chạm mốc {moc} rồi mọi người ơi!",
+      "Lên hạng rồi cả nhà ơi — {moc} chính thức mở cửa! Đẹp chưa, đẹp chưa?"
+    ],
+    "mcMinSec": 18,
+    "mcName": "MC Bong Bóng",
+    "mcThank": [
+      "Cảm ơn {ten} đã tặng quà cho lớp! Cô Ngân ghi vào sổ quà rồi nhé!",
+      "Ôi, {ten} tặng quà nè! Cả lớp cảm ơn bạn — món quà này ấm áp quá!",
+      "Quà của {ten} tới rồi! Cô Ngân thay mặt cả lớp cảm ơn bạn nhiều lắm!",
+      "{ten} hào phóng quá! Quà này làm lớp học sáng rực luôn — cảm ơn bạn!",
+      "Nhận được quà của {ten} rồi! Chúc bạn học giỏi, chơi vui như quà bạn tặng nhé!"
+    ],
+    "musicOn": true,
+    "musicShuffle": true,
+    "musicVolume": 30,
+    "npcDanhSach": [
+      "Bảo An",
+      "Khánh Vy",
+      "Đức Anh",
+      "Thảo Nhi",
+      "Minh Khôi",
+      "Lan Anh",
+      "Quốc Huy",
+      "Phương Nam",
+      "Thùy Dương",
+      "Hoàng Phúc"
+    ],
+    "npcNguongVang": 6,
+    "npcTuDong": true,
+    "npcVoice": "avocado_v2:rumi",
+    "npcVoiceMaxPerMin": 6,
+    "npcVoiceMinGapSec": 8,
+    "npcVoiceOn": true,
+    "quaTangMocLon": 299,
+    "quaTangMocVua": 99,
+    "rankPoints": [
+      100,
+      80,
+      60,
+      40,
+      40
+    ],
+    "revealSec": 8,
+    "sfxOn": true,
+    "sfxVolume": 55,
+    "streakMin": 3,
+    "streakMult": 2,
+    "teacherLines": [
+      "Cả lớp tập trung nè, câu đố sắp ra rồi đó!",
+      "Ai chưa trả lời thì nhanh tay lên nha, thời gian đang chạy đó!",
+      "Lớp mình hôm nay chăm quá, cô Ngân vui lắm luôn!",
+      "Nhớ gõ \"có mặt\" để điểm danh lấy điểm nè!",
+      "Đảo chữ không khó đâu, cứ bình tĩnh xếp chữ lại là ra!"
+    ],
+    "teacherName": "Cô Ngân",
+    "voiceOn": true,
+    "voiceVolume": 90,
+    "breakSec": 30,
+    "breakRevealSec": 20,
+    "breakWinPoints": 50
+  },
+  "description": "Lớp học chữ — cô Ngân ra câu đố đảo chữ, người xem gõ đáp án vào chat, ai nhanh nhất được nhiều điểm nhất, quà lớn được lên bảng nhận thưởng",
+  "follow": {
+    "action": "spotlight",
+    "label": "Theo dõi",
+    "value": 1
+  },
+  "game": "lop-hoc-chu",
+  "giftTiers": [
+    {
+      "action": "gift",
+      "combo": 1,
+      "label": "Lên bảng + pháo giấy",
+      "minDiamonds": 299,
+      "value": 3
+    },
+    {
+      "action": "fireworks",
+      "combo": 1,
+      "label": "Pháo hoa lớn",
+      "minDiamonds": 99,
+      "value": 3
+    },
+    {
+      "action": "fireworks",
+      "combo": 1,
+      "label": "Pháo hoa",
+      "minDiamonds": 30,
+      "value": 2
+    },
+    {
+      "action": "confetti",
+      "combo": 1,
+      "label": "Mưa giấy màu",
+      "minDiamonds": 10,
+      "value": 2
+    },
+    {
+      "action": "petals",
+      "combo": 1,
+      "label": "Sao vàng",
+      "minDiamonds": 1,
+      "value": 1
+    }
+  ],
+  "gifts": [
+    {
+      "action": "petals",
+      "combo": 1,
+      "diamonds": 1,
+      "label": "Hoa hồng",
+      "name": "Rose",
+      "value": 1
+    },
+    {
+      "action": "confetti",
+      "combo": 1,
+      "diamonds": 1,
+      "label": "Bánh vòng",
+      "name": "Doughnut",
+      "value": 1
+    }
+  ],
+  "join": {
+    "action": "join",
+    "value": 1
+  },
+  "like": {
+    "action": "like",
+    "every": 1,
+    "label": "Thả tim",
+    "value": 1
+  },
+  "share": {
+    "action": "confetti",
+    "label": "Chia sẻ",
+    "value": 1
+  }
+}
