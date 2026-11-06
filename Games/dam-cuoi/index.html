@@ -67,11 +67,12 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   /* V12b vong 2 — #spot NAM TRONG #world (the-gioi) chu khong phai man
      hinh: hop cu (top 18%, cao 27%) dat tam radial o the-gioi y ~41%,
      roi ngoai khung khi camera zoom vao cap (the-gioi y ~61%). Doi hop
-     xuong top 38% (bao the-gioi y 38-65%) de tam radial (50% 88%) roi
-     dung y ~62% tren nguoi cap. Khi cap dien camera luon bam cap nen
-     hop moi la dung cho; luc khong dien spot tat (opacity 0) nen khong
-     anh huong khung rong. */
-  #spot{position:absolute;left:50%;top:38%;width:31%;height:27%;transform:translateX(-50%);pointer-events:none;z-index:2;
+     V12b bo sung (2026-11-06, anh 26): doi hop xuong top 44% (bao
+     the-gioi y 44-71%) de tam radial (50% 88%) roi y ~68% (duoi cap,
+     tren tham) thay vi y ~62% — tam cu nam ngay cau thang/buc sang
+     san, chong voi tiergrade + aislebeam tao mang vang phang. Cap
+     (y ~61%) van nam trong quang spot (cach tam ~7% the-gioi). */
+  #spot{position:absolute;left:50%;top:44%;width:31%;height:27%;transform:translateX(-50%);pointer-events:none;z-index:2;
     background:radial-gradient(ellipse at 50% 88%,rgba(255,225,150,var(--spot-a)),rgba(255,225,150,.12) 42%,transparent 72%);
     opacity:0;transition:opacity .8s}
   #spot.on{opacity:1;animation:spotPulse 2.6s ease-in-out infinite}
@@ -170,17 +171,17 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   #stage[data-tier="5"]{--tg-stage:.45;--tg-tint:rgba(255,170,70,.08);--tg-side:.24;--ab-op:.6;--sc-op:.25;--spot-a:.75}
   #tiergrade{position:absolute;inset:0;z-index:2;pointer-events:none;
     background:
-      /* V12b vong 2 — NGUYEN NHAN GOC vua tim ra: cac lop sang the-gioi
-         truoc day neo o y 38-42% (san khau trong anh nen), nhung khi cap
-         dien camera zoom ~3.45x va chi thay vung the-gioi y 43-86% — tam
-         sang roi HOAN TOAN NGOAI KHUNG, cap (the-gioi y ~61%) khong duoc
-         chieu truc tiep. Doi tam radial ve y 54% (giua san khau va cho
-         cap dung dien) + mo rong ban kinh 22% -> 26% de duoi toi giua
-         tham. Roi DOC gan nguon (tam -> 40% o 38% ban kinh) roi duoi mo
-         dai toi 78%. */
-      radial-gradient(ellipse 36% 26% at 50% 54%,rgba(255,226,150,var(--tg-stage)),rgba(255,220,160,calc(var(--tg-stage)*.4)) 38%,transparent 78%),
-      /* Lop 2 — tint am rong: cung tam moi (y 54%), mo dan ra xa, het o 70%. */
-      radial-gradient(ellipse 60% 48% at 50% 54%,var(--tg-tint),transparent 70%),
+      /* V12b bo sung (2026-11-06, anh 26): doi tam radial xuong y 64%
+         (tren nguoi cap / dau tham) thay vi y 54% — tam cu nam dung
+         vung buc san khau + cau thang (nen von sang vang, co canh
+         thang) nen 4 lop sang chong len nhau tao thanh 1 mang vang
+         phang hinh chu nhat quanh san khau, vay vang cua co dau chim
+         luon vao nen. Tam moi o y 64% thi sang tap trung vao cap +
+         tham duoi, buc/cau thang phia tren chi con duoi mo cua quang. */
+      radial-gradient(ellipse 36% 26% at 50% 64%,rgba(255,226,150,var(--tg-stage)),rgba(255,220,160,calc(var(--tg-stage)*.4)) 38%,transparent 78%),
+      /* Lop 2 — tint am rong: cung tam moi (y 64%), hep 48% -> 40% de
+         tint khong tran len buc san khau, mo dan ra xa, het o 70%. */
+      radial-gradient(ellipse 60% 40% at 50% 64%,var(--tg-tint),transparent 70%),
       linear-gradient(90deg,rgba(24,4,16,var(--tg-side)) 0%,transparent 16%,transparent 84%,rgba(24,4,16,var(--tg-side)) 100%)}
   /* Ánh sáng dọc thảm đỏ giữa — SỬA sau chẩn đoán 2026-11-05 (xem dưới):
      bản cũ là hình thang clip-path + gradient dọc + screen ở opacity 1
@@ -192,12 +193,12 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
      4 phía) + mask dọc làm mờ dần cả đầu trên lẫn cuối dưới — không
      còn đường thẳng nào. Hẹp hơn (rộng 16%, ôm sát thảm giữa) và đỉnh
      ở mốc cao đã giảm (xem --ab-op: mốc 5 chỉ còn .5 sau V12). */
-  /* V12b vong 2 — doi tam radial xuong 28% hop (the-gioi y ~54%, giua
-     san khau va cho cap dung) + mo rong ban kinh doc 46% -> 58% de duoi
-     sang toi tham duoi (d/e) trong khung camera zoom. Tam cu (12% hop,
-     the-gioi y ~44%) roi ngoai khung khi camera zoom vao cap. */
+  /* V12b bo sung (2026-11-06, anh 26): doi tam radial xuong 45% hop
+     (the-gioi y ~65%, dau tham) thay vi 28% hop (y ~54%, ngay cau
+     thang) — tam cu chong sang len cau thang/buc von sang san, cung
+     voi tiergrade + spot tao mang vang phang co canh thang. */
   #aislebeam{position:absolute;left:42%;top:36%;width:16%;height:64%;z-index:2;pointer-events:none;
-    background:radial-gradient(ellipse 50% 58% at 50% 28%,rgba(255,238,190,.55),rgba(255,214,140,.22) 42%,transparent 82%);
+    background:radial-gradient(ellipse 50% 58% at 50% 45%,rgba(255,238,190,.55),rgba(255,214,140,.22) 42%,transparent 82%);
     mix-blend-mode:screen;opacity:var(--ab-op);transition:opacity 2s;
     -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 8%,#000 58%,transparent 88%);
     mask-image:linear-gradient(to bottom,transparent 0%,#000 8%,#000 58%,transparent 88%)}
