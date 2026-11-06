@@ -561,19 +561,32 @@ function renderBoard() {
   renderRevealList();
   renderTimer();
 }
-/* Bảng hiệu lớp: Tiết {tiết} · Câu {câu}/20 · {views} bạn.
-   Lúc giờ ra chơi: Giờ ra chơi {còn}/30 (đếm ngược, như ảnh họ). */
+/* Bảng hiệu lớp: Tiết {tiết} · Câu {câu}/20 · {chế độ} · {views} bạn.
+   Lúc giờ ra chơi: Giờ ra chơi {còn}/30 · {chế độ} (đếm ngược, như ảnh họ).
+   LH-V1: chế độ chỉ ĐỌC cfg.cheDo (key + logic chọn đề do LH-Q định
+   nghĩa — KHÔNG định nghĩa key ở đây); chưa có key thì mặc định Tổng hợp. */
+function cheDoLabel() {
+  const v = cfg.cheDo;
+  if (v === 'olympic') return 'Olympic';
+  if (v === 'tong-hop' || v == null || v === '') return 'Tổng hợp';
+  const known = { 'toan': 'Lớp Toán', 'dia-ly': 'Lớp Địa lí', 'lich-su': 'Lớp Lịch sử', 'doi-song': 'Lớp Đời sống', 'do-an': 'Lớp Đồ ăn' };
+  if (known[v]) return known[v];
+  const s = String(v).trim();
+  if (/[ A-ZÀ-Ỹ]/.test(s)) return s; // đã là nhãn hiển thị thì dùng nguyên
+  return 'Lớp ' + s.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+}
 function renderSign() {
   const el = $('signLine2');
   if (!el) return;
+  const mode = cheDoLabel();
   if (round && round.phase === 'break') {
     const left = Math.max(0, Math.ceil((round.phaseEnd - Date.now()) / 1000));
-    el.textContent = 'Giờ ra chơi ' + left + '/30';
+    el.textContent = 'Giờ ra chơi ' + left + '/30 · ' + mode;
     return;
   }
   const qInTiet = roundNo < 1 ? 1 : ((roundNo - 1) % 20) + 1;
   const tiet = roundNo < 1 ? 1 : Math.floor((roundNo - 1) / 20) + 1;
-  el.textContent = 'Tiết ' + tiet + ' · Câu ' + qInTiet + '/20 · ' + viewsTotal() + ' bạn';
+  el.textContent = 'Tiết ' + tiet + ' · Câu ' + qInTiet + '/20 · ' + mode + ' · ' + viewsTotal() + ' bạn';
 }
 /* Panel "Nhanh nhất" dưới bảng: top 3 người trả lời đúng nhanh nhất
    (avatar mặt trước + tên + thời gian; lúc công bố hiện +điểm). */
@@ -642,7 +655,8 @@ function renderInteract() {
   const list = [...interact.values()].sort((a, b) => b.pts - a.pts).slice(0, 5);
   if (!list.length) { box.innerHTML = '<div class="empty">Tương tác để lên top nè!</div>'; return; }
   box.innerHTML = list.map((s, i) => {
-    const medal = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][i] || '';
+    // LH-V1: hạng 4-5 hiện số thường như ảnh họ (trước: emoji 4️⃣/5️⃣).
+    const medal = ['🥇', '🥈', '🥉', '4', '5'][i] || '';
     return '<div class="top-row">' + medal + ' <b>' + esc(s.name) + '</b><span class="pts">' + s.pts + '</span></div>';
   }).join('');
 }

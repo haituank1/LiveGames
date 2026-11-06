@@ -41,15 +41,30 @@
     text-align: center; padding: 3px 8px 4px; box-shadow: 0 4px 10px rgba(0,0,0,.25);
   }
   #signLine1 { font-size: 29px; font-weight: 900; color: #5d4037; letter-spacing: 1px; line-height: 1.1; }
-  #signLine2 { font-size: 15px; font-weight: 700; color: #8a5a2b; }
+  /* LH-V1: 14px (thay 15px) để dòng 2 đủ chỗ thêm chế độ lớp
+     ("Tiết 1 · Câu 1/20 · Tổng hợp · 42 bạn") mà không tràn. */
+  #signLine2 { font-size: 14px; font-weight: 700; color: #8a5a2b; white-space: nowrap; }
 
-  /* Banner khau hieu do/vang ngay duoi bang hieu */
+  /* Banner khau hieu do ngay duoi bang hieu — LH-V1: giong y anh mau:
+     chu TRANG tren nen do ("NGHE HET DE – GO MOI AN DIEM", chi la
+     khau hieu hien thi), khong con chu vang + vien vang nhu v17
+     (doi voi chot TIEN HOC LE o v17 + handbook §7.2 — BOSS xac nhan
+     lai; doi mau chi tiet de nv5 chuan hoa). */
   #mottoBar {
     position: absolute; left: 2%; top: 6.8%; width: 96%; z-index: 9;
-    background: linear-gradient(#e53935, #b71c1c); color: #ffeb3b;
+    background: linear-gradient(#e53935, #b71c1c); color: #fff;
     font-size: 25px; font-weight: 900; letter-spacing: 2px; text-align: center;
-    padding: 5px 0; border-radius: 8px; border: 2px solid #ffd54f;
+    padding: 5px 0; border-radius: 8px; border: 2px solid #7f0000;
     box-shadow: 0 4px 12px rgba(150,20,0,.35); text-shadow: 0 2px 0 rgba(0,0,0,.3);
+  }
+
+  /* Ticker duoi bang nhu anh ho: dai nau dam, chu trang, 1 dong. */
+  #ticker {
+    position: absolute; left: 19%; top: 33.8%; width: 62%; z-index: 9;
+    background: rgba(62,39,35,.92); color: #fff;
+    font-size: 14px; font-weight: 700; text-align: center;
+    padding: 4px 10px; border-radius: 999px; white-space: nowrap; overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
   }
 
   /* Bang xanh la — de len dung bang xanh trong anh nen v16
@@ -120,9 +135,12 @@
   .top-row .pts { flex-shrink: 0; font-weight: 700; color: #e65100; }
   .empty { font-size: 12px; color: #888; }
 
-  /* Cot phai 4 panel nhu anh ho: Su kien / Thi dua to / Quy lop / Top Tuong tac */
+  /* Cot phai 4 panel nhu anh ho: Su kien / Thi dua to / Quy lop / Top Tuong tac
+     LH-V1: rong 24% (thay 20%) — anh mau cot phai rong hon han, rail 20%
+     lam "Duong len dinh Everest" cat "…" (do duoc: scrollWidth 146 > 122).
+     Rail van nam tren bang (z 9 > 6) nhu v17, chi rong them ve trai. */
   #rightRail {
-    position: absolute; right: 1.5%; top: 1%; width: 20%; z-index: 9;
+    position: absolute; right: 1.5%; top: 1%; width: 24%; z-index: 9;
     display: flex; flex-direction: column; gap: 6px;
   }
   .rail-panel {
@@ -130,12 +148,18 @@
     border: 3px solid #fb8c00; border-radius: 14px; padding: 6px 8px;
     box-shadow: 0 6px 16px rgba(90,50,10,.22), inset 0 1px 0 #fff;
   }
-  .rail-panel .panel-title { color: #e65100; font-size: 13px; white-space: nowrap; }
+  /* LH-V1: tieu de panel duoc xuong dong thay vi nowrap — khong bao gio
+     cat chu (truoc: "SU KIEN TRONG LOP" tran 2px o 12px). */
+  .rail-panel .panel-title { color: #e65100; font-size: 13px; }
   #eventPanel { border-color: #7e57c2; }
   #eventPanel .panel-title { color: #5e35b1; font-size: 12px; }
-  .ev-row { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* LH-V1: ten su kien xuong dong thay vi "…" (nhu anh ho thi vua 1 dong
+     o rail 24%; xuong dong chi la luoi an toan neu ten dai hon). */
+  .ev-row { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; line-height: 1.3; }
+  /* LH-V1: huy hieu "DANG DIEN RA" can giua, rong het panel nhu anh ho
+     (truoc: inline-block lech trai). */
   .ev-live {
-    display: inline-block; background: linear-gradient(#e53935, #b71c1c); color: #fff;
+    display: block; text-align: center; background: linear-gradient(#e53935, #b71c1c); color: #fff;
     font-size: 11px; font-weight: 800; border-radius: 6px; padding: 2px 8px; margin-top: 3px;
   }
   .gv-row {
@@ -149,10 +173,19 @@
   .gv-red { background: linear-gradient(#ef5350, #e53935); }
   .gv-orange { background: linear-gradient(#ffa726, #fb8c00); }
   #fundPanel .panel-title { color: #c2185b; }
-  .fund-num { font-size: 26px; font-weight: 900; color: #c2185b; text-align: center; line-height: 1.1; }
-  .fund-line { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* LH-V1: so Quy lop nam CUNG dong voi tieu de nhu anh ho
+     ("Quy lop 106", so to ben phai) thay vi dong rieng can giua. */
+  .fund-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+  .fund-head .panel-title { margin-bottom: 0; }
+  .fund-num { font-size: 26px; font-weight: 900; color: #c2185b; line-height: 1.1; }
+  /* LH-V1: dong Quy lop duoc xuong dong thay vi "…" (hien vua 1 dong o rail 24%). */
+  .fund-line { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; line-height: 1.3; }
   .fund-cnt { float: right; color: #c2185b; font-weight: 900; }
   #interactPanel .panel-title { color: #e65100; }
+  /* LH-V1: hang Top Tuong tac 12px (thay 13px ke thua .top-row) de ten dai
+     nhu "Mai Xuan Chinh" du cho hien du; chi ap cho panel phai, khong
+     dung toi BXH ben trai (#topPanel). */
+  #interactPanel .top-row { font-size: 12px; }
 
   /* Panel "Nhanh nhat" ngay duoi bang */
   #fastestPanel {
@@ -320,9 +353,9 @@
 
   <div id="classSign">
     <div id="signLine1">LỚP HỌC CHỮ</div>
-    <div id="signLine2">Tiết 1 · Câu 1/20 · 0 bạn</div>
+    <div id="signLine2">Tiết 1 · Câu 1/20 · Tổng hợp · 0 bạn</div>
   </div>
-  <div id="mottoBar">TIÊN HỌC LỄ – HẬU HỌC VĂN</div>
+  <div id="mottoBar">NGHE HẾT ĐỀ – GÕ MỚI ĂN ĐIỂM</div>
 
   <div id="board">
     <div id="qCat">Cô Ngân đang chuẩn bị câu đố…</div>
@@ -333,6 +366,7 @@
     <div id="qAnswer"></div>
   </div>
   <div id="timerBarWrap"><div id="timerBar"></div></div>
+  <div id="ticker">💬 Tương tác nhiều để giữ chỗ trong lớp nhé!</div>
 
   <div id="topPanel">
     <div class="panel-title">🏆 Học sinh xuất sắc</div>
@@ -354,8 +388,7 @@
       <div class="gv-row gv-orange"><span>Tổ 4</span><span class="cnt">4 bạn</span><span>0đ</span></div>
     </div>
     <div class="rail-panel" id="fundPanel">
-      <div class="panel-title">❤️ Quỹ lớp</div>
-      <div class="fund-num" id="fundTotal">0</div>
+      <div class="fund-head"><div class="panel-title">❤️ Quỹ lớp</div><div class="fund-num" id="fundTotal">0</div></div>
       <div class="fund-line" id="fundCatTang">🎁 Gửi tặng cô <b class="fund-cnt">0</b></div>
       <div class="fund-line" id="fundCatHoa">🌸 Tặng cô hoa <b class="fund-cnt">0</b></div>
       <div class="fund-line" id="fundCatTim">💗 Bắn tim cho cô <b class="fund-cnt">0</b></div>
