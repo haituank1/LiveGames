@@ -40,29 +40,36 @@ const TEACHER_IMG = 'img/co-ngan.png';
 const STUDENT_IMGS = ['img/hoc-sinh-sau-1.png', 'img/hoc-sinh-sau-2.png', 'img/hoc-sinh-sau-3.png', 'img/hoc-sinh-sau-4.png', 'img/hoc-sinh-sau-5.png', 'img/hoc-sinh-sau-6.png'];
 const FRONT_IMGS = ['img/hoc-sinh-1.png', 'img/hoc-sinh-2.png', 'img/hoc-sinh-3.png', 'img/hoc-sinh-4.png', 'img/hoc-sinh-5.png', 'img/hoc-sinh-6.png'];
 
-/* SEATS v16d (2026-11-06 tối, user chốt bỏ vụ cắt mép bàn + tự canh
-   tọa độ): 20 ghế (4 hàng × 5). x/y = vị trí phần tử (%, học sinh neo
+/* SEATS v18 (LH-V2, 2026-11-06 tối — to theo ảnh mẫu, giữ editor
+   ?seats=1): 20 ghế (4 hàng × 5). x/y = vị trí phần tử (%, học sinh neo
    translate(-50%,-100%) nên ĐÁY hình = y, đặt y đúng đỉnh bàn thì ngực
    cắt chạm mép bàn như ảnh họ — không dải mặt bàn, không mặt nạ, không
    cắt nào nữa. w = rộng ảnh (px); ảnh học sinh mới 600×600 (tỉ lệ 1.0,
-   đầu + vai cắt ngang ngực), w 48/56/64/74 → thân hiện 48/56/64/74px.
+   đầu + vai cắt ngang ngực).
+   w CŨ 48/56/64/74 cho đầu chỉ ~28/33/38/44px — đo từ ảnh mẫu: đầu
+   học sinh ~40/48/55/63px ở khung 720 (đầu ≈ 59% bề rộng ảnh sau-lưng).
+   w MỚI 68/74/87/96 cho đầu ~40/44/51/57px (≈90–100% ảnh mẫu).
+   Giới hạn trên do chip hàng trên: đầu hàng dưới không được che chip
+   hàng trên (chip cao ~24px, chipY = y + 0,3%) — w2 ≤ 74, w3 ≤ 87,
+   w4 ≤ 96 (đầu hàng dưới chạm đúng mép dưới chip hàng trên).
+   y = đỉnh bàn ĐO TỪ ẢNH NỀN v17 (tia nắng): 48,7/56,2/64,6/73,7 —
+   đã kiểm chứng đáy hình chạm đỉnh bàn 0 lệch (verify-v17).
    chipY = top (%) của chip tên + điểm (ngay dưới mép bàn, trên mặt
-   trước bàn, như ảnh họ). y = đỉnh bàn ĐO TỪ ẢNH NỀN v17 (tia nắng):
-   48,7/56,2/64,6/73,7 (bàn dịch lên 0,3–1% so với v16). Tọa độ từng ghế
-   user tự canh bằng ?seats=1 (xem P.setEditMode ở cuối file). */
+   trước bàn, như v17 chốt). Tọa độ từng ghế user tự canh bằng
+   ?seats=1 (xem P.setEditMode ở cuối file). */
 const SEATS = [
-  { x: 10, y: 48.7, w: 48, chipY: 49.0 }, { x: 30, y: 48.7, w: 48, chipY: 49.0 },
-  { x: 50, y: 48.7, w: 48, chipY: 49.0 }, { x: 70, y: 48.7, w: 48, chipY: 49.0 },
-  { x: 90, y: 48.7, w: 48, chipY: 49.0 },
-  { x: 10, y: 56.2, w: 56, chipY: 56.5 }, { x: 30, y: 56.2, w: 56, chipY: 56.5 },
-  { x: 50, y: 56.2, w: 56, chipY: 56.5 }, { x: 70, y: 56.2, w: 56, chipY: 56.5 },
-  { x: 90, y: 56.2, w: 56, chipY: 56.5 },
-  { x: 10, y: 64.6, w: 64, chipY: 64.9 }, { x: 30, y: 64.6, w: 64, chipY: 64.9 },
-  { x: 50, y: 64.6, w: 64, chipY: 64.9 }, { x: 70, y: 64.6, w: 64, chipY: 64.9 },
-  { x: 90, y: 64.6, w: 64, chipY: 64.9 },
-  { x: 10, y: 73.7, w: 74, chipY: 74.0 }, { x: 30, y: 73.7, w: 74, chipY: 74.0 },
-  { x: 50, y: 73.7, w: 74, chipY: 74.0 }, { x: 70, y: 73.7, w: 74, chipY: 74.0 },
-  { x: 90, y: 73.7, w: 74, chipY: 74.0 },
+  { x: 10, y: 48.7, w: 68, chipY: 49.0 }, { x: 30, y: 48.7, w: 68, chipY: 49.0 },
+  { x: 50, y: 48.7, w: 68, chipY: 49.0 }, { x: 70, y: 48.7, w: 68, chipY: 49.0 },
+  { x: 90, y: 48.7, w: 68, chipY: 49.0 },
+  { x: 10, y: 56.2, w: 74, chipY: 56.5 }, { x: 30, y: 56.2, w: 74, chipY: 56.5 },
+  { x: 50, y: 56.2, w: 74, chipY: 56.5 }, { x: 70, y: 56.2, w: 74, chipY: 56.5 },
+  { x: 90, y: 56.2, w: 74, chipY: 56.5 },
+  { x: 10, y: 64.6, w: 87, chipY: 64.9 }, { x: 30, y: 64.6, w: 87, chipY: 64.9 },
+  { x: 50, y: 64.6, w: 87, chipY: 64.9 }, { x: 70, y: 64.6, w: 87, chipY: 64.9 },
+  { x: 90, y: 64.6, w: 87, chipY: 64.9 },
+  { x: 10, y: 73.7, w: 96, chipY: 74.0 }, { x: 30, y: 73.7, w: 96, chipY: 74.0 },
+  { x: 50, y: 73.7, w: 96, chipY: 74.0 }, { x: 70, y: 73.7, w: 96, chipY: 74.0 },
+  { x: 90, y: 73.7, w: 96, chipY: 74.0 },
 ];
 /* Ghi đè tọa độ ghế do user tự canh (?seats=1): lưu localStorage, nạp
    khi mở game, ưu tiên hơn SEATS mặc định. */
