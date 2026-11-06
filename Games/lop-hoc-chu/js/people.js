@@ -40,36 +40,45 @@ const TEACHER_IMG = 'img/co-ngan.png';
 const STUDENT_IMGS = ['img/hoc-sinh-sau-1.png', 'img/hoc-sinh-sau-2.png', 'img/hoc-sinh-sau-3.png', 'img/hoc-sinh-sau-4.png', 'img/hoc-sinh-sau-5.png', 'img/hoc-sinh-sau-6.png'];
 const FRONT_IMGS = ['img/hoc-sinh-1.png', 'img/hoc-sinh-2.png', 'img/hoc-sinh-3.png', 'img/hoc-sinh-4.png', 'img/hoc-sinh-5.png', 'img/hoc-sinh-6.png'];
 
-/* SEATS v18 (LH-V2, 2026-11-06 tối — to theo ảnh mẫu, giữ editor
-   ?seats=1): 20 ghế (4 hàng × 5). x/y = vị trí phần tử (%, học sinh neo
+/* SEATS v19 (theo NỀN v18 — thay SEATS v18 theo nền v17): 20 ghế
+   (4 hàng × 5). x/y = vị trí phần tử (%, học sinh neo
    translate(-50%,-100%) nên ĐÁY hình = y, đặt y đúng đỉnh bàn thì ngực
    cắt chạm mép bàn như ảnh họ — không dải mặt bàn, không mặt nạ, không
    cắt nào nữa. w = rộng ảnh (px); ảnh học sinh mới 600×600 (tỉ lệ 1.0,
    đầu + vai cắt ngang ngực).
-   w CŨ 48/56/64/74 cho đầu chỉ ~28/33/38/44px — đo từ ảnh mẫu: đầu
-   học sinh ~40/48/55/63px ở khung 720 (đầu ≈ 59% bề rộng ảnh sau-lưng).
-   w MỚI 68/74/87/96 cho đầu ~40/44/51/57px (≈90–100% ảnh mẫu).
-   Giới hạn trên do chip hàng trên: đầu hàng dưới không được che chip
-   hàng trên (chip cao ~24px, chipY = y + 0,3%) — w2 ≤ 74, w3 ≤ 87,
-   w4 ≤ 96 (đầu hàng dưới chạm đúng mép dưới chip hàng trên).
-   y = đỉnh bàn ĐO TỪ ẢNH NỀN v17 (tia nắng): 48,7/56,2/64,6/73,7 —
-   đã kiểm chứng đáy hình chạm đỉnh bàn 0 lệch (verify-v17).
+   y = đỉnh bàn ĐO TRỰC TIẾP TỪ ẢNH NỀN v18 (nv3 warp dọc v17, đỉnh
+   623→704, 719→832, 827→960, 944→1088, 1093→1216): đo bằng profile
+   độ sáng cột x 300–420 — mép trên bàn là hàng tối (~40–100) rồi
+   nhảy lên mặt bàn sáng (~145–167): 704/832/960/1088/1216px =
+   55,0/65,0/75,0/85,0/95,0% (khớp đúng số nv3/BOSS báo; phương pháp
+   này đo lại v17 ra đúng 623/719/827/944/1093). Dùng 4 dải làm ghế:
+   55/65/75/85; dải 95% để trống như ảnh họ. Khoảng cách hàng đều
+   128px (10% × 1280).
+   w chốt theo ĐẦU học sinh đo từ ảnh mẫu (~40/48/55/63px ở khung
+   720; đầu ≈ 59% bề rộng ảnh sau-lưng): 68/81/93/107 → đầu
+   ~40/48/55/63px, khớp ảnh mẫu (không copy mù gợi ý 75/86/97/109
+   của nv3 — gợi ý đó cho đầu to hơn ảnh mẫu ở hàng 1–3). Giới hạn
+   trên do chip hàng trên (chip cao ~31px, chipY = y + 0,3%): đầu
+   hàng dưới chạm mép dưới chip hàng trên ở w ≈ 101; w 107 ở hàng 4
+   chỉ lấn ~5px sau chip (chip ở lớp trên, không che chữ — như v18
+   đã kiểm chứng bằng ảnh). Hàng 1: đầu top 641px, cách chân cô
+   (588px) 53px — hết lỗi hs nấp sau chân cô ở nền v17.
    chipY = top (%) của chip tên + điểm (ngay dưới mép bàn, trên mặt
    trước bàn, như v17 chốt). Tọa độ từng ghế user tự canh bằng
    ?seats=1 (xem P.setEditMode ở cuối file). */
 const SEATS = [
-  { x: 10, y: 48.7, w: 68, chipY: 49.0 }, { x: 30, y: 48.7, w: 68, chipY: 49.0 },
-  { x: 50, y: 48.7, w: 68, chipY: 49.0 }, { x: 70, y: 48.7, w: 68, chipY: 49.0 },
-  { x: 90, y: 48.7, w: 68, chipY: 49.0 },
-  { x: 10, y: 56.2, w: 74, chipY: 56.5 }, { x: 30, y: 56.2, w: 74, chipY: 56.5 },
-  { x: 50, y: 56.2, w: 74, chipY: 56.5 }, { x: 70, y: 56.2, w: 74, chipY: 56.5 },
-  { x: 90, y: 56.2, w: 74, chipY: 56.5 },
-  { x: 10, y: 64.6, w: 87, chipY: 64.9 }, { x: 30, y: 64.6, w: 87, chipY: 64.9 },
-  { x: 50, y: 64.6, w: 87, chipY: 64.9 }, { x: 70, y: 64.6, w: 87, chipY: 64.9 },
-  { x: 90, y: 64.6, w: 87, chipY: 64.9 },
-  { x: 10, y: 73.7, w: 96, chipY: 74.0 }, { x: 30, y: 73.7, w: 96, chipY: 74.0 },
-  { x: 50, y: 73.7, w: 96, chipY: 74.0 }, { x: 70, y: 73.7, w: 96, chipY: 74.0 },
-  { x: 90, y: 73.7, w: 96, chipY: 74.0 },
+  { x: 10, y: 55.0, w: 68, chipY: 55.3 }, { x: 30, y: 55.0, w: 68, chipY: 55.3 },
+  { x: 50, y: 55.0, w: 68, chipY: 55.3 }, { x: 70, y: 55.0, w: 68, chipY: 55.3 },
+  { x: 90, y: 55.0, w: 68, chipY: 55.3 },
+  { x: 10, y: 65.0, w: 81, chipY: 65.3 }, { x: 30, y: 65.0, w: 81, chipY: 65.3 },
+  { x: 50, y: 65.0, w: 81, chipY: 65.3 }, { x: 70, y: 65.0, w: 81, chipY: 65.3 },
+  { x: 90, y: 65.0, w: 81, chipY: 65.3 },
+  { x: 10, y: 75.0, w: 93, chipY: 75.3 }, { x: 30, y: 75.0, w: 93, chipY: 75.3 },
+  { x: 50, y: 75.0, w: 93, chipY: 75.3 }, { x: 70, y: 75.0, w: 93, chipY: 75.3 },
+  { x: 90, y: 75.0, w: 93, chipY: 75.3 },
+  { x: 10, y: 85.0, w: 107, chipY: 85.3 }, { x: 30, y: 85.0, w: 107, chipY: 85.3 },
+  { x: 50, y: 85.0, w: 107, chipY: 85.3 }, { x: 70, y: 85.0, w: 107, chipY: 85.3 },
+  { x: 90, y: 85.0, w: 107, chipY: 85.3 },
 ];
 /* Ghi đè tọa độ ghế do user tự canh (?seats=1): lưu localStorage, nạp
    khi mở game, ưu tiên hơn SEATS mặc định. */
