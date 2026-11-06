@@ -14,6 +14,13 @@ const { Mapper, editable } = require('./src/mapper');
 const { Settings } = require('./src/settings');
 const { serveStatic, listMedia, listBackgrounds } = require('./src/static');
 const { TtsEngine } = require('./src/tts');
+const { LatencyTracker } = require('./src/latency');
+
+/* Đo độ trễ đường webcast (mặc định TẮT, bật bằng config latencyLog hoặc --latency-log=1):
+   gom mẫu theo loại sự kiện, in tóm tắt mỗi 60s + xem qua GET /api/latency.
+   Xem định nghĩa các đoạn trong src/latency.js. */
+const latency = new LatencyTracker();
+let likeLogCount = 0;
 
 const tts = new TtsEngine(path.join(__dirname, 'voice-cache'));
 /* Trạng thái "NPC đang nói" — cổng ưu tiên voice dùng chung: game báo start/end
@@ -51,6 +58,7 @@ function loadConfig() {
   cfg.cliUser = (arg('user') || process.env.TIKTOK_USER || '').replace(/^@/, '');
   if (arg('port')) cfg.port = Number(arg('port'));
   if (arg('host')) cfg.host = arg('host');
+  if (arg('latency-log') != null) cfg.latencyLog = arg('latency-log') !== '0';
   return cfg;
 }
 
@@ -85,8 +93,36 @@ const viewerList = () => [...viewers.values()].sort((a, b) => b.last - a.last).s
   .map(v => ({ ...v, blocked: settings.isBlocked(v.user) }));
 
 /* ---------------- Phân phối sự kiện ---------------- */
+/* fanout ngoài khoảng này thì coi như đồng hồ lệch, không tính vào thống kê fanout/total */
+const LATENCY_FANOUT_MIN_MS = -60000;
+const LATENCY_FANOUT_MAX_MS = 10 * 60 * 1000;
+function recordLatency(raw, receivedAt, dispatchedAt) {
+  const localMs = dispatchedAt - receivedAt;
+  const evTs = Number(raw.eventTs) || 0;
+  let fanoutMs = null;
+  if (evTs > 0) {
+    const f = receivedAt - evTs;
+    if (f >= LATENCY_FANOUT_MIN_MS && f <= LATENCY_FANOUT_MAX_MS) fanoutMs = f;
+  }
+  const kind = raw.simulated ? `sim-${raw.kind}` : raw.kind;
+  latency.record(kind, fanoutMs, localMs);
+  // log từng sự kiện; like về theo đợt dày nên chỉ lấy mẫu 1/10 cho khỏi ngập log
+  if (raw.kind === 'like' && (++likeLogCount % 10) !== 0) return;
+  console.log(`[latency] ${kind} fanout=${fanoutMs != null ? fanoutMs + 'ms' : 'n/a'} local=${localMs}ms total=${fanoutMs != null ? (fanoutMs + localMs) + 'ms' : 'n/a'}`);
+}
+function logLatencySummary() {
+  const s = latency.summary();
+  for (const [kind, v] of Object.entries(s)) {
+    if (!v.localMs.n) continue;
+    const f = v.fanoutMs;
+    console.log(`[latency tổng] ${kind} n=${v.localMs.n} fanout med=${f.med}ms p90=${f.p90}ms min=${f.min}ms max=${f.max}ms | local med=${v.localMs.med}ms max=${v.localMs.max}ms | total med=${v.totalMs.med}ms p90=${v.totalMs.p90}ms${v.skippedClock ? ` | bỏ fanout ${v.skippedClock} mẫu (eventTs bất thường)` : ''}`);
+  }
+}
+
 function dispatch(raw) {
   if (!raw || !raw.user || !raw.user.id) return;
+  const dispatchStart = Date.now();
+  const receivedAt = raw.receivedAt || dispatchStart;   // sự kiện thật có receivedAt từ tiktok.js; sim thì lấy lúc vào dispatch
   const blocked = settings.isBlocked(raw.user);
   if (config.logEvents) {
     const u = raw.user.nickname;
@@ -110,6 +146,7 @@ function dispatch(raw) {
     if (!byGame.has(c.game)) byGame.set(c.game, mapper.map(c.game, raw).map(e => ({ ...e, id: ++seq })));
     for (const e of byGame.get(c.game)) send(c, e);
   }
+  if (config.latencyLog) recordLatency(raw, receivedAt, Date.now());
 }
 
 function injectRaw(raw) {
@@ -232,6 +269,7 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/') { res.writeHead(302, { Location: '/LiveBridge/public/admin.html' }); return res.end(); }
     if (url.pathname === '/api/games') return json(res, mapper.list());
     if (url.pathname === '/api/status') return json(res, { tiktok: tiktok.status, room, clients: clients.size, npcVoice, tts: tts.stats });
+    if (url.pathname === '/api/latency') return json(res, { enabled: !!config.latencyLog, summary: latency.summary() });
     if (url.pathname === '/api/voice/state') return json(res, { npcVoice });
     if (url.pathname === '/api/tts' && req.method === 'POST') {
       try {
@@ -298,6 +336,10 @@ server.listen(config.port, config.host, () => {
   console.log(`LiveBridge chạy tại ${base}`);
   console.log(`  Trang quản trị:   ${base}/`);
   console.log(`  Giả lập tặng quà: ${base}/LiveBridge/public/simulator.html`);
+  if (config.latencyLog) {
+    console.log('  Đo độ trễ webcast: BẬT (tóm tắt mỗi 60s, xem tại /api/latency)');
+    setInterval(logLatencySummary, 60000);
+  }
   const t = settings.data.tiktok;
   const user = config.cliUser || (t.autoConnect ? t.username : '');
   if (user) tiktok.start(user, t.signApiKey);

@@ -27,6 +27,14 @@ function normUser(d) {
   };
 }
 
+/* createTime của webcast (lúc TikTok tạo sự kiện). Connector có thể trả giây hoặc ms
+   tuỳ phiên bản → chuẩn hoá về ms epoch. Trả 0 khi không có (không đo được fanout). */
+const eventStamp = d => {
+  const t = Number(d && d.createTime);
+  const eventTs = !Number.isFinite(t) || t <= 0 ? 0 : (t < 1e12 ? t * 1000 : t);
+  return { eventTs, receivedAt: Date.now() };   // receivedAt = lúc callback connector chạy = lúc sự kiện tới máy này
+};
+
 class TikTokSource extends EventEmitter {
   /* opts: { autoReconnect, reconnectDelaySec, connectionOptions, debugRaw } */
   constructor(opts = {}) {
@@ -127,6 +135,7 @@ class TikTokSource extends EventEmitter {
       if ((giftType === 1 || g.combo === true) && !d.repeatEnd) return;
       emit({
         kind: 'gift',
+        ...eventStamp(d),
         user: normUser(d),
         giftId: d.giftId != null ? d.giftId : (g.id != null ? g.id : g.giftId),
         giftName: d.giftName || g.giftName || g.name || x.name || '',
@@ -135,11 +144,11 @@ class TikTokSource extends EventEmitter {
         count: Number(d.repeatCount || 1),
       });
     });
-    on('chat', d => emit({ kind: 'chat', user: normUser(d), text: String(d.comment != null ? d.comment : (d.content || '')) }));
-    on('like', d => emit({ kind: 'like', user: normUser(d), count: Number(d.likeCount || d.count || 1) }));
-    on('member', d => emit({ kind: 'join', user: normUser(d) }));
-    on('follow', d => emit({ kind: 'follow', user: normUser(d) }));
-    on('share', d => emit({ kind: 'share', user: normUser(d) }));
+    on('chat', d => emit({ kind: 'chat', ...eventStamp(d), user: normUser(d), text: String(d.comment != null ? d.comment : (d.content || '')) }));
+    on('like', d => emit({ kind: 'like', ...eventStamp(d), user: normUser(d), count: Number(d.likeCount || d.count || 1) }));
+    on('member', d => emit({ kind: 'join', ...eventStamp(d), user: normUser(d) }));
+    on('follow', d => emit({ kind: 'follow', ...eventStamp(d), user: normUser(d) }));
+    on('share', d => emit({ kind: 'share', ...eventStamp(d), user: normUser(d) }));
     // TikTok không báo khi ai rời phòng; ranks (v3) / topViewers (v1-2) là danh sách người xem top ĐANG ở trong phòng,
     // gửi id cho game để họ vẫn được tính điểm thời gian dù không tương tác
     on('roomUser', d => {
