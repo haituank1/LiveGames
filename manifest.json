@@ -1,7 +1,7 @@
 {
-  "commit": "c5cc842889a6e25f96128ec1555fb44807c615e3",
-  "short": "c5cc842",
-  "generatedAt": "2026-11-06T08:39:39.751Z",
+  "commit": "58153c297a0f33b9221d19377d3bd7e1cc0511e6",
+  "short": "58153c2",
+  "generatedAt": "2026-11-06T11:37:20.904Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -725,8 +725,8 @@
     },
     {
       "path": "Games/dam-cuoi/js/main.js",
-      "sha": "01416ab0f8f1b8b8439da78372346cd5dff7a78d",
-      "size": 159208
+      "sha": "7f16c9333f8d556a24abdbd1151e995c4a96228d",
+      "size": 161339
     },
     {
       "path": "Games/dam-cuoi/js/people.js",
@@ -1620,8 +1620,8 @@
     },
     {
       "path": "LiveBridge/config/mappings/dam-cuoi.json",
-      "sha": "e10efff6977d5b25f047b203d7cb1df00bec0420",
-      "size": 28692
+      "sha": "a7b4d9ac3d4219221ca461a81cb899f62f1150d1",
+      "size": 28718
     },
     {
       "path": "LiveBridge/config/mappings/san-nhay.json",
@@ -1640,8 +1640,8 @@
     },
     {
       "path": "LiveBridge/public/admin.html",
-      "sha": "ec8893a3ff6e8b9c91858887292dc1cf9246b9f9",
-      "size": 75931
+      "sha": "c58eb7fa906ce50a0ab1566bbc3938999d70fdb1",
+      "size": 76106
     },
     {
       "path": "LiveBridge/public/livebridge-client.js",
@@ -1675,8 +1675,8 @@
     },
     {
       "path": "LiveBridge/src/settings.js",
-      "sha": "f5eb6a3c08e68210b156ec08af613f96b5c684e9",
-      "size": 22467
+      "sha": "23404018dda2a7ad33b5741c3004b786d9f8da6a",
+      "size": 22482
     },
     {
       "path": "LiveBridge/src/static.js",
@@ -4815,8 +4815,8 @@
     },
     {
       "path": "manifest.json",
-      "sha": "25ff08e5cbd4508de3d7f03c00b63a7bd1400cdc",
-      "size": 50339
+      "sha": "0a76dad590e28d3ba1983b99c13cc16f1d55267f",
+      "size": 155638
     },
     {
       "path": "start-livebridge.bat",
@@ -4855,8 +4855,8 @@
     },
     {
       "path": "version.json",
-      "sha": "2585efe53b8f669e6fdc988b7a1afe53fa6389f6",
-      "size": 261
+      "sha": "474430b1169840bfd2eaa03fe7caf296b48b2870",
+      "size": 233
     }
   ]
 }

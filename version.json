@@ -1,7 +1,7 @@
 {
-  "commit": "c5cc842889a6e25f96128ec1555fb44807c615e3",
-  "short": "c5cc842",
-  "date": "2026-11-06T08:33:33Z",
-  "message": "merge nv2-nhan-vat-moi (F5b fix patch guest-boy2 DELIVER->DELIVERY 792fec3) into nv6",
-  "generatedAt": "2026-11-06T08:39:39.751Z"
+  "commit": "58153c297a0f33b9221d19377d3bd7e1cc0511e6",
+  "short": "58153c2",
+  "date": "2026-11-06T18:36:55+07:00",
+  "message": "Merge nv1-nut-xoay (F6 nut xoay man hinh) into main",
+  "generatedAt": "2026-11-06T11:37:20.904Z"
 }
