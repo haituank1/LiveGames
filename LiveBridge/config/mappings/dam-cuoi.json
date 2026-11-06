@@ -403,6 +403,7 @@
     "fxPhaoHoaMoiGiay": 20,
     "fxPhaoGiayMoiGiay": 20,
     "hieuUngThaTim": true,
+    "xoayManHinh": false,
     "timHieuUngChoGiay": 2,
     "mocTimHieuUng": 10,
     "diemMoiTim": 1,
