@@ -225,6 +225,10 @@ const DEFAULT_CFG = {
      tha, cap diemTimToiDa diem/nguoi/cap. */
   mocTimHieuUng: 10, diemMoiTim: 1, diemTimToiDa: 100, timHoaRoi: 50, timPhaoHoa: 3, timPhaoGiay: 50,
   rongKhungMc: 100, rongThongBao: 100, khungThongBaoX: 0, khungThongBaoY: 0,
+  /* F6b (nv1, 2026-11-06): xoay man hinh qua config LiveBridge (user doi
+     nut tu trang game sang config) — mac dinh TAT; bat thi game xoay 90
+     do de xem ngang tren man laptop (chi de xem, live van quay game doc). */
+  xoayManHinh: false,
 };
 const known = new Map();       // user.id -> user (để parse tag theo tên)
 const nameFoldCache = new Map();   // M13: user.id -> { nick, uid } (ten da gap, xem foldedNames)
@@ -2111,6 +2115,30 @@ function applyPanelPos() {
   root.setProperty('--by', String(cfg.bannerY != null ? cfg.bannerY : 30));
 }
 /* ============ Cấu hình ============ */
+/* F6b (nv1, 2026-11-06): XOAY MAN HINH qua config LiveBridge — user doi
+   nut tu trang game (F6, nut noi) sang config (checkbox o trang quan tri
+   LiveBridge). Chi xoay container NGOAI (#stage) bang transform, KHONG
+   dung layout / vi tri / logic ben trong game. Cong thuc (doc viewport
+   TRUOC khi xoay): stage goc la doc (sw x sh, resize() dat); xoay 90 do
+   thi khung hien thi thanh sh x sw; scale vua viewport, giu ti le:
+   S = min(vw / sh, vh / sw). Vi du 1920x1080, stage 607.5x1080:
+   S = min(1920/1080, 1080/607.5) = 1.78 -> khung xoay 1920x1080, vua
+   dung viewport, can giua. applyConfig dat co rotateOn theo
+   cfg.xoayManHinh roi goi applyRotate(); resize() goi lai applyRotate()
+   de tinh lai scale khi cua so doi kich thuoc luc dang xoay.
+   LUU Y: day la cai dat TOAN CUC cua game (ai mo game cung thay xoay)
+   — chi bat khi xem tren laptop, NHO TAT khi live (live van quay
+   game doc). Chu van nghieng theo khi xoay (MC, bang lenh, BXH...). */
+let rotateOn = false;
+function applyRotate() {
+  if (!stageEl) return;
+  if (!rotateOn) { stageEl.style.transform = ''; return; }
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const sw = stageEl.offsetWidth, sh = stageEl.offsetHeight;
+  if (!sw || !sh || !vw || !vh) return;
+  const s = Math.min(vw / sh, vh / sw);
+  stageEl.style.transform = 'translate(-50%,-50%) rotate(90deg) scale(' + s + ')';
+}
 function applyConfig(c) {
   cfg = c || {};
   /* Chuẩn hoá MỌI key danh sách ngay đầu vào, VÔ ĐIỀU KIỆN: settings.json
@@ -2201,6 +2229,11 @@ function applyConfig(c) {
   try { applyShowAll(); } catch (e) { console.warn('[dam-cuoi] showall:', e.message); }
   A.setConfig(cfg);
   } catch (e) { console.error('[dam-cuoi] applyConfig loi o phan cau hinh:', e); }
+  /* F6b: ap cai dat xoay man hinh tu config (rieng try/catch de loi xoay
+     khong giet applyConfig). Config moi tu LiveBridge (admin doi checkbox)
+     chay lai applyConfig nen bat/tat xoay co hieu luc ngay, khong can tai
+     lai trang. */
+  try { rotateOn = cfg.xoayManHinh === true; applyRotate(); } catch (e) { console.warn('[dam-cuoi] xoay man hinh:', e.message); }
   /* Hàng UI chạy SAU và TỪNG BƯỚC RIÊNG: dù bất kỳ bước cấu hình nào ở trên
      còn vấp, các khung luật/hướng dẫn/BXH/nền VẪN phải hiện — test giả lập
      hay live thật đều thấy UI như nhau. */
@@ -2251,6 +2284,7 @@ function resize() {
   world.style.width = WW + 'px'; world.style.height = WH + 'px';
   P.resize(WW, WH);
   Cam.apply(false);
+  applyRotate();   // F6b: cua so doi kich thuoc luc dang xoay -> tinh lai scale theo viewport moi
 }
 addEventListener('resize', resize);
 document.addEventListener('fullscreenchange', () => { lastLayoutKey = ''; resize(); });
@@ -2354,7 +2388,7 @@ if (isDemo) {
     choCongMoiCapCho: 15, choCongMoiCapGhep: 8, choMienGhep: 2,
     choNguongVang: 300, choHeSoVang: 0.6, choNguongDong: 1500, choHeSoDong: 1.3,
     hieuUngNgauNhien: true, hieuUngNgauNhienTuGiay: 12, hieuUngNgauNhienDenGiay: 25,
-    fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20, hieuUngThaTim: true, timHieuUngChoGiay: 2, tuGhepDoiKhiRong: true, tuGhepDoiSauGiay: 5,
+    fxHoaRoiMoiGiay: 10, fxPhaoHoaMoiGiay: 20, fxPhaoGiayMoiGiay: 20, hieuUngThaTim: true, timHieuUngChoGiay: 2, tuGhepDoiKhiRong: true, tuGhepDoiSauGiay: 5, xoayManHinh: false,
     mocTimHieuUng: 10, diemMoiTim: 1, diemTimToiDa: 100, timHoaRoi: 50, timPhaoHoa: 3, timPhaoGiay: 50,
     lenhDoiGioiTinh: true, lenhDoiTrangPhuc: true, doiTrangPhucChoGiay: 5,
     hangChoToiDa: 4, choDoiLanThapGiay: 30,

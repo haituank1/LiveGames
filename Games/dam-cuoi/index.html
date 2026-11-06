@@ -45,12 +45,6 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
   #left,#side,#mc,#queue{--u:calc(var(--u0)*var(--k))}
   html,body{margin:0;height:100%;overflow:hidden;background:#2a0a18;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   #stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100vw;height:100vh;overflow:hidden;background:#2a0a18}
-  /* F6 (nv1, 2026-11-06): nut XOAY MAN HINH — nam NGOAI #stage (co dinh,
-     goc tren-phai) de khong bi xoay theo game; mo nhat, nho, khong che
-     game. Chi la thu nghiem xem tren may (live van quay game chua xoay). */
-  #rotateBtn{position:fixed;top:10px;right:10px;z-index:10000;padding:7px 12px;border:1px solid rgba(255,215,106,.55);border-radius:999px;background:rgba(42,10,24,.72);color:#ffd76a;font:600 13px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer}
-  #rotateBtn:hover{background:rgba(66,16,38,.85)}
-  #rotateBtn:focus-visible{outline:2px solid #ffd76a;outline-offset:2px}
   #bootdiag{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:99999;max-width:94%;background:rgba(20,0,8,.93);color:#ffd9e2;border:1px solid #ff5b7f;border-radius:10px;padding:8px 10px;font-size:11px;line-height:1.55;text-align:center;display:none;pointer-events:none}
   /* ---------- Phòng cưới rộng + camera lia ---------- */
   #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;background:#430b18}
@@ -414,53 +408,5 @@ window.__diag = { build: 'pipeline-b24', stage: 'html', errs: [], uiErr: '' };
 <script src="js/audio.js"></script>
 <script src="js/people.js"></script>
 <script src="js/main.js"></script>
-<button id="rotateBtn" type="button" aria-pressed="false" title="Xoay khung game 90 độ để xem ngang trên màn hình laptop (bấm lại để về dọc)">⟳ Xoay màn hình</button>
-<script>
-/* F6 (nv1, 2026-11-06): XOAY MAN HINH — thu nghiem xem game doc tren man
-   ngang (laptop 1920x1080). Chi xoay container NGOAI (#stage) bang
-   transform, KHONG dung layout / vi tri / logic ben trong game.
-   Loi cu (user gui anh): xoay khong thi khung game bi day ra ngoai vung
-   nhin thay, man hinh den gan het, chi con 1 vet nho o duoi — vi xoay
-   1 khung doc 9:16 ma khong tinh lai kich thuoc theo viewport.
-   Cong thuc (doc viewport TRUOC khi xoay — yeu cau bat buoc cua user):
-   stage goc la doc (sw x sh, resize() trong main.js dat theo viewport);
-   xoay 90 do thi khung hien thi thanh sh x sw. Scale vua viewport,
-   giu ti le, khong meo: S = min(vw / sh, vh / sw). Vi du 1920x1080,
-   stage 607.5x1080: S = min(1920/1080, 1080/607.5) = 1.78 -> khung
-   xoay 1920x1080, vua dung viewport, can giua.
-   Xoay ve: xoa inline transform, stylesheet tra lai translate goc.
-   Han che (khong sua, nhu BOSS da ghi): chu van nghieng theo (MC,
-   bang lenh, BXH...) vi xoay ca khung; vi tri banner/ten cap co the
-   lech nhe luc xoay vi placeBanner()/syncStageSpotlight() tinh tu
-   getBoundingClientRect() cua #stage (da xoay). */
-(function () {
-  var stage = document.getElementById('stage');
-  var btn = document.getElementById('rotateBtn');
-  if (!stage || !btn) return;
-  var rotated = false;
-  function applyRotate() {
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var sw = stage.offsetWidth, sh = stage.offsetHeight;
-    if (!sw || !sh || !vw || !vh) return;
-    var s = Math.min(vw / sh, vh / sw);
-    stage.style.transform = 'translate(-50%,-50%) rotate(90deg) scale(' + s + ')';
-    btn.textContent = '⟲ Xoay lại';
-    btn.setAttribute('aria-pressed', 'true');
-  }
-  function applyNormal() {
-    stage.style.transform = '';
-    btn.textContent = '⟳ Xoay màn hình';
-    btn.setAttribute('aria-pressed', 'false');
-  }
-  btn.addEventListener('click', function () {
-    rotated = !rotated;
-    if (rotated) applyRotate(); else applyNormal();
-  });
-  /* resize() trong main.js so huu width/height cua #stage (chi viet lai
-     khi viewport doi); nut nay chi so huu transform. Khi cua so doi
-     kich thuoc luc dang xoay, tinh lai scale theo viewport moi. */
-  window.addEventListener('resize', function () { if (rotated) applyRotate(); });
-})();
-</script>
 </body>
 </html>

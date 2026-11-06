@@ -181,7 +181,7 @@ class Settings {
         zoomPairMax: [0.5, 2, 1.1], zoomSolo: [0.5, 2, 1.12] },
     };
     const BOOL_BY_GAME = {
-      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung', 'hieuUngThaTim', 'lenhGhepDoi', 'tuGhepDoiKhiRong'],
+      'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung', 'hieuUngThaTim', 'lenhGhepDoi', 'tuGhepDoiKhiRong', 'xoayManHinh'],
       'san-nhay': ['hieuUngDen', 'khuayDong', 'lamMoKhiLia', 'liaCamLenTrenCung', 'partyMaxNhanhHon', 'phuKienQua'],
     };
     const CHOICE_BY_GAME = {   // key: [các giá trị cho phép, mặc định]
