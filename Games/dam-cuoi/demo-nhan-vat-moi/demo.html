@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>F5 — So sánh nhân vật cũ / mới</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 720px; height: 1280px; overflow: hidden; background: #1a0b12; }
+  body { font-family: system-ui, -apple-system, sans-serif; color: #fff; }
+  .scene { position: relative; width: 720px; height: 640px; overflow: hidden;
+    background: url("../bg-full.webp") center / cover no-repeat; }
+  .scene + .scene { border-top: 4px solid #fff; }
+  .tag { position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,.65); padding: 6px 16px; border-radius: 20px;
+    font-size: 20px; font-weight: 700; letter-spacing: 1px; z-index: 5; }
+  .half { position: absolute; top: 0; bottom: 0; width: 360px; }
+  .half.left { left: 0; } .half.right { right: 0; }
+  .half.right::before { content: ""; position: absolute; left: 0; top: 56px; bottom: 0;
+    width: 2px; background: rgba(255,255,255,.65); }
+  .lbl { position: absolute; top: 52px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,.6); padding: 4px 14px; border-radius: 14px;
+    font-size: 18px; font-weight: 700; z-index: 4; white-space: nowrap; }
+  .lbl.new { background: rgba(180,20,40,.85); }
+  .couple { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: flex-end; }
+  .couple img { display: block; }
+  /* Co san khau: cao 340px de cap doi (~330px rong) vua trong nua 360px */
+  .stage .couple img.bride { height: 340px; }
+  .stage .couple img.groom { height: 340px; margin-left: -28px; }
+  /* Trong sanh: khach ~170px, cap doi cung co do */
+  .hall .couple img.bride, .hall .couple img.groom { height: 175px; }
+  .hall .couple img.groom { margin-left: -12px; }
+  .guest { position: absolute; bottom: 0; height: 175px; }
+  .note { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,.55); padding: 3px 12px; border-radius: 12px;
+    font-size: 13px; z-index: 5; white-space: nowrap; }
+</style>
+</head>
+<body>
+  <!-- NUA TREN: co san khau -->
+  <div class="scene stage">
+    <div class="tag">CỠ SÂN KHẤU</div>
+    <div class="half left">
+      <div class="lbl">CŨ</div>
+      <div class="couple">
+        <img class="bride" src="../img/bride.png" alt="Cô dâu cũ">
+        <img class="groom" src="../img/groom.png" alt="Chú rể cũ">
+      </div>
+    </div>
+    <div class="half right">
+      <div class="lbl new">MỚI</div>
+      <div class="couple">
+        <img class="bride" src="../img/bride-moi.png" alt="Cô dâu mới">
+        <img class="groom" src="../img/groom-moi.png" alt="Chú rể mới">
+      </div>
+    </div>
+  </div>
+  <!-- NUA DUOI: trong sanh, cung khach -->
+  <div class="scene hall">
+    <div class="tag">TRONG SẢNH (cùng khách)</div>
+    <img class="guest" style="left: 0;" src="../img/guest-girl.png" alt="">
+    <img class="guest" style="right: 0;" src="../img/guest-boy2.png" alt="">
+    <div class="half left">
+      <div class="lbl">CŨ</div>
+      <div class="couple">
+        <img class="bride" src="../img/bride.png" alt="Cô dâu cũ">
+        <img class="groom" src="../img/groom.png" alt="Chú rể cũ">
+      </div>
+    </div>
+    <div class="half right">
+      <div class="lbl new">MỚI</div>
+      <div class="couple">
+        <img class="bride" src="../img/bride-moi.png" alt="Cô dâu mới">
+        <img class="groom" src="../img/groom-moi.png" alt="Chú rể mới">
+      </div>
+    </div>
+    <div class="note">Demo tĩnh so sánh — không phải game live</div>
+  </div>
+</body>
+</html>
