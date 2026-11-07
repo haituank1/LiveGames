@@ -37,21 +37,22 @@ function hash(s) { let h = 0; s = String(s || ''); for (let i = 0; i < s.length;
 function esc(s) { return String(s || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 
 const TEACHER_IMG = 'img/co-ngan.png';
-/* Giáo viên theo môn học (cheDo): 9 giáo viên, mỗi môn 1 người, cùng
-   phong cách vẽ 2D anime với Cô Ngân (người lớn, đứng ở bảng, dáng
-   giơ tay/chỉ bảng, thẻ tên vẽ trong ảnh). tong-hop / olympic / lạ
-   → Cô Ngân (áo dài đỏ) mặc định. Giọng đọc KHÔNG đổi: mọi giáo
-   viên vẫn dùng GV02LemLinh — chỉ đổi ảnh + tên. */
+/* Giáo viên theo môn học (cheDo): 9 cô giáo (LH-GV2: tất cả nữ, áo
+   dài trắng, tư thế 1 tay chỉ bảng + 1 tay ngang eo), mỗi môn 1
+   người, cùng phong cách vẽ 2D anime với Cô Ngân (người lớn, đứng
+   ở bảng, thẻ tên vẽ trong ảnh). tong-hop / olympic / lạ → Cô Ngân
+   (áo dài đỏ) mặc định. Giọng đọc KHÔNG đổi: mọi giáo viên vẫn
+   dùng GV02LemLinh — chỉ đổi ảnh + tên. */
 const TEACHERS = {
   'tieng-viet': { name: 'Cô Mai Lan', img: 'img/gv-tieng-viet.png' },
-  'toan': { name: 'Thầy Minh Quân', img: 'img/gv-toan.png' },
+  'toan': { name: 'Cô Thu Hằng', img: 'img/gv-toan.png' },
   'khoa-hoc': { name: 'Cô Diệu Anh', img: 'img/gv-khoa-hoc.png' },
   'tieng-anh': { name: 'Cô Phương Thảo', img: 'img/gv-tieng-anh.png' },
-  'lich-su': { name: 'Thầy Văn Hiếu', img: 'img/gv-lich-su.png' },
-  'dia-ly': { name: 'Thầy Quốc Bảo', img: 'img/gv-dia-ly.png' },
+  'lich-su': { name: 'Cô Thanh Huyền', img: 'img/gv-lich-su.png' },
+  'dia-ly': { name: 'Cô Quỳnh Chi', img: 'img/gv-dia-ly.png' },
   'doi-song': { name: 'Cô Hồng Nhung', img: 'img/gv-doi-song.png' },
   'do-an': { name: 'Cô Ngọc Trâm', img: 'img/gv-do-an.png' },
-  'do-vui': { name: 'Thầy Bảo Long', img: 'img/gv-do-vui.png' },
+  'do-vui': { name: 'Cô Bảo Châu', img: 'img/gv-do-vui.png' },
 };
 const TEACHER_DEFAULT = { name: 'Cô Ngân', img: TEACHER_IMG };
 /* Vị trí + cỡ giáo viên từ config (key viTriGiaoVien): {x, y, w} —
