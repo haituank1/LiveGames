@@ -33,7 +33,7 @@ const DEFAULT_CFG = {
   mcName: 'MC Bong Bóng',
   npcVoiceOn: true, npcVoice: 'avocado_v2:rumi', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
   answerSec: 30, revealSec: 8, gapSec: 3,
-  cheDo: 'tong-hop', // chế độ lớp: tong-hop | <môn> | olympic — giáo viên hiện theo chế độ này (people.js setTeacherMode)
+  cheDo: 'tong-hop', // chế độ lớp: tong-hop | <chủ đề> | olympic — giáo viên hiện theo chế độ này (people.js setTeacherMode) + lọc câu hỏi theo chế độ (xem nextQuestion)
   breakSec: 30, breakWinPoints: 50, breakRevealSec: 20,
   viTriGiaoVien: '{"x":13,"y":42.5,"w":185}', // vị trí + cỡ giáo viên [{x,y,w}] — chuỗi JSON, user chỉnh qua admin (people.js applyTeacherPos); sai thì về vị trí Cô Ngân
   viTriGhe: '[{"x":10,"y":55,"w":68,"chipY":55.3},{"x":30,"y":55,"w":68,"chipY":55.3},{"x":50,"y":55,"w":68,"chipY":55.3},{"x":70,"y":55,"w":68,"chipY":55.3},{"x":90,"y":55,"w":68,"chipY":55.3},{"x":10,"y":65,"w":81,"chipY":65.3},{"x":30,"y":65,"w":81,"chipY":65.3},{"x":50,"y":65,"w":81,"chipY":65.3},{"x":70,"y":65,"w":81,"chipY":65.3},{"x":90,"y":65,"w":81,"chipY":65.3},{"x":10,"y":75,"w":93,"chipY":75.3},{"x":30,"y":75,"w":93,"chipY":75.3},{"x":50,"y":75,"w":93,"chipY":75.3},{"x":70,"y":75,"w":93,"chipY":75.3},{"x":90,"y":75,"w":93,"chipY":75.3},{"x":10,"y":85,"w":107,"chipY":85.3},{"x":30,"y":85,"w":107,"chipY":85.3},{"x":50,"y":85,"w":107,"chipY":85.3},{"x":70,"y":85,"w":107,"chipY":85.3},{"x":90,"y":85,"w":107,"chipY":85.3}]', // vị trí 20 ghế [{x,y,w,chipY}] — chuỗi JSON, user chỉnh qua admin (people.js applyConfigSeats); sai thì về SEATS v19
@@ -127,11 +127,23 @@ function saveFund() { lsSet(LS_FUND, JSON.stringify({ total: fundTotal, cats: fu
 loadFund();
 
 /* ---------- Vòng lặp câu hỏi ---------- */
+let deckMode = null; // chế độ (cfg.cheDo) mà bộ đề hiện tại được xáo theo
 function nextQuestion() {
   P.nextTeacherPose(); // xoay tư thế giáo viên mỗi lần đổi câu hỏi (LH-GV3) — câu đầu giữ A, từ câu 2 xoay A→B→C→A
   if (!QUESTIONS.length) return null;
-  if (!deck.length) {
-    deck = QUESTIONS.map((_, i) => i);
+  const mode = String(cfg.cheDo || 'tong-hop');
+  // Pool theo chế độ: tong-hop = mọi chủ đề; olympic = tổng hợp chỉ câu khó
+  // (d>=2); tên chủ đề = chỉ câu trong chủ đề đó. Pool rỗng (chủ đề lạ /
+  // chưa có câu) thì về tong-hop để game không chết.
+  let pool = QUESTIONS.map((_, i) => i);
+  if (mode === 'olympic') pool = pool.filter(i => (QUESTIONS[i].d || 1) >= 2);
+  else if (mode !== 'tong-hop') {
+    const byTopic = pool.filter(i => QUESTIONS[i].c === mode);
+    if (byTopic.length) pool = byTopic;
+  }
+  if (!deck.length || deckMode !== mode) {
+    deck = pool.slice();
+    deckMode = mode;
     for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
   }
   const idx = deck.pop();

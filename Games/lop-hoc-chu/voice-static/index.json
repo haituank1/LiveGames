@@ -895,12 +895,12 @@
     },
     {
       "id": "q-058-doc",
-      "key": "24c09f8b5f7c6156a217b159c97832ff5f8cff266837faa4e5b97ddc2f6b4385",
+      "key": "a18c7b2efbe1b98bfa83c475337aa160a7b0f6f8eaf281c68f39663bfd269332",
       "voice": "avocado_v2:rumi",
       "rate": 0,
-      "text": "Câu hỏi nè: Mũ hình nón làm bằng lá. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
-      "file": "24c09f8b5f7c6156a217b159.mp3",
-      "durationSec": 5.6
+      "text": "Câu hỏi nè: Mũ truyền thống của người Việt, che nắng che mưa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a18c7b2efbe1b98bfa83c475.mp3",
+      "durationSec": 6.8
     },
     {
       "id": "q-059-doc",
@@ -1459,6 +1459,906 @@
       "text": "Câu hỏi nè: Tỉnh có hang Sơn Đoòng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
       "file": "7b80d06612c68445810e9acb.mp3",
       "durationSec": 5.9
+    },
+    {
+      "id": "q-121-doc",
+      "key": "0638b1d369540826fb692eb719ec0e69a75189d4fcc2e04cf0421f8c906be3c0",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bảy cộng năm bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0638b1d369540826fb692eb7.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-122-doc",
+      "key": "c3fe70652dc41700f64da779dcf9efae77979359b2dcf42efc28b87709c7943d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Chín cộng sáu bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "c3fe70652dc41700f64da779.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-123-doc",
+      "key": "7b8e5d973130fcd1755beec425cd8d50523e9cd1294d5ab776248b06ccd571f0",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Mười cộng mười bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "7b8e5d973130fcd1755beec4.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-124-doc",
+      "key": "2925441bade58980eea314061a48541d2edd7e22affa8e961d09775f4188b54d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Chín nhân hai bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "2925441bade58980eea31406.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-125-doc",
+      "key": "92f14a75dcc8807233f6107ad22327f07b6024c6fc554de61d9202452ed95105",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Sáu nhân năm bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "92f14a75dcc8807233f6107a.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-126-doc",
+      "key": "6bf3562e09819723d9abbc3f439d07b1e1d87271861f305c378984fc9758ad0f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Mười nhân mười bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6bf3562e09819723d9abbc3f.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-127-doc",
+      "key": "93986436f05e57fef0f6c70d795246e15d49fcd2fda92452cdf283a3eaa07015",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tám nhân năm bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "93986436f05e57fef0f6c70d.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-128-doc",
+      "key": "fa8302cad231b33665536409241146ef04e97b2883b0ca14d2b5f734ac53e8cf",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bảy mươi trừ hai mươi bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "fa8302cad231b33665536409.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-129-doc",
+      "key": "cf3c673d24f16b6ab1a15e675c203586267cbb1fcfb0d2d7e7a0383f923d8167",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Năm nhân năm bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "cf3c673d24f16b6ab1a15e67.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-130-doc",
+      "key": "93d49937b36e62936e908704980f381bb5daf9891d72225d66315c39c88a93cb",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hai mươi trừ một bằng bao nhiêu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "93d49937b36e62936e908704.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-131-doc",
+      "key": "48b96d25067639b1de656148c437bf9a195ef1574fc3c8d791867caa9d570d3c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Phép tính lấy tổng của hai số. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "48b96d25067639b1de656148.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-132-doc",
+      "key": "13ec2dd024daf6d0e5fa2d8d1fdf73446c97c43aed9b99a543a202c315a7b3f4",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Phép tính lấy hiệu của hai số. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "13ec2dd024daf6d0e5fa2d8d.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-133-doc",
+      "key": "b68341cbee450180b6122d772658d449defca501305e5f0d1dadce3aeb8186b1",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Phép tính lấy tích của hai số. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "b68341cbee450180b6122d77.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-134-doc",
+      "key": "a396839526240301f768e45f5729df048b61c4448b4df328c4ff9159e4b9edf8",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Phép tính lấy thương của hai số. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a396839526240301f768e45f.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-135-doc",
+      "key": "ef801c43ef26f68b2171c509100d390612182b3c79a79de29b0069f3fbe20d23",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hình có bốn cạnh bằng nhau, bốn góc vuông. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "ef801c43ef26f68b2171c509.mp3",
+      "durationSec": 6.5
+    },
+    {
+      "id": "q-136-doc",
+      "key": "f671ec3ab3f8ba6076c72e5d8d9d455965a901be98531159baa53abacb780705",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hình không có cạnh, không có góc. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "f671ec3ab3f8ba6076c72e5d.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-137-doc",
+      "key": "1c520b731e224aac497751ad34c4870a7362ed21c897186f4c77b5f797ed24e9",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hình có ba cạnh, ba góc. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "1c520b731e224aac497751ad.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-138-doc",
+      "key": "bb0c3b3320e5668dd4dfa7565b19565190fdffd421f35a381c900aba74bd3056",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Số chia hết cho hai, ví dụ số bốn. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "bb0c3b3320e5668dd4dfa756.mp3",
+      "durationSec": 6.7
+    },
+    {
+      "id": "q-139-doc",
+      "key": "dc9776641080a324e861d2562e39a75a37c2c4af6d01526f49087e2d62eab82a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Số chia cho hai còn dư một, ví dụ số ba. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "dc9776641080a324e861d256.mp3",
+      "durationSec": 7.1
+    },
+    {
+      "id": "q-140-doc",
+      "key": "b246929363258db2c23936b9246fb1332de4d56cff8fea51fd21915987a36468",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Góc bằng chín mươi độ, như góc của quyển vở. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "b246929363258db2c23936b9.mp3",
+      "durationSec": 6.6
+    },
+    {
+      "id": "q-141-doc",
+      "key": "5b920f59624a0634c38fb595eaf1aad3c1e953e8c302c06cac108ac04f54d4c4",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Từ chỉ người, vật, hiện tượng, ví dụ từ bàn ghế. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "5b920f59624a0634c38fb595.mp3",
+      "durationSec": 7.9
+    },
+    {
+      "id": "q-142-doc",
+      "key": "cf8892fb6bb167533f5fec65b88a39ea79f6adbecbc92bfa7520bd6d279b71f8",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Từ chỉ hoạt động, ví dụ từ chạy nhảy. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "cf8892fb6bb167533f5fec65.mp3",
+      "durationSec": 6.5
+    },
+    {
+      "id": "q-143-doc",
+      "key": "3b97f7a83efafda787bb0f88e872fab24251abbfba197aabff23480561c8904b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Từ chỉ đặc điểm, ví dụ từ xinh đẹp. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "3b97f7a83efafda787bb0f88.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-144-doc",
+      "key": "83d4e3f2a6399ea4316add8935461f99e921fd163620e6f604529886810bce44",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phần chính của câu, trả lời câu hỏi ai, cái gì. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "83d4e3f2a6399ea4316add89.mp3",
+      "durationSec": 7.8
+    },
+    {
+      "id": "q-145-doc",
+      "key": "a119bf263172a69e8cda24e0c2b9c05a2165f1e8491b25846d05a3e7b05db481",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thành phần chính của câu, trả lời câu hỏi làm gì, thế nào. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a119bf263172a69e8cda24e0.mp3",
+      "durationSec": 7.6
+    },
+    {
+      "id": "q-146-doc",
+      "key": "2dafd1cf3ae61e1895e37e57c11a396ab3cca5f466a3bca517cdea60794b2f06",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Câu dùng để kể, tả hoặc giới thiệu sự việc. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "2dafd1cf3ae61e1895e37e57.mp3",
+      "durationSec": 7.3
+    },
+    {
+      "id": "q-147-doc",
+      "key": "44b8686e34469528e1f6fd0dfddf450d5d982925c9991dc76023b915a46fe33e",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Câu dùng để hỏi, cuối câu có dấu chấm hỏi. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "44b8686e34469528e1f6fd0d.mp3",
+      "durationSec": 6.9
+    },
+    {
+      "id": "q-148-doc",
+      "key": "763e36ec6519e26b6700cd54ad915b14d59373f233d14f5bb8bedba6c515d7e7",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dấu kết thúc câu kể, đặt ở cuối câu. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "763e36ec6519e26b6700cd54.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-149-doc",
+      "key": "7a65918a9ef425579ec78abb5fec62564905cb33580eff322c18b46ce818b034",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dấu ngăn cách các bộ phận trong câu. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "7a65918a9ef425579ec78abb.mp3",
+      "durationSec": 5.9
+    },
+    {
+      "id": "q-150-doc",
+      "key": "a3405fc1c27d1ff969de8245fb5b4f74a1fd77c9404d1a22be4085c8ee6cb6cf",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cụm từ cố định, ví dụ như gần mực thì đen. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a3405fc1c27d1ff969de8245.mp3",
+      "durationSec": 7.1
+    },
+    {
+      "id": "q-151-doc",
+      "key": "56c9b3f0e87f2d61d30317e54c9b0c7af752357461cee73a3e4c9df22142c357",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Câu nói ngắn gọn của dân gian, ví dụ có công mài sắt. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "56c9b3f0e87f2d61d30317e5.mp3",
+      "durationSec": 7.3
+    },
+    {
+      "id": "q-152-doc",
+      "key": "4d2f83335e8fb84bdb417a5d352ff64337124190996a324faa8e913fb6185c7b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thơ dân gian truyền miệng, ví dụ công cha như núi Thái Sơn. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "4d2f83335e8fb84bdb417a5d.mp3",
+      "durationSec": 7.2
+    },
+    {
+      "id": "q-153-doc",
+      "key": "96c08172252e3c4c2dfb95146b3ee3d79451087fcafa00a43a2d10b5c01d3641",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Truyện dân gian có yếu tố thần kì, ví dụ Tấm Cám. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "96c08172252e3c4c2dfb9514.mp3",
+      "durationSec": 7.7
+    },
+    {
+      "id": "q-154-doc",
+      "key": "5905c584d7a1496d922d142f0126d54a148c7789114658e964fa13cb40311d22",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thể thơ sáu tám, câu sáu chữ rồi câu tám chữ. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "5905c584d7a1496d922d142f.mp3",
+      "durationSec": 7.2
+    },
+    {
+      "id": "q-155-doc",
+      "key": "617e05fae63c922a826088a116be84d715078bbe67b149ab2cd5abae0ed26c41",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Âm mà khi phát ra luồng hơi thoát tự do, ví dụ a, e, i. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "617e05fae63c922a826088a1.mp3",
+      "durationSec": 9.4
+    },
+    {
+      "id": "q-156-doc",
+      "key": "46ea69443ca3b3224e3bfea9bc269b393e93c9a626d1448c891473766b1410bd",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Âm mà khi phát ra luồng hơi bị cản lại, ví dụ b, c, d. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "46ea69443ca3b3224e3bfea9.mp3",
+      "durationSec": 9.4
+    },
+    {
+      "id": "q-157-doc",
+      "key": "553aa801c4317453e5b79525ab2e3927c14efefb593438a73425ae3f126699f8",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Đơn vị phát âm nhỏ nhất của tiếng Việt. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "553aa801c4317453e5b79525.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-158-doc",
+      "key": "6ab262202c6453d936cb3c7ce71f39caabff427693fec044daa329b4ce464fd0",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dấu đặt cuối câu dùng để hỏi. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6ab262202c6453d936cb3c7c.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-159-doc",
+      "key": "4810dc53d00cc3ddb3170a1b1d1011711b9b38b1ff6597775e05cb475040010a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dấu đặt cuối câu cảm thán, thể hiện cảm xúc. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "4810dc53d00cc3ddb3170a1b.mp3",
+      "durationSec": 6.7
+    },
+    {
+      "id": "q-160-doc",
+      "key": "e4b73d85592c43a9841c73801c3c31f7c1747777b0cedfbb58d392fe02bb130b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Câu bộc lộ cảm xúc, cuối câu có dấu chấm than. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e4b73d85592c43a9841c7380.mp3",
+      "durationSec": 6.9
+    },
+    {
+      "id": "q-161-doc",
+      "key": "6c1da1f31752c4031bbf08dbff223206d0ddfe3cbbea90068151010d491f9568",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Ngôi sao chiếu sáng ban ngày cho Trái Đất. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6c1da1f31752c4031bbf08db.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-162-doc",
+      "key": "f79d28a68942075ab5c30b798e6e6b03b1f32c091e534285320baa7fc9a0573d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vệ tinh tự nhiên duy nhất của Trái Đất. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "f79d28a68942075ab5c30b79.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-163-doc",
+      "key": "e2876bb7f5ee7e07cb5f5bc82b96b12f2b764023af50a876d617d69f8ae44a86",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hành tinh thứ ba tính từ Mặt Trời, nơi chúng ta sống. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e2876bb7f5ee7e07cb5f5bc8.mp3",
+      "durationSec": 7
+    },
+    {
+      "id": "q-164-doc",
+      "key": "9e431a8cda62d12f8eb6b545d0c3c0048e50add5ef3ad5c3ca709aee4ec8cceb",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Thiên thể tự phát sáng trên bầu trời đêm. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9e431a8cda62d12f8eb6b545.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-165-doc",
+      "key": "e6f23096c806a28e65abc1a7fd0b2769e46a122e293dc12ae2674e71f7dd040a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quá trình cây xanh dùng ánh sáng tạo chất dinh dưỡng. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "e6f23096c806a28e65abc1a7.mp3",
+      "durationSec": 6.6
+    },
+    {
+      "id": "q-166-doc",
+      "key": "10bf54af6760c9fd4cd1202a3fcd1c4eea79623c75a317cada5858cce472ce6d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Sinh vật tạo ra khí ô xi nhờ ánh sáng mặt trời. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "10bf54af6760c9fd4cd1202a.mp3",
+      "durationSec": 6.8
+    },
+    {
+      "id": "q-167-doc",
+      "key": "6f39b8b67fd6ed6c43216069dd89bc9c8d8902c7318e3e46de6d51777ebb6acf",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hỗn hợp khí bao quanh Trái Đất, con người hít thở mỗi ngày. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6f39b8b67fd6ed6c43216069.mp3",
+      "durationSec": 7.4
+    },
+    {
+      "id": "q-168-doc",
+      "key": "a94cbdfb87f13a721afd5d94b9aa67779d571f76bb3a2d574f004574bf2ee4cd",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Nước mặn ở đại dương, chiếm phần lớn bề mặt Trái Đất. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a94cbdfb87f13a721afd5d94.mp3",
+      "durationSec": 7
+    },
+    {
+      "id": "q-169-doc",
+      "key": "0078f07843fee9d9df44cfa0b99738690ca2f8793a5017ddc12203be59261cae",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Sinh vật có thể di chuyển, ví dụ chó mèo chim cá. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0078f07843fee9d9df44cfa0.mp3",
+      "durationSec": 7.3
+    },
+    {
+      "id": "q-170-doc",
+      "key": "2fa5727de574af11212e014163003d95bbeee050b326bcda7ab35d05f033caaa",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Sinh vật không di chuyển, ví dụ cây cỏ hoa lá. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "2fa5727de574af11212e0141.mp3",
+      "durationSec": 7.1
+    },
+    {
+      "id": "q-171-doc",
+      "key": "fe90b235031f28ceecfd6ea14a769e9508d57e7538327d7397ae3061d7dece3a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Loài vật nhỏ có sáu chân, ví dụ kiến ong bướm. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "fe90b235031f28ceecfd6ea1.mp3",
+      "durationSec": 7.3
+    },
+    {
+      "id": "q-172-doc",
+      "key": "cc9094b476297ba29b19811bbefc4e625a7ee6f595751cda518e1bfa1008e154",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Loài vật lớn nhất sống dưới biển, thở bằng phổi. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "cc9094b476297ba29b19811b.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-173-doc",
+      "key": "d89cf3a22531976f058c11bdd479884ac8177ef12d4d3de2670e9f58e6ea74a3",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Loài chim không biết bay, sống ở vùng Nam Cực lạnh giá. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "d89cf3a22531976f058c11bd.mp3",
+      "durationSec": 6.9
+    },
+    {
+      "id": "q-174-doc",
+      "key": "c67ef37e24837d374384e64e3e341a307e04997f6eadf9ffc4351ded39d842c7",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Núi có thể phun ra dung nham nóng chảy. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "c67ef37e24837d374384e64e.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-175-doc",
+      "key": "0311efb4abebf8f39e48d660532e129fa16a6ba6b8842a0a6bd61a9f574a812c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dải màu cong xuất hiện trên trời sau cơn mưa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0311efb4abebf8f39e48d660.mp3",
+      "durationSec": 6.7
+    },
+    {
+      "id": "q-176-doc",
+      "key": "f48e73fc1706f28f2f1462b67b22911d92825e6a0a7a656b945d73ac93da2639",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Tiếng nổ và tia sáng trong cơn giông. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "f48e73fc1706f28f2f1462b6.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-177-doc",
+      "key": "0740f29be9041323aab235f29c2b808a27d1162b4563693cdce822ffccb60cf9",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Lực hút kéo mọi vật rơi xuống mặt đất. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0740f29be9041323aab235f2.mp3",
+      "durationSec": 6.1
+    },
+    {
+      "id": "q-178-doc",
+      "key": "da0d9abc5c56fa99f86d0e9832291a925a68f1b9de6817a8b2a9bb5afcadbb3d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Hạt băng rơi từ trên trời xuống khi trời giông. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "da0d9abc5c56fa99f86d0e98.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-179-doc",
+      "key": "30806b8a73bea34d939ee6abe179c8c054c28cd08b3bcfd45ae1b64da0eb51b2",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Loài côn trùng làm ra mật ngọt. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "30806b8a73bea34d939ee6ab.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-180-doc",
+      "key": "96fa9aa47f05954b6f88bbbef29c8cbc27587af60b2727fb353448ddab72be44",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Côn trùng có đôi cánh sặc sỡ, bay lượn trên hoa. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "96fa9aa47f05954b6f88bbbe.mp3",
+      "durationSec": 7.2
+    },
+    {
+      "id": "q-181-doc",
+      "key": "0bee14371d446c1c89d533ff71bf278a5f15c40552d16a2e46c16aa93c453844",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quả táo trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0bee14371d446c1c89d533ff.mp3",
+      "durationSec": 5.5
+    },
+    {
+      "id": "q-182-doc",
+      "key": "69c45a2a93c6f4db7acbfd8d0da73050ac6d01404ecd8e9a5fbeca0954319cf4",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quả chuối trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "69c45a2a93c6f4db7acbfd8d.mp3",
+      "durationSec": 5.8
+    },
+    {
+      "id": "q-183-doc",
+      "key": "2b0b1ce5be0f6b9349bdf169cec5f67993d312a2a3c9afe7999f427df89a8eb0",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Trường học trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "2b0b1ce5be0f6b9349bdf169.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-184-doc",
+      "key": "36ba1f6c1b488f817f3cf4aa9bfd76736a71551e74a57b4f252aa4eb7f75ae14",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cô giáo trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "36ba1f6c1b488f817f3cf4aa.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-185-doc",
+      "key": "6efe450f7d891ee4f8f6be6d67c68c3daa2e28dcd0febcf7304bf383853e03bb",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bạn bè trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6efe450f7d891ee4f8f6be6d.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-186-doc",
+      "key": "8207948f461dd4d03c163a5a1e1f4af7459ac43ebad43ba097bf75f4911ae73b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Gia đình trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8207948f461dd4d03c163a5a.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-187-doc",
+      "key": "25c20842a8662b4cf2797f00f748ac659790cefa52bc5a86bdacef107db81d1c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Ngày chủ nhật trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "25c20842a8662b4cf2797f00.mp3",
+      "durationSec": 5.5
+    },
+    {
+      "id": "q-188-doc",
+      "key": "dea0af513ee99788bdcb71c50199f472943872b56fce598580d8e7b8a1c37341",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Ngày thứ hai trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "dea0af513ee99788bdcb71c5.mp3",
+      "durationSec": 5.7
+    },
+    {
+      "id": "q-189-doc",
+      "key": "a5c849654a1c7c47e7f04814253afa16649474bcdba2563ea6dba71c8b10417c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Bông hoa trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a5c849654a1c7c47e7f04814.mp3",
+      "durationSec": 5.5
+    },
+    {
+      "id": "q-190-doc",
+      "key": "17f733c9bf7564975e9fb8879567698973caf1b7ca9446497479fd602b21f9f8",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Khu vườn trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "17f733c9bf7564975e9fb887.mp3",
+      "durationSec": 5.3
+    },
+    {
+      "id": "q-191-doc",
+      "key": "7927f02539e9d368d97c8f033e75951b1300415620b07a66c07ee1c72e98a10c",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cửa sổ trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "7927f02539e9d368d97c8f03.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-192-doc",
+      "key": "7d44bc2cadd58b817716e95e067f20f3f7a41a2019c7fef133701768f4ea7472",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cây bút chì trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "7d44bc2cadd58b817716e95e.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-193-doc",
+      "key": "9dd24e0f153487bee0a77f17d9497ac72811bf88578c5c137d2adb94352ecc2f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quả cam trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9dd24e0f153487bee0a77f17.mp3",
+      "durationSec": 5.5
+    },
+    {
+      "id": "q-194-doc",
+      "key": "d7806c16fb981be22a7f7b35913029bd66c9dc4f97ed92efb38a35efe322807f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Màu vàng trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "d7806c16fb981be22a7f7b35.mp3",
+      "durationSec": 5.5
+    },
+    {
+      "id": "q-195-doc",
+      "key": "5a768f65135bcc7c64b5644df0a51b6753256fe9c9e6a73543befc2a9f5c8514",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Màu tím trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "5a768f65135bcc7c64b5644d.mp3",
+      "durationSec": 5.3
+    },
+    {
+      "id": "q-196-doc",
+      "key": "04fe4d2c99e92e1b4600bd2ed683fda066e29b59b42b1abcc98cd2353d4bf3d6",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Vui vẻ trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "04fe4d2c99e92e1b4600bd2e.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-197-doc",
+      "key": "2f1ffbbabe4760b9b08950e2be24b5640e89119a3399b36b53488afd3e79e01d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Nước uống trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "2f1ffbbabe4760b9b08950e2.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-198-doc",
+      "key": "8001c1b143e9ada239a0df0bb5561a582019f3ed2059a43db0f260654f087810",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái bàn trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8001c1b143e9ada239a0df0b.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-199-doc",
+      "key": "7f2f2d70e7aaeecb195592ca4999396aa6aabfc9603467cc95f693e62c74aae9",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái ghế trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "7f2f2d70e7aaeecb195592ca.mp3",
+      "durationSec": 5.4
+    },
+    {
+      "id": "q-200-doc",
+      "key": "dd147a2eec966c1bae6f53caae05fecee50967838e8dd6a69a08a6afbed8f436",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Quyển sách trong tiếng Anh. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "dd147a2eec966c1bae6f53ca.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-201-doc",
+      "key": "61195eb62746d079816c105c191f5d2351bd904b0a67a67f62a56090b3ac81b3",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì có răng mà không cắn được ai? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "61195eb62746d079816c105c.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-202-doc",
+      "key": "ba16c9ff66e01f39c343141a1c67386c070f40f70c04b28e6d99ba212c39401f",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì càng giặt càng bẩn? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "ba16c9ff66e01f39c343141a.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-203-doc",
+      "key": "89cea2a2d277b0998cb3cc61a1475564207c21df977098cec5a58cd2b774afc2",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì đập thì sống, không đập thì chết? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "89cea2a2d277b0998cb3cc61.mp3",
+      "durationSec": 6.5
+    },
+    {
+      "id": "q-204-doc",
+      "key": "6672d6d958f792ae2073ec78defbcf535aebb4aeb4e715f816094a1d19a6b1a5",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì có đầu mà không có tóc? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "6672d6d958f792ae2073ec78.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-205-doc",
+      "key": "9f34ecd8ecd5f64b06b574889e138a206f5f71dfad6f823251c99c84377deb95",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì đi thì nằm, đứng thì nằm, nằm thì đứng? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "9f34ecd8ecd5f64b06b57488.mp3",
+      "durationSec": 7.2
+    },
+    {
+      "id": "q-206-doc",
+      "key": "16e2f5790a52a62e18f73f6353cbfc9744c57f56ba17181bdddb3255d085575d",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì có cổ mà không có đầu? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "16e2f5790a52a62e18f73f63.mp3",
+      "durationSec": 6.5
+    },
+    {
+      "id": "q-207-doc",
+      "key": "05290184d1a2134fffbd07bb75294da27a90091d8ff78b3b5f2e81efcde979ac",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì đi theo bạn cả ngày mà không bao giờ nói chuyện? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "05290184d1a2134fffbd07bb.mp3",
+      "durationSec": 7.2
+    },
+    {
+      "id": "q-208-doc",
+      "key": "5f3f6319083f5384f6d4226fce5e822626df1345625b9d613f84b9fbeef0213a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì quay tròn mà không đi đâu, giúp cả nhà mát mẻ? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "5f3f6319083f5384f6d4226f.mp3",
+      "durationSec": 7.6
+    },
+    {
+      "id": "q-209-doc",
+      "key": "8cb4a75098a9cf3022522c4437acbd7f53558c22d628ffbd53db5a015c622756",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì có miệng mà không ăn được? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8cb4a75098a9cf3022522c44.mp3",
+      "durationSec": 6.2
+    },
+    {
+      "id": "q-210-doc",
+      "key": "0a7f9e0d7aa2e30d7647f3b9d8e5c46bfd23f2ed9cdc4d2395214a05eadee8e3",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Dụng cụ có hai lưỡi, dùng để cắt giấy. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "0a7f9e0d7aa2e30d7647f3b9.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-211-doc",
+      "key": "87df4afff0e224d2edf9b6598c646a3be41d3bbfed60ee45b4b431fb68401c24",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Đồ dùng đun nước, có quai mà không nghe được. Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "87df4afff0e224d2edf9b659.mp3",
+      "durationSec": 6.7
+    },
+    {
+      "id": "q-212-doc",
+      "key": "b3f4b48a745f90e0b2075ec391ee933ad5c22f5de035570be69258bd5967d051",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì đi lên đi xuống mà không nhúc nhích? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "b3f4b48a745f90e0b2075ec3.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-213-doc",
+      "key": "ccdd10da73d02a0fb2afddb8a1c232822bdd95271616eb931f287f8ffd7e9af3",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì đánh thì kêu, không đánh thì im? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "ccdd10da73d02a0fb2afddb8.mp3",
+      "durationSec": 6.6
+    },
+    {
+      "id": "q-214-doc",
+      "key": "398e834f7a779d68ba0c8c10501419741b5ecc3c1a51d32963571768cfe01868",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì vừa đi vừa khóc? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "398e834f7a779d68ba0c8c10.mp3",
+      "durationSec": 5.6
+    },
+    {
+      "id": "q-215-doc",
+      "key": "1bf987531f6855d62ea08744d54604166e287413cfe0b6ecf35e4374c6b564e2",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì soi thấy mình mà không phải là người? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "1bf987531f6855d62ea08744.mp3",
+      "durationSec": 6.4
+    },
+    {
+      "id": "q-216-doc",
+      "key": "a1f0e5711f235185bd8268b85c2aebb7138b82149fe2d74d090641d45070a454",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì nhỏ xíu mà mở được cửa lớn? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "a1f0e5711f235185bd8268b8.mp3",
+      "durationSec": 6.3
+    },
+    {
+      "id": "q-217-doc",
+      "key": "5d4e303e885e4b23bc74e8e45b51b2af7ae3b9c82a6098dc1f6dd4c8ebe0f46e",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì có sóng mà không có biển? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "5d4e303e885e4b23bc74e8e4.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-218-doc",
+      "key": "2fef63395c42b2857ff6d61e96fab3f0b9137346f395ecc67c1c38e19c94350b",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì không cánh mà bay trên trời? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "2fef63395c42b2857ff6d61e.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-219-doc",
+      "key": "8624aa41ed2f54f5d782243b8c33b4514b87dec743547bd1b5a338ee5ccae36a",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Cái gì càng cháy càng ngắn lại? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "8624aa41ed2f54f5d782243b.mp3",
+      "durationSec": 6
+    },
+    {
+      "id": "q-220-doc",
+      "key": "72f702a83d2b335bf1cca00bcb275fffba4d090842e9117362df0e8f71a522ca",
+      "voice": "avocado_v2:rumi",
+      "rate": 0,
+      "text": "Câu hỏi nè: Con gì kêu meo meo, bắt chuột rất giỏi? Chữ đảo ở trên bảng rồi đó, cả lớp nhìn kỹ nha!",
+      "file": "72f702a83d2b335bf1cca00b.mp3",
+      "durationSec": 6.8
     }
   ]
 }
