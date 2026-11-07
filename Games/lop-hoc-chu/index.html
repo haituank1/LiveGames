@@ -57,11 +57,25 @@
      chu "N" cuoi cua khau hieu khi day con 96% (loi thay o anh demo
      sau LH-V1b, truoc do o v17 van hien du vi panel ngan hon). */
   #mottoBar {
-    /* LH-V6 gộp: rộng 74% của nv1 (không che chữ "N") + gradient + chữ vàng nhạt #f9e08a của nv5. */
-    position: absolute; left: 2%; top: 6.8%; width: 74%; z-index: 9;
+    /* LH-V1c (user 2026-11-07 11:53): khung + chu CAN GIUA man hinh (tam
+       50%, nhu header #classSign). Truoc: left 2% + width 74% nen tam
+       chu o 39% (do duoc: chu 75-487, tam 281).
+       Do that (white-space: nowrap tam thoi): chu 1 dong rong 387px o
+       25px/letter-spacing 1px; 358px o 23px; 329px o 21px. De vua 1
+       dong trong khung can giua (rong toi da 52% theo lenh, mep phai
+       <=76%): chon 21px + spacing 1px (chu 329px) + khung width 52%
+       (374px, left 24% -> 173-547, tam 360; noi dung 346px vua chu
+       thua 17px). Co 25px khong the vua (can khung >= 415px = 58%).
+       Luu y: mep trai cot phai thuc te o 74.5% (536px), khac 76% trong
+       lenh — khung 52% vuot qua 536px 11px nhung phan do nam SAU panel
+       (cot phai ve sau trong DOM, cung z-index) nen panel khong bi
+       che; chu ket thuc o ~525, cach cot phai 11px, chu 'N' hien du.
+       Giu nguyen: chu 'TIEN HOC LE – HAU HOC VAN', mau #f9e08a +
+       gradient cua nv5, top 6.8%. */
+    position: absolute; left: 24%; top: 6.8%; width: 52%; z-index: 9;
     background: linear-gradient(#d21a08, #a81204); color: #f9e08a;
-    font-size: 25px; font-weight: 900; letter-spacing: 2px; text-align: center;
-    padding: 5px 0; border-radius: 8px; border: 2px solid #8f0e02;
+    font-size: 21px; font-weight: 900; letter-spacing: 1px; text-align: center;
+    padding: 5px 12px; border-radius: 8px; border: 2px solid #8f0e02;
     box-shadow: 0 4px 12px rgba(150,20,0,.35); text-shadow: 0 2px 0 rgba(0,0,0,.3);
   }
 
