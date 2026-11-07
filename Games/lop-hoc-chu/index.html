@@ -99,6 +99,9 @@
     background: transparent;
     border: none; outline: none; border-radius: 0; box-shadow: none;
     padding: 6px 12px; color: #fff; z-index: 6;
+    /* LH-QC: flex dọc + căn giữa khối câu hỏi trong bảng (không dồn
+       lên đỉnh) — #qCat/#qRound absolute nên không bị ảnh hưởng. */
+    display: flex; flex-direction: column; justify-content: center;
   }
   #qCat {
     position: absolute; top: 6px; left: 70px; /* dich phai khoi panel BXH (ket thuc x 144px stage = 58px tuong doi bang): pill cu left 12px bi panel che 46/77px */
@@ -114,13 +117,18 @@
   #qHint {
     font-family: "Comic Sans MS", "Chalkboard SE", "Segoe Print", cursive;
     font-size: 23px; line-height: 1.25; color: #fff; text-align: center;
-    margin-top: 32px; text-shadow: 0 2px 4px rgba(0,0,0,.55);
-    /* Bảng v17 rộng hơn (x 12-88%) nên chừa 110px bên trái để câu đố
-       không chạy ra sau đầu cô Ngân (đầu cô tới ~x 31%). Chừa thêm
-       70px bên phải: mép phải bảng (x > 565px stage) nằm DƯỚI cột phải,
-       gợi ý dài (> ~33 chữ, 31/120 câu) bị cột phải cắt mất đuôi chữ
-       (vd "Trang phục truyền thống của Việt Nam" mất chữ "m"). */
-    padding: 0 70px 0 110px;
+    /* LH-QC: margin-top 0 — khối câu hỏi căn giữa dọc bằng flex của
+       #board (trước margin-top 32px dồn khối lên đỉnh). */
+    margin-top: 0; text-shadow: 0 2px 4px rgba(0,0,0,.55);
+    /* LH-QC: padding ĐỐI XỨNG 100px để tâm chữ = tâm bảng (360px).
+       Trước trái 110px/phải 70px nên tâm chữ lệch phải 20px (380).
+       100px vừa đủ cả 2 phía: mép trái nội dung 198px, cách tay cô
+       chỉ bảng xa nhất 173px (đo hết 30 ảnh giáo viên, gv-tieng-anh
+       pose A) 25px; mép phải 521px, cách cột phải (x 536px) 15px.
+       Câu dài nhất 58 chữ vẫn 2 dòng (dòng 1 đo được 308px < 323px);
+       49 chữ trong lệnh giao là dài nhất của 120 câu cũ, 100 câu mới
+       của LH-Q có câu dài hơn (58 chữ) nên lấy 58 làm chuẩn. */
+    padding: 0 100px;
   }
   #qScrambled { text-align: center; margin-top: 12px; }
   .tile {
@@ -128,6 +136,15 @@
     background: linear-gradient(#fff8dc, #ffe9a8); color: #6d4c41; border-radius: 7px;
     font-size: 22px; font-weight: 800; margin: 2px; padding: 0 2px; text-align: center;
     box-shadow: 0 2px 0 rgba(0,0,0,.3);
+  }
+  /* LH-QC2: đáp án dài (≥11 ô) thu nhỏ ô để hàng ô vừa bảng.
+     Ngưỡng 11: 10 ô rộng nhất 336px vẫn vừa (giới hạn 352px = tâm 360
+     ± 176: tay cô 173 / cột phải 536); 11 ô = 370px, 12 ô = 404px tràn.
+     Chỉ CSS (:has đếm ô, không đụng JS/logic): ô 30→24px, chữ 22→20px,
+     cao 36→32px → 12 ô còn 332px (194–526), 11 ô còn 304px (208–512).
+     Màn break không có .tile nên không bị ảnh hưởng. */
+  #qScrambled:has(> .tile:nth-child(11)) .tile {
+    min-width: 24px; height: 32px; line-height: 32px; font-size: 20px;
   }
   #qDashes { text-align: center; margin-top: 10px; color: #fff; font-size: 20px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,.55); }
   .dash-group { display: inline-block; margin: 0 7px; }
@@ -150,8 +167,8 @@
      Pill chủ đề + vòng số câu ẩn ở màn này (ảnh mẫu không có). */
   #board.board-break #qCat { display: none; }
   #board.board-break #qRound { display: none; }
-  #board.board-break #qHint { margin-top: 12px; font-size: 27px; }
-  #board.board-break #qScrambled { margin-top: 8px; padding-left: 40px; }
+  #board.board-break #qHint { margin-top: 0; font-size: 27px; }
+  #board.board-break #qScrambled { margin-top: 8px; }
   #board.board-break .rps-choice {
     width: 22%; background: none; border-radius: 0; box-shadow: none;
     padding: 0; margin: 0 6px; color: #fff;
