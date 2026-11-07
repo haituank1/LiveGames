@@ -45,13 +45,18 @@
      ("Tiết 1 · Câu 1/20 · Tổng hợp · 42 bạn") mà không tràn. */
   #signLine2 { font-size: 14px; font-weight: 700; color: #8a5a2b; white-space: nowrap; }
 
-  /* Banner khau hieu do ngay duoi bang hieu — LH-V1: giong y anh mau:
-     chu TRANG tren nen do ("NGHE HET DE – GO MOI AN DIEM", chi la
-     khau hieu hien thi), khong con chu vang + vien vang nhu v17
-     (doi voi chot TIEN HOC LE o v17 + handbook §7.2 — BOSS xac nhan
-     lai; doi mau chi tiet de nv5 chuan hoa). */
+  /* Banner khau hieu do ngay duoi bang hieu — LH-V1b (BOSS 2026-11-07):
+     khau hieu CHOT theo user (v17): "TIEN HOC LE – HAU HOC VAN" viet hoa.
+     Cau cu "NGHE HET DE – GO MOI AN DIEM" (chep tu anh mau o LH-V1) da bo
+     vi de hien ra la da tinh gio roi. Giu nguyen CSS chu trang/nen do
+     hien tai — mau chu nv5 se chuan hoa luc gop (anh mau do duoc chu
+     vang nhat #F9E08A, khong phai trang tinh).
+     Rong 74% (thay 96%): day bang dung ngay mep trai cot phai — dong
+     dem nguoc Gio vang moi them lam panel Su kien cao them, che mat
+     chu "N" cuoi cua khau hieu khi day con 96% (loi thay o anh demo
+     sau LH-V1b, truoc do o v17 van hien du vi panel ngan hon). */
   #mottoBar {
-    position: absolute; left: 2%; top: 6.8%; width: 96%; z-index: 9;
+    position: absolute; left: 2%; top: 6.8%; width: 74%; z-index: 9;
     background: linear-gradient(#e53935, #b71c1c); color: #fff;
     font-size: 25px; font-weight: 900; letter-spacing: 2px; text-align: center;
     padding: 5px 0; border-radius: 8px; border: 2px solid #7f0000;
@@ -156,6 +161,10 @@
   /* LH-V1: ten su kien xuong dong thay vi "…" (nhu anh ho thi vua 1 dong
      o rail 24%; xuong dong chi la luoi an toan neu ten dai hon). */
   .ev-row { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; line-height: 1.3; }
+  /* LH-V1b: dong dem nguoc Gio vang trong panel Su kien — renderEvent()
+     ghi vao #eventText, tu v17 element nay KHONG co nen dem nguoc khong
+     co cho hien (ham co guard nen khong loi, chi la khong thay gi). */
+  .ev-gold { font-size: 11px; font-weight: 800; color: #e65100; padding: 2px 0; line-height: 1.3; }
   /* LH-V1: huy hieu "DANG DIEN RA" can giua, rong het panel nhu anh ho
      (truoc: inline-block lech trai). */
   .ev-live {
@@ -204,7 +213,13 @@
   .f-col { display: flex; align-items: center; gap: 5px; min-width: 0; flex: 1 1 0; justify-content: center; }
   .f-av { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 2px solid #ffb300; background: #fff; flex-shrink: 0; }
   .f-av-none { display: flex; align-items: center; justify-content: center; font-size: 14px; }
-  .f-name { font-size: 12px; font-weight: 700; max-width: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* LH-V1b: ten panel Nhanh nhat rong toi da 100px (thay 56px) — ten nhu
+     "Mai Xuan Chinh" (~94px o 12px, do tren Linux — Segoe UI tren
+     Windows/OBS thuong hep hon) hien du, khong con "Mai Xu…".
+     Cot 3 o rong ~173px: avatar 24 + ten 100 + diem ~35 + khoang 10 =
+     ~169px vua du; ten dai hon nua van cat "…" o muc cuoi (khong the
+     rong hon neu khong chen cot ben canh). */
+  .f-name { font-size: 12px; font-weight: 700; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .f-pts { font-size: 13px; font-weight: 800; color: #e65100; white-space: nowrap; }
   .f-note { font-size: 12px; color: #888; text-align: center; margin-top: 2px; }
 
@@ -355,7 +370,7 @@
     <div id="signLine1">LỚP HỌC CHỮ</div>
     <div id="signLine2">Tiết 1 · Câu 1/20 · Tổng hợp · 0 bạn</div>
   </div>
-  <div id="mottoBar">NGHE HẾT ĐỀ – GÕ MỚI ĂN ĐIỂM</div>
+  <div id="mottoBar">TIÊN HỌC LỄ – HẬU HỌC VĂN</div>
 
   <div id="board">
     <div id="qCat">Cô Ngân đang chuẩn bị câu đố…</div>
@@ -378,6 +393,7 @@
       <div class="panel-title">SỰ KIỆN TRONG LỚP</div>
       <div class="ev-row">🏔️ Đường lên đỉnh Everest</div>
       <div class="ev-row">🔔 Rung Chuông Vàng</div>
+      <div class="ev-gold" id="eventText">⏰ Giờ vàng sau 10:00</div>
       <div><span class="ev-live">ĐANG DIỄN RA</span></div>
     </div>
     <div class="rail-panel" id="teamPanel">

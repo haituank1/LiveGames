@@ -569,7 +569,8 @@ function cheDoLabel() {
   const v = cfg.cheDo;
   if (v === 'olympic') return 'Olympic';
   if (v === 'tong-hop' || v == null || v === '') return 'Tổng hợp';
-  const known = { 'toan': 'Lớp Toán', 'dia-ly': 'Lớp Địa lí', 'lich-su': 'Lớp Lịch sử', 'doi-song': 'Lớp Đời sống', 'do-an': 'Lớp Đồ ăn' };
+  const known = { 'toan': 'Lớp Toán', 'dia-ly': 'Lớp Địa lí', 'lich-su': 'Lớp Lịch sử', 'doi-song': 'Lớp Đời sống', 'do-an': 'Lớp Đồ ăn',
+    'tieng-viet': 'Lớp Tiếng Việt', 'khoa-hoc': 'Lớp Khoa học', 'tieng-anh': 'Lớp Tiếng Anh', 'do-vui': 'Lớp Đố vui' };
   if (known[v]) return known[v];
   const s = String(v).trim();
   if (/[ A-ZÀ-Ỹ]/.test(s)) return s; // đã là nhãn hiển thị thì dùng nguyên
