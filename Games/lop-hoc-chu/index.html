@@ -20,7 +20,7 @@
     /* Nen lop hoc ve kin 720x1280 (tran, den, cua so, dam dong, ban ghe);
        gradient duoi la du phong neu anh nen loi */
     background: url(img/lop-hoc-bg.png) center / 100% 100% no-repeat,
-      linear-gradient(#fff8dd 0%, #ffe082 45%, #e8913a 55%, #c06a1e 100%);
+      linear-gradient(#fff8dd 0%, #fceea0 45%, #e0a040 55%, #a85a12 100%);
     overflow: hidden; color: #222;
   }
   /* Bong bóng chat của học sinh: lớp riêng trên cùng của #stage
@@ -37,13 +37,14 @@
   /* Bang hieu lop treo tren cung (trang, vien nau) */
   #classSign {
     position: absolute; left: 30%; top: 0.8%; width: 40%; z-index: 9;
-    background: linear-gradient(#fffdf5, #ffefc4); border: 3px solid #8a5a2b; border-radius: 14px;
+    background: linear-gradient(#fffbe8, #fcf5c4); border: 3px solid #6b3a14; border-radius: 14px;
     text-align: center; padding: 3px 8px 4px; box-shadow: 0 4px 10px rgba(0,0,0,.25);
   }
-  #signLine1 { font-size: 29px; font-weight: 900; color: #5d4037; letter-spacing: 1px; line-height: 1.1; }
+  #signLine1 { font-size: 29px; font-weight: 900; color: #5e2e0d; letter-spacing: 1px; line-height: 1.1; }
   /* LH-V1: 14px (thay 15px) để dòng 2 đủ chỗ thêm chế độ lớp
      ("Tiết 1 · Câu 1/20 · Tổng hợp · 42 bạn") mà không tràn. */
-  #signLine2 { font-size: 14px; font-weight: 700; color: #8a5a2b; white-space: nowrap; }
+  /* LH-V6 gộp: 14px của nv1 + màu #7a4a21 của nv5. */
+  #signLine2 { font-size: 14px; font-weight: 700; color: #7a4a21; white-space: nowrap; }
 
   /* Banner khau hieu do ngay duoi bang hieu — LH-V1b (BOSS 2026-11-07):
      khau hieu CHOT theo user (v17): "TIEN HOC LE – HAU HOC VAN" viet hoa.
@@ -56,10 +57,11 @@
      chu "N" cuoi cua khau hieu khi day con 96% (loi thay o anh demo
      sau LH-V1b, truoc do o v17 van hien du vi panel ngan hon). */
   #mottoBar {
+    /* LH-V6 gộp: rộng 74% của nv1 (không che chữ "N") + gradient + chữ vàng nhạt #f9e08a của nv5. */
     position: absolute; left: 2%; top: 6.8%; width: 74%; z-index: 9;
-    background: linear-gradient(#e53935, #b71c1c); color: #fff;
+    background: linear-gradient(#d21a08, #a81204); color: #f9e08a;
     font-size: 25px; font-weight: 900; letter-spacing: 2px; text-align: center;
-    padding: 5px 0; border-radius: 8px; border: 2px solid #7f0000;
+    padding: 5px 0; border-radius: 8px; border: 2px solid #8f0e02;
     box-shadow: 0 4px 12px rgba(150,20,0,.35); text-shadow: 0 2px 0 rgba(0,0,0,.3);
   }
 
@@ -118,13 +120,14 @@
   /* Oẳn tù tì giờ ra chơi (M5): 3 ô chọn trong #qScrambled */
   #qScrambled .rps-choice {
     display: inline-block; width: 30%; vertical-align: top;
-    background: linear-gradient(#fff8dc, #ffe9a8); color: #6d4c41;
+    background: rgba(255,255,255,.08); color: #fff;
+    border: 2px solid #a8c686;
     border-radius: 10px; padding: 4px 0 3px; margin: 0 4px;
     box-shadow: 0 2px 0 rgba(0,0,0,.3);
   }
   .rps-emoji { display: block; font-size: 30px; line-height: 1.1; }
   .rps-name { display: block; font-size: 16px; font-weight: 800; }
-  .rps-count { display: block; font-size: 20px; font-weight: 900; color: #e65100; }
+  .rps-count { display: block; font-size: 20px; font-weight: 900; color: #fff; }
   #qAnswer { font-size: 24px; font-weight: 800; color: #ffd76a; text-align: center; margin-top: 4px; display: none; text-shadow: 0 2px 4px rgba(0,0,0,.55); }
   #qAnswer.show { display: block; }
   /* Bảng Giờ ra chơi (M5) — khớp ảnh mẫu: tiêu đề phấn ở giữa bảng,
@@ -150,8 +153,8 @@
   /* BXH "xuat sac hom nay" ben trai, hep nhu anh ho (x 2-20%) */
   #topPanel {
     position: absolute; left: 2%; top: 12.5%; width: 18%; z-index: 9;
-    background: linear-gradient(#fffdf5, #fff3d6);
-    border: 3px solid #ffb300; border-radius: 16px; padding: 6px 8px;
+    background: #fff;
+    border: 2px solid #ffb300; border-radius: 16px; padding: 6px 8px;
     box-shadow: 0 6px 16px rgba(90,50,10,.22), inset 0 1px 0 #fff;
   }
   .panel-title { font-size: 13px; font-weight: 800; color: #b45309; margin-bottom: 3px; }
@@ -169,26 +172,33 @@
     display: flex; flex-direction: column; gap: 6px;
   }
   .rail-panel {
-    background: linear-gradient(#fffdf5, #fff3d6);
-    border: 3px solid #fb8c00; border-radius: 14px; padding: 6px 8px;
+    background: #fff;
+    border: 2px solid #ffb74d; border-radius: 14px; padding: 6px 8px;
     box-shadow: 0 6px 16px rgba(90,50,10,.22), inset 0 1px 0 #fff;
   }
   /* LH-V1: tieu de panel duoc xuong dong thay vi nowrap — khong bao gio
      cat chu (truoc: "SU KIEN TRONG LOP" tran 2px o 12px). */
-  .rail-panel .panel-title { color: #e65100; font-size: 13px; }
-  #eventPanel { border-color: #7e57c2; }
-  #eventPanel .panel-title { color: #5e35b1; font-size: 12px; }
+  /* LH-V6 gộp: xuống dòng của nv1 + màu #b45309 của nv5. */
+  .rail-panel .panel-title { color: #b45309; font-size: 13px; }
+  /* LH-V6 gộp: nền tím + viền của nv5 (khớp ảnh mẫu); tiêu đề trắng trên nền tím. */
+  #eventPanel { background: linear-gradient(#2e0877, #24055e); border-color: #7e33c2; }
+  #eventPanel .panel-title {
+    background: linear-gradient(#9549d3, #7e33c2); color: #fff; font-size: 12px;
+    margin: -6px -8px 4px; padding: 3px 8px; border-radius: 11px 11px 0 0;
+  }
   /* LH-V1: ten su kien xuong dong thay vi "…" (nhu anh ho thi vua 1 dong
      o rail 24%; xuong dong chi la luoi an toan neu ten dai hon). */
-  .ev-row { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; line-height: 1.3; }
+  /* LH-V6 gộp: xuống dòng của nv1 + màu trắng của nv5. */
+  .ev-row { font-size: 11px; font-weight: 700; color: #fff; padding: 1px 0; line-height: 1.3; }
   /* LH-V1b: dong dem nguoc Gio vang trong panel Su kien — renderEvent()
      ghi vao #eventText, tu v17 element nay KHONG co nen dem nguoc khong
      co cho hien (ham co guard nen khong loi, chi la khong thay gi). */
   .ev-gold { font-size: 11px; font-weight: 800; color: #e65100; padding: 2px 0; line-height: 1.3; }
   /* LH-V1: huy hieu "DANG DIEN RA" can giua, rong het panel nhu anh ho
      (truoc: inline-block lech trai). */
+  /* LH-V6 gộp: block + căn giữa của nv1 + gradient đỏ của nv5. */
   .ev-live {
-    display: block; text-align: center; background: linear-gradient(#e53935, #b71c1c); color: #fff;
+    display: block; text-align: center; background: linear-gradient(#e02138, #c01028); color: #fff;
     font-size: 11px; font-weight: 800; border-radius: 6px; padding: 2px 8px; margin-top: 3px;
   }
   .gv-row {
@@ -197,20 +207,22 @@
     padding: 3px 8px; margin-top: 3px;
   }
   .gv-row .cnt { font-weight: 700; font-size: 11px; opacity: .9; }
-  .gv-blue { background: linear-gradient(#42a5f5, #1e88e5); }
-  .gv-green { background: linear-gradient(#66bb6a, #43a047); }
-  .gv-red { background: linear-gradient(#ef5350, #e53935); }
-  .gv-orange { background: linear-gradient(#ffa726, #fb8c00); }
-  #fundPanel .panel-title { color: #c2185b; }
+  /* LH-V6 gộp: gradient của nv5 (chuẩn màu ảnh mẫu). */
+  .gv-blue { background: linear-gradient(#4a9bef, #2b7fe3); }
+  .gv-green { background: linear-gradient(#2ebc5e, #12a34a); }
+  .gv-red { background: linear-gradient(#f04444, #e02222); }
+  .gv-orange { background: linear-gradient(#ffb91e, #f59a00); }
+  #fundPanel .panel-title { color: #d81b60; }
   /* LH-V1: so Quy lop nam CUNG dong voi tieu de nhu anh ho
      ("Quy lop 106", so to ben phai) thay vi dong rieng can giua. */
   .fund-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
   .fund-head .panel-title { margin-bottom: 0; }
-  .fund-num { font-size: 26px; font-weight: 900; color: #c2185b; line-height: 1.1; }
+  /* LH-V6 gộp: màu #e91e63 của nv5 (text-align:center của nv5 bỏ vì số đã nằm trong flex .fund-head của nv1). */
+  .fund-num { font-size: 26px; font-weight: 900; color: #e91e63; line-height: 1.1; }
   /* LH-V1: dong Quy lop duoc xuong dong thay vi "…" (hien vua 1 dong o rail 24%). */
   .fund-line { font-size: 11px; font-weight: 700; color: #4e342e; padding: 1px 0; line-height: 1.3; }
-  .fund-cnt { float: right; color: #c2185b; font-weight: 900; }
-  #interactPanel .panel-title { color: #e65100; }
+  .fund-cnt { float: right; color: #d81b60; font-weight: 900; }
+  #interactPanel .panel-title { color: #b45309; }
   /* LH-V1: hang Top Tuong tac 12px (thay 13px ke thua .top-row) de ten dai
      nhu "Mai Xuan Chinh" du cho hien du; chi ap cho panel phai, khong
      dung toi BXH ben trai (#topPanel). */
@@ -219,7 +231,7 @@
   /* Panel "Nhanh nhat" ngay duoi bang */
   #fastestPanel {
     position: absolute; left: 12%; top: 38.5%; width: 76%; z-index: 9;
-    background: linear-gradient(#fffdf5, #fff3d6);
+    background: #fff;
     border: 3px solid #8a5a2b; border-radius: 14px; padding: 4px 10px;
     box-shadow: 0 6px 16px rgba(90,50,10,.25); display: none;
   }
@@ -247,8 +259,8 @@
      (như v14) — để khoảng dưới bảng cho panel Nhanh nhất + bong bóng cô */
   #guideBar {
     position: absolute; left: 14%; top: auto; bottom: 9.5%; width: 72%; text-align: center; z-index: 9;
-    font-size: 16px; font-weight: 800; color: #ffeb3b; background: linear-gradient(90deg, #e53935, #b71c1c);
-    border: 2px solid #ffd54f; border-radius: 999px; padding: 5px 10px;
+    font-size: 16px; font-weight: 800; color: #f6de96; background: linear-gradient(90deg, #8a4a08, #6b3405);
+    border: 2px solid #5a2c04; border-radius: 999px; padding: 5px 10px;
     text-shadow: 0 1px 0 rgba(0,0,0,.3); box-shadow: 0 4px 12px rgba(150,20,0,.35);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
@@ -273,7 +285,7 @@
   .student.dragging { transition: none !important; }
   #giftPanel {
     position: absolute; right: 2%; bottom: 1%; width: 46%; height: 7.5%; z-index: 9;
-    background: rgba(255,253,245,.94); border: 2px solid #fb8c00; border-radius: 12px;
+    background: rgba(255,255,255,.96); border: 2px solid #ffb74d; border-radius: 12px;
     padding: 5px 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(90,50,10,.18);
   }
   #giftPanel .panel-title { color: #e65100; font-size: 14px; }
@@ -308,7 +320,7 @@
   /* Chip ten + diem duoi moi ban (pill trang) */
   .chip {
     position: absolute; transform: translateX(-50%);
-    background: #fff; border: 2px solid #9e9e9e;
+    background: #fff; border: 2px solid #bdbdbd;
     border-radius: 999px; padding: 2px 7px;
     font-size: 12px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 6px rgba(60,30,0,.28);
     max-width: 110px; color: #4e342e; display: flex; gap: 4px; align-items: center;
