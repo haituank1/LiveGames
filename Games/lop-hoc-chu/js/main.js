@@ -129,6 +129,7 @@ loadFund();
 /* ---------- Vòng lặp câu hỏi ---------- */
 let deckMode = null; // chế độ (cfg.cheDo) mà bộ đề hiện tại được xáo theo
 function nextQuestion() {
+  P.setTeacherMood(null); // xóa cảm xúc phase công bố câu trước, về lại tư thế A/B/C (LH-GV4)
   P.nextTeacherPose(); // xoay tư thế giáo viên mỗi lần đổi câu hỏi (LH-GV3) — câu đầu giữ A, từ câu 2 xoay A→B→C→A
   if (!QUESTIONS.length) return null;
   const mode = String(cfg.cheDo || 'tong-hop');
@@ -202,12 +203,20 @@ function revealRound() {
   }
   saveScores();
   round.top = top;
+  // LH-GV4: cảm xúc cô giáo theo số học sinh THẬT trả lời đúng câu này
+  // (chỉ đếm đáp án có npc=false — NPC cũng nộp đáp án đúng 60% nên
+  // tính cả NPC thì cô lúc nào cũng vui). >=1 bạn thật đúng → cô VUI,
+  // 0 bạn đúng → cô BUỒN; giữ cảm xúc suốt phase công bố (8s).
+  const realCorrect = ans.filter(a => !a.npc).length;
+  P.setTeacherMood(realCorrect > 0 ? 'happy' : 'sad');
   setPhase('reveal', Number(cfg.revealSec) || 8);
   P.teacherPoint(false);
-  P.teacherHappy(3);
-  P.celebrate(top.map(a => a.id), 3);
-  FX.stars(16, 0.5, 0.3);
-  A.cheer();
+  if (realCorrect > 0) { // chỉ ăn mừng khi có bạn thật đúng; 0 bạn đúng thì cô buồn, không reo hò
+    P.teacherHappy(3);
+    P.celebrate(top.map(a => a.id), 3);
+    FX.stars(16, 0.5, 0.3);
+    A.cheer();
+  }
   A.speakLine(pick(['reveal-1', 'reveal-2']));
   if (top.length) setTimeout(() => A.speakLine(pick(['top-1', 'top-2', 'top-3'])), 2500);
   renderBoard();
@@ -240,6 +249,7 @@ function breakCounts() {
   return c;
 }
 function startBreak() {
+  P.setTeacherMood(null); // cảm xúc chỉ thuộc phase công bố của câu hỏi — vào Giờ ra chơi thì về lại tư thế A/B/C (LH-GV4)
   const sec = Number(cfg.breakSec) || 30;
   const revealAt = Number(cfg.breakRevealSec) || 20;
   round = { phase: 'break', phaseEnd: 0, votes: new Map(), teacherChoice: null, revealed: false, winners: [] };
