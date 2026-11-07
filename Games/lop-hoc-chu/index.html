@@ -123,6 +123,15 @@
     font-size: 22px; font-weight: 800; margin: 2px; padding: 0 2px; text-align: center;
     box-shadow: 0 2px 0 rgba(0,0,0,.3);
   }
+  /* LH-QC2: đáp án dài (≥11 ô) thu nhỏ ô để hàng ô vừa bảng.
+     Ngưỡng 11: 10 ô rộng nhất 336px vẫn vừa (giới hạn 352px = tâm 360
+     ± 176: tay cô 173 / cột phải 536); 11 ô = 370px, 12 ô = 404px tràn.
+     Chỉ CSS (:has đếm ô, không đụng JS/logic): ô 30→24px, chữ 22→20px,
+     cao 36→32px → 12 ô còn 332px (194–526), 11 ô còn 304px (208–512).
+     Màn break không có .tile nên không bị ảnh hưởng. */
+  #qScrambled:has(> .tile:nth-child(11)) .tile {
+    min-width: 24px; height: 32px; line-height: 32px; font-size: 20px;
+  }
   #qDashes { text-align: center; margin-top: 10px; color: #fff; font-size: 20px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,.55); }
   .dash-group { display: inline-block; margin: 0 7px; }
   /* Oẳn tù tì giờ ra chơi (M5): 3 ô chọn trong #qScrambled */
