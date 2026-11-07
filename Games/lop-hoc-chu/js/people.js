@@ -37,42 +37,184 @@ function hash(s) { let h = 0; s = String(s || ''); for (let i = 0; i < s.length;
 function esc(s) { return String(s || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 
 const TEACHER_IMG = 'img/co-ngan.png';
+/* Giáo viên theo môn học (cheDo): 9 cô giáo (LH-GV2: tất cả nữ, áo
+   dài trắng, tư thế 1 tay chỉ bảng + 1 tay ngang eo), mỗi môn 1
+   người, cùng phong cách vẽ 2D anime với Cô Ngân (người lớn, đứng
+   ở bảng, thẻ tên vẽ trong ảnh). tong-hop / olympic / lạ → Cô Ngân
+   (áo dài đỏ) mặc định. Giọng đọc KHÔNG đổi: mọi giáo viên vẫn
+   dùng GV02LemLinh — chỉ đổi ảnh + tên.
+   LH-GV3: mỗi cô 3 tư thế (poses) — A chỉ bảng (ảnh gốc), B ôm sách,
+   C suy nghĩ — xoay A→B→C→A mỗi lần câu hỏi đổi. */
+const TEACHERS = {
+  'tieng-viet': { name: 'Cô Mai Lan', img: 'img/gv-tieng-viet.png', poses: ['img/gv-tieng-viet.png', 'img/gv-tieng-viet-2.png', 'img/gv-tieng-viet-3.png'] },
+  'toan': { name: 'Cô Thu Hằng', img: 'img/gv-toan.png', poses: ['img/gv-toan.png', 'img/gv-toan-2.png', 'img/gv-toan-3.png'] },
+  'khoa-hoc': { name: 'Cô Diệu Anh', img: 'img/gv-khoa-hoc.png', poses: ['img/gv-khoa-hoc.png', 'img/gv-khoa-hoc-2.png', 'img/gv-khoa-hoc-3.png'] },
+  'tieng-anh': { name: 'Cô Phương Thảo', img: 'img/gv-tieng-anh.png', poses: ['img/gv-tieng-anh.png', 'img/gv-tieng-anh-2.png', 'img/gv-tieng-anh-3.png'] },
+  'lich-su': { name: 'Cô Thanh Huyền', img: 'img/gv-lich-su.png', poses: ['img/gv-lich-su.png', 'img/gv-lich-su-2.png', 'img/gv-lich-su-3.png'] },
+  'dia-ly': { name: 'Cô Quỳnh Chi', img: 'img/gv-dia-ly.png', poses: ['img/gv-dia-ly.png', 'img/gv-dia-ly-2.png', 'img/gv-dia-ly-3.png'] },
+  'doi-song': { name: 'Cô Hồng Nhung', img: 'img/gv-doi-song.png', poses: ['img/gv-doi-song.png', 'img/gv-doi-song-2.png', 'img/gv-doi-song-3.png'] },
+  'do-an': { name: 'Cô Ngọc Trâm', img: 'img/gv-do-an.png', poses: ['img/gv-do-an.png', 'img/gv-do-an-2.png', 'img/gv-do-an-3.png'] },
+  'do-vui': { name: 'Cô Bảo Châu', img: 'img/gv-do-vui.png', poses: ['img/gv-do-vui.png', 'img/gv-do-vui-2.png', 'img/gv-do-vui-3.png'] },
+};
+const TEACHER_DEFAULT = { name: 'Cô Ngân', img: TEACHER_IMG, poses: [TEACHER_IMG, 'img/co-ngan-2.png', 'img/co-ngan-3.png'] };
+/* Vị trí + cỡ giáo viên từ config (key viTriGiaoVien): {x, y, w} —
+   x/y = điểm neo của CSS .teacher (translate -50%,-85%), tính theo %
+   khung; w = rộng px ở khung 720×1280, cao tự theo tỉ lệ ảnh
+   (1151×1833). Mặc định = vị trí Cô Ngân hiện tại (TEACHER_POS
+   13/42,5 + CSS .teacher rộng 185px, cao ~295px). Áp chung cho mọi
+   giáo viên. Sai/thiếu thì về mặc định. */
+const TEACHER_POS_DEFAULT = { x: 13, y: 42.5, w: 185 };
+let teacherPos = Object.assign({}, TEACHER_POS_DEFAULT);
+function parseTeacherPos(v) {
+  let o = v;
+  if (typeof v === 'string') { try { o = JSON.parse(v); } catch (_) { return null; } }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return null;
+  const x = +o.x, y = +o.y, w = +o.w;
+  if (![x, y, w].every(Number.isFinite)) return null;
+  if (x < 0 || x > 100 || y < 0 || y > 100 || w < 50 || w > 400) return null;
+  return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, w: Math.round(w) };
+}
+function applyTeacherPosToEl() {
+  if (!teacherEl) return;
+  teacherEl.style.left = teacherPos.x + '%';
+  teacherEl.style.top = teacherPos.y + '%';
+  teacherEl.style.width = teacherPos.w + 'px';
+}
+P.applyTeacherPos = function (v) {
+  const p = parseTeacherPos(v);
+  teacherPos = p || Object.assign({}, TEACHER_POS_DEFAULT);
+  applyTeacherPosToEl();
+  return !!p;
+};
+P.teacherPos = function () { return Object.assign({}, teacherPos); };
+/* Tư thế giáo viên (LH-GV3): mỗi cô 3 tư thế — A chỉ bảng, B ôm sách,
+   C suy nghĩ. Xoay A→B→C→A mỗi lần câu hỏi đổi (main.js gọi 1 dòng
+   P.nextTeacherPose() trong nextQuestion); đổi giáo viên (đổi môn /
+   cheDo) thì về lại A. Câu hỏi đầu tiên giữ tư thế A, từ câu 2 mới
+   xoay. Tư thế KHÔNG đổi ở mỗi lần render — chỉ đổi khi câu hỏi
+   đổi hoặc đổi giáo viên. */
+let teacherPoseIdx = 0;
+let teacherPoseStarted = false;
+function teacherPoseImg() {
+  const t = TEACHERS[teacherMode] || TEACHER_DEFAULT;
+  const poses = t.poses || [t.img];
+  return poses[teacherPoseIdx % poses.length];
+}
+function applyTeacherPoseImg() {
+  if (!teacherImgEl) return;
+  const t = TEACHERS[teacherMode] || TEACHER_DEFAULT;
+  teacherImgEl.src = teacherPoseImg();
+  teacherImgEl.alt = t.name;
+}
+P.nextTeacherPose = function () {
+  if (!teacherPoseStarted) { teacherPoseStarted = true; return teacherPoseIdx; } // câu đầu giữ A
+  teacherPoseIdx = (teacherPoseIdx + 1) % 3;
+  applyTeacherPoseImg();
+  return teacherPoseIdx;
+};
+P.resetTeacherPose = function () { teacherPoseIdx = 0; teacherPoseStarted = false; applyTeacherPoseImg(); };
+P.teacherPose = function () { return teacherPoseIdx; };
+/* Đổi giáo viên theo chế độ lớp (cfg.cheDo): tên môn → giáo viên môn
+   đó; tong-hop / olympic / lạ → Cô Ngân. Chỉ đổi ảnh + tên, không
+   đổi vị trí (cùng 1 chỗ đứng) và không đổi giọng đọc. Đổi giáo
+   viên thì tư thế về lại A. */
+let teacherMode = 'tong-hop';
+let teacherImgEl = null;
+P.setTeacherMode = function (mode) {
+  const m = String(mode || 'tong-hop');
+  const next = TEACHERS[m] ? m : 'tong-hop';
+  if (next !== teacherMode) { teacherMode = next; P.resetTeacherPose(); } // chỉ về A khi đổi giáo viên thật (applyConfig khác không làm mất tư thế đang xoay)
+  return teacherMode;
+};
+P.teacherMode = function () { return teacherMode; };
+P.teacherName = function () { return (TEACHERS[teacherMode] || TEACHER_DEFAULT).name; };
 const STUDENT_IMGS = ['img/hoc-sinh-sau-1.png', 'img/hoc-sinh-sau-2.png', 'img/hoc-sinh-sau-3.png', 'img/hoc-sinh-sau-4.png', 'img/hoc-sinh-sau-5.png', 'img/hoc-sinh-sau-6.png'];
 const FRONT_IMGS = ['img/hoc-sinh-1.png', 'img/hoc-sinh-2.png', 'img/hoc-sinh-3.png', 'img/hoc-sinh-4.png', 'img/hoc-sinh-5.png', 'img/hoc-sinh-6.png'];
 
-/* SEATS v16d (2026-11-06 tối, user chốt bỏ vụ cắt mép bàn + tự canh
-   tọa độ): 20 ghế (4 hàng × 5). x/y = vị trí phần tử (%, học sinh neo
+/* SEATS v19 (theo NỀN v18 — thay SEATS v18 theo nền v17): 20 ghế
+   (4 hàng × 5). x/y = vị trí phần tử (%, học sinh neo
    translate(-50%,-100%) nên ĐÁY hình = y, đặt y đúng đỉnh bàn thì ngực
    cắt chạm mép bàn như ảnh họ — không dải mặt bàn, không mặt nạ, không
    cắt nào nữa. w = rộng ảnh (px); ảnh học sinh mới 600×600 (tỉ lệ 1.0,
-   đầu + vai cắt ngang ngực), w 48/56/64/74 → thân hiện 48/56/64/74px.
+   đầu + vai cắt ngang ngực).
+   y = đỉnh bàn ĐO TRỰC TIẾP TỪ ẢNH NỀN v18 (nv3 warp dọc v17, đỉnh
+   623→704, 719→832, 827→960, 944→1088, 1093→1216): đo bằng profile
+   độ sáng cột x 300–420 — mép trên bàn là hàng tối (~40–100) rồi
+   nhảy lên mặt bàn sáng (~145–167): 704/832/960/1088/1216px =
+   55,0/65,0/75,0/85,0/95,0% (khớp đúng số nv3/BOSS báo; phương pháp
+   này đo lại v17 ra đúng 623/719/827/944/1093). Dùng 4 dải làm ghế:
+   55/65/75/85; dải 95% để trống như ảnh họ. Khoảng cách hàng đều
+   128px (10% × 1280).
+   w chốt theo ĐẦU học sinh đo từ ảnh mẫu (~40/48/55/63px ở khung
+   720; đầu ≈ 59% bề rộng ảnh sau-lưng): 68/81/93/107 → đầu
+   ~40/48/55/63px, khớp ảnh mẫu (không copy mù gợi ý 75/86/97/109
+   của nv3 — gợi ý đó cho đầu to hơn ảnh mẫu ở hàng 1–3). Giới hạn
+   trên do chip hàng trên (chip cao ~31px, chipY = y + 0,3%): đầu
+   hàng dưới chạm mép dưới chip hàng trên ở w ≈ 101; w 107 ở hàng 4
+   chỉ lấn ~5px sau chip (chip ở lớp trên, không che chữ — như v18
+   đã kiểm chứng bằng ảnh). Hàng 1: đầu top 641px, cách chân cô
+   (588px) 53px — hết lỗi hs nấp sau chân cô ở nền v17.
    chipY = top (%) của chip tên + điểm (ngay dưới mép bàn, trên mặt
-   trước bàn, như ảnh họ). y = đỉnh bàn ĐO TỪ ẢNH NỀN v17 (tia nắng):
-   48,7/56,2/64,6/73,7 (bàn dịch lên 0,3–1% so với v16). Tọa độ từng ghế
-   user tự canh bằng ?seats=1 (xem P.setEditMode ở cuối file). */
+   trước bàn, như v17 chốt). Tọa độ từng ghế user tự canh bằng
+   ?seats=1 (xem P.setEditMode ở cuối file). */
 const SEATS = [
-  { x: 10, y: 48.7, w: 48, chipY: 49.0 }, { x: 30, y: 48.7, w: 48, chipY: 49.0 },
-  { x: 50, y: 48.7, w: 48, chipY: 49.0 }, { x: 70, y: 48.7, w: 48, chipY: 49.0 },
-  { x: 90, y: 48.7, w: 48, chipY: 49.0 },
-  { x: 10, y: 56.2, w: 56, chipY: 56.5 }, { x: 30, y: 56.2, w: 56, chipY: 56.5 },
-  { x: 50, y: 56.2, w: 56, chipY: 56.5 }, { x: 70, y: 56.2, w: 56, chipY: 56.5 },
-  { x: 90, y: 56.2, w: 56, chipY: 56.5 },
-  { x: 10, y: 64.6, w: 64, chipY: 64.9 }, { x: 30, y: 64.6, w: 64, chipY: 64.9 },
-  { x: 50, y: 64.6, w: 64, chipY: 64.9 }, { x: 70, y: 64.6, w: 64, chipY: 64.9 },
-  { x: 90, y: 64.6, w: 64, chipY: 64.9 },
-  { x: 10, y: 73.7, w: 74, chipY: 74.0 }, { x: 30, y: 73.7, w: 74, chipY: 74.0 },
-  { x: 50, y: 73.7, w: 74, chipY: 74.0 }, { x: 70, y: 73.7, w: 74, chipY: 74.0 },
-  { x: 90, y: 73.7, w: 74, chipY: 74.0 },
+  { x: 10, y: 55.0, w: 68, chipY: 55.3 }, { x: 30, y: 55.0, w: 68, chipY: 55.3 },
+  { x: 50, y: 55.0, w: 68, chipY: 55.3 }, { x: 70, y: 55.0, w: 68, chipY: 55.3 },
+  { x: 90, y: 55.0, w: 68, chipY: 55.3 },
+  { x: 10, y: 65.0, w: 81, chipY: 65.3 }, { x: 30, y: 65.0, w: 81, chipY: 65.3 },
+  { x: 50, y: 65.0, w: 81, chipY: 65.3 }, { x: 70, y: 65.0, w: 81, chipY: 65.3 },
+  { x: 90, y: 65.0, w: 81, chipY: 65.3 },
+  { x: 10, y: 75.0, w: 93, chipY: 75.3 }, { x: 30, y: 75.0, w: 93, chipY: 75.3 },
+  { x: 50, y: 75.0, w: 93, chipY: 75.3 }, { x: 70, y: 75.0, w: 93, chipY: 75.3 },
+  { x: 90, y: 75.0, w: 93, chipY: 75.3 },
+  { x: 10, y: 85.0, w: 107, chipY: 85.3 }, { x: 30, y: 85.0, w: 107, chipY: 85.3 },
+  { x: 50, y: 85.0, w: 107, chipY: 85.3 }, { x: 70, y: 85.0, w: 107, chipY: 85.3 },
+  { x: 90, y: 85.0, w: 107, chipY: 85.3 },
 ];
 /* Ghi đè tọa độ ghế do user tự canh (?seats=1): lưu localStorage, nạp
-   khi mở game, ưu tiên hơn SEATS mặc định. */
+   khi mở game, chỉ áp khi đang ở chế độ editor — xem thường thì
+   config (hoặc SEATS v19) thắng. */
 const LS_SEATS = 'lophochchu.seats.v1';
 let seatOverrides = {};
 try { seatOverrides = JSON.parse(localStorage.getItem(LS_SEATS) || '{}') || {}; } catch (_) { seatOverrides = {}; }
+/* Vị trí ghế từ config LiveBridge (key viTriGhe): user chỉnh qua admin.
+   Chấp nhận chuỗi JSON hoặc mảng [{x,y,w,chipY}] x20; sai/thiếu thì
+   về SEATS v19 hardcode. Thứ tự ưu tiên: xem thường thì config (hoặc
+   v19) luôn thắng — localStorage (?seats=1) CHỈ áp khi đang ở chế độ
+   editor (editMode bật), để sửa config trong admin không bị
+   localStorage cũ (kể cả từ lúc test v17) chặn mất tác dụng. */
+let seatBase = SEATS;
+function parseSeats(v) {
+  let arr = v;
+  if (typeof v === 'string') { try { arr = JSON.parse(v); } catch (_) { return null; } }
+  else if (Array.isArray(v) && v.length === 1 && typeof v[0] === 'string') { try { arr = JSON.parse(v[0]); } catch (_) { return null; } }
+  if (!Array.isArray(arr) || arr.length !== 20) return null;
+  const out = [];
+  for (const s of arr) {
+    if (!s || typeof s !== 'object') return null;
+    const x = +s.x, y = +s.y, w = +s.w, chipY = +s.chipY;
+    if (![x, y, w, chipY].every(Number.isFinite)) return null;
+    if (x < 0 || x > 100 || y < 0 || y > 100 || chipY < 0 || chipY > 100 || w < 10 || w > 300) return null;
+    out.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, w: Math.round(w), chipY: Math.round(chipY * 10) / 10 });
+  }
+  return out;
+}
+/* Áp vị trí ghế từ config (main.js applyConfig gọi): học sinh đang
+   ngồi dời theo ngay; config sai thì về v19. Trả về true nếu config
+   hợp lệ và được áp. */
+P.applyConfigSeats = function (v) {
+  const s = parseSeats(v);
+  seatBase = s || SEATS;
+  people.forEach(p => { if (p.seatIdx != null && !p.onboard) applySeat(p, p.seatIdx); });
+  return !!s;
+};
+P.seatsFromConfig = function () { return seatBase !== SEATS; };
 function getSeat(si) {
-  const base = SEATS[si];
+  const base = seatBase[si];
   if (!base) return null;
-  const o = seatOverrides[si];
+  // Ghi đè localStorage chỉ áp trong chế độ editor (?seats=1); xem
+  // thường thì config (hoặc v19) luôn thắng.
+  const o = editMode ? seatOverrides[si] : null;
   if (!o) return base;
   return {
     x: o.x != null ? +o.x : base.x,
@@ -148,15 +290,17 @@ P.init = function (el) {
   rootEl.appendChild(chipLayer);
   bubbleLayer = document.getElementById('bubbleLayer');
   // Preload toàn bộ ảnh nhân vật ngay khi mở game (tránh "mất hình").
-  [TEACHER_IMG].concat(STUDENT_IMGS, FRONT_IMGS).forEach(src => { const im = new Image(); im.src = src; });
+  // Preload cả 3 tư thế của mọi giáo viên để đổi tư thế tức thì, không nhấp nháy.
+  (TEACHER_DEFAULT.poses || [TEACHER_IMG]).concat(Object.values(TEACHERS).flatMap(t => t.poses || [t.img]), STUDENT_IMGS, FRONT_IMGS).forEach(src => { const im = new Image(); im.src = src; });
   // Cô giáo đứng cố định bên trái bảng, không chiếm ghế học sinh.
   teacherEl = document.createElement('div');
   teacherEl.className = 'teacher';
   teacherEl.id = 'teacher';
   teacherEl.innerHTML = '<div class="figwrap"><img src="' + TEACHER_IMG + '" alt="Cô Ngân" draggable="false"></div>'
     + '<div class="gshadow"></div>';
-  teacherEl.style.left = TEACHER_POS.x + '%';
-  teacherEl.style.top = TEACHER_POS.y + '%';
+  teacherImgEl = teacherEl.querySelector('.figwrap img');
+  applyTeacherPosToEl(); // vị trí + cỡ từ config (mặc định = Cô Ngân)
+  P.setTeacherMode(teacherMode); // đồng bộ ảnh theo chế độ lớp (nếu config đã về trước P.init)
   rootEl.appendChild(teacherEl);
   // Bong bóng cô Ngân: dải trống dưới khẩu hiệu, trên bảng — giữa
   // khung, không che câu đố/ô chữ trên bảng, không che đầu cô.
