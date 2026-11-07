@@ -85,8 +85,38 @@ const SEATS = [
 const LS_SEATS = 'lophochchu.seats.v1';
 let seatOverrides = {};
 try { seatOverrides = JSON.parse(localStorage.getItem(LS_SEATS) || '{}') || {}; } catch (_) { seatOverrides = {}; }
+/* Vị trí ghế từ config LiveBridge (key viTriGhe): user chỉnh qua admin.
+   Chấp nhận chuỗi JSON hoặc mảng [{x,y,w,chipY}] x20; sai/thiếu thì
+   về SEATS v19 hardcode. Thứ tự ưu tiên: localStorage (?seats=1) >
+   config viTriGhe > SEATS v19. */
+let seatBase = SEATS;
+function parseSeats(v) {
+  let arr = v;
+  if (typeof v === 'string') { try { arr = JSON.parse(v); } catch (_) { return null; } }
+  else if (Array.isArray(v) && v.length === 1 && typeof v[0] === 'string') { try { arr = JSON.parse(v[0]); } catch (_) { return null; } }
+  if (!Array.isArray(arr) || arr.length !== 20) return null;
+  const out = [];
+  for (const s of arr) {
+    if (!s || typeof s !== 'object') return null;
+    const x = +s.x, y = +s.y, w = +s.w, chipY = +s.chipY;
+    if (![x, y, w, chipY].every(Number.isFinite)) return null;
+    if (x < 0 || x > 100 || y < 0 || y > 100 || chipY < 0 || chipY > 100 || w < 10 || w > 300) return null;
+    out.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, w: Math.round(w), chipY: Math.round(chipY * 10) / 10 });
+  }
+  return out;
+}
+/* Áp vị trí ghế từ config (main.js applyConfig gọi): học sinh đang
+   ngồi dời theo ngay; config sai thì về v19. Trả về true nếu config
+   hợp lệ và được áp. */
+P.applyConfigSeats = function (v) {
+  const s = parseSeats(v);
+  seatBase = s || SEATS;
+  people.forEach(p => { if (p.seatIdx != null && !p.onboard) applySeat(p, p.seatIdx); });
+  return !!s;
+};
+P.seatsFromConfig = function () { return seatBase !== SEATS; };
 function getSeat(si) {
-  const base = SEATS[si];
+  const base = seatBase[si];
   if (!base) return null;
   const o = seatOverrides[si];
   if (!o) return base;

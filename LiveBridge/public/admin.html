@@ -733,6 +733,11 @@ const GAME_SCHEMAS = {
       { k: 'partyMaxNhanhHon', l: 'Party Max nhảy nhanh hơn', t: 'chk', defTrue: true },
     ] },
   ],
+  'lop-hoc-chu': [
+    { title: '🪑 Vị trí ghế học sinh', live: true, note: 'Dán JSON 20 ghế [{x, y, w, chipY}] theo đúng thứ tự ghế (hàng 1: ghế 1–5, hàng 2: ghế 6–10, hàng 3: ghế 11–15, hàng 4: ghế 16–20) — lấy từ nút Copy JSON trong chế độ chỉnh ghế (?demo=1&seats=1). Đổi là áp dụng ngay cho game đang chạy. Để trống / sai thì game dùng vị trí mặc định (SEATS v19: y 55/65/75/85, w 68/81/93/107).', fields: [
+      { k: 'viTriGhe', l: 'Vị trí 20 ghế (JSON)', t: 'txt', full: true },
+    ] },
+  ],
 };
 /* nhóm dùng chung cho mọi game ngoài chùa: âm thanh (không có niệm), giọng NPC, màn hình */
 const COMMON_GROUPS = [

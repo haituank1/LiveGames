@@ -34,6 +34,7 @@ const DEFAULT_CFG = {
   npcVoiceOn: true, npcVoice: 'avocado_v2:rumi', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
   answerSec: 30, revealSec: 8, gapSec: 3,
   breakSec: 30, breakWinPoints: 50, breakRevealSec: 20,
+  viTriGhe: '[{"x":10,"y":55,"w":68,"chipY":55.3},{"x":30,"y":55,"w":68,"chipY":55.3},{"x":50,"y":55,"w":68,"chipY":55.3},{"x":70,"y":55,"w":68,"chipY":55.3},{"x":90,"y":55,"w":68,"chipY":55.3},{"x":10,"y":65,"w":81,"chipY":65.3},{"x":30,"y":65,"w":81,"chipY":65.3},{"x":50,"y":65,"w":81,"chipY":65.3},{"x":70,"y":65,"w":81,"chipY":65.3},{"x":90,"y":65,"w":81,"chipY":65.3},{"x":10,"y":75,"w":93,"chipY":75.3},{"x":30,"y":75,"w":93,"chipY":75.3},{"x":50,"y":75,"w":93,"chipY":75.3},{"x":70,"y":75,"w":93,"chipY":75.3},{"x":90,"y":75,"w":93,"chipY":75.3},{"x":10,"y":85,"w":107,"chipY":85.3},{"x":30,"y":85,"w":107,"chipY":85.3},{"x":50,"y":85,"w":107,"chipY":85.3},{"x":70,"y":85,"w":107,"chipY":85.3},{"x":90,"y":85,"w":107,"chipY":85.3}]', // vị trí 20 ghế [{x,y,w,chipY}] — chuỗi JSON, user chỉnh qua admin (people.js applyConfigSeats); sai thì về SEATS v19
   rankPoints: [100, 80, 60, 40, 40], latePoints: 20,
   streakMin: 3, streakMult: 2,
   attendPoints: 50,
@@ -744,6 +745,7 @@ setInterval(() => {
 function applyConfig(c) {
   if (!c) return;
   cfg = Object.assign({}, DEFAULT_CFG, c);
+  P.applyConfigSeats(cfg.viTriGhe); // vị trí ghế từ admin; sai/thiếu thì về SEATS v19
   if (window.NpcVoice && NpcVoice.setConfig) {
     NpcVoice.setConfig({
       enabled: cfg.npcVoiceOn !== false, voice: cfg.npcVoice || 'avocado_v2:rumi',
