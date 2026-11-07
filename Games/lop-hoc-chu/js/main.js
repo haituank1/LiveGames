@@ -128,6 +128,7 @@ loadFund();
 
 /* ---------- Vòng lặp câu hỏi ---------- */
 function nextQuestion() {
+  P.nextTeacherPose(); // xoay tư thế giáo viên mỗi lần đổi câu hỏi (LH-GV3) — câu đầu giữ A, từ câu 2 xoay A→B→C→A
   if (!QUESTIONS.length) return null;
   if (!deck.length) {
     deck = QUESTIONS.map((_, i) => i);

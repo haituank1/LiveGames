@@ -42,19 +42,21 @@ const TEACHER_IMG = 'img/co-ngan.png';
    người, cùng phong cách vẽ 2D anime với Cô Ngân (người lớn, đứng
    ở bảng, thẻ tên vẽ trong ảnh). tong-hop / olympic / lạ → Cô Ngân
    (áo dài đỏ) mặc định. Giọng đọc KHÔNG đổi: mọi giáo viên vẫn
-   dùng GV02LemLinh — chỉ đổi ảnh + tên. */
+   dùng GV02LemLinh — chỉ đổi ảnh + tên.
+   LH-GV3: mỗi cô 3 tư thế (poses) — A chỉ bảng (ảnh gốc), B ôm sách,
+   C suy nghĩ — xoay A→B→C→A mỗi lần câu hỏi đổi. */
 const TEACHERS = {
-  'tieng-viet': { name: 'Cô Mai Lan', img: 'img/gv-tieng-viet.png' },
-  'toan': { name: 'Cô Thu Hằng', img: 'img/gv-toan.png' },
-  'khoa-hoc': { name: 'Cô Diệu Anh', img: 'img/gv-khoa-hoc.png' },
-  'tieng-anh': { name: 'Cô Phương Thảo', img: 'img/gv-tieng-anh.png' },
-  'lich-su': { name: 'Cô Thanh Huyền', img: 'img/gv-lich-su.png' },
-  'dia-ly': { name: 'Cô Quỳnh Chi', img: 'img/gv-dia-ly.png' },
-  'doi-song': { name: 'Cô Hồng Nhung', img: 'img/gv-doi-song.png' },
-  'do-an': { name: 'Cô Ngọc Trâm', img: 'img/gv-do-an.png' },
-  'do-vui': { name: 'Cô Bảo Châu', img: 'img/gv-do-vui.png' },
+  'tieng-viet': { name: 'Cô Mai Lan', img: 'img/gv-tieng-viet.png', poses: ['img/gv-tieng-viet.png', 'img/gv-tieng-viet-2.png', 'img/gv-tieng-viet-3.png'] },
+  'toan': { name: 'Cô Thu Hằng', img: 'img/gv-toan.png', poses: ['img/gv-toan.png', 'img/gv-toan-2.png', 'img/gv-toan-3.png'] },
+  'khoa-hoc': { name: 'Cô Diệu Anh', img: 'img/gv-khoa-hoc.png', poses: ['img/gv-khoa-hoc.png', 'img/gv-khoa-hoc-2.png', 'img/gv-khoa-hoc-3.png'] },
+  'tieng-anh': { name: 'Cô Phương Thảo', img: 'img/gv-tieng-anh.png', poses: ['img/gv-tieng-anh.png', 'img/gv-tieng-anh-2.png', 'img/gv-tieng-anh-3.png'] },
+  'lich-su': { name: 'Cô Thanh Huyền', img: 'img/gv-lich-su.png', poses: ['img/gv-lich-su.png', 'img/gv-lich-su-2.png', 'img/gv-lich-su-3.png'] },
+  'dia-ly': { name: 'Cô Quỳnh Chi', img: 'img/gv-dia-ly.png', poses: ['img/gv-dia-ly.png', 'img/gv-dia-ly-2.png', 'img/gv-dia-ly-3.png'] },
+  'doi-song': { name: 'Cô Hồng Nhung', img: 'img/gv-doi-song.png', poses: ['img/gv-doi-song.png', 'img/gv-doi-song-2.png', 'img/gv-doi-song-3.png'] },
+  'do-an': { name: 'Cô Ngọc Trâm', img: 'img/gv-do-an.png', poses: ['img/gv-do-an.png', 'img/gv-do-an-2.png', 'img/gv-do-an-3.png'] },
+  'do-vui': { name: 'Cô Bảo Châu', img: 'img/gv-do-vui.png', poses: ['img/gv-do-vui.png', 'img/gv-do-vui-2.png', 'img/gv-do-vui-3.png'] },
 };
-const TEACHER_DEFAULT = { name: 'Cô Ngân', img: TEACHER_IMG };
+const TEACHER_DEFAULT = { name: 'Cô Ngân', img: TEACHER_IMG, poses: [TEACHER_IMG, 'img/co-ngan-2.png', 'img/co-ngan-3.png'] };
 /* Vị trí + cỡ giáo viên từ config (key viTriGiaoVien): {x, y, w} —
    x/y = điểm neo của CSS .teacher (translate -50%,-85%), tính theo %
    khung; w = rộng px ở khung 720×1280, cao tự theo tỉ lệ ảnh
@@ -85,16 +87,43 @@ P.applyTeacherPos = function (v) {
   return !!p;
 };
 P.teacherPos = function () { return Object.assign({}, teacherPos); };
+/* Tư thế giáo viên (LH-GV3): mỗi cô 3 tư thế — A chỉ bảng, B ôm sách,
+   C suy nghĩ. Xoay A→B→C→A mỗi lần câu hỏi đổi (main.js gọi 1 dòng
+   P.nextTeacherPose() trong nextQuestion); đổi giáo viên (đổi môn /
+   cheDo) thì về lại A. Câu hỏi đầu tiên giữ tư thế A, từ câu 2 mới
+   xoay. Tư thế KHÔNG đổi ở mỗi lần render — chỉ đổi khi câu hỏi
+   đổi hoặc đổi giáo viên. */
+let teacherPoseIdx = 0;
+let teacherPoseStarted = false;
+function teacherPoseImg() {
+  const t = TEACHERS[teacherMode] || TEACHER_DEFAULT;
+  const poses = t.poses || [t.img];
+  return poses[teacherPoseIdx % poses.length];
+}
+function applyTeacherPoseImg() {
+  if (!teacherImgEl) return;
+  const t = TEACHERS[teacherMode] || TEACHER_DEFAULT;
+  teacherImgEl.src = teacherPoseImg();
+  teacherImgEl.alt = t.name;
+}
+P.nextTeacherPose = function () {
+  if (!teacherPoseStarted) { teacherPoseStarted = true; return teacherPoseIdx; } // câu đầu giữ A
+  teacherPoseIdx = (teacherPoseIdx + 1) % 3;
+  applyTeacherPoseImg();
+  return teacherPoseIdx;
+};
+P.resetTeacherPose = function () { teacherPoseIdx = 0; teacherPoseStarted = false; applyTeacherPoseImg(); };
+P.teacherPose = function () { return teacherPoseIdx; };
 /* Đổi giáo viên theo chế độ lớp (cfg.cheDo): tên môn → giáo viên môn
    đó; tong-hop / olympic / lạ → Cô Ngân. Chỉ đổi ảnh + tên, không
-   đổi vị trí (cùng 1 chỗ đứng) và không đổi giọng đọc. */
+   đổi vị trí (cùng 1 chỗ đứng) và không đổi giọng đọc. Đổi giáo
+   viên thì tư thế về lại A. */
 let teacherMode = 'tong-hop';
 let teacherImgEl = null;
 P.setTeacherMode = function (mode) {
   const m = String(mode || 'tong-hop');
-  const t = TEACHERS[m] || TEACHER_DEFAULT;
-  teacherMode = TEACHERS[m] ? m : 'tong-hop';
-  if (teacherImgEl) { teacherImgEl.src = t.img; teacherImgEl.alt = t.name; }
+  const next = TEACHERS[m] ? m : 'tong-hop';
+  if (next !== teacherMode) { teacherMode = next; P.resetTeacherPose(); } // chỉ về A khi đổi giáo viên thật (applyConfig khác không làm mất tư thế đang xoay)
   return teacherMode;
 };
 P.teacherMode = function () { return teacherMode; };
@@ -261,7 +290,8 @@ P.init = function (el) {
   rootEl.appendChild(chipLayer);
   bubbleLayer = document.getElementById('bubbleLayer');
   // Preload toàn bộ ảnh nhân vật ngay khi mở game (tránh "mất hình").
-  [TEACHER_IMG].concat(Object.values(TEACHERS).map(t => t.img), STUDENT_IMGS, FRONT_IMGS).forEach(src => { const im = new Image(); im.src = src; });
+  // Preload cả 3 tư thế của mọi giáo viên để đổi tư thế tức thì, không nhấp nháy.
+  (TEACHER_DEFAULT.poses || [TEACHER_IMG]).concat(Object.values(TEACHERS).flatMap(t => t.poses || [t.img]), STUDENT_IMGS, FRONT_IMGS).forEach(src => { const im = new Image(); im.src = src; });
   // Cô giáo đứng cố định bên trái bảng, không chiếm ghế học sinh.
   teacherEl = document.createElement('div');
   teacherEl.className = 'teacher';
