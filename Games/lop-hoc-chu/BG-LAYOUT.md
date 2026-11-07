@@ -1,18 +1,18 @@
-# BG-LAYOUT — Lớp học chữ (v17: nền tia nắng + bảng vẽ sẵn, học sinh mới, tự canh ghế, M5 Oẳn tù tì, motto mới)
+# BG-LAYOUT — Lớp học chữ (v18: nền dời bàn xuống khớp ảnh mẫu, bảng break khớp ảnh, gợi ý dài không bị cắt)
 
 Khung hình: **720 × 1280** (dọc 9:16), gốc tọa độ tính theo % chiều rộng /
 chiều cao của `#stage`. Mọi vị trí dưới đây là % của stage, không phải px,
 để OBS co giãn vẫn đúng.
 
-Nền là **ảnh vẽ kín `img/lop-hoc-bg.png`** (720×1280, bản v17, thay bản v16
-từ 2026-11-06 tối): trần xà gỗ, cửa sổ **trái** có cây xanh + **tia nắng
-vàng xiên vào lớp** (god rays, hạt bụi vàng, vùng sáng ấm trên sàn và mặt
-bàn gần cửa sổ), tường gỗ **phải**, sàn gỗ cam, **bảng xanh lá VẼ SẴN
-trong ảnh** (khung gỗ, x ~12–88%, y ~15,5–32,5%), **5 dải bàn dài
-trống**, không có đèn treo, không còn đám đông đứng 2 bên bảng, không
-có chữ. Các khung chữ game (bảng hiệu, banner, bảng, panel) đè lên đúng
-vị trí đã vẽ trong ảnh nền. CSS gradient dưới ảnh nền chỉ là dự phòng
-nếu ảnh lỗi.
+Nền là **ảnh vẽ kín `img/lop-hoc-bg.png`** (720×1280, bản v18, warp
+dọc từ v17 tối 2026-11-06 — xem Ghi chú v18): trần xà gỗ, cửa sổ
+**trái** có cây xanh + **tia nắng vàng xiên vào lớp** (god rays, hạt
+bụi vàng, vùng sáng ấm trên sàn và mặt bàn gần cửa sổ), tường gỗ
+**phải**, sàn gỗ cam, **bảng xanh lá VẼ SẴN trong ảnh** (khung gỗ,
+x ~12–88%, y ~15,5–32,5%), **5 dải bàn dài trống**, không có đèn treo,
+không còn đám đông đứng 2 bên bảng, không có chữ. Các khung chữ game
+(bảng hiệu, banner, bảng, panel) đè lên đúng vị trí đã vẽ trong ảnh
+nền. CSS gradient dưới ảnh nền chỉ là dự phòng nếu ảnh lỗi.
 
 > Ghi chú v8–v10 (đã thử rồi bỏ): từng vẽ lại nền sảnh trống + ghép bàn
 > (img/desk.png) + ghế (img/chair.png) riêng, 10 bàn 2 cột × 5 hàng.
@@ -28,15 +28,21 @@ nếu ảnh lỗi.
 > `workspace/lop-hoc-chu-polish/src/lop-hoc-bg-v16.png`, bản v15 tại
 > `.../src/lop-hoc-bg-v15.png`.
 >
-> Ghi chú v17 (2026-11-06 tối): user chốt **bỏ vụ cắt mép bàn** (dải
-> mặt bàn `.deskstrip` gây lỗi liên tục: cắt tóc hàng sau, cắt chip tên,
-> cắt bong bóng chat) + **tự canh tọa độ từng học sinh** + làm lại học
-> sinh giống ảnh họ + nền đẹp lên có tia nắng qua cửa sổ + popup giống
-> ảnh họ + bỏ sọc chéo trên bảng. Nền v17 vẽ từ v16 (thêm tia nắng);
-> lần đầu vẽ bảng luôn vào ảnh (v17a) nhưng bảng HTML đè lên thành 2
-> bảng nên vẽ lại v17b — vẫn vẽ bảng vào ảnh nhưng **bảng HTML đổi
-> thành khung trong suốt** đè đúng khung bảng vẽ. Đỉnh bàn dịch lên
-> 0,3–1% so với v16 (đo lại từ ảnh v17).
+> Ghi chú v18 (2026-11-06 tối, LH-V3 bổ sung — BOSS chốt dời bàn
+> xuống khớp ảnh mẫu): đỉnh bàn v17 cao hơn ảnh mẫu (48,7/56,2/64,6/
+> 73,7% vs ảnh ~55/65/75/85%) nên hàng 1 nấp sau chân cô + trống dưới
+> hàng 4. Nền v18 KHÔNG vẽ lại từ đầu (giữ nguyên bảng vẽ, tia nắng,
+> tường, cửa sổ): warp dọc ảnh v17 (ánh xạ từng hàng, nội suy tuyến
+> tính, làm tròn bằng numpy — xem `workspace/multi-session/lh-v3-demo/`
+> để xem lại nếu cần): giữ nguyên y < 460px, đỉnh bàn 623→704,
+> 719→832, 827→960, 944→1088, 1093→1216, đáy ảnh 1280→1370 rồi cắt
+> về 720×1280. Kết quả: đỉnh bàn **55 / 65 / 75 / 85 / 95%**, bảng
+> không đổi 1px, tia nắng không gãy khúc thấy được. Bản v17 lưu tại
+> `workspace/lop-hoc-chu-polish/src/lop-hoc-bg-v17.png`. **SEATS trong
+> `js/people.js` vẫn là số cũ (y 48,7/56,2/64,6/73,7) — chờ nv2 đo lại
+> theo đỉnh bàn v18 (gợi ý w nội suy từ thang nv2 v18: 75/86/97/109,
+> chipY = y+0,3); demo kiểm chứng đã chỉnh tạm qua `setSeat` (không
+> commit) nên ảnh demo khớp, code thật còn chờ nv2.
 
 ## Bố cục tổng thể (đối chiếu ảnh Giờ ra chơi thứ 2 user gửi 2026-11-06)
 
@@ -44,7 +50,7 @@ nếu ảnh lỗi.
 |---|---|---|
 | Bảng hiệu `#classSign` | left 30, top 0.8, w 40 | Trắng viền nâu: `LỚP HỌC CHỮ` + `Tiết {tiết} · Câu {câu}/20 · {views} bạn` (renderSign) |
 | Banner khẩu hiệu `#mottoBar` | left 2, top 6.8, w 96 | Đỏ/vàng `TIÊN HỌC LỄ – HẬU HỌC VĂN` (v16b, user chốt 2026-11-06 tối — bỏ câu cũ `NGHE HẾT ĐỀ – GÕ MỚI ĂN ĐIỂM` vì đề hiện là tính giờ luôn, câu đó sai luật). Chữ LỄ không có chấm dưới — chấm user thấy là của chữ Ọ trong HỌC (đã tra 2026-11-06 tối, chữ đúng chuẩn) |
-| Bảng xanh lá `#board` | left 12, top 15.5, w 76, h 17 | **KHUNG TRONG SUỐT** (v17): nền/border/shadow bỏ hết, chữ đè trực tiếp lên bảng vẽ sẵn trong ảnh nền (khung gỗ x ~12–88%, y ~15,5–32,5%). Chữ phấn trắng thêm bóng đậm (`text-shadow: 0 2px 4px rgba(0,0,0,.55)`) để đọc được trên tia nắng; `#qHint` chừa `padding-left: 110px` cho đầu cô Ngân; ô chữ/vạch đáp án/đáp án vàng như cũ. **Sọc chéo trên bảng đã bỏ** (v17, user chốt — nhìn lâu đau mắt) |
+| Bảng xanh lá `#board` | left 12, top 15.5, w 76, h 17 | **KHUNG TRONG SUỐT** (v17): nền/border/shadow bỏ hết, chữ đè trực tiếp lên bảng vẽ sẵn trong ảnh nền (khung gỗ x ~12–88%, y ~15,5–32,5%). Chữ phấn trắng thêm bóng đậm (`text-shadow: 0 2px 4px rgba(0,0,0,.55)`) để đọc được trên tia nắng; `#qHint` chừa `padding-left: 110px` cho đầu cô Ngân + `padding-right: 70px` (v18: mép phải bảng nằm dưới cột phải từ x 565px, gợi ý dài bị cắt đuôi — giờ gợi ý dài tự xuống 2 dòng, mép phải tối đa 540px); ô chữ/vạch đáp án/đáp án vàng như cũ. **Sọc chéo trên bảng đã bỏ** (v17, user chốt — nhìn lâu đau mắt). **Bảng break (v18, LH-V3):** tiêu đề phấn "Oẳn tù tì với cô" giữa bảng, búa/kéo/bao chữ phấn trơn (không hộp kem), "Cô ra" ở dòng cuối, dòng thắng vừa trong bảng; pill chủ đề + vòng số câu ẩn ở màn break |
 | Thanh thời gian `#timerBarWrap` | left 12, top 36.8, w 76, h 8px | Vàng-cam, co dần theo thời gian còn lại của giai đoạn (v17: rộng theo bảng mới) |
 | Panel Nhanh nhất `#fastestPanel` | left 12, top 38.5, w 76 | Ngay dưới bảng: header nâu `⚡ Nhanh nhất` + `N bạn đã đúng`, 3 cột avatar mặt trước + tên + thời gian (lúc công bố hiện +điểm) |
 | Banner luật chơi `#guideBar` | left 14, bottom 9.5, w 72 | Đỏ/vàng, xoay mỗi 8s; ở dưới cùng, trên dải chat/sổ quà |
@@ -64,11 +70,14 @@ nếu ảnh lỗi.
 
 ## Ghế ngồi = thứ hạng điểm (20 ghế: 4 hàng × 5)
 
-Tọa độ đo từ ảnh nền **v17** bằng xử lý ảnh (màu bàn gỗ vàng nhạt):
-- Dải bàn trong nền (đỉnh mỗi dải): y **48,7 / 56,2 / 64,6 / 73,7 / 85,4**
-  (dịch lên 0,3–1% so với v16 do vẽ lại). Dùng 4 dải làm ghế:
-  **48,7 / 56,2 / 64,6 / 73,7**. Dải 85,4% (bàn trống sát đáy, như ảnh
+Tọa độ đo từ ảnh nền **v18** (warp dọc từ v17, xem Ghi chú v18 ở đầu file):
+- Dải bàn trong nền (đỉnh mỗi dải): y **55 / 65 / 75 / 85 / 95**
+  (v17 là 48,7 / 56,2 / 64,6 / 73,7 / 85,4). Dùng 4 dải làm ghế:
+  **55 / 65 / 75 / 85**. Dải 95% (bàn trống sát đáy, như ảnh
   họ) để trống — dải chat + banner luật che mất chip tên nếu ngồi đó.
+  ⚠️ **SEATS trong `js/people.js` CHƯA cập nhật theo v18 (vẫn y cũ) —
+  chờ nv2 đo lại (LH-V2). Bảng dưới là số CŨ, chỉ để tham khảo cấu
+  trúc, KHÔNG dùng để đối chiếu nữa.**
 - **Tâm bàn:** bàn vẽ là dải dài liền mạch, không chia cột, nên 5 cột
   chia đều x 10/30/50/70/90 (v16b, user chốt 2026-11-06 tối — 1 dãy
   ghế 5 hs; ảnh họ ngồi 7/hàng nhưng user chốt 5).
