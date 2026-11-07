@@ -81,14 +81,17 @@ const SEATS = [
   { x: 90, y: 85.0, w: 107, chipY: 85.3 },
 ];
 /* Ghi đè tọa độ ghế do user tự canh (?seats=1): lưu localStorage, nạp
-   khi mở game, ưu tiên hơn SEATS mặc định. */
+   khi mở game, chỉ áp khi đang ở chế độ editor — xem thường thì
+   config (hoặc SEATS v19) thắng. */
 const LS_SEATS = 'lophochchu.seats.v1';
 let seatOverrides = {};
 try { seatOverrides = JSON.parse(localStorage.getItem(LS_SEATS) || '{}') || {}; } catch (_) { seatOverrides = {}; }
 /* Vị trí ghế từ config LiveBridge (key viTriGhe): user chỉnh qua admin.
    Chấp nhận chuỗi JSON hoặc mảng [{x,y,w,chipY}] x20; sai/thiếu thì
-   về SEATS v19 hardcode. Thứ tự ưu tiên: localStorage (?seats=1) >
-   config viTriGhe > SEATS v19. */
+   về SEATS v19 hardcode. Thứ tự ưu tiên: xem thường thì config (hoặc
+   v19) luôn thắng — localStorage (?seats=1) CHỈ áp khi đang ở chế độ
+   editor (editMode bật), để sửa config trong admin không bị
+   localStorage cũ (kể cả từ lúc test v17) chặn mất tác dụng. */
 let seatBase = SEATS;
 function parseSeats(v) {
   let arr = v;
@@ -118,7 +121,9 @@ P.seatsFromConfig = function () { return seatBase !== SEATS; };
 function getSeat(si) {
   const base = seatBase[si];
   if (!base) return null;
-  const o = seatOverrides[si];
+  // Ghi đè localStorage chỉ áp trong chế độ editor (?seats=1); xem
+  // thường thì config (hoặc v19) luôn thắng.
+  const o = editMode ? seatOverrides[si] : null;
   if (!o) return base;
   return {
     x: o.x != null ? +o.x : base.x,
