@@ -43,6 +43,17 @@ const SHOW_KEYS = ['feedChat', 'feedGift', 'feedJoin', 'feedFollow', 'feedLike',
 const LINE_KEYS = ['monkLines', 'monkGreet', 'monkThank', 'monkFollowThanks', 'guideLines', 'rulesLines',
   'mcLines', 'mcGreet', 'mcCouple', 'mcThank', 'mcFollowLines', 'mcFunny', 'mcMilestone', 'mcTagVang', 'mcGuide', 'funnyLines', 'npcDanhSach', 'lenhHoaRoi', 'lenhPhaoHoa', 'lenhPhaoGiay', 'tuKhoaGhepDoi', 'mcTagDaCoDoi', 'mcSapMoc'];
 const num = (v, min, max, def) => { const n = Number(v); return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def; };
+// vị trí + cỡ giáo viên lớp học {x,y,w}: chuỗi JSON (admin gửi dạng chuỗi)
+// hoặc object; sai/thiếu/rỗng thì trả null (game dùng vị trí Cô Ngân)
+const parseTeacherPos = v => {
+  let o = v;
+  if (typeof v === 'string') { try { o = JSON.parse(v); } catch (_) { return null; } }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return null;
+  const x = +o.x, y = +o.y, w = +o.w;
+  if (![x, y, w].every(Number.isFinite)) return null;
+  if (x < 0 || x > 100 || y < 0 || y > 100 || w < 50 || w > 400) return null;
+  return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, w: Math.round(w) };
+};
 // vị trí 20 ghế lớp học [{x,y,w,chipY}]: chuỗi JSON (admin gửi dạng chuỗi)
 // hoặc mảng; sai/thiếu/rỗng thì trả null (game dùng SEATS v19 hardcode)
 const parseSeatList = v => {
@@ -214,6 +225,11 @@ class Settings {
     if (id === 'lop-hoc-chu' && cfg.viTriGhe != null) {
       const seats = parseSeatList(cfg.viTriGhe);
       if (seats) clean.viTriGhe = JSON.stringify(seats); else drop.push('viTriGhe');
+    }
+    // vị trí + cỡ giáo viên lớp học (chuỗi JSON hoặc object {x,y,w}): hợp lệ thì lưu dạng chuỗi JSON chuẩn; sai/thiếu/rỗng thì bỏ (game dùng vị trí Cô Ngân)
+    if (id === 'lop-hoc-chu' && cfg.viTriGiaoVien != null) {
+      const pos = parseTeacherPos(cfg.viTriGiaoVien);
+      if (pos) clean.viTriGiaoVien = JSON.stringify(pos); else drop.push('viTriGiaoVien');
     }
     // mốc XP từng LV của sàn nhảy: dãy số, tối thiểu 2 mốc
     if (id === 'san-nhay' && Array.isArray(cfg.levelXp)) {

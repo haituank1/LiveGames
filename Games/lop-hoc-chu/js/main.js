@@ -33,7 +33,9 @@ const DEFAULT_CFG = {
   mcName: 'MC Bong Bóng',
   npcVoiceOn: true, npcVoice: 'avocado_v2:rumi', npcVoiceMinGapSec: 8, npcVoiceMaxPerMin: 6,
   answerSec: 30, revealSec: 8, gapSec: 3,
+  cheDo: 'tong-hop', // chế độ lớp: tong-hop | <môn> | olympic — giáo viên hiện theo chế độ này (people.js setTeacherMode)
   breakSec: 30, breakWinPoints: 50, breakRevealSec: 20,
+  viTriGiaoVien: '{"x":13,"y":42.5,"w":185}', // vị trí + cỡ giáo viên [{x,y,w}] — chuỗi JSON, user chỉnh qua admin (people.js applyTeacherPos); sai thì về vị trí Cô Ngân
   viTriGhe: '[{"x":10,"y":55,"w":68,"chipY":55.3},{"x":30,"y":55,"w":68,"chipY":55.3},{"x":50,"y":55,"w":68,"chipY":55.3},{"x":70,"y":55,"w":68,"chipY":55.3},{"x":90,"y":55,"w":68,"chipY":55.3},{"x":10,"y":65,"w":81,"chipY":65.3},{"x":30,"y":65,"w":81,"chipY":65.3},{"x":50,"y":65,"w":81,"chipY":65.3},{"x":70,"y":65,"w":81,"chipY":65.3},{"x":90,"y":65,"w":81,"chipY":65.3},{"x":10,"y":75,"w":93,"chipY":75.3},{"x":30,"y":75,"w":93,"chipY":75.3},{"x":50,"y":75,"w":93,"chipY":75.3},{"x":70,"y":75,"w":93,"chipY":75.3},{"x":90,"y":75,"w":93,"chipY":75.3},{"x":10,"y":85,"w":107,"chipY":85.3},{"x":30,"y":85,"w":107,"chipY":85.3},{"x":50,"y":85,"w":107,"chipY":85.3},{"x":70,"y":85,"w":107,"chipY":85.3},{"x":90,"y":85,"w":107,"chipY":85.3}]', // vị trí 20 ghế [{x,y,w,chipY}] — chuỗi JSON, user chỉnh qua admin (people.js applyConfigSeats); sai thì về SEATS v19
   rankPoints: [100, 80, 60, 40, 40], latePoints: 20,
   streakMin: 3, streakMult: 2,
@@ -746,6 +748,8 @@ function applyConfig(c) {
   if (!c) return;
   cfg = Object.assign({}, DEFAULT_CFG, c);
   P.applyConfigSeats(cfg.viTriGhe); // vị trí ghế từ admin; sai/thiếu thì về SEATS v19
+  P.applyTeacherPos(cfg.viTriGiaoVien); // vị trí + cỡ giáo viên từ admin; sai thì về vị trí Cô Ngân
+  P.setTeacherMode(cfg.cheDo); // giáo viên theo chế độ lớp; tong-hop/olympic/lạ → Cô Ngân
   if (window.NpcVoice && NpcVoice.setConfig) {
     NpcVoice.setConfig({
       enabled: cfg.npcVoiceOn !== false, voice: cfg.npcVoice || 'avocado_v2:rumi',
@@ -878,7 +882,9 @@ FX.init(fxCanvas);
 renderGuide(); renderGoal(); renderEvent(); renderLedger(); renderFund(); renderTop(); renderInteract();
 resize();
 if (isDemo) {
-  applyConfig(DEFAULT_CFG);
+  const demoCfg = Object.assign({}, DEFAULT_CFG);
+  if (q.has('cheDo')) demoCfg.cheDo = q.get('cheDo'); // ?demo=1&cheDo=toan: xem thử giáo viên từng môn
+  applyConfig(demoCfg);
   const btn = $('startBtn');
   if (btn) btn.addEventListener('click', () => {
     btn.remove();

@@ -37,6 +37,67 @@ function hash(s) { let h = 0; s = String(s || ''); for (let i = 0; i < s.length;
 function esc(s) { return String(s || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 
 const TEACHER_IMG = 'img/co-ngan.png';
+/* Giáo viên theo môn học (cheDo): 9 giáo viên, mỗi môn 1 người, cùng
+   phong cách vẽ 2D anime với Cô Ngân (người lớn, đứng ở bảng, dáng
+   giơ tay/chỉ bảng, thẻ tên vẽ trong ảnh). tong-hop / olympic / lạ
+   → Cô Ngân (áo dài đỏ) mặc định. Giọng đọc KHÔNG đổi: mọi giáo
+   viên vẫn dùng GV02LemLinh — chỉ đổi ảnh + tên. */
+const TEACHERS = {
+  'tieng-viet': { name: 'Cô Mai Lan', img: 'img/gv-tieng-viet.png' },
+  'toan': { name: 'Thầy Minh Quân', img: 'img/gv-toan.png' },
+  'khoa-hoc': { name: 'Cô Diệu Anh', img: 'img/gv-khoa-hoc.png' },
+  'tieng-anh': { name: 'Cô Phương Thảo', img: 'img/gv-tieng-anh.png' },
+  'lich-su': { name: 'Thầy Văn Hiếu', img: 'img/gv-lich-su.png' },
+  'dia-ly': { name: 'Thầy Quốc Bảo', img: 'img/gv-dia-ly.png' },
+  'doi-song': { name: 'Cô Hồng Nhung', img: 'img/gv-doi-song.png' },
+  'do-an': { name: 'Cô Ngọc Trâm', img: 'img/gv-do-an.png' },
+  'do-vui': { name: 'Thầy Bảo Long', img: 'img/gv-do-vui.png' },
+};
+const TEACHER_DEFAULT = { name: 'Cô Ngân', img: TEACHER_IMG };
+/* Vị trí + cỡ giáo viên từ config (key viTriGiaoVien): {x, y, w} —
+   x/y = điểm neo của CSS .teacher (translate -50%,-85%), tính theo %
+   khung; w = rộng px ở khung 720×1280, cao tự theo tỉ lệ ảnh
+   (1151×1833). Mặc định = vị trí Cô Ngân hiện tại (TEACHER_POS
+   13/42,5 + CSS .teacher rộng 185px, cao ~295px). Áp chung cho mọi
+   giáo viên. Sai/thiếu thì về mặc định. */
+const TEACHER_POS_DEFAULT = { x: 13, y: 42.5, w: 185 };
+let teacherPos = Object.assign({}, TEACHER_POS_DEFAULT);
+function parseTeacherPos(v) {
+  let o = v;
+  if (typeof v === 'string') { try { o = JSON.parse(v); } catch (_) { return null; } }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return null;
+  const x = +o.x, y = +o.y, w = +o.w;
+  if (![x, y, w].every(Number.isFinite)) return null;
+  if (x < 0 || x > 100 || y < 0 || y > 100 || w < 50 || w > 400) return null;
+  return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, w: Math.round(w) };
+}
+function applyTeacherPosToEl() {
+  if (!teacherEl) return;
+  teacherEl.style.left = teacherPos.x + '%';
+  teacherEl.style.top = teacherPos.y + '%';
+  teacherEl.style.width = teacherPos.w + 'px';
+}
+P.applyTeacherPos = function (v) {
+  const p = parseTeacherPos(v);
+  teacherPos = p || Object.assign({}, TEACHER_POS_DEFAULT);
+  applyTeacherPosToEl();
+  return !!p;
+};
+P.teacherPos = function () { return Object.assign({}, teacherPos); };
+/* Đổi giáo viên theo chế độ lớp (cfg.cheDo): tên môn → giáo viên môn
+   đó; tong-hop / olympic / lạ → Cô Ngân. Chỉ đổi ảnh + tên, không
+   đổi vị trí (cùng 1 chỗ đứng) và không đổi giọng đọc. */
+let teacherMode = 'tong-hop';
+let teacherImgEl = null;
+P.setTeacherMode = function (mode) {
+  const m = String(mode || 'tong-hop');
+  const t = TEACHERS[m] || TEACHER_DEFAULT;
+  teacherMode = TEACHERS[m] ? m : 'tong-hop';
+  if (teacherImgEl) { teacherImgEl.src = t.img; teacherImgEl.alt = t.name; }
+  return teacherMode;
+};
+P.teacherMode = function () { return teacherMode; };
+P.teacherName = function () { return (TEACHERS[teacherMode] || TEACHER_DEFAULT).name; };
 const STUDENT_IMGS = ['img/hoc-sinh-sau-1.png', 'img/hoc-sinh-sau-2.png', 'img/hoc-sinh-sau-3.png', 'img/hoc-sinh-sau-4.png', 'img/hoc-sinh-sau-5.png', 'img/hoc-sinh-sau-6.png'];
 const FRONT_IMGS = ['img/hoc-sinh-1.png', 'img/hoc-sinh-2.png', 'img/hoc-sinh-3.png', 'img/hoc-sinh-4.png', 'img/hoc-sinh-5.png', 'img/hoc-sinh-6.png'];
 
@@ -199,15 +260,16 @@ P.init = function (el) {
   rootEl.appendChild(chipLayer);
   bubbleLayer = document.getElementById('bubbleLayer');
   // Preload toàn bộ ảnh nhân vật ngay khi mở game (tránh "mất hình").
-  [TEACHER_IMG].concat(STUDENT_IMGS, FRONT_IMGS).forEach(src => { const im = new Image(); im.src = src; });
+  [TEACHER_IMG].concat(Object.values(TEACHERS).map(t => t.img), STUDENT_IMGS, FRONT_IMGS).forEach(src => { const im = new Image(); im.src = src; });
   // Cô giáo đứng cố định bên trái bảng, không chiếm ghế học sinh.
   teacherEl = document.createElement('div');
   teacherEl.className = 'teacher';
   teacherEl.id = 'teacher';
   teacherEl.innerHTML = '<div class="figwrap"><img src="' + TEACHER_IMG + '" alt="Cô Ngân" draggable="false"></div>'
     + '<div class="gshadow"></div>';
-  teacherEl.style.left = TEACHER_POS.x + '%';
-  teacherEl.style.top = TEACHER_POS.y + '%';
+  teacherImgEl = teacherEl.querySelector('.figwrap img');
+  applyTeacherPosToEl(); // vị trí + cỡ từ config (mặc định = Cô Ngân)
+  P.setTeacherMode(teacherMode); // đồng bộ ảnh theo chế độ lớp (nếu config đã về trước P.init)
   rootEl.appendChild(teacherEl);
   // Bong bóng cô Ngân: dải trống dưới khẩu hiệu, trên bảng — giữa
   // khung, không che câu đố/ô chữ trên bảng, không che đầu cô.
