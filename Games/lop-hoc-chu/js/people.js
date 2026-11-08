@@ -46,17 +46,17 @@ const TEACHER_IMG = 'img/co-ngan.png';
    LH-GV3: mỗi cô 3 tư thế (poses) — A chỉ bảng (ảnh gốc), B ôm sách,
    C suy nghĩ — xoay A→B→C→A mỗi lần câu hỏi đổi. */
 const TEACHERS = {
-  'tieng-viet': { name: 'Cô Mai Lan', img: 'img/gv-tieng-viet.png', poses: ['img/gv-tieng-viet.png', 'img/gv-tieng-viet-2.png', 'img/gv-tieng-viet-3.png'], happy: 'img/gv-tieng-viet-vui.png', sad: 'img/gv-tieng-viet-buon.png' },
-  'toan': { name: 'Cô Thu Hằng', img: 'img/gv-toan.png', poses: ['img/gv-toan.png', 'img/gv-toan-2.png', 'img/gv-toan-3.png'], happy: 'img/gv-toan-vui.png', sad: 'img/gv-toan-buon.png' },
-  'khoa-hoc': { name: 'Cô Diệu Anh', img: 'img/gv-khoa-hoc.png', poses: ['img/gv-khoa-hoc.png', 'img/gv-khoa-hoc-2.png', 'img/gv-khoa-hoc-3.png'], happy: 'img/gv-khoa-hoc-vui.png', sad: 'img/gv-khoa-hoc-buon.png' },
-  'tieng-anh': { name: 'Cô Phương Thảo', img: 'img/gv-tieng-anh.png', poses: ['img/gv-tieng-anh.png', 'img/gv-tieng-anh-2.png', 'img/gv-tieng-anh-3.png'], happy: 'img/gv-tieng-anh-vui.png', sad: 'img/gv-tieng-anh-buon.png' },
-  'lich-su': { name: 'Cô Thanh Huyền', img: 'img/gv-lich-su.png', poses: ['img/gv-lich-su.png', 'img/gv-lich-su-2.png', 'img/gv-lich-su-3.png'], happy: 'img/gv-lich-su-vui.png', sad: 'img/gv-lich-su-buon.png' },
-  'dia-ly': { name: 'Cô Quỳnh Chi', img: 'img/gv-dia-ly.png', poses: ['img/gv-dia-ly.png', 'img/gv-dia-ly-2.png', 'img/gv-dia-ly-3.png'], happy: 'img/gv-dia-ly-vui.png', sad: 'img/gv-dia-ly-buon.png' },
-  'doi-song': { name: 'Cô Hồng Nhung', img: 'img/gv-doi-song.png', poses: ['img/gv-doi-song.png', 'img/gv-doi-song-2.png', 'img/gv-doi-song-3.png'], happy: 'img/gv-doi-song-vui.png', sad: 'img/gv-doi-song-buon.png' },
-  'do-an': { name: 'Cô Ngọc Trâm', img: 'img/gv-do-an.png', poses: ['img/gv-do-an.png', 'img/gv-do-an-2.png', 'img/gv-do-an-3.png'], happy: 'img/gv-do-an-vui.png', sad: 'img/gv-do-an-buon.png' },
-  'do-vui': { name: 'Cô Bảo Châu', img: 'img/gv-do-vui.png', poses: ['img/gv-do-vui.png', 'img/gv-do-vui-2.png', 'img/gv-do-vui-3.png'], happy: 'img/gv-do-vui-vui.png', sad: 'img/gv-do-vui-buon.png' },
+  'tieng-viet': { name: 'Cô Mai Lan', img: 'img/gv-tieng-viet.png', poses: ['img/gv-tieng-viet.png', 'img/gv-tieng-viet-2.png', 'img/gv-tieng-viet-3.png'], happy: 'img/gv-tieng-viet-vui.png', sad: 'img/gv-tieng-viet-buon.png', voTay: 'img/gv-tieng-viet-vo-tay.png', traiTim: 'img/gv-tieng-viet-trai-tim.png', chuV: 'img/gv-tieng-viet-chu-v.png', ngonCai: 'img/gv-tieng-viet-ngon-cai.png', vayTay: 'img/gv-tieng-viet-vay-tay.png' },
+  'toan': { name: 'Cô Thu Hằng', img: 'img/gv-toan.png', poses: ['img/gv-toan.png', 'img/gv-toan-2.png', 'img/gv-toan-3.png'], happy: 'img/gv-toan-vui.png', sad: 'img/gv-toan-buon.png', voTay: 'img/gv-toan-vo-tay.png', traiTim: 'img/gv-toan-trai-tim.png', chuV: 'img/gv-toan-chu-v.png', ngonCai: 'img/gv-toan-ngon-cai.png', vayTay: 'img/gv-toan-vay-tay.png' },
+  'khoa-hoc': { name: 'Cô Diệu Anh', img: 'img/gv-khoa-hoc.png', poses: ['img/gv-khoa-hoc.png', 'img/gv-khoa-hoc-2.png', 'img/gv-khoa-hoc-3.png'], happy: 'img/gv-khoa-hoc-vui.png', sad: 'img/gv-khoa-hoc-buon.png', voTay: 'img/gv-khoa-hoc-vo-tay.png', traiTim: 'img/gv-khoa-hoc-trai-tim.png', chuV: 'img/gv-khoa-hoc-chu-v.png', ngonCai: 'img/gv-khoa-hoc-ngon-cai.png', vayTay: 'img/gv-khoa-hoc-vay-tay.png' },
+  'tieng-anh': { name: 'Cô Phương Thảo', img: 'img/gv-tieng-anh.png', poses: ['img/gv-tieng-anh.png', 'img/gv-tieng-anh-2.png', 'img/gv-tieng-anh-3.png'], happy: 'img/gv-tieng-anh-vui.png', sad: 'img/gv-tieng-anh-buon.png', voTay: 'img/gv-tieng-anh-vo-tay.png', traiTim: 'img/gv-tieng-anh-trai-tim.png', chuV: 'img/gv-tieng-anh-chu-v.png', ngonCai: 'img/gv-tieng-anh-ngon-cai.png', vayTay: 'img/gv-tieng-anh-vay-tay.png' },
+  'lich-su': { name: 'Cô Thanh Huyền', img: 'img/gv-lich-su.png', poses: ['img/gv-lich-su.png', 'img/gv-lich-su-2.png', 'img/gv-lich-su-3.png'], happy: 'img/gv-lich-su-vui.png', sad: 'img/gv-lich-su-buon.png', voTay: 'img/gv-lich-su-vo-tay.png', traiTim: 'img/gv-lich-su-trai-tim.png', chuV: 'img/gv-lich-su-chu-v.png', ngonCai: 'img/gv-lich-su-ngon-cai.png', vayTay: 'img/gv-lich-su-vay-tay.png' },
+  'dia-ly': { name: 'Cô Quỳnh Chi', img: 'img/gv-dia-ly.png', poses: ['img/gv-dia-ly.png', 'img/gv-dia-ly-2.png', 'img/gv-dia-ly-3.png'], happy: 'img/gv-dia-ly-vui.png', sad: 'img/gv-dia-ly-buon.png', voTay: 'img/gv-dia-ly-vo-tay.png', traiTim: 'img/gv-dia-ly-trai-tim.png', chuV: 'img/gv-dia-ly-chu-v.png', ngonCai: 'img/gv-dia-ly-ngon-cai.png', vayTay: 'img/gv-dia-ly-vay-tay.png' },
+  'doi-song': { name: 'Cô Hồng Nhung', img: 'img/gv-doi-song.png', poses: ['img/gv-doi-song.png', 'img/gv-doi-song-2.png', 'img/gv-doi-song-3.png'], happy: 'img/gv-doi-song-vui.png', sad: 'img/gv-doi-song-buon.png', voTay: 'img/gv-doi-song-vo-tay.png', traiTim: 'img/gv-doi-song-trai-tim.png', chuV: 'img/gv-doi-song-chu-v.png', ngonCai: 'img/gv-doi-song-ngon-cai.png', vayTay: 'img/gv-doi-song-vay-tay.png' },
+  'do-an': { name: 'Cô Ngọc Trâm', img: 'img/gv-do-an.png', poses: ['img/gv-do-an.png', 'img/gv-do-an-2.png', 'img/gv-do-an-3.png'], happy: 'img/gv-do-an-vui.png', sad: 'img/gv-do-an-buon.png', voTay: 'img/gv-do-an-vo-tay.png', traiTim: 'img/gv-do-an-trai-tim.png', chuV: 'img/gv-do-an-chu-v.png', ngonCai: 'img/gv-do-an-ngon-cai.png', vayTay: 'img/gv-do-an-vay-tay.png' },
+  'do-vui': { name: 'Cô Bảo Châu', img: 'img/gv-do-vui.png', poses: ['img/gv-do-vui.png', 'img/gv-do-vui-2.png', 'img/gv-do-vui-3.png'], happy: 'img/gv-do-vui-vui.png', sad: 'img/gv-do-vui-buon.png', voTay: 'img/gv-do-vui-vo-tay.png', traiTim: 'img/gv-do-vui-trai-tim.png', chuV: 'img/gv-do-vui-chu-v.png', ngonCai: 'img/gv-do-vui-ngon-cai.png', vayTay: 'img/gv-do-vui-vay-tay.png' },
 };
-const TEACHER_DEFAULT = { name: 'Cô Ngân', img: TEACHER_IMG, poses: [TEACHER_IMG, 'img/co-ngan-2.png', 'img/co-ngan-3.png'], happy: 'img/co-ngan-vui.png', sad: 'img/co-ngan-buon.png' };
+const TEACHER_DEFAULT = { name: 'Cô Ngân', img: TEACHER_IMG, poses: [TEACHER_IMG, 'img/co-ngan-2.png', 'img/co-ngan-3.png'], happy: 'img/co-ngan-vui.png', sad: 'img/co-ngan-buon.png', voTay: 'img/co-ngan-vo-tay.png', traiTim: 'img/co-ngan-trai-tim.png', chuV: 'img/co-ngan-chu-v.png', ngonCai: 'img/co-ngan-ngon-cai.png', vayTay: 'img/co-ngan-vay-tay.png' };
 /* Vị trí + cỡ giáo viên từ config (key viTriGiaoVien): {x, y, w} —
    x/y = điểm neo của CSS .teacher (translate -50%,-85%), tính theo %
    khung; w = rộng px ở khung 720×1280, cao tự theo tỉ lệ ảnh
@@ -176,25 +176,37 @@ function applyTeacherPoseImg() {
   teacherImgEl.src = currentTeacherImg();
   teacherImgEl.alt = t.name;
 }
-/* Cảm xúc giáo viên (LH-GV4): khi hết câu hỏi (vào phase công bố đáp
-   án), cô VUI nếu >=1 học sinh THẬT trả lời đúng, BUỒN nếu 0 bạn
-   đúng — main.js gọi P.setTeacherMood('happy'|'sad'). Cảm xúc giữ
+/* Cảm xúc giáo viên (LH-GV4 + LH-GV6): khi hết câu hỏi (vào phase công
+   bố đáp án), cô VUI nếu >=1 học sinh THẬT trả lời đúng, BUỒN nếu 0
+   bạn đúng — main.js gọi P.celebrateRandom() (vui: chọn ngẫu nhiên 1
+   trong 6 kiểu ăn mừng) hoặc P.setTeacherMood('sad'). Cảm xúc giữ
    suốt phase công bố; sang câu sau (nextQuestion) hoặc vào Giờ ra
    chơi thì gọi P.setTeacherMood(null) để về lại tư thế A/B/C hiện
    tại. Ảnh cảm xúc đè lên ảnh tư thế (không đổi teacherPoseIdx),
    nên đổi cảm xúc không làm mất tư thế đang xoay. */
-let teacherMood = null; // null | 'happy' | 'sad'
+/* Mood → field trong dữ liệu từng cô (LH-GV6: 5 kiểu ăn mừng mới cộng
+   thêm vào 'happy' cũ; LH-GV7 thêm 5 kiểu buồn vào đây khi gộp). */
+const MOOD_FIELD = { happy: 'happy', sad: 'sad', 'vo-tay': 'voTay', 'trai-tim': 'traiTim', 'chu-v': 'chuV', 'ngon-cai': 'ngonCai', 'vay-tay': 'vayTay' };
+const CELEBRATIONS = ['happy', 'vo-tay', 'trai-tim', 'chu-v', 'ngon-cai', 'vay-tay']; // 6 kiểu ăn mừng khi có bạn thật đúng
+let teacherMood = null; // null | 'happy' | 'sad' | 1 trong 5 kiểu ăn mừng
 function currentTeacherImg() {
   const t = TEACHERS[teacherMode] || TEACHER_DEFAULT;
-  if (teacherMood && t[teacherMood]) return t[teacherMood];
+  if (teacherMood && t[MOOD_FIELD[teacherMood]]) return t[MOOD_FIELD[teacherMood]];
   return teacherPoseImg();
 }
 P.setTeacherMood = function (mood) {
-  teacherMood = (mood === 'happy' || mood === 'sad') ? mood : null;
+  teacherMood = MOOD_FIELD[mood] ? mood : null;
   applyTeacherPoseImg();
   return teacherMood;
 };
 P.teacherMood = function () { return teacherMood; };
+/* LH-GV6: chọn ngẫu nhiên 1 trong 6 kiểu ăn mừng (vui cũ + 5 mới) rồi
+   áp lên cô; trả về kiểu đã chọn (để demo/log kiểm chứng). */
+P.celebrateRandom = function () {
+  const m = CELEBRATIONS[Math.floor(Math.random() * CELEBRATIONS.length)];
+  P.setTeacherMood(m);
+  return teacherMood;
+};
 P.nextTeacherPose = function () {
   if (!teacherPoseStarted) { teacherPoseStarted = true; return teacherPoseIdx; } // câu đầu giữ A
   teacherPoseIdx = (teacherPoseIdx + 1) % 3;
@@ -380,8 +392,8 @@ P.init = function (el) {
   rootEl.appendChild(chipLayer);
   bubbleLayer = document.getElementById('bubbleLayer');
   // Preload toàn bộ ảnh nhân vật ngay khi mở game (tránh "mất hình").
-  // Preload cả 3 tư thế + 2 cảm xúc của mọi giáo viên để đổi tức thì, không nhấp nháy.
-  (TEACHER_DEFAULT.poses || [TEACHER_IMG]).concat([TEACHER_DEFAULT.happy, TEACHER_DEFAULT.sad], Object.values(TEACHERS).flatMap(t => (t.poses || [t.img]).concat([t.happy, t.sad])), STUDENT_IMGS, FRONT_IMGS).filter(Boolean).forEach(src => { const im = new Image(); im.src = src; });
+  // Preload cả 3 tư thế + cảm xúc (vui/buồn + 5 ăn mừng LH-GV6) của mọi giáo viên để đổi tức thì, không nhấp nháy.
+  (TEACHER_DEFAULT.poses || [TEACHER_IMG]).concat([TEACHER_DEFAULT.happy, TEACHER_DEFAULT.sad, TEACHER_DEFAULT.voTay, TEACHER_DEFAULT.traiTim, TEACHER_DEFAULT.chuV, TEACHER_DEFAULT.ngonCai, TEACHER_DEFAULT.vayTay], Object.values(TEACHERS).flatMap(t => (t.poses || [t.img]).concat([t.happy, t.sad, t.voTay, t.traiTim, t.chuV, t.ngonCai, t.vayTay])), STUDENT_IMGS, FRONT_IMGS).filter(Boolean).forEach(src => { const im = new Image(); im.src = src; });
   // Cô giáo đứng cố định bên trái bảng, không chiếm ghế học sinh.
   teacherEl = document.createElement('div');
   teacherEl.className = 'teacher';

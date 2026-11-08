@@ -210,7 +210,7 @@ function revealRound() {
   // tính cả NPC thì cô lúc nào cũng vui). >=1 bạn thật đúng → cô VUI,
   // 0 bạn đúng → cô BUỒN; giữ cảm xúc suốt phase công bố (8s).
   const realCorrect = ans.filter(a => !a.npc).length;
-  P.setTeacherMood(realCorrect > 0 ? 'happy' : 'sad');
+  if (realCorrect > 0) P.celebrateRandom(); else P.setTeacherMood('sad'); // LH-GV6: ăn mừng ngẫu nhiên 1/6 kiểu (vui cũ + 5 mới); 0 ai đúng vẫn buồn như cũ
   setPhase('reveal', Number(cfg.revealSec) || 8);
   P.teacherPoint(false);
   if (realCorrect > 0) { // chỉ ăn mừng khi có bạn thật đúng; 0 bạn đúng thì cô buồn, không reo hò
