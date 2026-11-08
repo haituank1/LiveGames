@@ -347,6 +347,18 @@
     border-radius: 50%; z-index: -1;
   }
   .teacher .gshadow { width: 86%; bottom: -6px; }
+  /* Khung tên cô giáo dưới chân (LH-GV5c): thay bảng tên vẽ trong ảnh
+     (nv2 bỏ ở LH-GV5a). Vị trí + rộng theo config viTriKhungTen, chữ
+     theo config tenGiaoVien (people.js). Tấm bảng kem viền vàng, chữ
+     nâu đậm — cùng tông với bảng hiệu lớp. */
+  .teacher-nametag {
+    position: absolute; transform: translateX(-50%); z-index: 8;
+    background: linear-gradient(#fff8e1, #ffe082);
+    border: 2px solid #c9a227; border-radius: 8px;
+    color: #5d4037; font-size: 14px; font-weight: 800; line-height: 1.35;
+    text-align: center; padding: 3px 10px;
+    box-shadow: 0 3px 8px rgba(60,30,0,.30);
+  }
   .student.onboard .gshadow { display: none; }
   /* Chip ten + diem duoi moi ban (pill trang) */
   .chip {

@@ -54,6 +54,21 @@ const parseTeacherPos = v => {
   if (x < 0 || x > 100 || y < 0 || y > 100 || w < 50 || w > 400) return null;
   return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, w: Math.round(w) };
 };
+// tên hiển thị từng cô lớp học {chế độ: tên}: chuỗi JSON (admin gửi dạng chuỗi)
+// hoặc object; chỉ giữ key chế độ đã biết (tong-hop/olympic/9 chủ đề) + tên
+// không rỗng (cắt 30 ký tự); không còn tên hợp lệ nào thì trả null (game dùng tên mặc định)
+const TEACHER_NAME_MODES = ['tong-hop', 'olympic', 'toan', 'tieng-viet', 'khoa-hoc', 'tieng-anh', 'do-vui', 'lich-su', 'doi-song', 'do-an', 'dia-ly'];
+const parseTeacherNames = v => {
+  let o = v;
+  if (typeof v === 'string') { try { o = JSON.parse(v); } catch (_) { return null; } }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return null;
+  const out = {};
+  for (const k of TEACHER_NAME_MODES) {
+    const name = typeof o[k] === 'string' ? o[k].trim().slice(0, 30) : '';
+    if (name) out[k] = name;
+  }
+  return Object.keys(out).length ? out : null;
+};
 // vị trí 20 ghế lớp học [{x,y,w,chipY}]: chuỗi JSON (admin gửi dạng chuỗi)
 // hoặc mảng; sai/thiếu/rỗng thì trả null (game dùng SEATS v19 hardcode)
 const parseSeatList = v => {
@@ -231,6 +246,16 @@ class Settings {
     if (id === 'lop-hoc-chu' && cfg.viTriGiaoVien != null) {
       const pos = parseTeacherPos(cfg.viTriGiaoVien);
       if (pos) clean.viTriGiaoVien = JSON.stringify(pos); else drop.push('viTriGiaoVien');
+    }
+    // vị trí khung tên dưới chân cô (chuỗi JSON hoặc object {x,y,w} — cùng luật parseTeacherPos): hợp lệ thì lưu dạng chuỗi JSON chuẩn; sai/thiếu/rỗng thì bỏ (game dùng ngay dưới chân cô)
+    if (id === 'lop-hoc-chu' && cfg.viTriKhungTen != null) {
+      const pos = parseTeacherPos(cfg.viTriKhungTen);
+      if (pos) clean.viTriKhungTen = JSON.stringify(pos); else drop.push('viTriKhungTen');
+    }
+    // tên hiển thị từng cô (chuỗi JSON hoặc object {chế độ: tên}): chỉ giữ key chế độ đã biết + tên không rỗng; không còn tên hợp lệ nào thì bỏ (game dùng tên mặc định)
+    if (id === 'lop-hoc-chu' && cfg.tenGiaoVien != null) {
+      const names = parseTeacherNames(cfg.tenGiaoVien);
+      if (names) clean.tenGiaoVien = JSON.stringify(names); else drop.push('tenGiaoVien');
     }
     // mốc XP từng LV của sàn nhảy: dãy số, tối thiểu 2 mốc
     if (id === 'san-nhay' && Array.isArray(cfg.levelXp)) {
