@@ -112,6 +112,7 @@
       "Đảo chữ không khó đâu, cứ bình tĩnh xếp chữ lại là ra!"
     ],
     "teacherName": "Cô Ngân",
+    "tenGiaoVien": "{\"tong-hop\":\"Cô Ngân\",\"olympic\":\"Cô Ngân\",\"tieng-viet\":\"Cô Mai Lan\",\"toan\":\"Cô Thu Hằng\",\"khoa-hoc\":\"Cô Diệu Anh\",\"tieng-anh\":\"Cô Phương Thảo\",\"lich-su\":\"Cô Thanh Huyền\",\"dia-ly\":\"Cô Quỳnh Chi\",\"doi-song\":\"Cô Hồng Nhung\",\"do-an\":\"Cô Ngọc Trâm\",\"do-vui\":\"Cô Bảo Châu\"}",
     "voiceOn": true,
     "voiceVolume": 90,
     "breakSec": 30,
@@ -119,7 +120,8 @@
     "breakWinPoints": 50,
     "viTriGhe": "[{\"x\":10,\"y\":55,\"w\":68,\"chipY\":55.3},{\"x\":30,\"y\":55,\"w\":68,\"chipY\":55.3},{\"x\":50,\"y\":55,\"w\":68,\"chipY\":55.3},{\"x\":70,\"y\":55,\"w\":68,\"chipY\":55.3},{\"x\":90,\"y\":55,\"w\":68,\"chipY\":55.3},{\"x\":10,\"y\":65,\"w\":81,\"chipY\":65.3},{\"x\":30,\"y\":65,\"w\":81,\"chipY\":65.3},{\"x\":50,\"y\":65,\"w\":81,\"chipY\":65.3},{\"x\":70,\"y\":65,\"w\":81,\"chipY\":65.3},{\"x\":90,\"y\":65,\"w\":81,\"chipY\":65.3},{\"x\":10,\"y\":75,\"w\":93,\"chipY\":75.3},{\"x\":30,\"y\":75,\"w\":93,\"chipY\":75.3},{\"x\":50,\"y\":75,\"w\":93,\"chipY\":75.3},{\"x\":70,\"y\":75,\"w\":93,\"chipY\":75.3},{\"x\":90,\"y\":75,\"w\":93,\"chipY\":75.3},{\"x\":10,\"y\":85,\"w\":107,\"chipY\":85.3},{\"x\":30,\"y\":85,\"w\":107,\"chipY\":85.3},{\"x\":50,\"y\":85,\"w\":107,\"chipY\":85.3},{\"x\":70,\"y\":85,\"w\":107,\"chipY\":85.3},{\"x\":90,\"y\":85,\"w\":107,\"chipY\":85.3}]",
     "cheDo": "tong-hop",
-    "viTriGiaoVien": "{\"x\":13,\"y\":42.5,\"w\":185}"
+    "viTriGiaoVien": "{\"x\":13,\"y\":42.5,\"w\":185}",
+    "viTriKhungTen": "{\"x\":13,\"y\":46.5,\"w\":140}"
   },
   "description": "Lớp học chữ — cô Ngân ra câu đố đảo chữ, người xem gõ đáp án vào chat, ai nhanh nhất được nhiều điểm nhất, quà lớn được lên bảng nhận thưởng",
   "follow": {

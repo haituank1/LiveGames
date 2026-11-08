@@ -87,6 +87,73 @@ P.applyTeacherPos = function (v) {
   return !!p;
 };
 P.teacherPos = function () { return Object.assign({}, teacherPos); };
+/* Khung tên dưới chân cô (LH-GV5c): thay bảng tên vẽ trong ảnh
+   (nv2 bỏ ở LH-GV5a). Vị trí theo config viTriKhungTen {x, y, w} —
+   x/y = tâm/trên của khung (%, khung neo translateX(-50%)), w = rộng
+   px ở khung 720×1280. Mặc định: ngay dưới chân cô — chân ở
+   y + 15% chiều cao hình (neo -85%), cộng khe 0,5%: với vị trí mặc
+   định {13, 42.5, 185} và ảnh 1151×1833 (cao ~295px = 23%) thì chân
+   ở ~46%, khung ở y = 46,5. Config sai/thiếu thì tính lại từ vị trí
+   cô hiện tại (đổi vị trí cô mà chưa sửa khung tên thì khung vẫn bám
+   theo chân cô). */
+const IMG_RATIO = 1833 / 1151; // ảnh giáo viên 1151×1833, cùng tỉ lệ mọi cô
+const PLATE_W_DEFAULT = 140; // vừa tên dài nhất ("Cô Thanh Huyền" ~110px + padding)
+function platePosDefault() {
+  const hPct = teacherPos.w * IMG_RATIO / 1280 * 100;
+  return { x: teacherPos.x, y: Math.round((teacherPos.y + hPct * 0.15 + 0.5) * 10) / 10, w: PLATE_W_DEFAULT };
+}
+let teacherNamePos = platePosDefault();
+let teacherNameTagEl = null;
+function applyTeacherNamePosToEl() {
+  if (!teacherNameTagEl) return;
+  teacherNameTagEl.style.left = teacherNamePos.x + '%';
+  teacherNameTagEl.style.top = teacherNamePos.y + '%';
+  teacherNameTagEl.style.width = teacherNamePos.w + 'px';
+}
+P.applyTeacherNamePos = function (v) {
+  const p = parseTeacherPos(v);
+  teacherNamePos = p || platePosDefault();
+  applyTeacherNamePosToEl();
+  return !!p;
+};
+P.teacherNamePos = function () { return Object.assign({}, teacherNamePos); };
+/* Tên hiển thị từng cô (LH-GV5c): config tenGiaoVien {chế độ: tên}
+   (chuỗi JSON hoặc object) — chỉ giữ key chế độ đã biết + tên không
+   rỗng (cắt 30 ký tự); key thiếu/sai thì về tên mặc định của cô đó.
+   Tên mặc định lấy từ TEACHERS (tránh ghi trùng 10 tên ở 2 chỗ);
+   riêng Cô Ngân (tong-hop) lấy cfg.teacherName nếu admin có nhập. */
+const TEACHER_NAMES_DEFAULT = { 'tong-hop': TEACHER_DEFAULT.name, 'olympic': TEACHER_DEFAULT.name };
+Object.keys(TEACHERS).forEach(k => { TEACHER_NAMES_DEFAULT[k] = TEACHERS[k].name; });
+let teacherNames = {};
+let cfgTeacherName = TEACHER_DEFAULT.name;
+function parseTeacherNames(v) {
+  let o = v;
+  if (typeof v === 'string') { try { o = JSON.parse(v); } catch (_) { return null; } }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) return null;
+  const out = {};
+  for (const k of Object.keys(TEACHER_NAMES_DEFAULT)) {
+    const name = typeof o[k] === 'string' ? o[k].trim().slice(0, 30) : '';
+    if (name) out[k] = name;
+  }
+  return Object.keys(out).length ? out : null;
+}
+function refreshTeacherNameTag() {
+  if (!teacherNameTagEl) return;
+  teacherNameTagEl.textContent = P.teacherDisplayName();
+}
+P.applyTeacherNames = function (v, defaultName) {
+  if (typeof defaultName === 'string' && defaultName.trim()) cfgTeacherName = defaultName.trim().slice(0, 30);
+  const m = parseTeacherNames(v);
+  teacherNames = m || {};
+  refreshTeacherNameTag();
+  return !!m;
+};
+P.teacherDisplayName = function () {
+  const m = teacherMode;
+  if (teacherNames[m]) return teacherNames[m];
+  if (m === 'tong-hop') return cfgTeacherName || TEACHER_DEFAULT.name;
+  return (TEACHERS[m] || TEACHER_DEFAULT).name;
+};
 /* Tư thế giáo viên (LH-GV3): mỗi cô 3 tư thế — A chỉ bảng, B ôm sách,
    C suy nghĩ. Xoay A→B→C→A mỗi lần câu hỏi đổi (main.js gọi 1 dòng
    P.nextTeacherPose() trong nextQuestion); đổi giáo viên (đổi môn /
@@ -143,6 +210,7 @@ P.setTeacherMode = function (mode) {
   const m = String(mode || 'tong-hop');
   const next = TEACHERS[m] ? m : 'tong-hop';
   if (next !== teacherMode) { teacherMode = next; P.resetTeacherPose(); } // chỉ về A khi đổi giáo viên thật (applyConfig khác không làm mất tư thế đang xoay)
+  refreshTeacherNameTag(); // khung tên đổi theo cô đang đứng lớp
   return teacherMode;
 };
 P.teacherMode = function () { return teacherMode; };
@@ -319,6 +387,14 @@ P.init = function (el) {
     + '<div class="gshadow"></div>';
   teacherImgEl = teacherEl.querySelector('.figwrap img');
   applyTeacherPosToEl(); // vị trí + cỡ từ config (mặc định = Cô Ngân)
+  // Khung tên dưới chân cô (LH-GV5c): tạo cùng lúc với cô giáo, vị trí
+  // + chữ lấy từ config (đã về trước P.init thì áp ngay).
+  teacherNameTagEl = document.createElement('div');
+  teacherNameTagEl.className = 'teacher-nametag';
+  teacherNameTagEl.id = 'teacherNameTag';
+  applyTeacherNamePosToEl();
+  refreshTeacherNameTag();
+  rootEl.appendChild(teacherNameTagEl);
   P.setTeacherMode(teacherMode); // đồng bộ ảnh theo chế độ lớp (nếu config đã về trước P.init)
   rootEl.appendChild(teacherEl);
   // Bong bóng cô Ngân: dải trống dưới khẩu hiệu, trên bảng — giữa
