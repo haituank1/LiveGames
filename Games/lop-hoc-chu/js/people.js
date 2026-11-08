@@ -97,7 +97,7 @@ P.teacherPos = function () { return Object.assign({}, teacherPos); };
    cô hiện tại (đổi vị trí cô mà chưa sửa khung tên thì khung vẫn bám
    theo chân cô). */
 const IMG_RATIO = 1833 / 1151; // ảnh giáo viên 1151×1833, cùng tỉ lệ mọi cô
-const PLATE_W_DEFAULT = 140; // vừa tên dài nhất ("Cô Thanh Huyền" ~110px + padding)
+const PLATE_W_DEFAULT = 140; // rộng TỐI ĐA khung tên — vừa tên dài nhất ("Cô Thanh Huyền" ~110px + padding), tên ngắn thì khung co lại
 function platePosDefault() {
   const hPct = teacherPos.w * IMG_RATIO / 1280 * 100;
   return { x: teacherPos.x, y: Math.round((teacherPos.y + hPct * 0.15 + 0.5) * 10) / 10, w: PLATE_W_DEFAULT };
@@ -108,7 +108,10 @@ function applyTeacherNamePosToEl() {
   if (!teacherNameTagEl) return;
   teacherNameTagEl.style.left = teacherNamePos.x + '%';
   teacherNameTagEl.style.top = teacherNamePos.y + '%';
-  teacherNameTagEl.style.width = teacherNamePos.w + 'px';
+  // Khung ôm vừa tên (đỡ che hông cô): rộng co theo chữ, w trong config
+  // là rộng TỐI ĐA — tên dài nhất vừa đủ, tên dài hơn thì cắt … (CSS).
+  teacherNameTagEl.style.width = 'auto';
+  teacherNameTagEl.style.maxWidth = teacherNamePos.w + 'px';
 }
 P.applyTeacherNamePos = function (v) {
   const p = parseTeacherPos(v);
