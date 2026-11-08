@@ -370,6 +370,9 @@
   }
   .chip .nm { overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
   .chip .pts { color: #e65100; font-weight: 800; flex-shrink: 0; }
+  /* LH-HS-AV: avatar mat truoc chibi trong chip ghe — tron, khong co,
+     vien mo giong vien chip de tach khoi nen trang (ao trang cua avatar). */
+  .chip .av { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; background: #fff; border: 1px solid #bdbdbd; flex-shrink: 0; }
   .chip.top1 { background: linear-gradient(#ffe082, #ffd76a); border-color: #e65100; }
   .chip.top1::before { content: "⭐ "; }
   .chip.correct { background: #c8e6c9; border-color: #43a047; }

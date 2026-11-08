@@ -454,7 +454,7 @@ P.spawn = function (user) {
   rootEl.appendChild(p.el);
   p.chipEl = document.createElement('div');
   p.chipEl.className = 'chip';
-  p.chipEl.innerHTML = '<span class="nm">' + esc(p.name) + '</span><span class="pts">0</span>';
+  p.chipEl.innerHTML = '<img class="av" src="' + esc(p.avatar) + '" alt=""><span class="nm">' + esc(p.name) + '</span><span class="pts">0</span>';
   chipLayer.appendChild(p.chipEl);
   seatOf.set(user.id, si);
   applySeat(p, si);
