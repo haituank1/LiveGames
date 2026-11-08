@@ -37,7 +37,7 @@ const DEFAULT_CFG = {
   breakSec: 30, breakWinPoints: 50, breakRevealSec: 20,
   viTriGiaoVien: '{"x":22.9,"y":44.8,"w":185}', // vị trí + cỡ giáo viên [{x,y,w}] — chuỗi JSON, user chỉnh qua admin (people.js applyTeacherPos); sai thì về vị trí Cô Ngân
   tenGiaoVien: '{"tong-hop":"Cô Ngân","olympic":"Cô Ngân","tieng-viet":"Cô Mai Lan","toan":"Cô Thu Hằng","khoa-hoc":"Cô Diệu Anh","tieng-anh":"Cô Phương Thảo","lich-su":"Cô Thanh Huyền","dia-ly":"Cô Quỳnh Chi","doi-song":"Cô Hồng Nhung","do-an":"Cô Ngọc Trâm","do-vui":"Cô Bảo Châu"}', // tên hiển thị từng cô [{chế độ: tên}] — chuỗi JSON, user chỉnh qua admin (people.js applyTeacherNames); sai/thiếu thì về tên mặc định của cô đó
-  viTriKhungTen: '{"x":22.9,"y":48.8,"w":140}', // vị trí + rộng khung tên dưới chân cô [{x,y,w}] — chuỗi JSON, user chỉnh qua admin (people.js applyTeacherNamePos); sai thì về ngay dưới chân cô
+  viTriKhungTen: '{"x":10,"y":37,"w":140}', // vị trí + rộng khung tên ngang hông bên trái cô [{x,y,w}] — chuỗi JSON, user chỉnh qua admin (people.js applyTeacherNamePos); sai thì về ngay dưới chân cô
   viTriGhe: '[{"x":10,"y":55,"w":68,"chipY":55.3},{"x":30,"y":55,"w":68,"chipY":55.3},{"x":50,"y":55,"w":68,"chipY":55.3},{"x":70,"y":55,"w":68,"chipY":55.3},{"x":90,"y":55,"w":68,"chipY":55.3},{"x":10,"y":65,"w":81,"chipY":65.3},{"x":30,"y":65,"w":81,"chipY":65.3},{"x":50,"y":65,"w":81,"chipY":65.3},{"x":70,"y":65,"w":81,"chipY":65.3},{"x":90,"y":65,"w":81,"chipY":65.3},{"x":10,"y":75,"w":93,"chipY":75.3},{"x":30,"y":75,"w":93,"chipY":75.3},{"x":50,"y":75,"w":93,"chipY":75.3},{"x":70,"y":75,"w":93,"chipY":75.3},{"x":90,"y":75,"w":93,"chipY":75.3},{"x":10,"y":85,"w":107,"chipY":85.3},{"x":30,"y":85,"w":107,"chipY":85.3},{"x":50,"y":85,"w":107,"chipY":85.3},{"x":70,"y":85,"w":107,"chipY":85.3},{"x":90,"y":85,"w":107,"chipY":85.3}]', // vị trí 20 ghế [{x,y,w,chipY}] — chuỗi JSON, user chỉnh qua admin (people.js applyConfigSeats); sai thì về SEATS v19
   rankPoints: [100, 80, 60, 40, 40], latePoints: 20,
   streakMin: 3, streakMult: 2,
@@ -795,7 +795,7 @@ function applyConfig(c) {
   P.applyTeacherPos(cfg.viTriGiaoVien); // vị trí + cỡ giáo viên từ admin; sai thì về vị trí Cô Ngân
   P.setTeacherMode(cfg.cheDo); // giáo viên theo chế độ lớp; tong-hop/olympic/lạ → Cô Ngân
   P.applyTeacherNames(cfg.tenGiaoVien, cfg.teacherName); // tên hiển thị từng cô từ admin; sai thì về tên mặc định
-  P.applyTeacherNamePos(cfg.viTriKhungTen); // vị trí khung tên dưới chân cô từ admin; sai thì về ngay dưới chân cô
+  P.applyTeacherNamePos(cfg.viTriKhungTen); // vị trí khung tên ngang hông bên trái cô từ admin; sai thì về ngay dưới chân cô
   if (window.NpcVoice && NpcVoice.setConfig) {
     NpcVoice.setConfig({
       enabled: cfg.npcVoiceOn !== false, voice: cfg.npcVoice || 'avocado_v2:rumi',
