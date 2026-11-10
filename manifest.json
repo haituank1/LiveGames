@@ -1,7 +1,7 @@
 {
-  "commit": "a81b0f1daf8d1fb51f94482147193d280b23a274",
-  "short": "a81b0f1",
-  "generatedAt": "2026-11-10T08:19:29.395Z",
+  "commit": "d0d736af281e0e34f4f613fba339957da106a72c",
+  "short": "d0d736a",
+  "generatedAt": "2026-11-10T08:29:53.229Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -1635,8 +1635,8 @@
     },
     {
       "path": "Games/viet-nam-que-huong/js/provinceTalk.js",
-      "sha": "4d2bd5a1c97c8fe4213fc5be09479b7fb7727aa7",
-      "size": 13900
+      "sha": "29ce07482f08159eae372fa02358ab35e86366bf",
+      "size": 20667
     },
     {
       "path": "Games/viet-nam-que-huong/js/provinces.js",
@@ -4885,7 +4885,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "5ad3ba91eaba3b190f6f585349a3764320d828fb",
+      "sha": "a8cb5bc80b94783ce1a3560d493496c55cbe7af4",
       "size": 157678
     },
     {
@@ -4925,8 +4925,8 @@
     },
     {
       "path": "version.json",
-      "sha": "6348ac282c65b849bfc1cb23d47939e97633326f",
-      "size": 214
+      "sha": "eb6c82f2e04d53d70925c143412b98cd2d030c15",
+      "size": 247
     }
   ]
 }
