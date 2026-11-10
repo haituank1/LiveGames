@@ -1,7 +1,7 @@
 {
-  "commit": "d0d736af281e0e34f4f613fba339957da106a72c",
-  "short": "d0d736a",
-  "generatedAt": "2026-11-10T08:29:53.229Z",
+  "commit": "d0ccd7b588b6b52ff887a589b68232ec048023e2",
+  "short": "d0ccd7b",
+  "generatedAt": "2026-11-10T08:30:16.318Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -4885,7 +4885,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "a8cb5bc80b94783ce1a3560d493496c55cbe7af4",
+      "sha": "4b47518e68794a1122ff9fa3ac35182fed2741a1",
       "size": 157678
     },
     {
@@ -4925,8 +4925,8 @@
     },
     {
       "path": "version.json",
-      "sha": "eb6c82f2e04d53d70925c143412b98cd2d030c15",
-      "size": 247
+      "sha": "3b962262cc65292a40d8d568a3fb6517e652eb53",
+      "size": 214
     }
   ]
 }
