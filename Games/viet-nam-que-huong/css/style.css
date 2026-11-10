@@ -56,18 +56,21 @@ html, body { height: 100%; background: #000; overflow: hidden; font-family: "Be 
 /* Ban do */
 .map-box { position: absolute; left: 0; top: 210px; width: 720px; height: 980px; z-index: 3; }
 .vn-map { display: block; width: 720px; height: 980px; }
-.prov { fill: var(--land); stroke: var(--map-line); stroke-width: 1; transition: fill .6s, fill-opacity .6s; }
+.prov { fill: var(--land); stroke: var(--map-line); stroke-width: 1; transition: fill .6s, fill-opacity .6s; vector-effect: non-scaling-stroke; }
 .prov.on { stroke-width: 1.4; }
 .prov.visit { stroke: var(--accent); stroke-width: 3; animation: provPulse 1s ease-in-out infinite alternate; }
 @keyframes provPulse { from { stroke-opacity: .55; } to { stroke-opacity: 1; } }
-.prov-lbl { display: none; fill: var(--label); font-size: 15px; font-weight: 700; text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: rgba(0,0,0,.45); stroke-width: 3px; }
+/* Nhan trong nhom world bi camera scale theo k (--k do map.js dat tren svg):
+   chia nguoc cho 1/k de chu giu nguyen co tren man hinh, khong phong to
+   che nhau khi zoom. */
+.prov-lbl { display: none; fill: var(--label); font-size: calc(15px / var(--k, 1)); font-weight: 700; text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: rgba(0,0,0,.45); stroke-width: calc(3px / var(--k, 1)); }
 .prov-lbl.show { display: block; }
-.sea-lbl { fill: var(--sea); font-size: 20px; font-style: italic; text-anchor: middle; pointer-events: none; }
-.sea-lbl.sm { font-size: 15px; }
-.isl-main path { fill: var(--land); stroke: var(--map-line); stroke-width: 1; }
+.sea-lbl { fill: var(--sea); font-size: calc(20px / var(--k, 1)); font-style: italic; text-anchor: middle; pointer-events: none; }
+.sea-lbl.sm { font-size: calc(15px / var(--k, 1)); }
+.isl-main path { fill: var(--land); stroke: var(--map-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .isl-main circle { fill: var(--map-line); }
 .isl-main.on path { fill: var(--accent); fill-opacity: .85; }
-.isl-lbl { fill: var(--label); font-size: 13px; text-anchor: middle; pointer-events: none; }
+.isl-lbl { fill: var(--label); font-size: calc(13px / var(--k, 1)); text-anchor: middle; pointer-events: none; }
 .burst { fill: none; stroke: #ffd76a; stroke-width: 3; opacity: 0; }
 .burst.go { animation: burstOut 1.1s ease-out forwards; }
 @keyframes burstOut { 0% { opacity: .95; stroke-width: 5; } 100% { opacity: 0; stroke-width: 1; } }
@@ -77,13 +80,23 @@ html, body { height: 100%; background: #000; overflow: hidden; font-family: "Be 
   color: var(--muted); background: rgba(0,0,0,.28); padding: 5px 9px; border-radius: 8px;
   transition: opacity .5s; pointer-events: none;
 }
+/* Ten tinh dang ghe: noi len tren cung lop overlay (z-index 30, tren pin
+   z 8), dang vien thuoc nen toi de khong bi ban do sang hay avatar che mat.
+   Dat o tren map-box, khong nam giua ban do nua. LUU Y: z-index 30 chi co
+   tac dung trong map-box (map-box z 3, cot phai .side z 12) nen vien
+   KHONG the de len cot phai — phai can vao vung ban do trong: cot phai
+   bat dau tu x=482px (720-10-228) nen tam vien dat o x=241px, rong toi
+   da 460px, chu khong can giua ca man hinh 720px nua. */
 .big-prov {
-  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(1.2);
-  font-family: var(--display); font-weight: 900; color: var(--label); opacity: 0;
-  text-shadow: 0 3px 14px rgba(0,0,0,.7); white-space: nowrap; pointer-events: none;
+  position: absolute; left: 241px; top: 22px; transform: translate(-50%, 0) scale(1.2);
+  max-width: 460px; padding: 10px 24px; text-align: center; line-height: 1.15;
+  background: rgba(0,0,0,.62); border: 1px solid var(--line); border-radius: 999px;
+  font-family: var(--display); font-weight: 900; color: #fff; opacity: 0;
+  text-shadow: 0 2px 8px rgba(0,0,0,.8); white-space: normal; overflow-wrap: break-word;
+  pointer-events: none; z-index: 30;
 }
 .big-prov.show { animation: bigProv 2.4s ease forwards; }
-@keyframes bigProv { 0% { opacity: 0; transform: translate(-50%,-50%) scale(1.25); } 15% { opacity: .92; transform: translate(-50%,-50%) scale(1); } 60% { opacity: .92; } 100% { opacity: 0; transform: translate(-50%,-50%) scale(.96); } }
+@keyframes bigProv { 0% { opacity: 0; transform: translate(-50%,0) scale(1.25); } 15% { opacity: 1; transform: translate(-50%,0) scale(1); } 60% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,0) scale(.96); } }
 
 /* Ghim nguoi choi */
 .pin {
@@ -91,7 +104,9 @@ html, body { height: 100%; background: #000; overflow: hidden; font-family: "Be 
   filter: drop-shadow(0 4px 10px rgba(0,0,0,.55)); pointer-events: none;
 }
 .pin-points { font-size: 19px; font-weight: 900; color: #ffd76a; text-shadow: 0 2px 4px rgba(0,0,0,.8); }
-.pin-prov { font-size: 26px; font-weight: 900; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.85); white-space: nowrap; }
+/* Ten tinh tren ghim: vien thuoc nen toi, gioi han be ngang de ten dai
+   (TP. Ho Chi Minh) khong tran ra mep man hinh. */
+.pin-prov { display: inline-block; max-width: 560px; padding: 2px 12px; background: rgba(0,0,0,.62); border-radius: 999px; font-size: 26px; font-weight: 900; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.85); white-space: normal; line-height: 1.2; }
 .pin-sub { font-size: 14px; color: #ffe9b0; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
 .pin-av { margin: 4px auto 2px; }
 .pin-name { font-size: 18px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,.85); }

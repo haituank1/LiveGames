@@ -280,7 +280,11 @@ function applyState(st) {
       p.el.style.fillOpacity = '';
       p.el.style.transitionDelay = '';
     }
-    p.lbl.setAttribute('class', 'prov-lbl' + (on && arrivedId !== p.id ? ' show' : ''));
+    /* Dang ghe 1 tinh (zoom sau): chi hien nhan cua tinh do, an het nhan
+       tinh khac de khoi chong nhau khi phong to. Luc nhin ca nuoc thi
+       hien lai nhan cua moi tinh da sang nhu cu. */
+    var showLbl = on && arrivedId !== p.id && (!st.visitingId || p.id === st.visitingId);
+    p.lbl.setAttribute('class', 'prov-lbl' + (showLbl ? ' show' : ''));
   });
   ['hoang-sa', 'truong-sa'].forEach(function (id, i) {
     var parent = i === 0 ? 'da-nang' : 'khanh-hoa';

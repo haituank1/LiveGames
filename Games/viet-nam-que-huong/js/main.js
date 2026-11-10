@@ -676,8 +676,14 @@ function renderPin() {
   if (!pin || !pin.at || !pin.v) { pinEl.style.display = 'none'; return; }
   var v = pin.v;
   pinEl.style.display = '';
-  pinEl.style.left = pin.at[0] + 'px';
-  pinEl.style.top = Math.max(pin.at[1], 120) + 'px';
+  /* Kep ghim trong khung: ghim cao ~230px va moc tu duoi len (translate
+     -50%,-100%) nen top < 240 se cat mat ten tinh o dinh; ten dai
+     (TP. Ho Chi Minh) can ~150px moi ben nen left < 150 hoac > 570
+     se cat mep phai/trai. Kep lai thi chan ghim lech khoi tinh mot
+     chut nhung chu khong bao gio mat — ten tinh con co vien big-prov
+     o tren cung dam bao hien du. */
+  pinEl.style.left = Math.min(Math.max(pin.at[0], 150), 570) + 'px';
+  pinEl.style.top = Math.min(Math.max(pin.at[1], 240), 940) + 'px';
   var gained = v.kind === 'gift' ? v.pts : (v.others + 1) * (cfg.pointsPerComment || 1);
   if (gained > 0) {
     var pp = document.createElement('div'); pp.className = 'pin-points';
@@ -863,7 +869,10 @@ function showBigProv(name) {
   var b = $('bigProv');
   if (!b) return;
   b.textContent = name;
-  b.style.fontSize = Math.min(52, Math.floor(420 / Math.max(1, name.length))) + 'px';
+  /* Vien thuoc rong toi da 460px (can trong vung ban do trong, khong de
+     len cot phai): ten dai nhat ~350px o co 32px nen vua, ten dai hon
+     tu xuong dong trong vien thay vi tran mep. */
+  b.style.fontSize = Math.min(48, Math.floor(560 / Math.max(1, name.length))) + 'px';
   b.classList.remove('show');
   void b.offsetWidth; /* khoi dong lai animation */
   b.classList.add('show');
