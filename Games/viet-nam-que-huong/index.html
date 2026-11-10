@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Việt Nam — Quê Hương Tôi</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <header class="stage-head">
+    <h1><span class="t1" id="title1">Việt Nam</span><span class="t2" id="title2">Quê hương tôi</span></h1>
+    <p id="subtitle">Gõ tên quê bạn, bản đồ sẽ ghé thăm</p>
+  </header>
+  <div id="guideLine"></div>
+  <div class="bar">
+    <div class="chip round" id="roundNo">Vòng 1</div>
+    <div class="chip clock" id="clock">02:30</div>
+    <div class="chip phase" id="phaseChip">Mở màn vòng</div>
+    <div class="chip lit" id="litCount">Đã sáng 0/34</div>
+  </div>
+  <div class="visiting">
+    <span class="v-label" id="visitingLabel">Đang ghé quê</span>
+    <span class="v-name" id="visitingName">Cả nước</span>
+    <span class="v-fans" id="visitingFans">Đồng hương mọi buổi: 0 người</span>
+  </div>
+
+  <div class="map-box" id="mapBox">
+    <svg id="mapSvg" class="vn-map" width="720" height="980"></svg>
+    <div class="map-overlay" id="mapOverlay">
+      <div class="big-prov" id="bigProv"></div>
+      <div class="pin" id="pin" style="display:none"></div>
+    </div>
+    <div class="map-note" id="mapNote">Hình ảnh mô phỏng,<br>vẽ thu nhỏ,<br>không theo tỷ lệ</div>
+  </div>
+
+  <div class="side">
+    <div class="upcoming panel">
+      <span class="up-lbl">Sắp ghé</span>
+      <span id="upcomingList"><span class="up-empty">gõ tên quê để xếp hàng</span></span>
+    </div>
+    <div class="heart-bar panel" id="heartBar">
+      <div class="hb-top"><span>❤ Thắp sáng cả nước</span></div>
+      <div class="hb-track"><div class="hb-fill" id="heartFill"></div><span class="hb-num" id="heartNum">0 / 2.026</span></div>
+    </div>
+    <div class="ticker" id="ticker"></div>
+    <div class="gift-strip panel"><span class="gs-lbl" id="giftStripTitle">Quà về quê</span><span class="gs-row" id="giftStripRow"></span></div>
+    <div class="panel podium">
+      <h3 id="podiumTitle">Top quê hương</h3>
+      <div class="cols" id="podiumCols"></div>
+      <div class="empty big" id="podiumEmpty">Quê nào lên bục đầu tiên?</div>
+    </div>
+    <div class="panel champ">
+      <h3 id="champTitle">Người thắp lửa quê</h3>
+      <div class="champ-body" id="champBody"></div>
+    </div>
+  </div>
+
+  <div class="panel called">
+    <h3 id="calledTitle">Mới gọi quê</h3>
+    <div class="called-body" id="calledBody" style="display:none">
+      <div class="called-av-wrap" id="calledAv"></div>
+      <div class="c-name" id="calledName"></div>
+      <div class="c-sub" id="calledSub"></div>
+    </div>
+    <div class="empty" id="calledEmpty">Chưa ai gọi. Gõ tên quê bạn đi!</div>
+  </div>
+
+  <div class="all-lit" id="allLit" style="display:none"><b>Cả nước sáng đèn!</b><span>Cảm ơn 2.026 tim của cả nhà</span></div>
+  <div class="final" id="finalCount" style="display:none"><b id="finalNum">10</b><span>Còn <span id="finalSecs">10</span> giây, quê nào vượt lên?</span></div>
+  <div class="gift-banner" id="giftBanner" style="display:none"></div>
+
+  <div class="banner" id="banner" style="display:none">
+    <div class="banner-box">
+      <h2 id="bannerTitle">Vòng 1</h2>
+      <p id="bannerSub"></p>
+      <div class="rows" id="bannerRows"></div>
+      <div class="mvp" id="bannerMvp"></div>
+    </div>
+  </div>
+
+  <canvas id="fxCanvas"></canvas>
+  <div id="liveStatus">Chưa nối LiveBridge</div>
+  <div id="mapError" style="display:none"></div>
+
+  <div class="demo-bar" id="demoBar" style="display:none">
+    <button id="btnStart">▶ Bắt đầu demo</button>
+    <button id="btnSkip">⏭ Qua giai đoạn</button>
+    <button id="btnNewRound">↻ Vòng mới</button>
+    <button id="btnResetFans">🗑 Xoá đồng hương</button>
+    <span class="demo-note">Demo nội bộ: người giả tự gọi quê, tặng quà, thả tim.</span>
+  </div>
+</div>
+
+<script src="../../LiveBridge/public/livebridge-client.js"></script>
+<script src="../../LiveBridge/public/npc-voice.js"></script>
+<script src="js/provinces.js"></script>
+<script src="js/provinceTalk.js"></script>
+<script src="js/themes.js"></script>
+<script src="js/filter.js"></script>
+<script src="js/map.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/voice-queue.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
