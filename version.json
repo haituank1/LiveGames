@@ -1,7 +1,7 @@
 {
-  "commit": "9ff7fd49fbce6ec50462bd4c16d87b51c42f5bd8",
-  "short": "9ff7fd4",
-  "date": "2026-11-10T07:42:34+00:00",
-  "message": "Sua chu ten tinh khi zoom: nhan giu co, ten lon noi len vien thuoc, ghim kep trong khung",
-  "generatedAt": "2026-11-10T07:42:51.361Z"
+  "commit": "a3490d3fc5938d57e9db5303a93ed30410fb2679",
+  "short": "a3490d3",
+  "date": "2026-11-10T07:42:51Z",
+  "message": "Cap nhat version.json + manifest.json",
+  "generatedAt": "2026-11-10T07:43:13.124Z"
 }
