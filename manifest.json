@@ -1,7 +1,7 @@
 {
-  "commit": "e72888a3292c262944826293942bf7f3cb7bc4ef",
-  "short": "e72888a",
-  "generatedAt": "2026-11-10T07:19:31.592Z",
+  "commit": "b08ea6dbfbc857dfcd3646522b6a9467c92dc993",
+  "short": "b08ea6d",
+  "generatedAt": "2026-11-10T07:19:58.630Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -4885,8 +4885,8 @@
     },
     {
       "path": "manifest.json",
-      "sha": "b478f570894bf1bcd9aa0a39f110fb7fa5c6be77",
-      "size": 155639
+      "sha": "a2f5f3ffbb0ffc5ec826a6560d320c7ed83aa144",
+      "size": 157678
     },
     {
       "path": "start-livebridge.bat",
@@ -4925,8 +4925,8 @@
     },
     {
       "path": "version.json",
-      "sha": "81e597374a7dc06f2d66b605b0a8677812bb98b0",
-      "size": 246
+      "sha": "b4bf9ac2f2eb72c8f7517c96f281a84d719d99d0",
+      "size": 219
     }
   ]
 }
