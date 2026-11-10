@@ -1,7 +1,7 @@
 {
-  "commit": "bf7c971119afed2a1354472d74b2878c44f91cb9",
-  "short": "bf7c971",
-  "generatedAt": "2026-11-06T15:19:00.761Z",
+  "commit": "e72888a3292c262944826293942bf7f3cb7bc4ef",
+  "short": "e72888a",
+  "generatedAt": "2026-11-10T07:19:31.592Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -1594,6 +1594,71 @@
       "size": 87598
     },
     {
+      "path": "Games/viet-nam-que-huong/README.md",
+      "sha": "d418d965e3dd0a01a221e566ce5e9046e38051ae",
+      "size": 10910
+    },
+    {
+      "path": "Games/viet-nam-que-huong/css/style.css",
+      "sha": "17c93df30ad207f1611912a1348fee2ac1c3a640",
+      "size": 12752
+    },
+    {
+      "path": "Games/viet-nam-que-huong/index.html",
+      "sha": "a888ee4935d5a7b8dda4a8c09ae8e1cf6fb0b2d8",
+      "size": 4566
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/audio.js",
+      "sha": "970ce6f363a23bf19f6ba862311171a2d35d817a",
+      "size": 6635
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/effects.js",
+      "sha": "c3b270eb08df36e67239550865f38b700f6c0b40",
+      "size": 7373
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/filter.js",
+      "sha": "017b014d8de295aef6b83ae87a4e6398b696fadd",
+      "size": 9716
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/main.js",
+      "sha": "2f1c3c3ffd132e93449859ab3b42a5592c5b7c48",
+      "size": 44340
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/map.js",
+      "sha": "89a2a140612ddbb63ac3a8e694cfabee4955d41e",
+      "size": 14712
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/provinceTalk.js",
+      "sha": "4d2bd5a1c97c8fe4213fc5be09479b7fb7727aa7",
+      "size": 13900
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/provinces.js",
+      "sha": "7bd265454b6a850a491b1e82a34d0acb55a0d1b6",
+      "size": 11205
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/themes.js",
+      "sha": "8e9991bc7a1a970f3d917e10e2e86ba3a86fc3ca",
+      "size": 8712
+    },
+    {
+      "path": "Games/viet-nam-que-huong/js/voice-queue.js",
+      "sha": "de83ef12c9db763104f4befd95a773ce1f3ea507",
+      "size": 3726
+    },
+    {
+      "path": "Games/viet-nam-que-huong/vn34.json",
+      "sha": "55e3c7faba4607ddcceb006e13141d1cd2da3e10",
+      "size": 659953
+    },
+    {
       "path": "HANDOFF.md",
       "sha": "d397da534398697694d4049142cff8336f38dea4",
       "size": 11009
@@ -1627,6 +1692,11 @@
       "path": "LiveBridge/config/mappings/san-nhay.json",
       "sha": "159353e6247a68271dc319ee3ae2cd91eeb88353",
       "size": 5785
+    },
+    {
+      "path": "LiveBridge/config/mappings/viet-nam-que-huong.json",
+      "sha": "5022214a14de2d4c09bff7dd8cab6fc4038766c9",
+      "size": 2602
     },
     {
       "path": "LiveBridge/package-lock.json",
@@ -4815,7 +4885,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "2395637db4c80c5db5dfcbd9bddd49108fe569f4",
+      "sha": "b478f570894bf1bcd9aa0a39f110fb7fa5c6be77",
       "size": 155639
     },
     {
@@ -4855,8 +4925,8 @@
     },
     {
       "path": "version.json",
-      "sha": "ab0d9887bc12bcb48e2056d27c8129d79b4caf7e",
-      "size": 263
+      "sha": "81e597374a7dc06f2d66b605b0a8677812bb98b0",
+      "size": 246
     }
   ]
 }
