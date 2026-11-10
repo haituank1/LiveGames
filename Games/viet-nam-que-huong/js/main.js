@@ -42,6 +42,28 @@ var DEFAULT_CFG = {
   greetEveryMs: 6000, namesPerGreeting: 3,
   wishPerUserMs: 600000, wishGlobalMs: 20000,
   shareReminderEveryMs: 300000, idleAfterMs: 60000,
+  /* Che do moi khi vang nguoi that: bat sau moiSauGiay khong co tuong tac
+     that, tu chay tour + noi cau moi; co tuong tac that thi dung ngay. */
+  moiOn: true, moiSauGiay: 25, moiTourGiay: 25, moiVoiceGiay: 25,
+  lureLines: [
+    'Bạn quê ở đâu? Gõ tên tỉnh, thành quê mình vào chat, bản đồ bay tới quê bạn ngay nè.',
+    'Ai mới vào thì gõ tên quê mình đi, bản đồ sẽ ghé thăm tận nơi luôn đó.',
+    'Thả 15 tim là quê bạn được cộng 1 điểm, cả nhà thả tim thử xem nào.',
+    'Hà Nội với Thành phố Hồ Chí Minh, bên nào đông đồng hương hơn đây?',
+    'Miền Bắc với miền Nam, bên nào sáng nhiều tỉnh hơn nào?',
+    'Tỉnh nào sẽ sáng đầu tiên hôm nay? Gõ tên quê mình lên đi.',
+    'Tặng quà là quê sáng rực lên, quà càng to hiệu ứng càng lớn nè.',
+    'Người đầu tiên gọi tên quê sẽ được mình đọc tên lên sóng luôn đó.',
+    'Quê bạn đang đứng thứ mấy rồi? Gõ tên quê để kéo lên top nha.',
+    'Chưa ai gọi tên quê mình thì gọi đi nào, bản đồ đang chờ đó.',
+    'Một câu comment thôi là quê bạn sáng đèn, thử xem nào.',
+    'Rủ thêm người cùng quê vào đây đi, đông người thì quê mình mới lên top được.'
+  ],
+  lureBanners: [
+    'GÕ TÊN TỈNH CỦA BẠN – BẢN ĐỒ BAY TỚI QUÊ BẠN NGAY',
+    'THẢ 15 TIM – QUÊ BẠN ĐƯỢC CỘNG 1 ĐIỂM',
+    'TỈNH NÀO SÁNG ĐẦU TIÊN HÔM NAY?'
+  ],
   labels: {
     title1: 'Việt Nam', title2: 'Quê hương tôi',
     subtitle: 'Gõ tên quê bạn, bản đồ sẽ ghé thăm',
@@ -148,7 +170,12 @@ var G = {
   follows: new W.OncePerPerson(),
   wishes: new W.WishLimiter(600000, 20000),
   recent: new W.RecentPeople(),
-  giftStripIdx: 0, guideIdx: 0
+  giftStripIdx: 0, guideIdx: 0,
+  /* Che do moi: lastRealAt = lan cuoi co tuong tac that (chat/like/qua/
+     join/follow/share, khong tinh sim). lure.active chi bat khi het
+     tuong tac that qua moiSauGiay; recentPids tranh tour lap tinh. */
+  lastRealAt: Date.now(),
+  lure: { active: false, lastVoiceAt: 0, lastTourAt: 0, recentPids: [], bannerIdx: 0, bannerAt: 0 }
 };
 var roundMs = DEFAULT_CFG.roundSec * 1000;
 var CYCLE = roundMs + DEFAULT_CFG.summaryMs;
@@ -300,7 +327,14 @@ function enqueue(v) {
   }
   if (v.kind === 'comment') {
     for (var j = 0; j < G.queue.length; j++) {
-      if (G.queue[j].kind === 'comment' && G.queue[j].pid === v.pid) { G.queue[j].others++; draw(); return; }
+      if (G.queue[j].kind === 'comment' && G.queue[j].pid === v.pid) {
+        G.queue[j].others++;
+        /* Nguoi that gop vao chuyen tour dang cho: chuyen ve nguoi that
+           (hien ten that tren ghim) de luc co tuong tac that thi chuyen
+           khong bi huy nham cung tour. */
+        if (G.queue[j].lure && !v.lure) { G.queue[j].lure = false; G.queue[j].user = v.user; }
+        draw(); return;
+      }
     }
     if (G.visiting && G.visiting.pid === v.pid) return;
     if (v.pid && Date.now() - (G.lastVisit.get(v.pid) || 0) < (cfg.revisitMs || 30000)) return;
@@ -377,13 +411,36 @@ function lineFor(v, waiting) {
   return talk ? call + ' ' + talk : call;
 }
 
+/* ---------- Che do moi: ghi nhan tuong tac that, tat moi ---------- */
+/* Goi moi khi co tuong tac that (khong sim): dat lai dong ho vang nguoi,
+   an banner moi ngay, huy cac chuyen tour dang cho (chuyen tour da gop
+   voi nguoi that thi khong con co lure nen khong bi huy nham). */
+function noteReal() {
+  G.lastRealAt = Date.now();
+  lureOff();
+  var hadLure = false;
+  G.queue.forEach(function (qq) { if (qq.lure) hadLure = true; });
+  if (hadLure) {
+    G.queue = G.queue.filter(function (qq) { return !qq.lure; });
+    draw();
+  }
+}
+function lureOff() {
+  if (!G.lure.active) return;
+  G.lure.active = false;
+  draw();
+}
+
 /* ---------- Su kien tu LiveBridge / demo ---------- */
 function onChatEvent(m) {
   var e = normUser(m.user);
   var text = String(m.text || '');
   var name = safeName(e.nickname || '', e.username || '');
   var sim = !!(e.sim || m.sim);
-  G.recent.note(e.username, W.speakableName(name));
+  if (!sim) noteReal();
+  /* Nguoi sim (tour moi, gia lap) khong vao danh sach goi ten chia se,
+     keo MC cam on nham ten tour nhu nguoi that. */
+  if (!sim) G.recent.note(e.username, W.speakableName(name));
   pushFeed({ name: name, avatar: e.avatar || '', text: W.maskBanned(text).slice(0, 60), gift: false });
   var topic = (W.containsBanned(text) || W.isRudeName(text)) ? null : W.detectWish(text);
   if (topic) {
@@ -409,7 +466,10 @@ function onChatEvent(m) {
     pid: prov.id,
     user: { username: e.username, name: name, avatar: pl.avatar },
     kind: 'comment', xu: 0, pts: 0, gift: '', others: 0, pri: false, id: ++seq,
-    spot: spot && spot.pid === prov.id ? spot : null
+    spot: spot && spot.pid === prov.id ? spot : null,
+    /* Chuyen tour moi danh dau lure de co tuong tac that thi huy cho dung;
+       sim thi diem/fan da bi chan o addPoints/addFan. */
+    lure: !!m.lure
   });
 }
 function onGiftEvent(ev) {
@@ -417,6 +477,7 @@ function onGiftEvent(ev) {
   var src = ev.source || {};
   var name = safeName(e.nickname || '', e.username || '');
   var sim = !!(e.sim || ev.sim);
+  if (!sim) noteReal();
   var coins = ev.diamonds || ((src.diamonds || 1) * (ev.count || 1));
   coins = Math.max(0, Math.floor(coins));
   var giftName = safeGiftName(src.giftName || ev.label || 'quà');
@@ -441,6 +502,7 @@ function onLikeEvent(m) {
   var n = Math.max(0, Math.floor(m.likeCount || m.count || 1));
   if (!n) return;
   var sim = !!e.sim;
+  if (!sim) noteReal();
   var pl = playerOf(e, W.speakableName(safeName(e.nickname || '', e.username || '')));
   G.hearts += n;
   if (G.hearts >= (cfg.heartGoal || 2026)) {
@@ -460,6 +522,7 @@ function onLikeEvent(m) {
 function onJoin(rawUser) {
   var user = normUser(rawUser);
   if (!user || !user.username) return;
+  noteReal();
   ensureGuest(user);
   var spoken = W.speakableName(safeName(user.nickname || '', user.username));
   if (spoken === 'bạn') return;
@@ -479,6 +542,7 @@ function flushGreeter() {
 function onFollowEvent(rawUser) {
   var user = normUser(rawUser);
   if (!user || !user.username) return;
+  noteReal();
   ensureGuest(user);
   if (G.follows.first(user.username)) {
     V.say(cfg.thankFollow(W.speakableName(safeName(user.nickname || '', user.username)), G.kenh), false, 'event');
@@ -498,7 +562,7 @@ function handle(ev) {
     case 'join': onJoin(ev.user); break;
     case 'like': onLikeEvent({ user: ev.user, likeCount: (ev.value || 1) * (ev.count || 1) }); break;
     case 'spotlight': onFollowEvent(ev.user); break;
-    case 'share': W.effects.confetti(40); break;
+    case 'share': noteReal(); W.effects.confetti(40); break;
     case 'fireworks': W.effects.fireworks(2, 360, 520); break;
     case 'petals': W.effects.hearts(10, 360, 520); break;
     case 'confetti': W.effects.confetti(50); break;
@@ -644,6 +708,20 @@ function render() {
   /* Ghi chu mo phong: chi hien luc nhin ca nuoc. */
   var note = $('mapNote');
   if (note) note.style.opacity = visitingId ? '0' : '1';
+  /* Banner moi: chi hien khi dang moi. Ne ghim — ghim o nua tren ban do
+     thi banner xuong duoi, nguoc lai o tren (duoi bigProv, tren map-note);
+     luc khong co ghim thi mac dinh o tren. */
+  var lb = $('lureBanner');
+  if (lb) {
+    var banners = cfg.lureBanners || [];
+    if (!G.lure.active || isDemo || !banners.length) { lb.style.display = 'none'; }
+    else {
+      lb.style.display = '';
+      lb.textContent = banners[G.lure.bannerIdx % banners.length] || '';
+      var pinTop = G.pin && G.pin.at ? Math.min(Math.max(G.pin.at[1], 240), 940) : null;
+      lb.classList.toggle('low', pinTop !== null && pinTop < 500);
+    }
+  }
   /* Banner mo man / tong ket. */
   renderBanner(c);
   /* Dem nguoc 10s cuoi. */
@@ -685,7 +763,9 @@ function renderPin() {
   pinEl.style.left = Math.min(Math.max(pin.at[0], 150), 570) + 'px';
   pinEl.style.top = Math.min(Math.max(pin.at[1], 240), 940) + 'px';
   var gained = v.kind === 'gift' ? v.pts : (v.others + 1) * (cfg.pointsPerComment || 1);
-  if (gained > 0) {
+  /* Chuyen tour (sim) khong duoc diem that nen khong hien '+N diem' keo
+     nguoi xem tuong tour vua ghi diem; ten tinh + ten tour van hien du. */
+  if (gained > 0 && !v.lure) {
     var pp = document.createElement('div'); pp.className = 'pin-points';
     pp.textContent = '+' + fmtNum(gained) + ' điểm';
     pinEl.appendChild(pp);
@@ -924,6 +1004,9 @@ function applyConfig(c) {
   cfgApplied = true;
   cfg = Object.assign({}, DEFAULT_CFG, c);
   cfg.roundSec = clampNum(cfg.roundSec, 60, 600, 150);
+  cfg.moiSauGiay = clampNum(cfg.moiSauGiay, 5, 300, 25);
+  cfg.moiTourGiay = clampNum(cfg.moiTourGiay, 10, 300, 25);
+  cfg.moiVoiceGiay = clampNum(cfg.moiVoiceGiay, 10, 300, 25);
   setRoundMs(cfg.roundSec * 1000, !first);
   G.kenh = typeof cfg.channelName === 'string' && cfg.channelName.trim() ? cfg.channelName.trim() : DEFAULT_CFG.channelName;
   V.setWho(cfg.voice === 'M' ? 'M' : 'F');
@@ -1039,6 +1122,62 @@ function demoSetup() {
   });
 }
 
+/* ---------- Che do moi khi vang nguoi that ---------- */
+/* Chon tinh cho tour: uu tien tinh chua sang, tranh 2 tinh vua tour va
+   tinh vua ghe duoi 30s (enqueue cung loai luon neu trung). */
+function pickLureProvince() {
+  var now = Date.now();
+  var recent = G.lure.recentPids;
+  var fresh = function (p) {
+    return recent.indexOf(p.id) < 0 && now - (G.lastVisit.get(p.id) || 0) >= (cfg.revisitMs || 30000);
+  };
+  var pool = W.PROVINCES.filter(function (p) { return fresh(p) && !G.scores.has(p.id); });
+  if (!pool.length) pool = W.PROVINCES.filter(fresh);
+  if (!pool.length) pool = W.PROVINCES.filter(function (p) { return recent.indexOf(p.id) < 0; });
+  if (!pool.length) pool = W.PROVINCES;
+  var p = pool[Math.floor(Math.random() * pool.length)];
+  recent.push(p.id);
+  if (recent.length > 2) recent.shift();
+  return p;
+}
+/* Chay moi 5s: het tuong tac that qua moiSauGiay thi bat moi (banner +
+   voice + tour); co tuong tac that, phase summary, demo hoac moiOn tat
+   thi khong moi. Tour di qua dung onChatEvent voi user sim ten ro la
+   tour cua game — diem/fan cua sim da bi chan o addPoints/addFan. */
+function lureTick() {
+  if (isDemo) return;
+  if (cfg.moiOn === false) { lureOff(); return; }
+  if (G.phase === 'summary') { lureOff(); return; }
+  var now = Date.now();
+  if (now - G.lastRealAt < (cfg.moiSauGiay || 25) * 1000) { lureOff(); return; }
+  if (!G.lure.active) {
+    G.lure.active = true;
+    G.lure.lastVoiceAt = 0;
+    G.lure.lastTourAt = 0;
+    /* bannerAt = now de cau banner dau tien (index 0) hien du 10s truoc
+       khi xoay, thay vi nhay ngay sang cau thu 2. */
+    G.lure.bannerAt = now;
+  }
+  draw();
+  /* Voice moi: chi noi khi giong da ranh it nhat 2s, de khong at voice
+     su kien that (qua, tong ket, chao). */
+  if (now - G.lure.lastVoiceAt >= (cfg.moiVoiceGiay || 25) * 1000 && V.quietForMs() >= 2000) {
+    var line = pick(cfg.lureLines);
+    if (line) { V.say(line, false, 'random'); G.lure.lastVoiceAt = now; }
+  }
+  /* Tour: chi khi hang cho trong va khong dang ghe tinh nao. */
+  if (!G.queue.length && !G.visiting && now - G.lure.lastTourAt >= (cfg.moiTourGiay || 25) * 1000) {
+    var p = pickLureProvince();
+    onChatEvent({
+      user: { id: 'lure-tour', username: 'lure-tour', nickname: 'Tour quê hương', avatar: '', sim: true },
+      text: p.name, sim: true, lure: true
+    });
+    if (G.queue.some(function (qq) { return qq.pid === p.id; })) G.lure.lastTourAt = now;
+  }
+  /* Xoay chu banner moi 10s. */
+  if (now - G.lure.bannerAt >= 10000) { G.lure.bannerAt = now; G.lure.bannerIdx++; draw(); }
+}
+
 /* ---------- Khoi dong ---------- */
 function boot() {
   G.phase = roundClock().phase;
@@ -1059,10 +1198,13 @@ function boot() {
     if (line) V.say(line, false, 'random');
   }, cfg.shareReminderEveryMs || 300000);
   setInterval(function () {
+    /* Che do moi bat thi cau moi thay cau idle cu; tat moi thi giu nguyen. */
+    if (cfg.moiOn !== false && !isDemo) return;
     if (V.quietForMs() < (cfg.idleAfterMs || 60000)) return;
     var line = pick(cfg.idleLines);
     if (line) V.say(line, false, 'random');
   }, 15000);
+  setInterval(lureTick, 5000);
   setInterval(function () {
     G.giftStripIdx++;
     G.guideIdx++;

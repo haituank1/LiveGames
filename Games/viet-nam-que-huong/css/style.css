@@ -98,6 +98,23 @@ html, body { height: 100%; background: #000; overflow: hidden; font-family: "Be 
 .big-prov.show { animation: bigProv 2.4s ease forwards; }
 @keyframes bigProv { 0% { opacity: 0; transform: translate(-50%,0) scale(1.25); } 15% { opacity: 1; transform: translate(-50%,0) scale(1); } 60% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,0) scale(.96); } }
 
+/* Banner moi khi vang nguoi: chi hien luc dang moi. Nam trong map-overlay
+   nen chi de len ban do, khong de len cot phai (.side z 12); rong 440px
+   can vao vung ban do trong (x 20-460). Vi tri doi theo ghim: mac dinh o
+   tren (duoi bigProv), ghim o nua tren thi xuong duoi (tren map-note) de
+   khong che ghim; pulse nhe de thu hut mat nhin. */
+.lure-banner {
+  position: absolute; left: 20px; top: 104px; width: 440px; z-index: 7;
+  text-align: center; font-family: var(--display); font-weight: 900;
+  font-size: 27px; line-height: 1.25; color: #fff;
+  background: rgba(0,0,0,.66); border: 2px solid var(--accent); border-radius: 16px;
+  padding: 10px 14px; pointer-events: none; text-shadow: 0 2px 6px rgba(0,0,0,.8);
+  animation: lurePulse 1.6s ease-in-out infinite;
+}
+.lure-banner.low { top: 800px; }
+@keyframes lurePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@media (prefers-reduced-motion: reduce) { .lure-banner { animation: none; } }
+
 /* Ghim nguoi choi */
 .pin {
   position: absolute; transform: translate(-50%, -100%); text-align: center; z-index: 8;
