@@ -1,7 +1,7 @@
 {
-  "commit": "d5ec5811d8e03f8018a0e9a898b11cbf578062f4",
-  "short": "d5ec581",
-  "date": "2026-11-10T09:32:21+00:00",
-  "message": "Them 18 cau moi vao lureLines (12 -> 30 cau)",
-  "generatedAt": "2026-11-10T09:32:23.990Z"
+  "commit": "78ada0c649f16490a5eb55d31d0cb78084ae2b70",
+  "short": "78ada0c",
+  "date": "2026-11-10T09:32:24Z",
+  "message": "Cap nhat version.json + manifest.json",
+  "generatedAt": "2026-11-10T09:32:41.571Z"
 }
