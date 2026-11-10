@@ -1,7 +1,7 @@
 {
-  "commit": "d0ccd7b588b6b52ff887a589b68232ec048023e2",
-  "short": "d0ccd7b",
-  "generatedAt": "2026-11-10T08:30:16.318Z",
+  "commit": "d5ec5811d8e03f8018a0e9a898b11cbf578062f4",
+  "short": "d5ec581",
+  "generatedAt": "2026-11-10T09:32:23.990Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -1625,8 +1625,8 @@
     },
     {
       "path": "Games/viet-nam-que-huong/js/main.js",
-      "sha": "c08f99d3a53a5a1869ad2fdbaca698a702f699c1",
-      "size": 51926
+      "sha": "51d061e3fb3f7e846914ad33df8ac2dbd91113ec",
+      "size": 53721
     },
     {
       "path": "Games/viet-nam-que-huong/js/map.js",
@@ -4885,7 +4885,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "4b47518e68794a1122ff9fa3ac35182fed2741a1",
+      "sha": "bfa5a0409d47caeb7e17efd52ff597828e513df3",
       "size": 157678
     },
     {
@@ -4925,8 +4925,8 @@
     },
     {
       "path": "version.json",
-      "sha": "3b962262cc65292a40d8d568a3fb6517e652eb53",
-      "size": 214
+      "sha": "cded232de05488bf90c2391275e23013149eff98",
+      "size": 226
     }
   ]
 }
