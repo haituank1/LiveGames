@@ -1,7 +1,7 @@
 {
-  "commit": "b08ea6dbfbc857dfcd3646522b6a9467c92dc993",
-  "short": "b08ea6d",
-  "generatedAt": "2026-11-10T07:19:58.630Z",
+  "commit": "9ff7fd49fbce6ec50462bd4c16d87b51c42f5bd8",
+  "short": "9ff7fd4",
+  "generatedAt": "2026-11-10T07:42:51.361Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -1600,8 +1600,8 @@
     },
     {
       "path": "Games/viet-nam-que-huong/css/style.css",
-      "sha": "17c93df30ad207f1611912a1348fee2ac1c3a640",
-      "size": 12752
+      "sha": "80f30abaf3726fd58846261c6696b173151b283e",
+      "size": 14034
     },
     {
       "path": "Games/viet-nam-que-huong/index.html",
@@ -1625,13 +1625,13 @@
     },
     {
       "path": "Games/viet-nam-que-huong/js/main.js",
-      "sha": "2f1c3c3ffd132e93449859ab3b42a5592c5b7c48",
-      "size": 44340
+      "sha": "c921ae53275903df1ded5400019deb0f24274839",
+      "size": 44965
     },
     {
       "path": "Games/viet-nam-que-huong/js/map.js",
-      "sha": "89a2a140612ddbb63ac3a8e694cfabee4955d41e",
-      "size": 14712
+      "sha": "2ee41e13b2165af74d006def4792fc5542344cda",
+      "size": 14983
     },
     {
       "path": "Games/viet-nam-que-huong/js/provinceTalk.js",
@@ -4885,7 +4885,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "a2f5f3ffbb0ffc5ec826a6560d320c7ed83aa144",
+      "sha": "31ef18ce9523a6f01fff34570ffa1080aad9942d",
       "size": 157678
     },
     {
@@ -4925,8 +4925,8 @@
     },
     {
       "path": "version.json",
-      "sha": "b4bf9ac2f2eb72c8f7517c96f281a84d719d99d0",
-      "size": 219
+      "sha": "b5e5ac95ebd0b0c5decaaf5f5c1d963775624f54",
+      "size": 270
     }
   ]
 }
