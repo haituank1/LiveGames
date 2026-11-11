@@ -94,12 +94,16 @@ Bảng quà mặc định (`quaTang`, JSON):
 
 - `main.js` tạo DUY NHẤT 1 lần: `renderer` (WebGLRenderer, antialias, pixelRatio
   tối đa 2), `scene`, `camera` (Perspective fov 60, góc 3/4 từ trên xuống ~52 độ,
-  bàn nằm mặt XZ, Y là cao), đèn (Ambient 0.55 + Directional 0.95 castShadow,
-  shadow map 1024), nền trong suốt (gradient nâu của `#stage` hiện qua).
-  Object dùng chung `window.Ran3D = { THREE, scene, camera, renderer }`.
+  bàn nằm mặt XZ, Y là cao), đèn (Ambient 0.75 + Directional 1.0 từ
+  trước-phải-trên, castShadow, shadow map 1024 — theo ảnh test nv3, đèn yếu
+  hơn sẽ làm ô caro tối bị tối quá), nền trong suốt (gradient nâu của `#stage`
+  hiện qua). Object dùng chung `window.Ran3D = { THREE, scene, camera, renderer }`.
 - Tọa độ 3D dùng đúng số 2D: ô (x,y) → `(gridX + (x+0.5)*cell, 0,
-  gridY + (y+0.5)*cell)`. Camera (340, 1050, 1450) nhìn (340, 0, 620) —
-  cả bàn (kể cả khung gỗ dưới) hiện đủ trên thanh quà.
+  gridY + (y+0.5)*cell)`. Camera (340, 1082, 1475) nhìn (340, 0, 620) —
+  cả bàn (kể cả khung gỗ dưới) hiện đủ trên thanh quà. BIÊN: táo/bom rơi từ
+  cao 6 ô (board 3D nv3: FALL_CELLS = 6) nên ở cột biên lúc cao nhất bị phóng
+  đại ra ngoài thêm ~40px — camera đã kéo xa để chừa biên ~47px quanh bàn
+  (đo bằng phép chiếu, xem `workspace/multi-session/ran-test/ran-measure-cam.py`).
 - `main.js` truyền `scene` cho Snake/Board/Effects qua `setScene(scene)` (nếu
   có) ngay sau khi tạo, rồi mỗi frame gọi `snake.render(scene, alpha)` /
   `board.render(scene, Date.now())` / `effects.render(scene)` (chúng CHỈ cập

@@ -141,13 +141,19 @@ function initThree() {
   // chiều ngang bàn (640 + khung). lookAt z=620 (sau tâm bàn 1 chút) để bàn
   // hiện cao hơn giữa khung — khớp vị trí bàn bản 2D (tâm y ~500/1280) và
   // mép dưới bàn không bị thanh quà (y 844) che.
+  // BIÊN (lưu ý nv3/BOSS 2026-11-11 19:12): táo/bom rơi từ cao 6 ô (board 3D
+  // nv3: FALL_CELLS = 6) nên ở cột biên lúc cao nhất bị phóng đại ra ngoài
+  // thêm ~40px — camera kéo xa thêm 3% so với bản đầu để chừa biên ~44px
+  // quanh bàn (đo bằng phép chiếu, xem ran-test/ran-measure-cam.py).
   camera = new T.PerspectiveCamera(60, 720 / 1280, 1, 4000);
-  camera.position.set(340, 1050, 1450);
+  camera.position.set(340, 1082, 1475);
   camera.lookAt(340, 0, 620);
   // Đèn: Ambient sáng nền + Directional chính (castShadow, shadow map 1024).
-  scene.add(new T.AmbientLight(0xffffff, 0.55));
-  const sun = new T.DirectionalLight(0xfff2d9, 0.95);
-  sun.position.set(340 + 350, 900, 500 + 150);
+  // Độ sáng theo ảnh test nv3 (BOSS 2026-11-11 19:12): Ambient 0.75 +
+  // Directional 1.0 từ TRƯỚC-PHẢI-TRÊN thì caro đọc rõ; đèn yếu hơn sẽ tối.
+  scene.add(new T.AmbientLight(0xffffff, 0.75));
+  const sun = new T.DirectionalLight(0xfff2d9, 1.0);
+  sun.position.set(340 + 400, 950, 500 + 550);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
   sun.shadow.camera.left = -500; sun.shadow.camera.right = 500;
