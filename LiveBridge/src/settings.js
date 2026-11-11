@@ -158,6 +158,25 @@ class Settings {
         .map(l => String(l).trim().slice(0, 200)).filter(Boolean).slice(0, 100);
       if (lines.length) clean[k] = lines; else drop.push(k);
     }
+    // bảng quà rắn săn mồi {tên quà: {diem, hieuUng}} (chuỗi JSON hoặc object):
+    // chỉ giữ tên không rỗng (cắt 40 ký tự) + diem 0–10000 + hieuUng 'tao'
+    // (rớt táo) hoặc 'bom' (thả bom, sai thì về 'tao'); không còn quà hợp lệ
+    // nào thì trả null (game dùng bảng mặc định)
+    const parseGiftTable = v => {
+      let o = v;
+      if (typeof v === 'string') { try { o = JSON.parse(v); } catch (_) { return null; } }
+      if (!o || typeof o !== 'object' || Array.isArray(o)) return null;
+      const out = {};
+      for (const k of Object.keys(o)) {
+        const name = String(k).trim().slice(0, 40);
+        const val = o[k];
+        if (!name || !val || typeof val !== 'object') continue;
+        const diem = Math.max(0, Math.min(10000, Math.round(Number(val.diem) || 0)));
+        const hieuUng = val.hieuUng === 'bom' ? 'bom' : 'tao';
+        out[name] = { diem, hieuUng };
+      }
+      return Object.keys(out).length ? out : null;
+    };
     // config RIÊNG của đám cưới / sàn nhảy: trước đây setGame chỉ hiểu key của chùa nên mọi
     // key riêng đều bị bỏ qua (trang quản trị báo "chưa hiểu"). [min, max, mặc định] cho số.
     const NUM_BY_GAME = {
@@ -179,6 +198,9 @@ class Settings {
         xpPerFollow: [0, 1000, 5], xpPerGiftCoin: [0, 100, 2], zoomEntry: [0.5, 2, 1.02], zoomEntryVip: [0.5, 2, 1.15],
         zoomGiftMid: [0.5, 2, 1.08], zoomGiftBig: [0.5, 2, 1.18], zoomGiftHuge: [0.5, 2, 1.32], zoomLevelup: [0.5, 2, 1.18],
         zoomPairMax: [0.5, 2, 1.1], zoomSolo: [0.5, 2, 1.12] },
+      'ran-san-moi': { kichThuocBan: [16, 24, 20], tocDo: [80, 300, 150], doDaiBanDau: [3, 10, 5],
+        diemTao: [1, 100, 10], thoiGianBom: [0, 300, 30], soBomToiDa: [1, 20, 5], soTaoToiDa: [1, 10, 3],
+        thoiGianHoiSinh: [1, 10, 3] },
     };
     const BOOL_BY_GAME = {
       'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung', 'hieuUngThaTim', 'lenhGhepDoi', 'tuGhepDoiKhiRong', 'xoayManHinh'],
@@ -188,7 +210,7 @@ class Settings {
       'san-nhay': { tocDoNhay: [['cham', 'thuong', 'nhanh'], 'thuong'], hieuUngManHinh: [['song', 'vong', 'led'], 'vong'] },
     };
     for (const [k, [mn, mx, def]] of Object.entries(NUM_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = num(cfg[k], mn, mx, def);
-    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'lenhHieuUngChoGiay', 'phongVangDuoi', 'mcSapMocConLai', 'mcCheGheuChoGiay', 'choDoiLanThapGiay', 'rongKhungMc', 'rongThongBao', 'mocTimHieuUng', 'diemMoiTim', 'diemTimToiDa', 'timHoaRoi', 'timPhaoHoa', 'timPhaoGiay', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays'])
+    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'lenhHieuUngChoGiay', 'phongVangDuoi', 'mcSapMocConLai', 'mcCheGheuChoGiay', 'choDoiLanThapGiay', 'rongKhungMc', 'rongThongBao', 'mocTimHieuUng', 'diemMoiTim', 'diemTimToiDa', 'timHoaRoi', 'timPhaoHoa', 'timPhaoGiay', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays', 'kichThuocBan', 'tocDo', 'doDaiBanDau', 'diemTao', 'thoiGianBom', 'soBomToiDa', 'soTaoToiDa', 'thoiGianHoiSinh'])
       if (clean[k] != null) clean[k] = Math.round(clean[k]);
     for (const k of BOOL_BY_GAME[id] || []) if (cfg[k] != null) clean[k] = !!cfg[k];
     for (const [k, [opts, def]] of Object.entries(CHOICE_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = opts.includes(cfg[k]) ? cfg[k] : def;
@@ -197,6 +219,19 @@ class Settings {
     if (id === 'san-nhay' && Array.isArray(cfg.levelXp)) {
       const xs = cfg.levelXp.map(Number).filter(n => Number.isFinite(n) && n >= 0).slice(0, 30);
       if (xs.length >= 2) clean.levelXp = xs; else drop.push('levelXp');
+    }
+    // rắn săn mồi: tên game + màu rắn (chuỗi hex #RGB/#RRGGBB) + bảng quà
+    if (id === 'ran-san-moi') {
+      if (cfg.tenGame != null) clean.tenGame = String(cfg.tenGame).trim().slice(0, 60) || 'Rắn Săn Mồi';
+      for (const k of ['mauThanRan', 'mauDauRan']) {
+        if (cfg[k] == null) continue;
+        const c = String(cfg[k]).trim();
+        if (/^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(c)) clean[k] = c; else drop.push(k);
+      }
+      if (cfg.quaTang != null) {
+        const t = parseGiftTable(cfg.quaTang);
+        if (t) clean.quaTang = JSON.stringify(t); else drop.push('quaTang');
+      }
     }
     // danh sách từ (từ cấm / từ an toàn của đám cưới): để trống = dùng mặc định trong mapping
     for (const k of ['tuCamComment', 'tuAnToanComment']) {

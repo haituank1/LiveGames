@@ -292,7 +292,7 @@ function grp(title, wide, open) {
   };
 }
 
-const GAME_NAMES = { 'chua-3d': '⛩️ Chùa 3D', 'dam-cuoi': '💍 Đám cưới online', 'san-nhay': '🪩 Sàn nhảy' };
+const GAME_NAMES = { 'chua-3d': '⛩️ Chùa 3D', 'dam-cuoi': '💍 Đám cưới online', 'san-nhay': '🪩 Sàn nhảy', 'ran-san-moi': '🐍 Rắn Săn Mồi' };
 
 /* ---- Một game: thanh lưu ghim + các nhóm config ---- */
 function buildGame(g) {
@@ -738,6 +738,28 @@ const GAME_SCHEMAS = {
       { k: 'phuKienQua', l: 'Quà lớn tặng phụ kiện cho nhân vật', t: 'chk', defTrue: true },
       { k: 'phuKienGiuGio', l: 'Phụ kiện giữ (giờ)', t: 'num', min: 0, max: 24, step: 0.5 },
       { k: 'partyMaxNhanhHon', l: 'Party Max nhảy nhanh hơn', t: 'chk', defTrue: true },
+    ] },
+  ],
+  'ran-san-moi': [
+    { title: '🐍 Bàn chơi & tốc độ', live: true, note: 'Rắn tự chơi (AI tìm táo, tránh tường/thân/bom). Bàn vuông N×N ô; rắn đi 1 ô mỗi tick — số ms/tick càng nhỏ rắn càng nhanh. Đổi kích thước bàn là dựng lại bàn + rắn (điểm giữ nguyên).', fields: [
+      { k: 'kichThuocBan', l: 'Kích thước bàn (ô, 16–24)', t: 'num', min: 16, max: 24, step: 1 },
+      { k: 'tocDo', l: 'Tốc độ (ms/tick, 80–300)', t: 'num', min: 80, max: 300, step: 1 },
+      { k: 'doDaiBanDau', l: 'Độ dài rắn lúc đầu (đốt, 3–10)', t: 'num', min: 3, max: 10, step: 1 },
+      { k: 'diemTao', l: 'Điểm mỗi quả táo ăn được (1–100)', t: 'num', min: 1, max: 100, step: 1 },
+      { k: 'thoiGianHoiSinh', l: 'Chết bao lâu thì chơi lại (giây, 1–10)', t: 'num', min: 1, max: 10, step: 1 },
+    ] },
+    { title: '💣 Bom & táo', live: true, note: 'Bom là bẫy: rắn đụng bom thì chết. Bom thả cách đầu rắn ít nhất 3 ô; hết hạn thì tự biến mất; đủ số bom tối đa thì quà thả bom bị bỏ qua.', fields: [
+      { k: 'thoiGianBom', l: 'Bom tồn tại (giây, 0–300; 0 = không hết hạn)', t: 'num', min: 0, max: 300, step: 1 },
+      { k: 'soBomToiDa', l: 'Tối đa bom cùng lúc (1–20)', t: 'num', min: 1, max: 20, step: 1 },
+      { k: 'soTaoToiDa', l: 'Số táo thường trực trên bàn (1–10)', t: 'num', min: 1, max: 10, step: 1 },
+    ] },
+    { title: '🎨 Màu rắn & tên game', live: true, note: 'Đổi màu ăn ngay (không cần load lại trang). Màu ghi dạng hex #RRGGBB, vd #FF9F1C (cam), #4CAF50 (xanh lá).', fields: [
+      { k: 'mauThanRan', l: 'Màu thân rắn (hex)', t: 'txt' },
+      { k: 'mauDauRan', l: 'Màu đầu rắn (hex)', t: 'txt' },
+      { k: 'tenGame', l: 'Tên game', t: 'txt' },
+    ] },
+    { title: '🎁 Bảng quà', live: true, note: 'Dán JSON {"Tên quà":{"diem":N,"hieuUng":"tao"|"bom"}} — key là TÊN QUÀ THẬT trên TikTok (Rose, Doughnut đã xác nhận; GG, Apple, Chicken, Gift Box theo ảnh tham chiếu — live thật thấy tên khác thì sửa key cho khớp). diem = điểm quà (cộng vào Điểm game + Top tặng quà); hieuUng "tao" = rớt 1 táo, "bom" = thả 1 bom. Quà không có trong bảng thì +0 điểm, không hiệu ứng. Quà combo: điểm nhân theo count, hiệu ứng chỉ thả 1 lần.', fields: [
+      { k: 'quaTang', l: 'Bảng quà (JSON)', t: 'txt', full: true },
     ] },
   ],
 };

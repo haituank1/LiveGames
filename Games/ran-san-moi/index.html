@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Rắn Săn Mồi — Live TikTok</title>
+<style>
+  /* Rắn Săn Mồi — khung 720×1280 dọc (TikTok live), nền nâu sẫm.
+     Bàn chơi + rắn + táo + bom do Board/Snake vẽ trên canvas (js/board.js,
+     js/snake.js); HUD còn lại là DOM. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden; font-family: "Be Vietnam Pro", system-ui, sans-serif; }
+  #stage {
+    position: relative; width: 720px; height: 1280px; margin: 0 auto; overflow: hidden;
+    background: linear-gradient(#2b1d12, #1a120a 60%, #120c06);
+    color: #fff;
+  }
+  /* Tiêu đề */
+  .stage-head { position: absolute; left: 0; right: 0; top: 12px; text-align: center; z-index: 5; }
+  .stage-head h1 {
+    font-size: 46px; font-weight: 900; letter-spacing: 2px; color: #ffd54f;
+    text-shadow: 0 3px 0 #7a4a00, 0 6px 14px rgba(0,0,0,.6);
+  }
+  #statusLine { font-size: 15px; color: #ffe082; margin-top: 2px; min-height: 20px; }
+  /* Hàng chip điểm */
+  .chips { position: absolute; left: 20px; right: 20px; top: 100px; display: flex; gap: 8px; justify-content: center; z-index: 5; }
+  .chip {
+    background: rgba(0,0,0,.45); border: 2px solid #8d6e63; border-radius: 999px;
+    padding: 5px 13px; font-size: 16px; font-weight: 800; color: #fff; white-space: nowrap;
+  }
+  .chip b { color: #ffd54f; }
+  .chip .lbl { color: #d7ccc8; font-weight: 700; }
+  /* Bàn chơi */
+  #boardWrap { position: absolute; left: 20px; top: 148px; width: 680px; height: 680px; z-index: 3; }
+  #board { display: block; width: 680px; height: 680px; border-radius: 6px; }
+  /* Nút Start — phủ giữa bàn, bấm để bắt đầu (như lớp học chữ) */
+  #btnStart {
+    position: absolute; left: 50%; top: 488px; transform: translate(-50%, -50%); z-index: 10;
+    font-size: 26px; font-weight: 900; color: #4e342e; cursor: pointer;
+    background: linear-gradient(#ffe082, #ffb300); border: 3px solid #fff;
+    border-radius: 999px; padding: 14px 44px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.55);
+  }
+  #btnStart:disabled { opacity: .75; cursor: default; }
+  /* Thanh quà dưới màn hình */
+  #giftBar {
+    position: absolute; left: 20px; right: 20px; top: 844px; z-index: 5;
+    display: flex; gap: 6px; justify-content: space-between;
+  }
+  .gift-card {
+    flex: 1 1 0; background: rgba(0,0,0,.45); border: 2px solid #6d4c41; border-radius: 10px;
+    padding: 6px 2px 5px; text-align: center; min-width: 0;
+  }
+  .gift-card .ic { font-size: 24px; line-height: 1.1; }
+  .gift-card .nm { font-size: 12px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gift-card .pt { font-size: 12px; font-weight: 800; color: #ffd54f; }
+  .gift-card .fx { font-size: 11px; color: #d7ccc8; }
+  /* Top tặng quà */
+  #topPanel {
+    position: absolute; left: 20px; right: 20px; top: 952px; z-index: 5;
+    background: rgba(0,0,0,.45); border: 2px solid #6d4c41; border-radius: 12px; padding: 8px 12px;
+  }
+  #topPanel h3 { font-size: 17px; color: #ffd54f; margin-bottom: 4px; }
+  .top-row { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; padding: 2px 0; }
+  .top-row .rank { width: 28px; text-align: center; }
+  .top-row .nm { flex: 1 1 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top-row .pt { color: #ffd54f; }
+  .top-empty { font-size: 14px; color: #d7ccc8; text-align: center; padding: 4px 0; }
+  /* Dòng quà vừa tặng + trạng thái live */
+  #feedLine { position: absolute; left: 20px; right: 20px; top: 1136px; z-index: 5; text-align: center; font-size: 14px; color: #ffe082; min-height: 20px; }
+  #liveStatus { position: absolute; left: 0; right: 0; bottom: 8px; z-index: 5; text-align: center; font-size: 12px; color: #a1887f; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <header class="stage-head">
+    <h1>🐍 RẮN SĂN MỒI</h1>
+    <div id="statusLine">Bấm Start để bắt đầu</div>
+  </header>
+  <div class="chips">
+    <div class="chip"><span class="lbl">Điểm</span> <b id="scoreVal">0</b></div>
+    <div class="chip"><span class="lbl">Dài</span> <b id="lenVal">5</b></div>
+    <div class="chip"><span class="lbl">Kỷ lục</span> <b id="recordVal">0</b></div>
+    <div class="chip">❤️ <b id="likeVal">0</b></div>
+  </div>
+  <div id="boardWrap"><canvas id="board" width="680" height="680"></canvas></div>
+  <button id="btnStart">▶ Bắt đầu</button>
+  <div id="giftBar"></div>
+  <div id="topPanel">
+    <h3>🏆 Top tặng quà</h3>
+    <div id="topList"><div class="top-empty">Chưa có ai tặng quà — tặng quà để lên bảng!</div></div>
+  </div>
+  <div id="feedLine"></div>
+  <div id="liveStatus">Chưa nối LiveBridge</div>
+</div>
+<script src="../../LiveBridge/public/livebridge-client.js"></script>
+<script src="js/snake.js"></script>
+<script src="js/board.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
