@@ -1,25 +1,27 @@
-// Rắn Săn Mồi — effects.js (nv4). Pure Canvas 2D FX, no DOM, no external libs.
-// Contract (RAN-SAN-MOI-SPEC.md §6): main.js calls exactly
+// Rắn Săn Mồi — effects.js (nv4, bản 3D). Three.js r128, KHÔNG tự tạo
+// renderer/camera/đèn — chỉ thêm/bớt object FX vào scene chung của main.js.
+// Contract (RAN-SAN-MOI-3D.md §4, giữ nguyên API bản 2D): main.js gọi đúng
 //   effects.init(opts), effects.eat(x,y), effects.explode(x,y), effects.die(),
-//   effects.spawn(x,y), effects.land(x,y,type), effects.update(dt), effects.render(ctx).
-// Coordinates x,y are BOARD CELLS (0-based). Cell -> pixel conversion uses the
-// layout main.js gives via init() (cellSize/origin/cols/rows); defaults match
-// the spec (20x20 board, 34px cells). If the board layout changes, call init()
-// again or the setters below — do NOT hardcode pixel positions here.
-// Division of labour: board.js draws the falling apple/bomb itself + its ground
-// shadow + its own squash-bounce; effects.land() only adds dust + debris + a
-// ring at the landing cell (it never draws the apple/bomb). main.js calls
-// land() once per item in `landed` from board.update() — only then does the
-// item count (a falling item is not yet edible / not yet a danger).
-// Coordinates x,y are BOARD CELLS (0-based). Cell -> pixel conversion uses the
-// layout main.js gives via init() (cellSize/origin/cols/rows); defaults match
-// the spec (20x20 board, 34px cells). If the board layout changes, call init()
-// again or the setters below — do NOT hardcode pixel positions here.
-// Optional extras (main.js may ignore them): getShakeOffset() + render(ctx, false)
-// for a whole-scene shake, setCellSize/setOrigin/setBoard, clear(), count(), _diag().
-// Budget: at most ~100 particles alive at once (oldest dropped first); floating
-// texts are separate, at most 6. FX never covers the snake/board for long:
-// bursts fade in <= 1.5s, the "Rắn đã thua!" text in 1.8s.
+//   effects.spawn(x,y), effects.land(x,y,type), effects.update(dt),
+//   effects.render(scene), effects.count().
+// Tọa độ x,y vẫn là Ô TRÊN BÀN (0-based). Đổi sang vị trí 3D theo công thức
+// spec §1: (gridX + (x+0.5)*cell, 0, gridY + (y+0.5)*cell) — bàn nằm ngang
+// mặt XZ, Y là chiều cao, mặt đất Y=0. main.js truyền đúng số đo của board
+// qua init(), vd: effects.init({ scene, cell: board.cell, gridX: board.gridX,
+// gridY: board.gridY, cols: board.n, rows: board.n }). Mặc định (cell 34,
+// bàn 680×680 căn giữa gốc) chỉ để test độc lập — game thật PHẢI truyền số
+// đo thật, vì board 3D có thể dùng đơn vị khác.
+// Scene: truyền qua init({scene}) hoặc setScene(scene) hoặc render(scene)
+// (render nhận scene mới thì dùng scene đó). THREE lấy từ init({THREE})
+// hoặc window.THREE (three.min.js tự host, load trước effects.js).
+// Hạt: 1 THREE.Sprite / hạt (texture chấm tròn dùng chung, material riêng để
+// fade từng hạt), ring là Mesh RingGeometry nằm phẳng trên mặt bàn, chữ là
+// Sprite với CanvasTexture. Không tự vẽ táo/bom/bóng — board.js giữ phần đó;
+// land() chỉ thêm bụi/nảy/vòng ở ô đích (như bản 2D).
+// Rung camera: effects KHÔNG chạm camera — main.js đọc effects.getShakeOffset()
+// mỗi frame rồi cộng vào vị trí camera (đơn vị world, giống số px bản 2D).
+// Budget: tối đa ~100 hạt (thừa thì bỏ hạt cũ nhất, dispose material); text
+// tối đa 6; mọi object FX nằm trong 1 Group 'ran-fx' để dọn sạch không rò.
 (function () {
   'use strict';
 
@@ -28,68 +30,238 @@
   var TAU = Math.PI * 2;
 
   var cfg = {
-    cellSize: 34, // px per cell (board ~680px at 20 cols)
+    cell: 34, // 1 ô theo đơn vị world (bàn 680 với 20 ô)
     cols: 20, rows: 20,
-    originX: 0, originY: 0, // px of the board's top-left corner on the canvas
-    applePoints: 10, // shown in the "+10" floating text (spec §7 diemTao)
+    gridX: -340, gridY: -340, // góc bàn trong world (mặc định: bàn căn giữa gốc)
+    applePoints: 10, // chữ "+10" (spec §7 diemTao)
   };
 
-  var P = []; // particles
-  var T = []; // floating texts
+  var providedTHREE = null;
+  var scene = null;
+  var group = null; // THREE.Group 'ran-fx', chứa mọi object FX
+  var dotTex = null; // texture chấm tròn dùng chung cho mọi sprite hạt
+  var warnedNoThree = false;
+
+  var P = []; // sprite particles {kind, spr, vx, vy, vz, life, max, size0, size1, grav, drag, op0, ground}
+  var R = []; // rings {mesh, life, max, r0, r1}
+  var T = []; // text sprites {spr, tex, vy, life, max}
+  var B = []; // light beams {mesh, life, max, drop}
+  var pendingLand = []; // landing bursts queued during update(), run after the loops
+  // (landBurst adds particles — adding mid-iteration would shift P under the
+  // backward loop and orphan sprites in the scene, so bursts are queued.)
   var shakeMag = 0, shakeT = 0, shakeDur = 1;
-  var shakeOX = 0, shakeOY = 0; // offset computed in update(), used by render()
+  var shakeOX = 0, shakeOY = 0;
 
   function rand(a, b) { return a + Math.random() * (b - a); }
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
 
-  // Pixel center of a board cell.
-  function cellCenter(cx, cy) {
+  function getTHREE() {
+    if (providedTHREE) return providedTHREE;
+    if (typeof window !== 'undefined' && window.THREE) return window.THREE;
+    if (typeof globalThis !== 'undefined' && globalThis.THREE) return globalThis.THREE;
+    return null;
+  }
+
+  function warnNoThree() {
+    if (!warnedNoThree) {
+      warnedNoThree = true;
+      if (typeof console !== 'undefined' && console.warn) console.warn('[ran-fx] THREE chua co — hieu ung bi bo qua (can three.min.js truoc effects.js)');
+    }
+  }
+
+  // World position of a cell center (ground Y=0).
+  function cellPos(cx, cy) {
     return {
-      x: cfg.originX + (cx + 0.5) * cfg.cellSize,
-      y: cfg.originY + (cy + 0.5) * cfg.cellSize,
+      x: cfg.gridX + (cx + 0.5) * cfg.cell,
+      y: 0,
+      z: cfg.gridY + (cy + 0.5) * cfg.cell,
     };
+  }
+
+  function boardCenter() {
+    return {
+      x: cfg.gridX + (cfg.cols * cfg.cell) / 2,
+      y: 0,
+      z: cfg.gridY + (cfg.rows * cfg.cell) / 2,
+    };
+  }
+
+  function ensureGroup() {
+    var TH = getTHREE();
+    if (!TH) { warnNoThree(); return null; }
+    if (!group) {
+      group = new TH.Group();
+      group.name = 'ran-fx';
+    }
+    if (scene && group.parent !== scene) scene.add(group);
+    return group;
+  }
+
+  // Shared soft-dot texture for particle sprites (canvas radial gradient).
+  // Falls back to null (plain square sprite) when no document/canvas exists.
+  function dotTexture() {
+    if (dotTex) return dotTex;
+    var TH = getTHREE();
+    if (!TH || typeof document === 'undefined') return null;
+    try {
+      var cv = document.createElement('canvas');
+      cv.width = 64; cv.height = 64;
+      var c2 = cv.getContext('2d');
+      var g = c2.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, 'rgba(255,255,255,1)');
+      g.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+      g.addColorStop(1, 'rgba(255,255,255,0)');
+      c2.fillStyle = g;
+      c2.fillRect(0, 0, 64, 64);
+      dotTex = new TH.CanvasTexture(cv);
+    } catch (e) { dotTex = null; }
+    return dotTex;
+  }
+
+  function makeSprite(color, size, additive, opacity) {
+    var TH = getTHREE();
+    var mat = new TH.SpriteMaterial({
+      map: dotTexture(), color: color, transparent: true,
+      opacity: opacity == null ? 1 : opacity,
+      blending: additive ? TH.AdditiveBlending : TH.NormalBlending,
+      depthWrite: false,
+    });
+    var spr = new TH.Sprite(mat);
+    spr.scale.set(size * 2, size * 2, 1); // size = radius, scale = diameter
+    return spr;
+  }
+
+  // Text sprite (canvas texture, crisp text that floats in 3D). height = world height.
+  function makeTextSprite(text, height, color) {
+    var TH = getTHREE();
+    var spr = null, tex = null;
+    try {
+      var pad = 24, fontPx = 96;
+      var cv = document.createElement('canvas');
+      var c2 = cv.getContext('2d');
+      c2.font = '800 ' + fontPx + 'px "Segoe UI", system-ui, sans-serif';
+      var w = Math.ceil(c2.measureText(text).width) + pad * 2;
+      cv.width = w; cv.height = fontPx + pad * 2;
+      c2.font = '800 ' + fontPx + 'px "Segoe UI", system-ui, sans-serif';
+      c2.textAlign = 'center'; c2.textBaseline = 'middle';
+      c2.lineWidth = 12; c2.strokeStyle = 'rgba(0,0,0,0.6)';
+      c2.strokeText(text, w / 2, cv.height / 2);
+      c2.fillStyle = color;
+      c2.fillText(text, w / 2, cv.height / 2);
+      tex = new TH.CanvasTexture(cv);
+      var mat = new TH.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+      spr = new TH.Sprite(mat);
+      spr.scale.set(height * (w / cv.height), height, 1);
+    } catch (e) {
+      spr = makeSprite(color, height / 2, false, 1); // fallback: plain dot
+    }
+    return { spr: spr, tex: tex };
+  }
+
+  function disposeObj(o) {
+    if (!o) return;
+    if (o.spr) {
+      if (o.spr.material) o.spr.material.dispose();
+      if (o.tex) o.tex.dispose();
+    }
+    if (o.mesh) {
+      if (o.mesh.material) o.mesh.material.dispose();
+      if (o.mesh.geometry) o.mesh.geometry.dispose();
+    }
+  }
+
+  function removeFromGroup(o) {
+    if (group && o) {
+      if (o.spr) group.remove(o.spr);
+      if (o.mesh) group.remove(o.mesh);
+    }
+    disposeObj(o);
   }
 
   function add(p) {
     // Hard budget: drop the oldest particle so the count never exceeds the cap.
-    if (P.length >= MAX_PARTICLES) P.shift();
+    if (!ensureGroup()) return;
+    if (P.length >= MAX_PARTICLES) removeFromGroup(P.shift());
+    p.spr.position.set(p.x, p.y, p.z); // visible at the right place even before update()
+    group.add(p.spr);
     P.push(p);
   }
 
-  function addText(x, y, text, size, color, life) {
-    if (T.length >= MAX_TEXTS) T.shift();
-    T.push({ x: x, y: y, vy: -34, life: 0, max: life || 1.1, size: size, color: color, text: text });
+  function addText(x, y, z, text, height, color, life) {
+    if (!ensureGroup()) return;
+    if (T.length >= MAX_TEXTS) {
+      var old = T.shift();
+      removeFromGroup(old);
+    }
+    var t = makeTextSprite(text, height, color);
+    t.spr.position.set(x, y, z);
+    group.add(t.spr);
+    T.push({ spr: t.spr, tex: t.tex, vy: cfg.cell * 1.0, life: 0, max: life || 1.1 });
   }
 
-  function burst(x, y, n, colors, speed, life, size, kind, grav) {
+  // Burst of sprites flying in 3D (random sphere directions + upward bias).
+  // speed/life/size/grav are in world units (cell-relative, like the 2D px values).
+  function burst(x, y, z, n, colors, speed, life, size, kind, grav, upBias) {
     for (var i = 0; i < n; i++) {
-      var a = rand(0, TAU), sp = rand(speed * 0.35, speed);
+      var th = rand(0, TAU), ph = Math.acos(rand(-1, 1));
+      var sp = rand(speed * 0.35, speed);
+      var col = colors[(Math.random() * colors.length) | 0];
+      var additive = kind === 'spark' || kind === 'flash';
+      var sz = rand(size * 0.6, size * 1.3);
       add({
-        kind: kind || 'spark', x: x, y: y,
-        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - speed * 0.25,
+        kind: kind || 'spark', spr: makeSprite(col, sz, additive, 1),
+        x: x, y: y, z: z,
+        vx: Math.sin(ph) * Math.cos(th) * sp,
+        vy: Math.cos(ph) * sp + (upBias == null ? speed * 0.35 : upBias),
+        vz: Math.sin(ph) * Math.sin(th) * sp,
         life: 0, max: rand(life * 0.6, life),
-        size: rand(size * 0.6, size * 1.3),
-        color: colors[(Math.random() * colors.length) | 0],
-        grav: grav == null ? 140 : grav, drag: 1.6, rot: rand(0, TAU), vr: rand(-6, 6),
+        size0: sz, size1: kind === 'smoke' ? sz * 2.4 : sz * 0.7,
+        grav: grav == null ? 140 : grav, drag: 1.6,
+        op0: kind === 'smoke' ? 0.28 : 1, ground: true,
       });
     }
   }
 
-  function ring(x, y, size, color, life) {
-    add({ kind: 'ring', x: x, y: y, vx: 0, vy: 0, life: 0, max: life || 0.45, size: size, color: color, grav: 0, drag: 0, rot: 0, vr: 0 });
+  // Flat ring mesh on the board (XZ plane), expands r0 -> r1 then fades.
+  function ring(x, z, r0, r1, color, life) {
+    if (!ensureGroup()) return;
+    var TH = getTHREE();
+    var geo = new TH.RingGeometry(0.85, 1, 40);
+    var mat = new TH.MeshBasicMaterial({
+      color: color, transparent: true, opacity: 1,
+      side: TH.DoubleSide, depthWrite: false,
+    });
+    var mesh = new TH.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.set(x, 0.06, z);
+    mesh.scale.set(r0, r0, 1);
+    group.add(mesh);
+    R.push({ mesh: mesh, life: 0, max: life || 0.45, r0: r0, r1: r1 });
   }
 
-  function flash(x, y, size, life) {
-    add({ kind: 'flash', x: x, y: y, vx: 0, vy: 0, life: 0, max: life || 0.3, size: size, color: '#fff7d6', grav: 0, drag: 0, rot: 0, vr: 0 });
+  function flash(x, y, z, radius, life) {
+    add({
+      kind: 'flash', spr: makeSprite('#fff7d6', radius * 0.4, true, 0.75),
+      x: x, y: y, z: z, vx: 0, vy: 0, vz: 0, life: 0, max: life || 0.3,
+      size0: radius * 0.4, size1: radius, grav: 0, drag: 0, op0: 0.75, ground: false,
+    });
   }
 
-  function landDrop(p) {
-    // A falling gift item lands: ring + sparkles + a soft poof.
-    ring(p.tx, p.ty, cfg.cellSize * 1.1, '#ffd54f', 0.4);
-    burst(p.tx, p.ty, 6, ['#ffd54f', '#fff176', '#ffffff'], cfg.cellSize * 4, 0.5, cfg.cellSize * 0.1, 'spark', 40);
-    add({ kind: 'poof', x: p.tx, y: p.ty, vx: 0, vy: 0, life: 0, max: 0.35,
-      size: cfg.cellSize * 0.55, color: '#fff8e1', grav: 0, drag: 0, rot: 0, vr: 0 });
+  // Landing burst shared by spawn()'s drop and the land() dust (small version).
+  // Queue it instead of running immediately when called from update(): adding
+  // particles mid-iteration would shift P and orphan sprites in the scene.
+  function queueLandBurst(x, z) { pendingLand.push({ x: x, z: z }); }
+  function landBurst(x, z, accent) {
+    var s = cfg.cell;
+    ring(x, z, s * 0.3, s * 1.1, '#ffd54f', 0.4);
+    burst(x, s * 0.15, z, 6, ['#ffd54f', '#fff176', '#ffffff'], s * 4, 0.5, s * 0.1, 'spark', 40, s * 2);
+    add({
+      kind: 'poof', spr: makeSprite('#fff8e1', s * 0.28, false, 0.55),
+      x: x, y: s * 0.15, z: z, vx: 0, vy: s * 0.4, vz: 0, life: 0, max: 0.35,
+      size0: s * 0.28, size1: s * 0.55, grav: 0, drag: 0, op0: 0.55, ground: false,
+    });
   }
+
   function shake(mag, dur) {
     // Strongest shake wins; a new shake never shortens a bigger one in progress.
     if (mag >= shakeMag || shakeT <= 0) { shakeMag = mag; shakeT = dur; shakeDur = dur; }
@@ -97,45 +269,67 @@
 
   var effects = {
     // main.js calls this once after the board layout is known.
-    // opts: { cellSize, cols, rows, originX, originY, applePoints } (all optional).
+    // opts: { scene, THREE, cell, gridX, gridY, cols, rows,
+    //         cellSize (=cell), originX (=gridX), originY (=gridY), applePoints }.
     init: function (opts) {
       if (opts) {
-        if (opts.cellSize > 0) cfg.cellSize = opts.cellSize;
+        if (opts.THREE) providedTHREE = opts.THREE;
+        if (opts.scene) effects.setScene(opts.scene);
+        if (opts.cell > 0) cfg.cell = opts.cell;
+        if (opts.cellSize > 0) cfg.cell = opts.cellSize;
         if (opts.cols > 0) cfg.cols = opts.cols;
         if (opts.rows > 0) cfg.rows = opts.rows;
-        if (opts.originX != null) cfg.originX = opts.originX;
-        if (opts.originY != null) cfg.originY = opts.originY;
+        if (opts.gridX != null) cfg.gridX = opts.gridX;
+        if (opts.gridY != null) cfg.gridY = opts.gridY;
+        if (opts.originX != null) cfg.gridX = opts.originX;
+        if (opts.originY != null) cfg.gridY = opts.originY;
         if (opts.applePoints != null) cfg.applePoints = opts.applePoints;
       }
       return effects;
     },
-    setCellSize: function (px) { if (px > 0) cfg.cellSize = px; return effects; },
-    setOrigin: function (x, y) { cfg.originX = x; cfg.originY = y; return effects; },
+
+    // Attach (or switch) the shared scene. FX objects live in group 'ran-fx'.
+    setScene: function (sc) {
+      if (!sc) return effects;
+      if (scene && group && group.parent === scene) scene.remove(group);
+      scene = sc;
+      ensureGroup(); // creates group 'ran-fx' if needed + attaches it now
+      return effects;
+    },
+    setCellSize: function (px) { if (px > 0) cfg.cell = px; return effects; },
+    setOrigin: function (x, z) { cfg.gridX = x; cfg.gridY = z; return effects; },
     setBoard: function (cols, rows) { if (cols > 0) cfg.cols = cols; if (rows > 0) cfg.rows = rows; return effects; },
 
-    // Apple eaten at cell (x,y): red/green chunks fly + "+10" floats up.
+    // Apple eaten at cell (x,y): red/green chunks fly in 3D + "+10" floats up.
     // points overrides cfg.applePoints for this one call.
     eat: function (x, y, points) {
-      var c = cellCenter(x, y);
-      var s = cfg.cellSize;
-      burst(c.x, c.y, 10, ['#ff5252', '#e53935', '#ff8a80'], s * 7, 0.7, s * 0.22, 'chunk', 340);
-      burst(c.x, c.y, 3, ['#66bb6a', '#43a047'], s * 5, 0.6, s * 0.16, 'chunk', 300);
-      burst(c.x, c.y, 4, ['#ffd54f', '#fff176'], s * 6, 0.5, s * 0.12, 'spark', 60);
-      addText(c.x, c.y - s * 0.4, '+' + (points != null ? points : cfg.applePoints),
+      if (!getTHREE()) { warnNoThree(); return; }
+      var c = cellPos(x, y);
+      var s = cfg.cell;
+      burst(c.x, s * 0.3, c.z, 10, ['#ff5252', '#e53935', '#ff8a80'], s * 7, 0.7, s * 0.22, 'chunk', s * 10, s * 2.5);
+      burst(c.x, s * 0.3, c.z, 3, ['#66bb6a', '#43a047'], s * 5, 0.6, s * 0.16, 'chunk', s * 9, s * 2);
+      burst(c.x, s * 0.3, c.z, 4, ['#ffd54f', '#fff176'], s * 6, 0.5, s * 0.12, 'spark', s * 2, s * 2.5);
+      addText(c.x, s * 0.9, c.z, '+' + (points != null ? points : cfg.applePoints),
         Math.round(s * 0.62), '#ffd54f', 1.1);
     },
 
-    // Bomb hit at cell (x,y): fire + smoke + flash + ring + a light screen shake.
+    // Bomb hit at cell (x,y): fire + smoke rising + flash + ring + light camera shake.
     explode: function (x, y) {
-      var c = cellCenter(x, y);
-      var s = cfg.cellSize;
-      flash(c.x, c.y, s * 2.6, 0.3);
-      ring(c.x, c.y, s * 2.2, '#ffb74d', 0.45);
-      burst(c.x, c.y, 14, ['#ff9800', '#ff5722', '#ffeb3b', '#fff3e0'], s * 9, 0.8, s * 0.24, 'spark', 200);
+      if (!getTHREE()) { warnNoThree(); return; }
+      var c = cellPos(x, y);
+      var s = cfg.cell;
+      flash(c.x, s * 0.5, c.z, s * 2.6, 0.3);
+      ring(c.x, c.z, s * 0.4, s * 2.2, '#ffb74d', 0.45);
+      burst(c.x, s * 0.4, c.z, 14, ['#ff9800', '#ff5722', '#ffeb3b', '#fff3e0'], s * 9, 0.8, s * 0.24, 'spark', s * 6, s * 4);
       for (var i = 0; i < 7; i++) {
-        add({ kind: 'smoke', x: c.x + rand(-s * 0.3, s * 0.3), y: c.y + rand(-s * 0.2, s * 0.2),
-          vx: rand(-14, 14), vy: rand(-55, -18), life: 0, max: rand(0.9, 1.5),
-          size: rand(s * 0.3, s * 0.5), color: '#9e9e9e', grav: 0, drag: 0.4, rot: 0, vr: 0 });
+        add({
+          kind: 'smoke', spr: makeSprite('#9e9e9e', rand(s * 0.3, s * 0.5), false, 0.28),
+          x: c.x + rand(-s * 0.3, s * 0.3), y: s * 0.3, z: c.z + rand(-s * 0.3, s * 0.3),
+          vx: rand(-s * 0.4, s * 0.4), vy: rand(s * 0.6, s * 1.6), vz: rand(-s * 0.4, s * 0.4),
+          life: 0, max: rand(0.9, 1.5),
+          size0: rand(s * 0.3, s * 0.5), size1: rand(s * 0.7, s * 1.1),
+          grav: 0, drag: 0.4, op0: 0.28, ground: false,
+        });
       }
       shake(5, 0.35);
     },
@@ -145,30 +339,58 @@
     // main.js respawns the snake after config thoiGianHoiSinh (3s); the FX is
     // gone long before that.
     die: function () {
-      var cx = cfg.originX + (cfg.cols * cfg.cellSize) / 2;
-      var cy = cfg.originY + (cfg.rows * cfg.cellSize) / 2;
-      var s = cfg.cellSize;
-      flash(cx, cy, s * 6, 0.4);
-      ring(cx, cy, s * 4.5, '#ff8a65', 0.6);
-      ring(cx, cy, s * 3, '#ffd54f', 0.5);
-      burst(cx, cy, 22, ['#ff9800', '#ff5722', '#ffeb3b', '#fff3e0', '#ffc107'], s * 12, 1.0, s * 0.28, 'spark', 220);
+      if (!getTHREE()) { warnNoThree(); return; }
+      var bc = boardCenter();
+      var s = cfg.cell;
+      flash(bc.x, s * 1, bc.z, s * 6, 0.4);
+      ring(bc.x, bc.z, s * 0.6, s * 4.5, '#ff8a65', 0.6);
+      ring(bc.x, bc.z, s * 0.4, s * 3, '#ffd54f', 0.5);
+      burst(bc.x, s * 0.8, bc.z, 22, ['#ff9800', '#ff5722', '#ffeb3b', '#fff3e0', '#ffc107'], s * 12, 1.0, s * 0.28, 'spark', s * 6.5, s * 5);
       for (var i = 0; i < 10; i++) {
-        add({ kind: 'smoke', x: cx + rand(-s, s), y: cy + rand(-s * 0.6, s * 0.6),
-          vx: rand(-20, 20), vy: rand(-70, -25), life: 0, max: rand(1.0, 1.6),
-          size: rand(s * 0.4, s * 0.7), color: '#8d8d8d', grav: 0, drag: 0.4, rot: 0, vr: 0 });
+        add({
+          kind: 'smoke', spr: makeSprite('#8d8d8d', rand(s * 0.4, s * 0.7), false, 0.28),
+          x: bc.x + rand(-s, s), y: s * 0.5, z: bc.z + rand(-s, s),
+          vx: rand(-s * 0.6, s * 0.6), vy: rand(s * 0.8, s * 2), vz: rand(-s * 0.6, s * 0.6),
+          life: 0, max: rand(1.0, 1.6),
+          size0: rand(s * 0.4, s * 0.7), size1: rand(s * 0.9, s * 1.4),
+          grav: 0, drag: 0.4, op0: 0.28, ground: false,
+        });
       }
-      addText(cx, cy - s * 0.5, 'Rắn đã thua!', Math.round(s * 1.35), '#ffffff', 1.8);
+      addText(bc.x, s * 2, bc.z, 'Rắn đã thua!', Math.round(s * 1.35), '#ffffff', 1.8);
       shake(8, 0.6);
     },
 
     // A gift dropped an apple/bomb at cell (x,y): a glowing dot falls from
-    // 3 cells above into the cell, then a gold ring + sparkles mark the landing.
+    // 3 cells above into the cell, with a light beam, then a gold ring +
+    // sparkles mark the landing. (Board.js draws the falling item itself;
+    // this is only the FX: falling glow + beam + landing burst.)
     spawn: function (x, y) {
-      var c = cellCenter(x, y);
-      var s = cfg.cellSize;
-      add({ kind: 'drop', x: c.x, y: c.y - 3 * s, tx: c.x, ty: c.y,
-        vx: 0, vy: s * 15, life: 0, max: 2, size: s * 0.22, color: '#ffd54f',
-        grav: 0, drag: 0, rot: 0, vr: 0 });
+      if (!getTHREE()) { warnNoThree(); return; }
+      var TH = getTHREE();
+      var c = cellPos(x, y);
+      var s = cfg.cell;
+      var h = 3 * s;
+      var beam = null;
+      if (ensureGroup()) {
+        var geo = new TH.CylinderGeometry(s * 0.12, s * 0.12, h, 12, 1, true);
+        var mat = new TH.MeshBasicMaterial({
+          color: '#ffd54f', transparent: true, opacity: 0.22,
+          blending: TH.AdditiveBlending, depthWrite: false, side: TH.DoubleSide,
+        });
+        beam = new TH.Mesh(geo, mat);
+        beam.position.set(c.x, h / 2, c.z);
+        group.add(beam);
+        B.push({ mesh: beam, life: 0, max: 2, drop: null });
+      }
+      var drop = {
+        kind: 'drop', spr: makeSprite('#ffd54f', s * 0.22, true, 0.9),
+        x: c.x, y: h, z: c.z, tx: c.x, tz: c.z,
+        vx: 0, vy: -s * 15, vz: 0, life: 0, max: 2,
+        size0: s * 0.22, size1: s * 0.22, grav: 0, drag: 0, op0: 0.9, ground: false,
+        beam: B.length ? B[B.length - 1] : null,
+      };
+      if (drop.beam) drop.beam.drop = drop;
+      add(drop);
     },
 
     // An apple/bomb JUST touched the ground at cell (x,y): dust + debris bounce
@@ -176,24 +398,33 @@
     // 'apple'). Only dust/debris/ring here — board.js draws the item itself,
     // its shadow and its own bounce, so nothing is drawn twice.
     land: function (x, y, type) {
-      var c = cellCenter(x, y);
-      var s = cfg.cellSize;
-      var gy = c.y + s * 0.3; // ground line of the cell (dust stays low)
+      if (!getTHREE()) { warnNoThree(); return; }
+      var c = cellPos(x, y);
+      var s = cfg.cell;
       var accent = type === 'bomb' ? '#ff8a65' : '#aed581';
       var i;
       for (i = 0; i < 7; i++) {
-        add({ kind: 'dust', x: c.x + rand(-s * 0.35, s * 0.35), y: gy + rand(-s * 0.08, s * 0.08),
-          vx: rand(-s * 4.4, s * 4.4), vy: rand(-s * 1.8, -s * 0.3), life: 0, max: rand(0.5, 0.8),
-          size: rand(s * 0.12, s * 0.24), color: (Math.random() < 0.5 ? '#cbb59a' : '#b8a88f'),
-          grav: 260, drag: 2.0, rot: 0, vr: 0 });
+        add({
+          kind: 'dust', spr: makeSprite((Math.random() < 0.5 ? '#cbb59a' : '#b8a88f'), rand(s * 0.12, s * 0.24), false, 0.35),
+          x: c.x + rand(-s * 0.35, s * 0.35), y: s * 0.1, z: c.z + rand(-s * 0.35, s * 0.35),
+          vx: rand(-s * 4.4, s * 4.4), vy: rand(-s * 0.3, s * 0.6), vz: rand(-s * 4.4, s * 4.4),
+          life: 0, max: rand(0.5, 0.8),
+          size0: rand(s * 0.12, s * 0.24), size1: rand(s * 0.22, s * 0.4),
+          grav: s * 7.6, drag: 2.0, op0: 0.35, ground: true,
+        });
       }
-      ring(c.x, gy, s * 1.0, accent, 0.35);
+      ring(c.x, c.z, s * 0.2, s * 1.0, accent, 0.35);
       for (i = 0; i < 2; i++) {
-        add({ kind: 'bounce', x: c.x + rand(-s * 0.2, s * 0.2), y: gy,
-          vx: rand(-s * 1.2, s * 1.2), vy: rand(-s * 6, -s * 4.2), life: 0, max: rand(0.4, 0.55),
-          size: rand(s * 0.07, s * 0.11), color: '#d7ccc8', grav: 520, drag: 0.3, rot: 0, vr: 0 });
+        add({
+          kind: 'bounce', spr: makeSprite('#d7ccc8', rand(s * 0.07, s * 0.11), false, 1),
+          x: c.x + rand(-s * 0.2, s * 0.2), y: s * 0.1, z: c.z + rand(-s * 0.2, s * 0.2),
+          vx: rand(-s * 1.2, s * 1.2), vy: rand(s * 4.2, s * 6), vz: rand(-s * 1.2, s * 1.2),
+          life: 0, max: rand(0.4, 0.55),
+          size0: rand(s * 0.07, s * 0.11), size1: rand(s * 0.07, s * 0.11),
+          grav: s * 15, drag: 0.3, op0: 1, ground: true,
+        });
       }
-      burst(c.x, gy - s * 0.1, 2, [accent, '#ffffff'], s * 2.5, 0.4, s * 0.09, 'spark', 60);
+      burst(c.x, s * 0.15, c.z, 2, [accent, '#ffffff'], s * 2.5, 0.4, s * 0.09, 'spark', s * 2, s * 1.5);
     },
 
     // dt: seconds since the last frame (clamped, so a hidden tab cannot jump FX).
@@ -211,125 +442,116 @@
         p = P[i];
         p.life += dt;
         if (p.life >= p.max) {
-          if (p.kind === 'drop') landDrop(p); // safety net if it never reached ty
+          if (p.kind === 'drop') queueLandBurst(p.tx, p.tz); // safety net
+          if (p.beam) killBeam(p.beam);
+          removeFromGroup(p);
           P.splice(i, 1);
           continue;
         }
         var dragK = Math.max(0, 1 - p.drag * dt);
-        p.vx *= dragK; p.vy *= dragK;
-        p.vy += p.grav * dt;
-        p.x += p.vx * dt; p.y += p.vy * dt;
-        p.rot += p.vr * dt;
-        if (p.kind === 'drop' && p.y >= p.ty) { landDrop(p); P.splice(i, 1); }
+        p.vx *= dragK; p.vy *= dragK; p.vz *= dragK;
+        p.vy -= p.grav * dt; // Y-up: gravity pulls down
+        p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+        if (p.ground && p.y < 0.03 * cfg.cell) {
+          p.y = 0.03 * cfg.cell;
+          if (p.vy < 0) p.vy = -p.vy * 0.25; // small settle bounce, then drag stops it
+        }
+        if (p.kind === 'drop' && p.y <= 0.03 * cfg.cell) {
+          queueLandBurst(p.tx, p.tz);
+          if (p.beam) killBeam(p.beam);
+          removeFromGroup(p);
+          P.splice(i, 1);
+          continue;
+        }
+        syncSprite(p);
+      }
+      for (i = R.length - 1; i >= 0; i--) {
+        var r = R[i];
+        r.life += dt;
+        if (r.life >= r.max) { removeFromGroup(r); R.splice(i, 1); continue; }
+        var rf = r.life / r.max;
+        var rr = r.r0 + (r.r1 - r.r0) * rf;
+        r.mesh.scale.set(rr, rr, 1);
+        r.mesh.material.opacity = 1 - rf;
       }
       for (i = T.length - 1; i >= 0; i--) {
-        T[i].life += dt;
-        T[i].y += T[i].vy * dt;
-        if (T[i].life >= T[i].max) T.splice(i, 1);
-      }
-    },
-
-    // Draw all live FX on ctx. main.js calls this AFTER board.render + snake.render.
-    // applyShake (default true) translates the FX layer by the current shake
-    // offset; pass false only if main.js already translated the whole scene by
-    // getShakeOffset() itself.
-    render: function (ctx, applyShake) {
-      if (!ctx) return;
-      ctx.save();
-      if (applyShake !== false && (shakeOX !== 0 || shakeOY !== 0)) ctx.translate(shakeOX, shakeOY);
-      var i, p, f, r;
-      for (i = 0; i < P.length; i++) {
-        p = P[i];
-        f = 1 - p.life / p.max; // 1 -> 0 over the particle's life
-        if (p.kind === 'spark') {
-          ctx.globalCompositeOperation = 'lighter';
-          ctx.globalAlpha = f;
-          ctx.fillStyle = p.color;
-          ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0.5, p.size * (0.5 + f * 0.5)), 0, TAU); ctx.fill();
-          ctx.globalCompositeOperation = 'source-over';
-        } else if (p.kind === 'smoke') {
-          ctx.globalAlpha = 0.28 * Math.sin(Math.min(1, p.life / p.max) * Math.PI);
-          ctx.fillStyle = p.color;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 + (p.life / p.max) * 1.4), 0, TAU); ctx.fill();
-        } else if (p.kind === 'chunk') {
-          ctx.globalAlpha = f;
-          ctx.fillStyle = p.color;
-          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.75); ctx.restore();
-        } else if (p.kind === 'ring') {
-          ctx.globalAlpha = f;
-          ctx.strokeStyle = p.color;
-          ctx.lineWidth = 1 + 3 * f;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.25 + 0.75 * (p.life / p.max)), 0, TAU); ctx.stroke();
-        } else if (p.kind === 'flash') {
-          r = p.size * (0.4 + 0.6 * (p.life / p.max));
-          var g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-          g.addColorStop(0, 'rgba(255,247,214,' + (0.75 * f).toFixed(3) + ')');
-          g.addColorStop(1, 'rgba(255,247,214,0)');
-          ctx.globalAlpha = 1;
-          ctx.fillStyle = g;
-          ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, TAU); ctx.fill();
-        } else if (p.kind === 'drop') {
-          ctx.globalAlpha = 0.9;
-          ctx.strokeStyle = 'rgba(255,213,79,0.55)';
-          ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(p.x, p.y - cfg.cellSize * 0.9); ctx.lineTo(p.x, p.y); ctx.stroke();
-          ctx.globalCompositeOperation = 'lighter';
-          ctx.fillStyle = p.color;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, TAU); ctx.fill();
-          ctx.globalCompositeOperation = 'source-over';
-        } else if (p.kind === 'dust') {
-          // Ground dust: soft tan puff, low alpha, grows a little as it settles.
-          ctx.globalAlpha = 0.35 * Math.sin(Math.min(1, p.life / p.max) * Math.PI);
-          ctx.fillStyle = p.color;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 + (p.life / p.max) * 0.9), 0, TAU); ctx.fill();
-        } else if (p.kind === 'bounce') {
-          // Debris that jumps up on impact and falls back down.
-          ctx.globalAlpha = f;
-          ctx.fillStyle = p.color;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, TAU); ctx.fill();
-        } else if (p.kind === 'poof') {
-          ctx.globalAlpha = 0.55 * f;
-          ctx.fillStyle = p.color;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.5 + 0.5 * (p.life / p.max)), 0, TAU); ctx.fill();
-        }
-      }
-      ctx.globalAlpha = 1;
-      for (i = 0; i < T.length; i++) {
         var t = T[i];
+        t.life += dt;
+        if (t.life >= t.max) { removeFromGroup(t); T.splice(i, 1); continue; }
+        t.spr.position.y += t.vy * dt;
         var tf = t.life / t.max;
-        ctx.globalAlpha = tf < 0.6 ? 1 : 1 - (tf - 0.6) / 0.4;
-        ctx.font = '800 ' + t.size + 'px "Segoe UI", system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.lineWidth = Math.max(3, Math.round(t.size / 10));
-        ctx.strokeStyle = 'rgba(0,0,0,0.55)';
-        ctx.strokeText(t.text, t.x, t.y);
-        ctx.fillStyle = t.color;
-        ctx.fillText(t.text, t.x, t.y);
+        t.spr.material.opacity = tf < 0.6 ? 1 : 1 - (tf - 0.6) / 0.4;
       }
-      ctx.globalAlpha = 1;
-      ctx.restore();
+      for (i = B.length - 1; i >= 0; i--) {
+        var b = B[i];
+        b.life += dt;
+        if (b.life >= b.max || !b.drop) { removeFromGroup(b); B.splice(i, 1); continue; }
+        b.mesh.material.opacity = 0.22 * (1 - b.life / b.max);
+      }
+      // Run queued landing bursts now that no loop is iterating P.
+      while (pendingLand.length) {
+        var lb = pendingLand.shift();
+        landBurst(lb.x, lb.z, '#ffd54f');
+      }
     },
 
-    // Current shake offset in px (0,0 when idle). main.js may translate the
-    // whole scene by this before drawing board+snake; then call render(ctx, false).
+    // Sync the FX group with the scene. main.js calls this every frame AFTER
+    // snake.render / board.render (it only adopts a scene passed in — the
+    // actual drawing is renderer.render(scene, camera) in main.js).
+    // render(scene): use that scene from now on. render() with no argument
+    // keeps the scene from init()/setScene().
+    render: function (sc) {
+      if (sc && typeof sc.add === 'function') effects.setScene(sc);
+      if (scene) ensureGroup();
+      return effects;
+    },
+
+    // Current shake offset in world units (0,0 when idle). main.js adds this
+    // to the camera position each frame for a light camera shake on explode/die.
     getShakeOffset: function () { return { x: shakeOX, y: shakeOY }; },
 
     // Wipe all live FX (e.g. on game reset). Shake is cancelled too.
-    clear: function () { P.length = 0; T.length = 0; shakeMag = 0; shakeT = 0; shakeOX = 0; shakeOY = 0; },
+    clear: function () {
+      var i;
+      for (i = P.length - 1; i >= 0; i--) removeFromGroup(P[i]);
+      for (i = R.length - 1; i >= 0; i--) removeFromGroup(R[i]);
+      for (i = T.length - 1; i >= 0; i--) removeFromGroup(T[i]);
+      for (i = B.length - 1; i >= 0; i--) removeFromGroup(B[i]);
+      P.length = 0; R.length = 0; T.length = 0; B.length = 0; pendingLand.length = 0;
+      shakeMag = 0; shakeT = 0; shakeOX = 0; shakeOY = 0;
+    },
 
-    // Live particle + text count (0 when everything faded out).
-    count: function () { return P.length + T.length; },
+    // Live FX object count (particles + rings + texts + beams; 0 when all faded).
+    count: function () { return P.length + R.length + T.length + B.length; },
 
-    // Diagnostics for tests / nv6: counts by kind, live texts, shake state.
+    // Diagnostics for tests / nv6: counts by kind, live texts/rings/beams, shake.
     _diag: function () {
       var byKind = {};
       for (var i = 0; i < P.length; i++) byKind[P[i].kind] = (byKind[P[i].kind] || 0) + 1;
-      return { n: P.length + T.length, particles: P.length, texts: T.length, byKind: byKind,
-        shake: { mag: shakeMag, t: +(shakeT.toFixed(3)) } };
+      return { n: P.length + R.length + T.length + B.length,
+        particles: P.length, rings: R.length, texts: T.length, beams: B.length,
+        byKind: byKind, shake: { mag: shakeMag, t: +(shakeT.toFixed(3)) } };
     },
   };
+
+  // Sync one particle's sprite to its simulated state (position/scale/opacity).
+  function syncSprite(p) {
+    var f = 1 - p.life / p.max; // 1 -> 0 over the particle's life
+    var lf = p.life / p.max;
+    var size = p.size0 + (p.size1 - p.size0) * lf;
+    p.spr.position.set(p.x, p.y, p.z);
+    p.spr.scale.set(size * 2, size * 2, 1);
+    if (p.kind === 'smoke' || p.kind === 'dust') {
+      p.spr.material.opacity = p.op0 * Math.sin(Math.min(1, lf) * Math.PI);
+    } else {
+      p.spr.material.opacity = p.op0 * f;
+    }
+  }
+
+  function killBeam(b) {
+    var idx = B.indexOf(b);
+    if (idx >= 0) { removeFromGroup(b); B.splice(idx, 1); }
+  }
 
   if (typeof window !== 'undefined') { window.effects = effects; window.RanEffects = effects; }
   if (typeof module !== 'undefined' && module.exports) { module.exports = effects; }
