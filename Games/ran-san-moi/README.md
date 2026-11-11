@@ -73,24 +73,42 @@ Bảng quà mặc định (`quaTang`, JSON):
 - `js/effects.js` (nv4) — FX: hạt ăn táo, nổ bom, chết, chữ điểm bay.
 - Không dùng CDN / thư viện ngoài. Canvas 2D thuần.
 
-## Hợp đồng interface (không tự đổi signature)
+## Hợp đồng interface (không tự đổi signature — đối chiếu code thật nv2/nv3/nv4)
 
 - `new Snake({ board, config, isBlocked(x,y), getFood(), onEat, onDie })`;
   `snake.reset()`; `snake.tick()` → `{type:'eat',apple}` /
-  `{type:'die',cause}` / `{type:'move'}`; `snake.grow(n)`;
+  `{type:'die',cause}` / `{type:'move'}` / `null` (đã chết); `snake.grow(n)`;
   `snake.render(ctx, alpha)`; `snake.segments/direction/alive/length`.
-  - main.js xử lý event trả về từ `tick()`; callback `onEat`/`onDie` để
-    trống (tránh cộng điểm 2 lần). `tick()` chỉ BÁO ăn/chết — main gọi
-    `snake.grow(1)` khi ăn.
-- `new Board({ size, config, isSnake(x,y), getHead() })`;
-  `board.spawnFood()` / `board.spawnBomb()` → vị trí hoặc null;
-  `board.isBomb/isFood/isFree(x,y)`; `board.render(ctx)`;
-  `board.foods`, `board.bombs`.
-  - Board constructor KHÔNG tự thả táo (main gọi `spawnFood()` đủ
-    `soTaoToiDa` sau khi tạo snake); Board tự dọn bom hết hạn trong
-    `render()`. `isFree` không tính rắn (rắn do Snake giữ).
-- `window.effects.eat/explode/die/spawn(x,y)` (tọa độ ô lưới),
-  `update(dt)` (dt = mili-giây), `render(ctx)`.
+  - main.js CHỈ dùng event trả về từ `tick()`; callback `onEat`/`onDie`
+    truyền no-op (tick vừa trả event vừa gọi callback — dùng cả 2 sẽ cộng
+    điểm/grow 2 lần). `tick()` chỉ BÁO ăn/chết — main gọi `snake.grow(1)`
+    khi ăn. Snake KHÔNG tự gỡ táo khỏi bàn — main gọi `board.removeFood()`.
+  - Snake snapshot config lúc new (copy) — main đẩy màu/độ dài mới vào
+    `snake.config` sau mỗi applyConfig để admin đổi ăn ngay.
+  - Snake._geometry đọc `board.cell` + `board.offsetX`/`board.offsetY`
+    (không đọc `gridX`/`gridY`) — main gán alias
+    `board.offsetX = board.gridX`, `board.offsetY = board.gridY` sau khi
+    tạo Board để rắn vẽ đúng vị trí bàn.
+- `new Board(config)` (config plain — Board chỉ lấy 4 key
+  `kichThuocBan`/`soTaoToiDa`/`soBomToiDa`/`thoiGianBom`);
+  hình học `board.cell/gridX/gridY/gridSize/frame` (mặc định lưới 640px,
+  khung 20px, grid (20,180) trên stage 720×1280);
+  `board.setRect(x,y,cell)`; `board.reset(isBlocked)`;
+  `board.spawnFood(isBlocked)` / `board.ensureFood(isBlocked)`;
+  `board.spawnBomb(head, isBlocked, nowMs)` (cách đầu ≥3 ô Manhattan);
+  `board.update(nowMs)` — PHẢI gọi mỗi frame, dọn bom hết hạn, trả mảng
+  bom vừa hết hạn; `board.removeFood/removeBomb(x,y)`;
+  `board.isBomb/isFood/isFree/inBounds(x,y)`; `board.cellCenter(x,y)`;
+  `board.render(ctx, nowMs)` (vẽ ở tọa độ tuyệt đối stage — canvas phủ
+  toàn stage 720×1280). `isBlocked` = "ô rắn đang chiếm", main PHẢI truyền
+  khi thả (Board chỉ biết tường/táo/bom). `isFree` không tính rắn.
+  - Board snapshot config lúc new (copy) — main đẩy `thoiGianBom`/
+    `soBomToiDa`/`soTaoToiDa` mới vào `board.config` sau mỗi applyConfig.
+- `window.effects.init({cellSize, cols, rows, originX, originY, applePoints})`
+  — PHẢI gọi sau khi biết layout bàn (và gọi lại khi đổi bàn/điểm);
+  `effects.eat(x,y,points)/explode(x,y)/die()/spawn(x,y)` (tọa độ ô lưới),
+  `update(dt)` (dt tính bằng GIÂY), `render(ctx)`. Chưa có hàm poof riêng
+  cho bom hết hạn — main gọi `update()` và chưa bắn FX gì thêm.
 
 ## Lưu ý kiểm chứng
 

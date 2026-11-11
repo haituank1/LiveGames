@@ -1,36 +1,61 @@
 /* Rắn Săn Mồi — điều phối game (nv1, RAN-SHELL).
    TikTok LIVE -> LiveBridge (port 8787) -> WebSocket -> game này.
    Spec: ~/workspace/multi-session/RAN-SAN-MOI-SPEC.md (§1 luật, §4 Snake,
-   §5 Board/quà, §6 FX, §7 config, §8 demo). Spec là hợp đồng — KHÔNG tự
+   §5 Board/quà, §6 FX, §7 config, §8 demo) + 3 lưu ý tích hợp của BOSS
+   (2026-11-11 16:42, đã ghi vào spec §4). Spec là hợp đồng — KHÔNG tự
    đổi signature interface của Snake/Board/Effects.
 
-   HỢP ĐỒNG GIAO TIẾP (main.js gọi đúng tên trong spec):
-   - Snake: new Snake({ board, config, isBlocked(x,y), getFood(), onEat, onDie });
-     snake.reset(); snake.tick() -> {type:'eat',apple}|{type:'die',cause}|{type:'move'};
-     snake.grow(n); snake.render(ctx, alpha); snake.segments/direction/alive/length.
-   - Board: new Board({ size, config, isSnake(x,y), getHead() }); board.spawnFood() -> pos|null;
-     board.spawnBomb() -> pos|null; board.isBomb/isFood/isFree(x,y); board.render(ctx);
-     board.foods (mảng táo {x,y}), board.bombs (mảng bom {x,y,expiresAt}).
-   - Effects: window.effects.eat/explode/die/spawn(x,y), update(dt), render(ctx)
-     (tọa độ ô lưới; dt = mili-giây).
+   HỢP ĐỒNG GIAO TIẾP (đối chiếu code thật nv2/nv3/nv4 ngày 2026-11-11):
+   - Snake (nv2): new Snake({ board, config, isBlocked(x,y), getFood(),
+     onEat, onDie }); snake.reset(); snake.tick() -> {type:'eat',apple} |
+     {type:'die',cause} | {type:'move'} | null (đã chết); snake.grow(n);
+     snake.render(ctx, alpha); snake.segments/direction/alive/length.
+     tick() VỪA trả event VỪA gọi onEat/onDie (theo §4) — main.js CHỈ dùng
+     event tick() (onEat/onDie truyền no-op) để tránh cộng điểm/grow 2 lần.
+     tick() KHÔNG tự grow — main.js gọi snake.grow(1) khi nhận event eat.
+     Snake KHÔNG tự gỡ táo khỏi bàn — main.js gọi board.removeFood().
+   - Board (nv3): new Board(config) — config plain, Board chỉ lấy 4 key
+     kichThuocBan/soTaoToiDa/soBomToiDa/thoiGianBom; hình học
+     board.cell/gridX/gridY/gridSize/frame (mặc định lưới 640px, khung 20px,
+     grid (20,180) trên stage 720×1280); board.setRect(x,y,cell);
+     board.reset(isBlocked) (dọn táo/bom, thả 1 táo);
+     board.spawnFood(isBlocked) / board.ensureFood(isBlocked) (cap soTaoToiDa);
+     board.spawnBomb(head, isBlocked, nowMs) (cách đầu rắn ≥3 ô Manhattan);
+     board.update(nowMs) — DỌN BOM HẾT HẠN, trả mảng bom vừa hết hạn;
+     board.removeFood/removeBomb(x,y); board.isBomb/isFood/isFree(x,y);
+     board.inBounds(x,y); board.cellCenter(x,y); board.render(ctx, nowMs)
+     (vẽ ở tọa độ TUYỆT ĐỐI stage — canvas phải phủ toàn stage 720×1280).
+     isBlocked(x,y) = "ô rắn đang chiếm" — main.js PHẢI truyền khi thả
+     (Board chỉ biết tường/táo/bom); main.js PHẢI gọi update() mỗi frame
+     nếu không bom hết hạn không tự biến mất.
+   - Effects (nv4): window.effects.init({cellSize, cols, rows, originX,
+     originY, applePoints}) — PHẢI gọi sau khi biết layout bàn (và gọi lại
+     khi đổi bàn/điểm); effects.eat(x,y,points)/explode(x,y)/die()/spawn(x,y)
+     (tọa độ Ô LƯỚI); effects.update(dt) với dt tính bằng GIÂY (clamp 0..0.05);
+     effects.render(ctx). Chưa có hàm poof riêng cho bom hết hạn — main.js
+     gọi update() và chưa bắn FX gì thêm (nv4 có thể thêm effects.poof sau).
    QUYẾT ĐỊNH NỐI TIẾP (để nv2/nv3/nv4/nv6 khỏi đoán):
+   - NỐI HÌNH HỌC (lưu ý BOSS #2): Snake._geometry đọc b.cell + b.offsetX/
+     b.offsetY (không đọc b.gridX/b.gridY). Board expose gridX/gridY —
+     main.js gán alias board.offsetX = board.gridX, board.offsetY =
+     board.gridY ngay sau khi tạo Board để rắn vẽ đúng vị trí bàn.
+     (Lâu dài: nv2 sửa _geometry đọc gridX/gridY, hoặc nv3 thêm alias
+     offsetX/offsetY trong Board — main.js nối tạm bằng alias để game chạy
+     đúng ngay, không đợi sửa 2 file kia.)
+   - Snake/Board SNAPSHOT config lúc new (copy, không giữ reference) — nên
+     main.js KHÔNG trông chờ "giữ nguyên object cfg" nữa: sau mỗi applyConfig,
+     main đẩy key đổi được vào object public snake.config/board.config
+     (màu thân/đầu, doDaiBanDau, thoiGianBom, soBomToiDa, soTaoToiDa) để
+     admin đổi ăn ngay; chỉ đổi kichThuocBan mới rebuild board + snake.
+     Tốc độ (tocDo) main đọc trực tiếp từ cfg mỗi frame nên ăn ngay.
    - Điểm: táo +diemTao, tim +1/tim, quà +điểm theo bảng quaTang (vào cả Điểm
      game lẫn Top tặng quà của người tặng). Quà lạ (không có trong bảng): +0,
      không hiệu ứng (ghi console để user bổ sung bảng).
-   - Ăn táo: main.js xử lý event 'eat' từ snake.tick() (cộng điểm, gọi
-     snake.grow(1), thả táo mới); callback onEat/onDie truyền vào Snake để
-     TRỐNG (noop) để tránh cộng điểm 2 lần — Snake.tick() chỉ BÁO ăn/chết,
-     KHÔNG tự dài ra, KHÔNG tự gọi onEat/onDie để cộng điểm.
-   - Board constructor KHÔNG tự thả táo; main.js gọi board.spawnFood() đủ
-     soTaoToiDa sau khi tạo xong snake (để táo không trùng rắn lúc đầu).
-     Board tự dọn bom hết hạn trong render() (gọi mỗi frame).
-   - main.js GIỮ NGUYÊN object cfg (không thay reference) để Snake/Board đọc
-     config mới nhất khi admin đổi (màu/tốc độ ăn ngay); chỉ đổi kichThuocBan
-     mới rebuild board + snake.
+   - Ăn táo: main xử lý event 'eat' (cộng điểm, board.removeFood, gọi
+     snake.grow(1), thả táo mới bằng board.spawnFood(isBlocked)).
    - Chết: điểm về 0, giữ Kỷ lục, rắn reset sau thoiGianHoiSinh; bom trên bàn
      GIỮ NGUYÊN (tự hết hạn theo thoiGianBom).
-   - Quà combo (count > 1): điểm nhân theo count, hiệu ứng chỉ thả 1 lần
-     (tránh đầy bàn).
+   - Quà combo (count > 1): điểm nhân theo count, hiệu ứng chỉ thả 1 lần.
    - Effects/Snake/Board chưa có (trước khi gộp): main dùng noop/FX rỗng và
      báo trạng thái, trang vẫn load, HUD vẫn hiện, 0 console error.
 */
@@ -111,8 +136,18 @@ function giftIcon(entry) {
 }
 
 /* ---------- Effects (noop nếu effects.js chưa gộp) ---------- */
-const noopFX = { eat: function () {}, explode: function () {}, die: function () {}, spawn: function () {}, update: function () {}, render: function () {} };
+const noopFX = { init: function () {}, eat: function () {}, explode: function () {}, die: function () {}, spawn: function () {}, update: function () {}, render: function () {} };
 const FX = (typeof window.effects === 'object' && window.effects) ? window.effects : noopFX;
+/* Đẩy hình học bàn thật vào Effects (effects.init bắt buộc — mặc định của
+   nó là cell 34px + origin (0,0), sai với bàn thật cell 32px + grid (20,180)). */
+function initEffects() {
+  if (!board || typeof FX.init !== 'function') return;
+  FX.init({
+    cellSize: board.cell, cols: board.n, rows: board.n,
+    originX: board.gridX, originY: board.gridY,
+    applePoints: cfg.diemTao,
+  });
+}
 
 /* ---------- State ---------- */
 let board = null, snake = null;
@@ -211,8 +246,8 @@ function getHeadCell() {
   return (snake && snake.segments && snake.segments[0]) ? snake.segments[0] : null;
 }
 function isBlockedCell(x, y) {
-  const size = cfg.kichThuocBan;
-  if (x < 0 || y < 0 || x >= size || y >= size) return true; // tường
+  if (board && board.inBounds) { if (!board.inBounds(x, y)) return true; } // tường (theo kích thước bàn thật)
+  else { const size = cfg.kichThuocBan; if (x < 0 || y < 0 || x >= size || y >= size) return true; }
   if (isSnakeCell(x, y)) return true; // thân rắn (AI tự trừ đuôi theo spec §4)
   if (board && board.isBomb && board.isBomb(x, y)) return true; // bom
   return false;
@@ -224,15 +259,24 @@ function createGame() {
     setStatus('⏳ Đang chờ file snake.js / board.js (nv2/nv3 chưa gộp) — HUD vẫn chạy.');
     return false;
   }
-  board = new Board({ size: cfg.kichThuocBan, config: cfg, isSnake: isSnakeCell, getHead: getHeadCell });
+  board = new Board(cfg); // Board(config) — Board chỉ lấy 4 key kichThuocBan/soTaoToiDa/soBomToiDa/thoiGianBom
+  // NỐI HÌNH HỌC (lưu ý BOSS #2): Board expose cell/gridX/gridY; Snake._geometry
+  // đọc b.cell + b.offsetX/b.offsetY — gán alias để rắn vẽ đúng vị trí bàn.
+  board.offsetX = board.gridX;
+  board.offsetY = board.gridY;
   snake = new Snake({
     board: board, config: cfg, isBlocked: isBlockedCell,
     getFood: function () { return board ? board.foods : []; },
-    onEat: function () {}, // noop có chủ ý — main xử lý event 'eat' từ tick() (tránh cộng 2 lần)
-    onDie: function () {}, // noop có chủ ý — main xử lý event 'die' từ tick()
+    onEat: function () {}, // noop có chủ ý — chỉ dùng event 'eat' từ tick() (tránh cộng 2 lần)
+    onDie: function () {}, // noop có chủ ý — chỉ dùng event 'die' từ tick()
   });
-  const n = Math.max(1, Math.floor(Number(cfg.soTaoToiDa) || 3));
-  for (let i = 0; i < n; i++) { try { board.spawnFood(); } catch (e) { console.error('[ran-san-moi] spawnFood lỗi:', e); } }
+  board.reset(isSnakeCell); // dọn táo/bom, thả 1 táo (không trùng rắn)
+  // Thả thêm cho đủ soTaoToiDa táo lúc đầu (spawnFood tự cap ở soTaoToiDa).
+  const target = Math.max(1, Math.floor(Number(cfg.soTaoToiDa) || 3));
+  while (board.foods.length < target) {
+    try { if (!board.spawnFood(isSnakeCell)) break; } catch (e) { console.error('[ran-san-moi] spawnFood lỗi:', e); break; }
+  }
+  initEffects(); // đẩy hình học bàn thật vào Effects
   return true;
 }
 
@@ -249,10 +293,11 @@ function tick() {
   if (ev.type === 'eat') {
     score += cfg.diemTao;
     if (score > record) record = score;
+    if (board && ev.apple) { try { board.removeFood(ev.apple.x, ev.apple.y); } catch (e) { console.error('[ran-san-moi] removeFood lỗi:', e); } } // Snake không tự gỡ táo khỏi bàn
     try { snake.grow(1); } catch (e) { console.error('[ran-san-moi] snake.grow lỗi:', e); }
     const a = ev.apple || (snake.segments && snake.segments[0]);
-    if (a) FX.eat(a.x, a.y);
-    if (board) { try { board.spawnFood(); } catch (e) { console.error('[ran-san-moi] spawnFood lỗi:', e); } }
+    if (a) FX.eat(a.x, a.y, cfg.diemTao); // truyền điểm để chữ bay "+N" đúng diemTao
+    if (board) { try { board.spawnFood(isSnakeCell); } catch (e) { console.error('[ran-san-moi] spawnFood lỗi:', e); } } // ăn 1 táo → thả táo mới (không trùng rắn)
     updateHUD();
   } else if (ev.type === 'die') {
     onDie(ev.cause);
@@ -275,12 +320,19 @@ function onDie(cause) {
     updateHUD();
   }, Math.max(1, Number(cfg.thoiGianHoiSinh) || 3) * 1000);
 }
-function render(dt) {
+function render(dtMs) {
   const alpha = (started && status === 'running') ? Math.min(1, acc / tickMs()) : 0;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  if (board) { try { board.render(ctx); } catch (e) { console.error('[ran-san-moi] board.render lỗi:', e); } }
+  if (board) {
+    try {
+      board.update(); // PHẢI gọi mỗi frame (lưu ý BOSS #3): dọn bom hết hạn; trả mảng bom vừa hết hạn
+      // (chưa có FX poof riêng cho bom hết hạn trong effects.js — mảng trả về chỉ để log/debug;
+      // nv4 có thể thêm effects.poof(x,y) sau, main sẽ bắn tại vị trí bom.)
+      board.render(ctx);
+    } catch (e) { console.error('[ran-san-moi] board.render lỗi:', e); }
+  }
   if (snake) { try { snake.render(ctx, alpha); } catch (e) { console.error('[ran-san-moi] snake.render lỗi:', e); } }
-  try { FX.update(dt); } catch (e) { console.error('[ran-san-moi] effects.update lỗi:', e); }
+  try { FX.update(dtMs / 1000); } catch (e) { console.error('[ran-san-moi] effects.update lỗi:', e); } // dt tính bằng GIÂY (effects.js clamp 0..0.05)
   try { FX.render(ctx); } catch (e) { console.error('[ran-san-moi] effects.render lỗi:', e); }
 }
 function frame(now) {
@@ -316,10 +368,10 @@ function onGiftEvent(ev) {
   if (entry) {
     pts = entry.diem * count;
     if (entry.hieuUng === 'bom') {
-      const b = board ? board.spawnBomb() : null;
+      const b = board ? board.spawnBomb(getHeadCell(), isSnakeCell) : null; // head + isBlocked (cách đầu ≥3 ô, không trùng rắn)
       if (b) FX.spawn(b.x, b.y); // null = đã đủ số bom tối đa → bỏ qua (spec §1)
     } else {
-      const f = board ? board.spawnFood() : null;
+      const f = board ? board.spawnFood(isSnakeCell) : null; // isBlocked: không rớt táo lên thân rắn
       if (f) FX.spawn(f.x, f.y);
     }
   } else {
@@ -357,10 +409,23 @@ let cfgApplied = false;
 function applyConfig(c) {
   if (!c) return;
   const oldSize = cfg.kichThuocBan;
-  Object.assign(cfg, DEFAULT_CFG, c); // giữ nguyên object cfg để Snake/Board thấy config mới ngay
+  Object.assign(cfg, DEFAULT_CFG, c); // giữ nguyên object cfg (main đọc trực tiếp mỗi frame: tocDo, diemTao...)
   cfgApplied = true;
   giftTable = parseGiftTable(cfg.quaTang) || {};
   renderGiftBar();
+  // Snake/Board SNAPSHOT config lúc new (copy) — đẩy key đổi được vào object
+  // public của chúng để admin đổi ăn ngay (không cần rebuild):
+  if (snake) {
+    snake.config.mauThanRan = cfg.mauThanRan;
+    snake.config.mauDauRan = cfg.mauDauRan;
+    snake.config.doDaiBanDau = cfg.doDaiBanDau; // áp từ lần hồi sinh sau
+  }
+  if (board) {
+    board.config.thoiGianBom = Math.max(0, Number(cfg.thoiGianBom) || 0);
+    board.config.soBomToiDa = Math.max(0, Math.round(Number(cfg.soBomToiDa) || 0));
+    board.config.soTaoToiDa = Math.max(1, Math.round(Number(cfg.soTaoToiDa) || 1));
+  }
+  if (board && typeof FX.init === 'function') FX.init({ applePoints: cfg.diemTao }); // chữ "+N" bay đúng điểm mới (giữ nguyên hình học)
   if (!board || cfg.kichThuocBan !== oldSize) createGame(); // đổi kích thước bàn → dựng lại bàn + rắn
   updateHUD();
 }
@@ -445,11 +510,14 @@ window.RanSanMoi = {
   demoGift: demoGift,
   demoLike: demoLike,
   startGame: startGame,
+  getBoard: function () { return board; },
+  getSnake: function () { return snake; },
   getState: function () {
     return {
       score: score, record: record, likes: likes, status: status, started: started,
       length: snake ? snake.length : 0, alive: snake ? snake.alive : false,
       foods: board ? board.foods.length : 0, bombs: board ? board.bombs.length : 0,
+      board: board ? { n: board.n, cell: board.cell, gridX: board.gridX, gridY: board.gridY, offsetX: board.offsetX, offsetY: board.offsetY } : null,
       giftTable: giftTable, cfg: cfg,
     };
   },

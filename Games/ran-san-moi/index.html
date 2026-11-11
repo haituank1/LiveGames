@@ -29,12 +29,14 @@
   }
   .chip b { color: #ffd54f; }
   .chip .lbl { color: #d7ccc8; font-weight: 700; }
-  /* Bàn chơi */
-  #boardWrap { position: absolute; left: 20px; top: 148px; width: 680px; height: 680px; z-index: 3; }
-  #board { display: block; width: 680px; height: 680px; border-radius: 6px; }
+  /* Bàn chơi — canvas PHỦ TOÀN STAGE (720×1280): Board/Snake/Effects vẽ ở
+     tọa độ tuyệt đối của stage (board.gridX/gridY, cell) nên canvas phải
+     trùng stage, không phải khung 680 riêng. HUD (z 5) nằm trên canvas (z 3). */
+  #boardWrap { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; z-index: 3; }
+  #board { display: block; width: 720px; height: 1280px; }
   /* Nút Start — phủ giữa bàn, bấm để bắt đầu (như lớp học chữ) */
   #btnStart {
-    position: absolute; left: 50%; top: 488px; transform: translate(-50%, -50%); z-index: 10;
+    position: absolute; left: 50%; top: 500px; transform: translate(-50%, -50%); z-index: 10;
     font-size: 26px; font-weight: 900; color: #4e342e; cursor: pointer;
     background: linear-gradient(#ffe082, #ffb300); border: 3px solid #fff;
     border-radius: 999px; padding: 14px 44px;
@@ -82,7 +84,7 @@
     <div class="chip"><span class="lbl">Kỷ lục</span> <b id="recordVal">0</b></div>
     <div class="chip">❤️ <b id="likeVal">0</b></div>
   </div>
-  <div id="boardWrap"><canvas id="board" width="680" height="680"></canvas></div>
+  <div id="boardWrap"><canvas id="board" width="720" height="1280"></canvas></div>
   <button id="btnStart">▶ Bắt đầu</button>
   <div id="giftBar"></div>
   <div id="topPanel">
