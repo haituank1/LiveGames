@@ -123,6 +123,7 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
    Tọa độ 3D dùng đúng số 2D: ô (x,y) -> (gridX + (x+0.5)*cell, 0,
    gridY + (y+0.5)*cell). */
 let renderer = null, scene = null, camera = null;
+let camBase = null; // vị trí gốc của camera — rung chỉ lệch tạm quanh đây, không dồn
 function initThree() {
   if (typeof window.THREE === 'undefined') {
     setText('liveStatus', 'Không thấy three.min.js — kiểm tra js/three.min.js');
@@ -147,6 +148,7 @@ function initThree() {
   // quanh bàn (đo bằng phép chiếu, xem ran-test/ran-measure-cam.py).
   camera = new T.PerspectiveCamera(60, 720 / 1280, 1, 4000);
   camera.position.set(340, 1082, 1475);
+  camBase = { x: 340, y: 1082, z: 1475 };
   camera.lookAt(340, 0, 620);
   // Đèn: Ambient sáng nền + Directional chính (castShadow, shadow map 1024).
   // Độ sáng theo ảnh test nv3 (BOSS 2026-11-11 19:12): Ambient 0.75 +
@@ -542,6 +544,15 @@ function render(dtMs) {
   if (snake) { try { snake.render(scene, alpha); } catch (e) { console.error('[ran-san-moi] snake.render lỗi:', e); } } // 3D: chỉ cập nhật vị trí mesh
   try { FX.update(dtMs / 1000); } catch (e) { console.error('[ran-san-moi] effects.update lỗi:', e); } // dt tính bằng GIÂY (effects.js clamp 0..0.05)
   try { FX.render(scene); } catch (e) { console.error('[ran-san-moi] effects.render lỗi:', e); } // 3D: chỉ cập nhật vị trí hạt
+  // RAN3D-QA gộp (BOSS 2026-11-11): rung camera theo effects.getShakeOffset()
+  // (nv4 tính rung nhưng main chưa hề đọc — nổ không rung). Áp lệch tạm quanh
+  // camBase mỗi khung rồi trả về gốc ở khung sau (offset về 0 khi hết rung).
+  if (camera && camBase) {
+    try {
+      const sh = (FX && typeof FX.getShakeOffset === 'function') ? FX.getShakeOffset() : null;
+      if (sh) camera.position.set(camBase.x + (sh.x || 0), camBase.y + (sh.y || 0), camBase.z);
+    } catch (e) { /* rung lỗi thì giữ camera gốc */ }
+  }
   // Vẽ 1 khung hình 3D (renderer chung — các module chỉ cập nhật mesh).
   if (renderer && scene && camera) {
     try { renderer.render(scene, camera); } catch (e) { console.error('[ran-san-moi] renderer.render lỗi:', e); }
