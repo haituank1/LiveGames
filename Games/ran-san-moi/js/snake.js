@@ -1,8 +1,11 @@
 // Games/ran-san-moi/js/snake.js — Snake: state, AI, movement, 3D drawing.
 // Spec: RAN-SAN-MOI-SPEC.md §4 (AI/logic) + RAN-SAN-MOI-3D.md §2 (3D render).
 // The interface below is the contract with main.js — do NOT rename functions
-// or change signatures. AI/logic are unchanged from the 2D version; only the
-// rendering changed (Three.js spheres instead of 2D canvas circles).
+// or change signatures. AI/logic are unchanged from the 2D version.
+// Rendering (§2, updated 2026-11-11 after the DarkBossTv reference): the body
+// is ONE seamless striped tube (TubeGeometry along a CatmullRomCurve3 through
+// the interpolated segment positions) — NOT a chain of separate balls. The
+// head (green ball + eyes + tongue) is unchanged from the approved version.
 // main.js loads this file with a plain <script> tag and calls `new Snake(opts)`.
 // 3D setup: main.js creates the renderer/scene/camera/lights (§1) and hands
 // the shared scene to the snake via setScene(scene, THREE) or init({scene}).
@@ -45,9 +48,14 @@ class Snake {
     this._scene = null;
     this._THREE = null;
     this._built3D = false;
-    this._pool = []; // body segment meshes (pool[i-1] <-> segments[i])
     this._headGroup = null; // Group: head sphere + eyes + tongue (unit space)
     this._tongue = null;
+    this._tubeMesh = null; // the single seamless striped body tube
+    this._tubeGeo = null; // rebuilt every frame from the curve (old one disposed)
+    this._tubeMat = null;
+    this._stripeTex = null;
+    this._tailCap = null; // round yellow cap closing the tail end of the tube
+    this._tubePts = []; // persistent Vector3 list (reused, never reallocated)
     this._eatPulse = 0; // 1 right after eating, decays per render -> head swell
     this.reset();
     if (opts.scene) this.setScene(opts.scene, opts.THREE);
@@ -197,20 +205,46 @@ class Snake {
     this._tongue = tongue;
     this._headGroup = head;
     this._scene.add(head);
+    // Body tube: ONE mesh, rebuilt every frame (see render()). The stripe
+    // texture / material / mesh are created once and reused.
+    this._stripeTex = this._makeStripeTexture();
+    this._tubeMat = new T.MeshStandardMaterial({ map: this._stripeTex, roughness: 0.35 });
+    this._tubeMesh = new T.Mesh(new T.BufferGeometry(), this._tubeMat);
+    this._tubeMesh.castShadow = true;
+    this._tubeMesh.visible = false;
+    this._scene.add(this._tubeMesh);
+    // Round cap closing the tail end (TubeGeometry is open-ended).
+    const capMat = new T.MeshStandardMaterial({ color: TAIL_YELLOW, roughness: 0.35 });
+    this._tailCap = new T.Mesh(this._sphereGeo, capMat);
+    this._tailCap.castShadow = true;
+    this._tailCap.visible = false;
+    this._scene.add(this._tailCap);
     this._built3D = true;
   }
 
-  // Grow the body-mesh pool to k meshes (created once, reused forever).
-  _ensurePool(k) {
-    if (!this._scene || !this._THREE) return;
-    while (this._pool.length < k) {
-      const mat = new this._THREE.MeshStandardMaterial({ color: this.config.mauThanRan, roughness: 0.35 });
-      const mesh = new this._THREE.Mesh(this._sphereGeo, mat);
-      mesh.castShadow = true;
-      mesh.visible = false;
-      this._scene.add(mesh);
-      this._pool.push(mesh);
+  // Stripe texture: alternating pale-yellow / orange bands, one period = half
+  // light + half dark. Built as a DataTexture (raw pixels, no DOM canvas),
+  // so it also works headless in Node tests. TubeGeometry UVs run along the
+  // tube length, so with wrapS = Repeat the bands become rings around the
+  // body; repeat.x is set per frame to ~1 period per cell.
+  _makeStripeTexture() {
+    const T = this._THREE;
+    const W = 64;
+    const data = new Uint8Array(W * 4);
+    const light = [255, 230, 160]; // pale yellow #FFE6A0
+    const dark = [245, 166, 35]; // orange #F5A623 (as in the DarkBossTv reference)
+    for (let i = 0; i < W; i++) {
+      const c = i < W / 2 ? light : dark;
+      data[i * 4] = c[0];
+      data[i * 4 + 1] = c[1];
+      data[i * 4 + 2] = c[2];
+      data[i * 4 + 3] = 255;
     }
+    const tex = new T.DataTexture(data, W, 1, T.RGBAFormat);
+    tex.wrapS = T.RepeatWrapping;
+    tex.wrapT = T.RepeatWrapping;
+    tex.needsUpdate = true;
+    return tex;
   }
 
   // Board pixel geometry in 3D: cell (x, y) -> (gridX + (x+0.5)*cell, 0, gridY + (y+0.5)*cell).
@@ -257,7 +291,7 @@ class Snake {
     const g = this._geometry3d();
     const n = this.segments.length;
     const headR = g.cell * 0.58;
-    const bodyR = g.cell * 0.54; // > cell/2, so neighbouring balls overlap: no gaps
+    const tubeR = g.cell * 0.5; // spec §2: body tube radius ~cell*0.5
     const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     // Head: interpolated cell -> 3D position, yaw to face the travel direction.
     const hp = this._interpPos(0, alpha);
@@ -270,28 +304,36 @@ class Snake {
     this._headGroup.scale.set(s * headR, s * headR, s * headR);
     // Tongue flicks gently in and out.
     if (this._tongue) this._tongue.scale.y = 0.85 * (0.7 + 0.3 * Math.sin(now / 160));
-    // Body: one sphere per segment, orange -> yellow gradient toward the tail.
-    this._ensurePool(n - 1);
-    for (let i = 1; i < n; i++) {
-      const mesh = this._pool[i - 1];
-      const p = this._interpPos(i, alpha);
-      mesh.position.set(g.gx + (p.x + 0.5) * g.cell, bodyR, g.gy + (p.y + 0.5) * g.cell);
-      mesh.scale.setScalar(bodyR);
-      const t = n <= 1 ? 0 : i / (n - 1);
-      mesh.material.color.setHex(this._lerpHex(this.config.mauThanRan, TAIL_YELLOW, t));
-      mesh.visible = true;
+    // Body: ONE seamless striped tube along a smooth curve through the
+    // interpolated segment positions (centripetal Catmull-Rom passes through
+    // every point, so the tube follows the snake exactly, corners included).
+    // The old tube geometry is disposed every frame — the mesh, material and
+    // texture are reused, so nothing leaks.
+    if (n >= 2) {
+      const pts = this._tubePts;
+      while (pts.length < n) pts.push(new this._THREE.Vector3());
+      for (let i = 0; i < n; i++) {
+        const p = this._interpPos(i, alpha);
+        pts[i].set(g.gx + (p.x + 0.5) * g.cell, tubeR, g.gy + (p.y + 0.5) * g.cell);
+      }
+      const curve = new this._THREE.CatmullRomCurve3(pts.slice(0, n), false, 'centripetal');
+      const tubular = Math.max(32, Math.min(360, n * 6));
+      const geo = new this._THREE.TubeGeometry(curve, tubular, tubeR, 10, false);
+      if (this._tubeGeo) this._tubeGeo.dispose();
+      this._tubeGeo = geo;
+      this._tubeMesh.geometry = geo;
+      // One stripe period per cell, so the bands stay ~1 cell wide at any length.
+      this._stripeTex.repeat.x = Math.max(2, n - 1);
+      this._tubeMesh.visible = true;
+      // Round cap closing the tail end.
+      const tp = pts[n - 1];
+      this._tailCap.position.set(tp.x, tp.y, tp.z);
+      this._tailCap.scale.setScalar(tubeR);
+      this._tailCap.visible = true;
+    } else {
+      this._tubeMesh.visible = false;
+      this._tailCap.visible = false;
     }
-    for (let j = n - 1; j < this._pool.length; j++) this._pool[j].visible = false;
-  }
-
-  // Lerp two #rrggbb colours, returns a 0xrrggbb integer for THREE.Color.setHex.
-  _lerpHex(a, b, t) {
-    const ca = this._hexToRgb(a);
-    const cb = this._hexToRgb(b);
-    const r = Math.round(ca.r + (cb.r - ca.r) * t);
-    const g = Math.round(ca.g + (cb.g - ca.g) * t);
-    const bl = Math.round(ca.b + (cb.b - ca.b) * t);
-    return (r << 16) | (g << 8) | bl;
   }
 
   // --- AI: pick a direction each tick (spec §4, exactly this priority) ---
@@ -513,14 +555,6 @@ class Snake {
       x: from.x + (cur.x - from.x) * alpha,
       y: from.y + (cur.y - from.y) * alpha,
     };
-  }
-
-  _hexToRgb(hex) {
-    const h = String(hex || '').replace('#', '');
-    const v = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
-    const n = parseInt(v, 16);
-    if (!Number.isFinite(n)) return { r: 255, g: 159, b: 28 };
-    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
   }
 
 }
