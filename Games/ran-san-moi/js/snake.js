@@ -1,8 +1,18 @@
-// Games/ran-san-moi/js/snake.js — Snake: state, AI, movement, drawing.
-// Spec: RAN-SAN-MOI-SPEC.md §4. The interface below is the contract with
-// main.js — do NOT rename functions or change signatures.
+// Games/ran-san-moi/js/snake.js — Snake: state, AI, movement, 3D drawing.
+// Spec: RAN-SAN-MOI-SPEC.md §4 (AI/logic) + RAN-SAN-MOI-3D.md §2 (3D render).
+// The interface below is the contract with main.js — do NOT rename functions
+// or change signatures. AI/logic are unchanged from the 2D version.
+// Rendering (§2, updated 2026-11-11 after the DarkBossTv reference): the body
+// is ONE seamless striped tube (TubeGeometry along a CatmullRomCurve3 through
+// the interpolated segment positions) — NOT a chain of separate balls. The
+// head (green ball + eyes + tongue) is unchanged from the approved version.
 // main.js loads this file with a plain <script> tag and calls `new Snake(opts)`.
-// Node tests can require() it (module.exports guard at the bottom).
+// 3D setup: main.js creates the renderer/scene/camera/lights (§1) and hands
+// the shared scene to the snake via setScene(scene, THREE) or init({scene}).
+// render() then only moves the snake's meshes; renderer.render() is main.js's
+// job. render() also tolerates render(alpha), render(scene, alpha), and the
+// legacy render(ctx, alpha) from the 2D main.js (no-op until a scene is set,
+// never throws). Node tests can require() it (module.exports guard).
 
 const DIRS = [
   { x: 0, y: -1 }, // up
@@ -34,7 +44,21 @@ class Snake {
     this.alive = true;
     this._deathCause = null;
     this._prevSegments = []; // segments before the last tick (for smooth render)
+    // 3D rendering state (empty until main.js hands over the shared scene).
+    this._scene = null;
+    this._THREE = null;
+    this._built3D = false;
+    this._headGroup = null; // Group: head sphere + eyes + tongue (unit space)
+    this._tongue = null;
+    this._tubeMesh = null; // the single seamless striped body tube
+    this._tubeGeo = null; // rebuilt every frame from the curve (old one disposed)
+    this._tubeMat = null;
+    this._stripeTex = null;
+    this._tailCap = null; // round yellow cap closing the tail end of the tube
+    this._tubePts = []; // persistent Vector3 list (reused, never reallocated)
+    this._eatPulse = 0; // 1 right after eating, decays per render -> head swell
     this.reset();
+    if (opts.scene) this.setScene(opts.scene, opts.THREE);
   }
 
   // Back to the initial state: length doDaiBanDau, board center, facing right.
@@ -51,6 +75,7 @@ class Snake {
     this.direction = { x: 1, y: 0 };
     this.alive = true;
     this._deathCause = null;
+    this._eatPulse = 0;
     this._prevSegments = this.segments.map((s) => ({ x: s.x, y: s.y }));
   }
 
@@ -82,6 +107,7 @@ class Snake {
     this.segments.unshift(nh);
     this.segments.pop();
     if (apple) {
+      this._eatPulse = 1; // head swells for one beat (render() decays it)
       if (this.onEat) {
         try { this.onEat(apple); } catch (e) { /* main.js handler must not break the loop */ }
       }
@@ -103,39 +129,211 @@ class Snake {
     }
   }
 
-  // Draw the snake. alpha (0..1) interpolates each segment between its
-  // previous-tick and current-tick cell so movement looks smooth, never
-  // jumping cell to cell. main.js computes alpha from elapsed time.
-  render(ctx, alpha) {
-    if (!ctx || !this.segments.length) return;
-    const a = typeof alpha === 'number' && Number.isFinite(alpha)
-      ? Math.max(0, Math.min(1, alpha)) : 1;
-    const g = this._geometry(ctx);
+  // --- 3D rendering (RAN-SAN-MOI-3D.md §2) ---
+  // main.js owns the renderer/scene/camera/lights; the snake only owns its
+  // meshes inside the shared scene. Geometry/materials are created ONCE and
+  // reused — render() only moves meshes and recolours them, never allocates.
+
+  // Hand over the shared scene (call once, from main.js). `three` is optional:
+  // without it, window.THREE (three.min.js global) is used. Returns true once
+  // the meshes are built; false only when THREE is not available yet (render()
+  // retries on every call, so a late three.min.js still works).
+  setScene(scene, three) {
+    if (!scene || typeof scene.add !== 'function') return false;
+    this._scene = scene;
+    if (!this._THREE) this._THREE = this._resolveTHREE(three);
+    if (this._THREE) this._ensure3D();
+    return this._built3D;
+  }
+
+  // Same as setScene, in init({scene, THREE}) / init(scene) form.
+  init(opts) {
+    if (!opts) return false;
+    if (opts.scene) return this.setScene(opts.scene, opts.THREE);
+    return this.setScene(opts, opts.THREE);
+  }
+
+  _resolveTHREE(three) {
+    if (three) return three;
+    if (typeof window !== 'undefined' && window.THREE) return window.THREE;
+    if (typeof globalThis !== 'undefined' && globalThis.THREE) return globalThis.THREE;
+    return null;
+  }
+
+  // Build the shared geometry + head group ONCE, add them to the scene.
+  // The head is built in UNIT space (head radius = 1); render() scales the
+  // whole group to the real cell size, so a board-size change needs no rebuild.
+  _ensure3D() {
+    if (this._built3D || !this._scene || !this._THREE) return;
+    const T = this._THREE;
+    this._sphereGeo = new T.SphereGeometry(1, 12, 8);
+    this._coneGeo = new T.ConeGeometry(1, 1, 8);
+    const head = new T.Group();
+    const tilt = new T.Group();
+    tilt.rotation.x = 0.15; // head leans slightly into the direction of travel
+    head.add(tilt);
+    const headMat = new T.MeshStandardMaterial({
+      color: this.config.mauDauRan || DEFAULT_CONFIG.mauDauRan, roughness: 0.35,
+    });
+    const headMesh = new T.Mesh(this._sphereGeo, headMat);
+    headMesh.castShadow = true;
+    tilt.add(headMesh);
+    // Eyes sit on the front of the head (local +Z = forward); pupils sit on
+    // the white surface; tongue cone below the nose, pointing forward.
+    const whiteMat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+    const blackMat = new T.MeshStandardMaterial({ color: 0x222222, roughness: 0.2 });
+    const eyeR = 0.22; // 0.128 / 0.58 (head radius in unit space is 1)
+    const pupR = 0.11;
+    for (const s of [-1, 1]) {
+      const dir = new T.Vector3(0.41 * s, 0.37, 0.80).normalize();
+      const eyePos = dir.clone().multiplyScalar(0.97);
+      const eye = new T.Mesh(this._sphereGeo, whiteMat);
+      eye.scale.setScalar(eyeR);
+      eye.position.copy(eyePos);
+      tilt.add(eye);
+      const pup = new T.Mesh(this._sphereGeo, blackMat);
+      pup.scale.setScalar(pupR);
+      pup.position.copy(eyePos).addScaledVector(dir, eyeR * 0.55);
+      tilt.add(pup);
+    }
+    const tongueMat = new T.MeshStandardMaterial({ color: 0xe53935, roughness: 0.4, emissive: 0x330000 });
+    const tongue = new T.Mesh(this._coneGeo, tongueMat);
+    tongue.rotation.x = Math.PI / 2; // cone points +Y by default; aim it +Z (forward)
+    tongue.scale.set(0.12, 0.85, 0.12);
+    tongue.position.set(0, -0.08, 1.0);
+    tilt.add(tongue);
+    this._tongue = tongue;
+    this._headGroup = head;
+    this._scene.add(head);
+    // Body tube: ONE mesh, rebuilt every frame (see render()). The stripe
+    // texture / material / mesh are created once and reused.
+    this._stripeTex = this._makeStripeTexture();
+    this._tubeMat = new T.MeshStandardMaterial({ map: this._stripeTex, roughness: 0.35 });
+    this._tubeMesh = new T.Mesh(new T.BufferGeometry(), this._tubeMat);
+    this._tubeMesh.castShadow = true;
+    this._tubeMesh.visible = false;
+    this._scene.add(this._tubeMesh);
+    // Round cap closing the tail end (TubeGeometry is open-ended).
+    const capMat = new T.MeshStandardMaterial({ color: TAIL_YELLOW, roughness: 0.35 });
+    this._tailCap = new T.Mesh(this._sphereGeo, capMat);
+    this._tailCap.castShadow = true;
+    this._tailCap.visible = false;
+    this._scene.add(this._tailCap);
+    this._built3D = true;
+  }
+
+  // Stripe texture: alternating pale-yellow / orange bands, one period = half
+  // light + half dark. Built as a DataTexture (raw pixels, no DOM canvas),
+  // so it also works headless in Node tests. TubeGeometry UVs run along the
+  // tube length, so with wrapS = Repeat the bands become rings around the
+  // body; repeat.x is set per frame to ~1 period per cell.
+  _makeStripeTexture() {
+    const T = this._THREE;
+    const W = 64;
+    const data = new Uint8Array(W * 4);
+    const light = [255, 230, 160]; // pale yellow #FFE6A0
+    const dark = [245, 166, 35]; // orange #F5A623 (as in the DarkBossTv reference)
+    for (let i = 0; i < W; i++) {
+      const c = i < W / 2 ? light : dark;
+      data[i * 4] = c[0];
+      data[i * 4 + 1] = c[1];
+      data[i * 4 + 2] = c[2];
+      data[i * 4 + 3] = 255;
+    }
+    const tex = new T.DataTexture(data, W, 1, T.RGBAFormat);
+    tex.wrapS = T.RepeatWrapping;
+    tex.wrapT = T.RepeatWrapping;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  // Board pixel geometry in 3D: cell (x, y) -> (gridX + (x+0.5)*cell, 0, gridY + (y+0.5)*cell).
+  // Board (nv3) exposes cell/gridX/gridY (aliases offsetX/Y kept as fallback).
+  _geometry3d() {
+    const b = this.board;
+    let cell = 34; // 680px board / 20 cells (fallback when no board is attached)
+    let gx = 0;
+    let gy = 0;
+    if (b) {
+      if (Number.isFinite(b.cell)) cell = b.cell;
+      else if (Number.isFinite(b.cellSize)) cell = b.cellSize;
+      if (Number.isFinite(b.gridX)) gx = b.gridX;
+      else if (Number.isFinite(b.offsetX)) gx = b.offsetX;
+      else if (Number.isFinite(b.originX)) gx = b.originX;
+      else if (Number.isFinite(b.x)) gx = b.x;
+      if (Number.isFinite(b.gridY)) gy = b.gridY;
+      else if (Number.isFinite(b.offsetY)) gy = b.offsetY;
+      else if (Number.isFinite(b.originY)) gy = b.originY;
+      else if (Number.isFinite(b.y)) gy = b.y;
+    }
+    if (Number.isFinite(this.config.cellSize)) cell = this.config.cellSize;
+    return { cell, gx, gy };
+  }
+
+  // Move the 3D meshes to the snake's interpolated position. alpha (0..1)
+  // interpolates each segment between its previous-tick and current-tick
+  // cell, exactly like the 2D version — movement stays smooth, never jumps.
+  // Accepts render(alpha), render(scene, alpha), or legacy render(ctx, alpha);
+  // with no scene set yet it simply does nothing (never throws), so the 2D
+  // main.js keeps running until nv1's 3D main.js hands over the scene.
+  render(a, b) {
+    let alpha = 1;
+    if (typeof a === 'number') alpha = a;
+    else if (a && typeof a.add === 'function') {
+      this.setScene(a);
+      if (typeof b === 'number') alpha = b;
+    } else if (typeof b === 'number') alpha = b;
+    alpha = Number.isFinite(alpha) ? Math.max(0, Math.min(1, alpha)) : 1;
+    if (!this._scene || !this.segments.length) return;
+    if (!this._THREE) this._THREE = this._resolveTHREE();
+    if (!this._THREE) return;
+    this._ensure3D();
+    const g = this._geometry3d();
     const n = this.segments.length;
-    const pos = [];
-    for (let i = 0; i < n; i++) pos.push(this._interpPos(i, a));
-    const toPx = (p) => ({ x: g.ox + (p.x + 0.5) * g.cell, y: g.oy + (p.y + 0.5) * g.cell });
-    const pts = pos.map(toPx);
-    // Connective strokes first (tail to head) so turns have no gaps between
-    // the round segments, then the round segments on top.
-    ctx.lineCap = 'round';
-    for (let i = n - 1; i >= 1; i--) {
-      const t = n <= 1 ? 0 : i / (n - 1);
-      ctx.strokeStyle = this._lerpColor(this.config.mauThanRan, TAIL_YELLOW, t);
-      ctx.lineWidth = g.cell * 0.72;
-      ctx.beginPath();
-      ctx.moveTo(pts[i].x, pts[i].y);
-      ctx.lineTo(pts[i - 1].x, pts[i - 1].y);
-      ctx.stroke();
+    const headR = g.cell * 0.58;
+    const tubeR = g.cell * 0.5; // spec §2: body tube radius ~cell*0.5
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    // Head: interpolated cell -> 3D position, yaw to face the travel direction.
+    const hp = this._interpPos(0, alpha);
+    this._headGroup.position.set(g.gx + (hp.x + 0.5) * g.cell, headR, g.gy + (hp.y + 0.5) * g.cell);
+    this._headGroup.rotation.y = Math.atan2(this.direction.x, this.direction.y);
+    this._headGroup.visible = true;
+    // Eat swell: one beat, decays every frame.
+    this._eatPulse *= 0.9;
+    const s = 1 + 0.22 * this._eatPulse;
+    this._headGroup.scale.set(s * headR, s * headR, s * headR);
+    // Tongue flicks gently in and out.
+    if (this._tongue) this._tongue.scale.y = 0.85 * (0.7 + 0.3 * Math.sin(now / 160));
+    // Body: ONE seamless striped tube along a smooth curve through the
+    // interpolated segment positions (centripetal Catmull-Rom passes through
+    // every point, so the tube follows the snake exactly, corners included).
+    // The old tube geometry is disposed every frame — the mesh, material and
+    // texture are reused, so nothing leaks.
+    if (n >= 2) {
+      const pts = this._tubePts;
+      while (pts.length < n) pts.push(new this._THREE.Vector3());
+      for (let i = 0; i < n; i++) {
+        const p = this._interpPos(i, alpha);
+        pts[i].set(g.gx + (p.x + 0.5) * g.cell, tubeR, g.gy + (p.y + 0.5) * g.cell);
+      }
+      const curve = new this._THREE.CatmullRomCurve3(pts.slice(0, n), false, 'centripetal');
+      const tubular = Math.max(32, Math.min(360, n * 6));
+      const geo = new this._THREE.TubeGeometry(curve, tubular, tubeR, 10, false);
+      if (this._tubeGeo) this._tubeGeo.dispose();
+      this._tubeGeo = geo;
+      this._tubeMesh.geometry = geo;
+      // One stripe period per cell, so the bands stay ~1 cell wide at any length.
+      this._stripeTex.repeat.x = Math.max(2, n - 1);
+      this._tubeMesh.visible = true;
+      // Round cap closing the tail end.
+      const tp = pts[n - 1];
+      this._tailCap.position.set(tp.x, tp.y, tp.z);
+      this._tailCap.scale.setScalar(tubeR);
+      this._tailCap.visible = true;
+    } else {
+      this._tubeMesh.visible = false;
+      this._tailCap.visible = false;
     }
-    for (let i = n - 1; i >= 1; i--) {
-      const t = n <= 1 ? 0 : i / (n - 1);
-      ctx.beginPath();
-      ctx.arc(pts[i].x, pts[i].y, g.cell * 0.46, 0, Math.PI * 2);
-      ctx.fillStyle = this._lerpColor(this.config.mauThanRan, TAIL_YELLOW, t);
-      ctx.fill();
-    }
-    this._drawHead(ctx, pts[0].x, pts[0].y, g.cell);
   }
 
   // --- AI: pick a direction each tick (spec §4, exactly this priority) ---
@@ -265,6 +463,7 @@ class Snake {
   _die(cause) {
     this.alive = false;
     this._deathCause = cause;
+    this._eatPulse = 0;
     const ev = { type: 'die', cause };
     if (this.onDie) {
       try { this.onDie(cause); } catch (e) { /* main.js handler must not break the loop */ }
@@ -358,88 +557,6 @@ class Snake {
     };
   }
 
-  // Board pixel geometry. Board (nv3) should expose cellSize / offsetX /
-  // offsetY; otherwise fall back to fitting the board to the canvas width.
-  _geometry(ctx) {
-    const size = this._size();
-    const b = this.board;
-    let cell = null;
-    let ox = 0;
-    let oy = 0;
-    if (b) {
-      if (Number.isFinite(b.cellSize)) cell = b.cellSize;
-      else if (Number.isFinite(b.cell)) cell = b.cell;
-      if (Number.isFinite(b.offsetX)) ox = b.offsetX;
-      else if (Number.isFinite(b.originX)) ox = b.originX;
-      else if (Number.isFinite(b.x)) ox = b.x;
-      if (Number.isFinite(b.offsetY)) oy = b.offsetY;
-      else if (Number.isFinite(b.originY)) oy = b.originY;
-      else if (Number.isFinite(b.y)) oy = b.y;
-    }
-    if (Number.isFinite(this.config.cellSize)) cell = this.config.cellSize;
-    if (!cell) {
-      const w = ctx && ctx.canvas ? ctx.canvas.width : 720;
-      cell = Math.max(8, Math.floor(w / size));
-      ox = Math.floor((w - cell * size) / 2);
-    }
-    return { cell, ox, oy };
-  }
-
-  _drawHead(ctx, px, py, cell) {
-    const r = cell * 0.5;
-    ctx.beginPath();
-    ctx.arc(px, py, r, 0, Math.PI * 2);
-    ctx.fillStyle = this.config.mauDauRan || DEFAULT_CONFIG.mauDauRan;
-    ctx.fill();
-    const d = this.direction;
-    const perp = { x: -d.y, y: d.x };
-    const eyeFwd = cell * 0.14;
-    const eyeOff = cell * 0.17;
-    const eyeR = cell * 0.11;
-    const pupR = cell * 0.055;
-    for (const s of [-1, 1]) {
-      const ex = px + d.x * eyeFwd + perp.x * eyeOff * s;
-      const ey = py + d.y * eyeFwd + perp.y * eyeOff * s;
-      ctx.beginPath();
-      ctx.arc(ex, ey, eyeR, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(ex + d.x * eyeR * 0.35, ey + d.y * eyeR * 0.35, pupR, 0, Math.PI * 2);
-      ctx.fillStyle = '#222222';
-      ctx.fill();
-    }
-    // Small forked tongue in front of the head.
-    const tx = px + d.x * r;
-    const ty = py + d.y * r;
-    const tLen = cell * 0.22;
-    ctx.strokeStyle = '#E53935';
-    ctx.lineWidth = Math.max(1, cell * 0.05);
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(tx, ty);
-    ctx.lineTo(tx + d.x * tLen + perp.x * tLen * 0.4, ty + d.y * tLen + perp.y * tLen * 0.4);
-    ctx.moveTo(tx, ty);
-    ctx.lineTo(tx + d.x * tLen - perp.x * tLen * 0.4, ty + d.y * tLen - perp.y * tLen * 0.4);
-    ctx.stroke();
-  }
-
-  _hexToRgb(hex) {
-    const h = String(hex || '').replace('#', '');
-    const v = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
-    const n = parseInt(v, 16);
-    if (!Number.isFinite(n)) return { r: 255, g: 159, b: 28 };
-    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
-  }
-
-  _lerpColor(a, b, t) {
-    const ca = this._hexToRgb(a);
-    const cb = this._hexToRgb(b);
-    const r = Math.round(ca.r + (cb.r - ca.r) * t);
-    const g = Math.round(ca.g + (cb.g - ca.g) * t);
-    const bl = Math.round(ca.b + (cb.b - ca.b) * t);
-    return 'rgb(' + r + ',' + g + ',' + bl + ')';
-  }
 }
 
 if (typeof window !== 'undefined') window.Snake = Snake;
