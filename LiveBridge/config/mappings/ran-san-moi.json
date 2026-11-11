@@ -10,7 +10,7 @@
     "kichThuocBan": 20,
     "mauDauRan": "#4CAF50",
     "mauThanRan": "#FF9F1C",
-    "quaTang": "{\"Rose\":{\"diem\":1,\"hieuUng\":\"tao\"},\"GG\":{\"diem\":5,\"hieuUng\":\"tao\"},\"Apple\":{\"diem\":25,\"hieuUng\":\"tao\"},\"Doughnut\":{\"diem\":30,\"hieuUng\":\"tao\"},\"Chicken\":{\"diem\":60,\"hieuUng\":\"tao\"},\"Gift Box\":{\"diem\":100,\"hieuUng\":\"bom\"}}",
+    "quaTang": "{\"Rose\":{\"diem\":1,\"hieuUng\":\"tao\"},\"GG\":{\"diem\":5,\"hieuUng\":\"tao\"},\"Apple\":{\"diem\":25,\"hieuUng\":\"tao\"},\"Doughnut\":{\"diem\":30,\"hieuUng\":\"tao\"},\"Chicken\":{\"diem\":60,\"hieuUng\":\"tao\"},\"Gift Box\":{\"diem\":100,\"hieuUng\":\"bom\"},\"Perfume\":{\"diem\":20,\"hieuUng\":\"bom\"},\"Fire\":{\"diem\":100,\"hieuUng\":\"bom\"},\"Rocket\":{\"diem\":1000,\"hieuUng\":\"bom\"}}",
     "soBomToiDa": 30,
     "soTaoToiDa": 3,
     "soTaoToiDaTrenBan": 30,

@@ -68,14 +68,16 @@ quà tặng và tim.
 Bảng quà mặc định (`quaTang`, JSON):
 
 ```json
-{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":100,"hieuUng":"bom"}}
+{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":100,"hieuUng":"bom"},"Perfume":{"diem":20,"hieuUng":"bom"},"Fire":{"diem":100,"hieuUng":"bom"},"Rocket":{"diem":1000,"hieuUng":"bom"}}
 ```
 
 - Key = **tên quà thật trên TikTok** (khớp không phân biệt hoa/thường;
   `Rose`/`Doughnut` đã xác nhận có trong catalog LiveBridge;
-  `GG`/`Apple`/`Chicken`/`Gift Box` theo ảnh tham chiếu — nếu live thật
-  thấy tên khác thì sửa key cho khớp, game cũng nhận cả nhãn tiếng Việt
-  như "Hoa hồng").
+  `GG`/`Apple`/`Chicken`/`Gift Box` theo ảnh tham chiếu;
+  `Perfume`/`Fire`/`Rocket` là quà bom BOSS chọn 2026-11-11 (tên thường
+  gặp trên TikTok — nếu live thật thấy tên khác thì sửa key cho khớp, user
+  sửa lại trong config sau nếu cần), game cũng nhận cả nhãn tiếng Việt
+  như "Hoa hồng"/"Nước hoa".
 - `diem` = số xu mặc định của quà (điểm quà = số xu kèm event, fallback
   diem này; cộng vào Điểm game + Top tặng quà), `hieuUng` = `"tao"` (rớt
   táo) hoặc `"bom"` (thả bom). **Số trái không nằm trong bảng này** — tính

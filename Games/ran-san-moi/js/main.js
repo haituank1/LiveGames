@@ -207,13 +207,13 @@ const DEFAULT_CFG = {
   // live thật thấy tên khác thì sửa key cho khớp). diem = số xu mặc định của
   // quà (dùng làm điểm khi event không kèm xu), hieuUng: "tao" = rớt táo,
   // "bom" = thả bom. SỐ TRÁI không nằm trong bảng này — tính theo bậc xu.
-  quaTang: '{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":100,"hieuUng":"bom"}}',
+  quaTang: '{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":100,"hieuUng":"bom"},"Perfume":{"diem":20,"hieuUng":"bom"},"Fire":{"diem":100,"hieuUng":"bom"},"Rocket":{"diem":1000,"hieuUng":"bom"}}',
 };
 let cfg = Object.assign({}, DEFAULT_CFG);
 
 /* Nhãn + icon hiển thị cho bảng quà (key chuẩn hóa lowercase). */
-const GIFT_LABELS = { rose: 'Hoa hồng', gg: 'GG', apple: 'Táo', doughnut: 'Bánh donut', chicken: 'Gà', 'gift box': 'Hộp quà' };
-const GIFT_ICONS = { rose: '🌹', gg: '🎮', apple: '🍎', doughnut: '🍩', chicken: '🍗', 'gift box': '🎁' };
+const GIFT_LABELS = { rose: 'Hoa hồng', gg: 'GG', apple: 'Táo', doughnut: 'Bánh donut', chicken: 'Gà', 'gift box': 'Hộp quà', perfume: 'Nước hoa', fire: 'Lửa', rocket: 'Tên lửa' };
+const GIFT_ICONS = { rose: '🌹', gg: '🎮', apple: '🍎', doughnut: '🍩', chicken: '🍗', 'gift box': '🎁', perfume: '💐', fire: '🔥', rocket: '🚀' };
 
 /* ---------- Bảng quà ---------- */
 let giftTable = {};
