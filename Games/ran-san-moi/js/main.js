@@ -19,10 +19,12 @@
      choRoi/soTaoToiDaTrenBan); hình học board.cell/gridX/gridY/gridSize/
      frame (mặc định lưới 640px, khung 20px, grid (20,180) trên stage
      720×1280); board.setRect(x,y,cell); board.reset(isBlocked) (dọn
-     táo/bom, thả 1 táo); board.spawnFood(count, isBlocked) /
+     táo/bom, thả 1 táo); board.spawnFood(count, isBlocked, nowMs) /
      board.spawnBomb(count, head, isBlocked, nowMs) — count mặc định 1,
-     rơi nối tiếp cách nhau choRoi ms, chỉ thả tới trần 30 trên bàn
-     (soTaoToiDaTrenBan / soBomToiDa), TRẢ số trái thực tế đã thả;
+     nowMs (ms) để board tính t0 bắt đầu rơi cho từng trái (đính chính BOSS
+     2026-11-11 17:03, spec §5); rơi nối tiếp cách nhau choRoi ms, chỉ thả
+     tới trần 30 trên bàn (soTaoToiDaTrenBan / soBomToiDa), TRẢ số trái
+     thực tế đã thả;
      board.update(nowMs) — tiến độ rơi + dọn bom hết hạn, TRẢ object
      { expiredBombs: [...], landed: [...] } (landed = táo/bom VỪA chạm đất
      {type:'apple'|'bomb', x, y}); board.removeFood/removeBomb(x,y);
@@ -317,8 +319,10 @@ function isBlockedCell(x, y) {
   return false;
 }
 /* ---------- Thả táo/bom (adapter theo spec §5 mới) ----------
-   Board mới: spawnFood(count, isBlocked) / spawnBomb(count, head, isBlocked)
-   — count trái, rơi nối tiếp, chặn ở trần 30, TRẢ số trái thực tế đã thả.
+   Board mới: spawnFood(count, isBlocked, nowMs) / spawnBomb(count, head,
+   isBlocked, nowMs) — count trái, nowMs để board tính t0 bắt đầu rơi cho
+   từng trái (đính chính BOSS 2026-11-11 17:03, spec §5); rơi nối tiếp,
+   chặn ở trần 30, TRẢ số trái thực tế đã thả.
    Board cũ (nv3 @ fa31f3f, chưa cập nhật): spawnFood(isBlocked) /
    spawnBomb(head, isBlocked) — 1 trái/lần, không rơi, trần táo 3/bom 5.
    Adapter tự chọn API theo board.falling có tồn tại hay không; khi nv3 cập
@@ -329,7 +333,10 @@ function spawnApples(count) {
   const n = Math.max(0, Math.floor(count) || 0);
   if (!n) return 0;
   try {
-    if (boardHasFalling()) return Math.max(0, Math.floor(board.spawnFood(n, isSnakeCell)) || 0);
+    // Board mới: spawnFood(count, isBlocked, nowMs) — nowMs (thời gian hiện
+    // tại, ms) để board tính t0 bắt đầu rơi cho từng trái (đính chính BOSS
+    // 2026-11-11 17:03, spec §5). 1 mốc thời gian cho cả cơn mưa.
+    if (boardHasFalling()) return Math.max(0, Math.floor(board.spawnFood(n, isSnakeCell, Date.now())) || 0);
     let done = 0;
     for (let i = 0; i < n; i++) { if (board.spawnFood(isSnakeCell)) done++; else break; }
     return done;
@@ -340,9 +347,9 @@ function spawnBombs(count) {
   const n = Math.max(0, Math.floor(count) || 0);
   if (!n) return 0;
   try {
-    if (boardHasFalling()) return Math.max(0, Math.floor(board.spawnBomb(n, getHeadCell(), isSnakeCell)) || 0);
+    if (boardHasFalling()) return Math.max(0, Math.floor(board.spawnBomb(n, getHeadCell(), isSnakeCell, Date.now())) || 0);
     let done = 0;
-    for (let i = 0; i < n; i++) { if (board.spawnBomb(getHeadCell(), isSnakeCell)) done++; else break; }
+    for (let i = 0; i < n; i++) { if (board.spawnBomb(getHeadCell(), isSnakeCell, Date.now())) done++; else break; }
     return done;
   } catch (e) { console.error('[ran-san-moi] spawnBomb lỗi:', e); return 0; }
 }

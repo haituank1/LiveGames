@@ -111,9 +111,11 @@ Bảng quà mặc định (`quaTang`, JSON):
   hình học `board.cell/gridX/gridY/gridSize/frame` (mặc định lưới 640px,
   khung 20px, grid (20,180) trên stage 720×1280);
   `board.setRect(x,y,cell)`; `board.reset(isBlocked)`;
-  `board.spawnFood(count, isBlocked)` / `board.ensureFood(isBlocked)` —
-  count mặc định 1, rơi nối tiếp cách nhau `choRoi` ms, chỉ thả tới trần 30
-  trên bàn (`soTaoToiDaTrenBan`), TRẢ số trái thực tế đã thả;
+  `board.spawnFood(count, isBlocked, nowMs)` / `board.ensureFood(isBlocked)` —
+  count mặc định 1, nowMs (ms) để board tính t0 bắt đầu rơi cho từng trái
+  (đính chính BOSS 2026-11-11 17:03, spec §5); rơi nối tiếp cách nhau
+  `choRoi` ms, chỉ thả tới trần 30 trên bàn (`soTaoToiDaTrenBan`), TRẢ số
+  trái thực tế đã thả;
   `board.spawnBomb(count, head, isBlocked, nowMs)` (cách đầu ≥3 ô
   Manhattan, trần 30 bom `soBomToiDa`);
   `board.update(nowMs)` — PHẢI gọi mỗi frame: tiến độ rơi + dọn bom hết
