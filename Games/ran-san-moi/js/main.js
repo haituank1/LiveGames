@@ -373,6 +373,14 @@ function boardUpdate() {
       try { FX.land(it.x, it.y, it.type); } catch (e) { console.error('[ran-san-moi] effects.land lỗi:', e); }
     }
   }
+  // RAN-QA gộp (BOSS 2026-11-11): bom hết hạn trước đây biến mất lặng —
+  // bắn land() 'bomb' (vòng + bụi, đọc như 1 cái poof nhỏ) cho từng bom vừa
+  // hết hạn, ngay cạnh đoạn land cho `landed` ở trên. Không thêm hàm poof mới.
+  if (r && !Array.isArray(r) && Array.isArray(r.expiredBombs) && typeof FX.land === 'function') {
+    for (const b of r.expiredBombs) {
+      try { FX.land(b.x, b.y, 'bomb'); } catch (e) { console.error('[ran-san-moi] effects.land (bom het han) lỗi:', e); }
+    }
+  }
 }
 function createGame() {
   board = null;
