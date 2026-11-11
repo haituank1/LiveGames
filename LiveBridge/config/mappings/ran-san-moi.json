@@ -19,9 +19,13 @@
     "thoiGianBom": 30,
     "thoiGianHoiSinh": 3,
     "thoiGianRoi": 600,
-    "tocDo": 150
+    "tocDo": 150,
+    "tuRoiTaoGiay": 12,
+    "tuRoiBomGiay": 20,
+    "voiceOn": true,
+    "voiceGiong": "HoaiMy"
   },
-  "description": "Rắn Săn Mồi: rắn tự chơi (AI tìm táo, tránh tường/thân/bom), người xem tặng quà để rớt táo hoặc thả bom (rơi từ trên cao, số lượng theo xu, tối đa 30/lần), tim +1 điểm, top 3 tặng quà",
+  "description": "Rắn Săn Mồi: rắn tự chơi (AI tìm táo, tránh tường/thân/bom), người xem tặng quà để rớt táo hoặc thả bom (rơi từ trên cao, số lượng theo xu, tối đa 30/lần), tim +1 điểm, top 3 tặng quà. Không ai tặng quà thì tự rơi 1 táo sau 12s / 1 bom sau 20s. Voice MC (HoaiMy/NamMinh) cảm ơn quà, báo mốc điểm/dài, mồi khi yên ắng.",
   "game": "ran-san-moi",
   "giftTiers": [
     {

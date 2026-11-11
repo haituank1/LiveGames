@@ -195,6 +195,12 @@ const DEFAULT_CFG = {
   tangQuaTheoXu: '[[9,1],[29,3],[99,5],[299,10],[999,20],[999999,30]]',
   thoiGianRoi: 600, // ms, thời gian 1 trái rơi từ trên cao xuống đất
   choRoi: 80, // ms, khoảng cách giữa 2 trái rơi nối tiếp trong cùng 1 quà
+  // Tự rơi khi không ai tặng quà (spec §7 mới, user 2026-11-11 22:36):
+  // tuRoiTaoGiay 12 (5–60, 0 = tắt), tuRoiBomGiay 20 (5–120, 0 = tắt).
+  tuRoiTaoGiay: 12, // giây KHÔNG CÓ QUÀ thì tự rơi 1 táo
+  tuRoiBomGiay: 20, // giây KHÔNG CÓ QUÀ thì tự rơi 1 bom
+  voiceOn: true, // bật/tắt voice MC (NpcVoice)
+  voiceGiong: 'HoaiMy', // 'HoaiMy' nữ / 'NamMinh' nam (map sang vi-VN-*Neural)
   // Bảng quà mặc định (spec §5): key = TÊN QUÀ THẬT trên TikTok (đối chiếu
   // catalog LiveBridge — "Rose"/"Doughnut" đã xác nhận có trong mapping các
   // game khác; "GG"/"Apple"/"Chicken"/"Gift Box" theo ảnh tham chiếu, nếu
@@ -294,6 +300,15 @@ let board = null, snake = null;
 let score = 0, record = 0, likes = 0;
 let status = 'idle'; // idle | running | dead
 let started = false;
+/* Tự rơi + voice MC (spec §7 mới, user 2026-11-11 22:36). */
+let lastGiftAt = Date.now(); // quà gần nhất (thật + demo giả) — đếm tự rơi
+let lastAppleAt = Date.now(); // mốc đếm RIÊNG của táo tự rơi
+let lastBombAt = Date.now(); // mốc đếm RIÊNG của bom tự rơi
+let lastInteractAt = Date.now(); // tương tác THẬT gần nhất (quà/tim thật) — đếm mồi voice
+let lastLureAt = 0; // lần mồi voice gần nhất
+let nextScoreMilestone = 500; // mốc điểm tiếp theo (mỗi 500)
+let nextLengthMilestone = 20; // mốc độ dài tiếp theo (mỗi 20 đốt)
+let autoTaoCount = 0, autoBomCount = 0; // đếm táo/bom tự rơi (debug/kiểm chứng)
 let topGifters = new Map(); // userId -> { name, points }
 let lastFrame = 0, acc = 0;
 let demoGiftTimer = 0, demoLikeTimer = 0, demoGiftTurn = 0;
@@ -508,6 +523,8 @@ function tick() {
     try { snake.grow(1); } catch (e) { console.error('[ran-san-moi] snake.grow lỗi:', e); }
     const a = ev.apple || (snake.segments && snake.segments[0]);
     if (a) FX.eat(a.x, a.y, cfg.diemTao); // truyền điểm để chữ bay "+N" đúng diemTao
+    checkScoreMilestone(); // mốc điểm mỗi 500 (ăn táo cũng lên điểm)
+    checkLengthMilestone(); // mốc dài mỗi 20 đốt (vừa grow xong)
     // Thả táo tự nhiên cho đủ soTaoToiDa (táo rơi từ trên cao; đếm cả táo đang
     // rơi để không thả thừa; nếu bàn đã nhiều táo quà thì không thả thêm).
     if (board && countApples() < Math.max(1, Math.floor(Number(cfg.soTaoToiDa) || 3))) spawnApples(1);
@@ -521,6 +538,7 @@ function onDie(cause) {
   const head = snake && snake.segments && snake.segments[0];
   if (head) FX.explode(head.x, head.y);
   FX.die();
+  speakVoice('Ôi không, rắn thua rồi! Chơi lại nào!', 'event');
   const why = cause === 'bomb' ? ' (đụng bom)' : cause === 'wall' ? ' (đụng tường)' : cause === 'self' ? ' (cắn thân mình)' : '';
   setStatus('💥 Rắn đã thua' + why + '! Hồi sinh sau ' + cfg.thoiGianHoiSinh + 's…');
   updateHUD();
@@ -528,6 +546,8 @@ function onDie(cause) {
     if (!snake) return;
     snake.reset();
     score = 0; // điểm về 0, giữ Kỷ lục
+    nextScoreMilestone = 500; // mốc điểm/dài về lại từ đầu (như điểm + độ dài)
+    nextLengthMilestone = 20;
     status = 'running';
     setStatus('▶ Đang chạy — tặng quà để can thiệp vào game!');
     updateHUD();
@@ -573,7 +593,119 @@ function frame(now) {
     }
     if (guard >= 8) acc = 0; // tab ẩn lâu: bỏ tick dồn để rắn không chạy gấp
   }
+  checkAutoDrop(Date.now()); // tự rơi táo/bom khi lâu không có quà (§7 mới)
+  checkLure(Date.now()); // mồi voice khi yên ắng 25s không tương tác thật
   render(dt);
+}
+
+/* ---------- Voice MC + tự rơi (spec §7 mới, user 2026-11-11 22:36) ---------- */
+/* Đọc số ra chữ cho voice MC ("năm trăm", "một nghìn năm trăm", "hai mươi mốt")
+   — TTS đọc chữ hay hơn đọc dãy số. Chỉ dùng cho mốc điểm/dài (< 1 triệu). */
+const NUM_WORDS = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+function readTens(t, u, hasHigher) {
+  if (t === 0) return u === 0 ? '' : (hasHigher ? 'lẻ ' + NUM_WORDS[u] : NUM_WORDS[u]);
+  if (t === 1) return 'mười' + (u === 0 ? '' : u === 5 ? ' lăm' : ' ' + NUM_WORDS[u]);
+  return NUM_WORDS[t] + ' mươi' + (u === 0 ? '' : u === 1 ? ' mốt' : u === 5 ? ' lăm' : ' ' + NUM_WORDS[u]);
+}
+function read3(n, hasHigher) {
+  const h = Math.floor(n / 100), t = Math.floor(n % 100 / 10), u = n % 10;
+  const head = h > 0 ? NUM_WORDS[h] + ' trăm' : '';
+  const tail = readTens(t, u, hasHigher || h > 0);
+  return (head && tail ? head + ' ' + tail : head || tail);
+}
+function numToWords(n) {
+  n = Math.floor(Number(n) || 0);
+  if (n < 0) return 'âm ' + numToWords(-n);
+  if (n === 0) return 'không';
+  if (n >= 1000000) return String(n); // quá lớn: đọc số (không chế chữ sai)
+  const nghin = Math.floor(n / 1000), rest = n % 1000;
+  const parts = [];
+  if (nghin > 0) parts.push(read3(nghin, false) + ' nghìn');
+  if (rest > 0 || parts.length === 0) parts.push(read3(rest, parts.length > 0));
+  return parts.join(' ').trim();
+}
+
+/* Voice MC dùng NpcVoice của LiveBridge (npc-voice.js) — server tổng hợp bằng
+   node-edge-tts + cache đĩa, giọng vi-VN-HoaiMyNeural / vi-VN-NamMinhNeural.
+   KHÔNG tự tạo engine TTS, KHÔNG dùng GV01/GV02 cho game live. Guard typeof
+   để không có LiveBridge thì game vẫn chạy, chỉ không có tiếng. kind 'event'
+   (cảm ơn quà, chết, mốc — ưu tiên, gap 2s) / 'random' (mồi — gap 8s, tối đa
+   6/phút). NpcVoice tự nối tiếp (không chồng tiếng); main không gọi speak
+   dồn dập — mốc điểm/dài chỉ nói mốc cao nhất đã vượt (1 câu/lần tăng điểm). */
+const LURE_LINES = [
+  'Tặng quà để thả táo hoặc bom nào, rắn đang đói!',
+  'Ai tặng hoa hồng là rắn có táo ăn liền!',
+  'Tặng hộp quà đi, bom rơi vui lắm!',
+  'Rắn đang chờ quà của bạn đó!',
+];
+let lureIdx = 0;
+function voiceName() {
+  return cfg.voiceGiong === 'NamMinh' ? 'vi-VN-NamMinhNeural' : 'vi-VN-HoaiMyNeural';
+}
+function speakVoice(text, kind) {
+  if (!cfg.voiceOn || !text) return;
+  if (typeof window.NpcVoice === 'undefined' || typeof NpcVoice.speak !== 'function') return;
+  try {
+    const r = NpcVoice.speak(text, { kind: kind || 'event', voice: voiceName() });
+    if (r && typeof r.catch === 'function') r.catch(function () {}); // speak async — lỗi thì câm, không crash game
+  } catch (e) { /* NpcVoice lỗi thì game vẫn chạy */ }
+}
+function applyVoiceConfig() {
+  if (typeof window.NpcVoice === 'undefined' || typeof NpcVoice.setConfig !== 'function') return;
+  try {
+    NpcVoice.setConfig({ npcVoiceOn: cfg.voiceOn !== false, npcVoice: voiceName() });
+  } catch (e) { /* không set được thì NpcVoice giữ mặc định (tắt) */ }
+}
+/* Mốc điểm mỗi 500 / mốc dài mỗi 20 đốt — chỉ nói mốc CAO NHẤT đã vượt
+   (1 câu/lần tăng điểm, tránh 1 quà lớn (+5000) làm MC nói 10 câu liền). */
+function checkScoreMilestone() {
+  const crossed = Math.floor(score / 500) * 500;
+  if (crossed > 0 && crossed >= nextScoreMilestone) {
+    speakVoice('Tuyệt vời, đã ' + numToWords(crossed) + ' điểm rồi!', 'event');
+    nextScoreMilestone = crossed + 500;
+  }
+}
+function checkLengthMilestone() {
+  if (!snake) return;
+  const crossed = Math.floor(snake.length / 20) * 20;
+  if (crossed > 0 && crossed >= nextLengthMilestone) {
+    speakVoice('Rắn dài ' + numToWords(crossed) + ' đốt rồi, giỏi quá!', 'event');
+    nextLengthMilestone = crossed + 20;
+  }
+}
+/* Tự rơi khi không ai tặng quà (spec §7 mới): đếm từ lúc nhận quà gần nhất
+   (lastGiftAt — quà thật + quà giả demo đều tính, nên demo có quà giả 8s thì
+   tự rơi ít khi kích hoạt — đó là đúng); táo và bom đếm RIÊNG (lastAppleAt /
+   lastBombAt độc lập); quà tới đặt lại cả 2 đếm; rơi xong cũng đặt lại đếm
+   của món đó. Rơi qua board như quà (rơi từ trên cao, chạm đất mới tính,
+   trần 30 board tự chặn). KHÔNG cộng điểm, KHÔNG tính vào Top tặng quà.
+   0 = tắt món đó. */
+function checkAutoDrop(now) {
+  if (!started || !board) return;
+  const taoGiay = Math.max(0, Number(cfg.tuRoiTaoGiay) || 0);
+  const bomGiay = Math.max(0, Number(cfg.tuRoiBomGiay) || 0);
+  if (taoGiay > 0 && now - lastAppleAt >= taoGiay * 1000) {
+    spawnApples(1);
+    autoTaoCount++;
+    lastAppleAt = now; // đặt lại đếm táo (dù board đầy không rớt được — thử lại sau 1 chu kỳ)
+  }
+  if (bomGiay > 0 && now - lastBombAt >= bomGiay * 1000) {
+    const dropped = spawnBombs(1);
+    autoBomCount++;
+    lastBombAt = now;
+    if (dropped >= 1) speakVoice('Cẩn thận, bom rơi kìa!', 'event'); // chỉ nói khi bom rơi thật (board đầy thì không nói)
+  }
+}
+/* Mồi voice khi yên ắng (giống game QH): 25s không tương tác THẬT (quà/tim
+   thật — quà giả demo KHÔNG tính, để mồi vẫn nói được trong demo) thì MC nói
+   1 câu mồi, luân phiên, tối đa 1 câu/25s. */
+const LURE_QUIET_MS = 25000;
+function checkLure(now) {
+  if (!started || !cfg.voiceOn) return;
+  if (now - lastInteractAt < LURE_QUIET_MS) return;
+  if (now - lastLureAt < LURE_QUIET_MS) return;
+  lastLureAt = now;
+  speakVoice(LURE_LINES[lureIdx++ % LURE_LINES.length], 'random');
 }
 
 /* ---------- Sự kiện LiveBridge ---------- */
@@ -581,12 +713,20 @@ function normUser(u) {
   u = u || {};
   return { id: String(u.id || u.username || ''), username: String(u.username || ''), nickname: String(u.nickname || u.username || 'Bạn'), avatar: u.avatar || '' };
 }
-function onGiftEvent(ev) {
+/* isSim: quà giả demo — vẫn rớt táo/bom + đặt lại đếm tự rơi, nhưng KHÔNG
+   tính là tương tác thật (để mồi voice vẫn nói được trong demo). */
+function onGiftEvent(ev, isSim) {
   const e = normUser(ev.user);
   const src = ev.source || {};
   const rawName = String(src.giftName || ev.label || 'quà');
   const count = Math.max(1, Math.floor(ev.count || 1));
   const entry = lookupGift(rawName);
+  // Quà tới (thật hay giả) đặt lại cả 2 đếm tự rơi (táo/bom đếm riêng nhưng
+  // cùng mốc từ quà gần nhất); tương tác thật mới đặt lại đếm mồi voice.
+  lastGiftAt = Date.now();
+  lastAppleAt = Date.now();
+  lastBombAt = Date.now();
+  if (!isSim) lastInteractAt = Date.now();
   // Điểm quà = SỐ XU của quà (§5 mới): ưu tiên xu kèm event, fallback diem
   // trong bảng quaTang (cũng là số xu mặc định của quà đó).
   // SỐ TRÁI chỉ tính theo xu KÈM EVENT — event không kèm xu thì 1 trái
@@ -614,16 +754,20 @@ function onGiftEvent(ev) {
     score += pts;
     if (score > record) record = score;
     addGifter(e, pts);
+    checkScoreMilestone(); // quà cũng lên điểm — mốc 500/1000...
   }
+  speakVoice('Cảm ơn ' + e.nickname + ' tặng ' + giftDisplayName(rawName, entry) + '!', 'event'); // quan trọng nhất — kéo quà
   setFeed('🎁 ' + e.nickname + ' tặng ' + giftDisplayName(rawName, entry) + (count > 1 ? ' ×' + count : '') + (pts > 0 ? ' +' + pts + ' điểm' : ''));
   updateHUD();
 }
-function onLikeEvent(m) {
+function onLikeEvent(m, isSim) {
   const n = Math.max(0, Math.floor(m.likeCount || m.count || 1));
   if (!n) return;
   likes += n;
   score += n; // tim +1 điểm mỗi tim (§1)
   if (score > record) record = score;
+  if (!isSim) lastInteractAt = Date.now(); // tim thật = tương tác thật (đếm mồi voice)
+  checkScoreMilestone(); // tim cũng lên điểm
   updateHUD();
 }
 function handle(ev) {
@@ -662,6 +806,7 @@ function applyConfig(c) {
     board.config.choRoi = Math.max(0, Number(cfg.choRoi) || 0);
   }
   if (board && typeof FX.init === 'function') FX.init({ applePoints: cfg.diemTao }); // chữ "+N" bay đúng điểm mới (giữ nguyên hình học)
+  applyVoiceConfig(); // đẩy voiceOn/voiceGiong vào NpcVoice (giọng MC)
   if (!board || cfg.kichThuocBan !== oldSize) createGame(); // đổi kích thước bàn → dựng lại bàn + rắn
   updateHUD();
 }
@@ -675,6 +820,9 @@ function connect() {
      nối cổng đó; mở bằng file:// thì mặc định localhost:8787. */
   const wsHost = location.host || 'localhost:8787';
   const bridge = new LiveBridgeClient({ url: 'ws://' + wsHost, game: 'ran-san-moi' });
+  if (typeof window.NpcVoice !== 'undefined' && NpcVoice.attach) {
+    try { NpcVoice.attach(bridge); } catch (e) {} // báo ưu tiên voice qua LiveBridge (như QH/đám cưới)
+  }
   bridge.on('event', handle);
   bridge.on('hello', function (h) {
     if (h && h.config) applyConfig(h.config); else applyConfig(DEFAULT_CFG);
@@ -708,14 +856,16 @@ function demoGift() {
     user: { id: u.username, username: u.username, nickname: u.nickname, avatar: '' },
     diamonds: giftTable[key].diem, count: 1, label: giftDisplayName(key, { key: key }),
     source: { kind: 'gift', giftName: key, diamonds: giftTable[key].diem },
-  });
+  }, true); // quà giả: rớt đồ + đặt lại đếm tự rơi, KHÔNG tính tương tác thật (mồi voice)
 }
 function demoLike() {
-  onLikeEvent({ user: { id: 'demo-like', username: 'demo-like', nickname: '' }, likeCount: 10 });
+  onLikeEvent({ user: { id: 'demo-like', username: 'demo-like', nickname: '' }, likeCount: 10 }, true);
 }
 function startGame() {
   if (started) return;
   started = true;
+  lastGiftAt = lastAppleAt = lastBombAt = lastInteractAt = Date.now(); // đếm tự rơi + mồi từ lúc bắt đầu chơi
+  lastLureAt = 0;
   const btn = $('btnStart');
   if (btn) btn.style.display = 'none'; // ẩn nút khỏi bàn sau khi bắt đầu (không che rắn)
   status = 'running';
@@ -752,12 +902,21 @@ window.RanSanMoi = {
   getBoard: function () { return board; },
   getSnake: function () { return snake; },
   getThree: function () { return window.Ran3D || null; },
+  numToWords: numToWords,
+  /* Mồi voice: gọi trực tiếp để test (khi đã ép lastInteractAt về quá khứ).
+     _setLastInteractAt/_setLastGiftAt: hook test — ép mốc thời gian để kiểm
+     chứng mồi/tự rơi mà không cần chờ 25s/12s thật. */
+  lureTick: function (nowMs) { checkLure(nowMs || Date.now()); },
+  _setLastInteractAt: function (ms) { lastInteractAt = ms; },
+  _setLastGiftAt: function (ms) { lastGiftAt = ms; lastAppleAt = ms; lastBombAt = ms; },
   getState: function () {
     return {
       score: score, record: record, likes: likes, status: status, started: started,
       length: snake ? snake.length : 0, alive: snake ? snake.alive : false,
       foods: board ? board.foods.length : 0, bombs: board ? board.bombs.length : 0,
       falling: board && Array.isArray(board.falling) ? board.falling.length : 0,
+      autoTao: autoTaoCount, autoBom: autoBomCount,
+      voice: { on: !!cfg.voiceOn, giong: cfg.voiceGiong, lastGiftAt: lastGiftAt, lastInteractAt: lastInteractAt, nextScoreMilestone: nextScoreMilestone, nextLengthMilestone: nextLengthMilestone },
       three: !!(renderer && scene && camera),
       board: board ? { n: board.n, cell: board.cell, gridX: board.gridX, gridY: board.gridY, offsetX: board.offsetX, offsetY: board.offsetY } : null,
       giftTable: giftTable, giftTiers: giftTiers, cfg: cfg,

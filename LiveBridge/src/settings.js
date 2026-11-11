@@ -221,17 +221,19 @@ class Settings {
       'ran-san-moi': { kichThuocBan: [16, 24, 20], tocDo: [80, 300, 150], doDaiBanDau: [3, 10, 5],
         diemTao: [1, 100, 10], thoiGianBom: [0, 300, 30], soBomToiDa: [1, 30, 30], soTaoToiDa: [1, 10, 3],
         soTaoToiDaTrenBan: [1, 30, 30], thoiGianRoi: [100, 2000, 600], choRoi: [0, 500, 80],
-        thoiGianHoiSinh: [1, 10, 3] },
+        thoiGianHoiSinh: [1, 10, 3], tuRoiTaoGiay: [0, 60, 12], tuRoiBomGiay: [0, 120, 20] },
     };
     const BOOL_BY_GAME = {
       'dam-cuoi': ['ghepDoiNgauNhien', 'uuTienQuaTang', 'uuTienChoTrong', 'choTuDong', 'hieuUngNgauNhien', 'lenhDoiGioiTinh', 'lenhDoiTrangPhuc', 'hienBongChat', 'npcTuDong', 'hieuUngChat', 'hienBangLenh', 'hienTatCaKhung', 'hieuUngThaTim', 'lenhGhepDoi', 'tuGhepDoiKhiRong', 'xoayManHinh'],
       'san-nhay': ['hieuUngDen', 'khuayDong', 'lamMoKhiLia', 'liaCamLenTrenCung', 'partyMaxNhanhHon', 'phuKienQua'],
+      'ran-san-moi': ['voiceOn'],
     };
     const CHOICE_BY_GAME = {   // key: [các giá trị cho phép, mặc định]
       'san-nhay': { tocDoNhay: [['cham', 'thuong', 'nhanh'], 'thuong'], hieuUngManHinh: [['song', 'vong', 'led'], 'vong'] },
+      'ran-san-moi': { voiceGiong: [['HoaiMy', 'NamMinh'], 'HoaiMy'] },
     };
     for (const [k, [mn, mx, def]] of Object.entries(NUM_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = num(cfg[k], mn, mx, def);
-    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'lenhHieuUngChoGiay', 'phongVangDuoi', 'mcSapMocConLai', 'mcCheGheuChoGiay', 'choDoiLanThapGiay', 'rongKhungMc', 'rongThongBao', 'mocTimHieuUng', 'diemMoiTim', 'diemTimToiDa', 'timHoaRoi', 'timPhaoHoa', 'timPhaoGiay', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays', 'kichThuocBan', 'tocDo', 'doDaiBanDau', 'diemTao', 'thoiGianBom', 'soBomToiDa', 'soTaoToiDa', 'soTaoToiDaTrenBan', 'thoiGianRoi', 'choRoi', 'thoiGianHoiSinh'])
+    for (const k of ['nhaCapTiepSauGiay', 'hangChoToiDa', 'choMienGhep', 'bongChatAnKhiTuCamQua', 'npcNguongVang', 'npcMoiBaoLauGiay', 'npcNghiGiay', 'lenhHieuUngChoGiay', 'phongVangDuoi', 'mcSapMocConLai', 'mcCheGheuChoGiay', 'choDoiLanThapGiay', 'rongKhungMc', 'rongThongBao', 'mocTimHieuUng', 'diemMoiTim', 'diemTimToiDa', 'timHoaRoi', 'timPhaoHoa', 'timPhaoGiay', 'entryFlairLv', 'entryFlairLv2', 'staffThreshold', 'soloSoPhim', 'resetDay', 'retentionDays', 'kichThuocBan', 'tocDo', 'doDaiBanDau', 'diemTao', 'thoiGianBom', 'soBomToiDa', 'soTaoToiDa', 'soTaoToiDaTrenBan', 'thoiGianRoi', 'choRoi', 'thoiGianHoiSinh', 'tuRoiTaoGiay', 'tuRoiBomGiay'])
       if (clean[k] != null) clean[k] = Math.round(clean[k]);
     for (const k of BOOL_BY_GAME[id] || []) if (cfg[k] != null) clean[k] = !!cfg[k];
     for (const [k, [opts, def]] of Object.entries(CHOICE_BY_GAME[id] || {})) if (cfg[k] != null) clean[k] = opts.includes(cfg[k]) ? cfg[k] : def;
