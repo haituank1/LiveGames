@@ -1,7 +1,16 @@
 // Rắn Săn Mồi — effects.js (nv4). Pure Canvas 2D FX, no DOM, no external libs.
 // Contract (RAN-SAN-MOI-SPEC.md §6): main.js calls exactly
 //   effects.init(opts), effects.eat(x,y), effects.explode(x,y), effects.die(),
-//   effects.spawn(x,y), effects.update(dt), effects.render(ctx).
+//   effects.spawn(x,y), effects.land(x,y,type), effects.update(dt), effects.render(ctx).
+// Coordinates x,y are BOARD CELLS (0-based). Cell -> pixel conversion uses the
+// layout main.js gives via init() (cellSize/origin/cols/rows); defaults match
+// the spec (20x20 board, 34px cells). If the board layout changes, call init()
+// again or the setters below — do NOT hardcode pixel positions here.
+// Division of labour: board.js draws the falling apple/bomb itself + its ground
+// shadow + its own squash-bounce; effects.land() only adds dust + debris + a
+// ring at the landing cell (it never draws the apple/bomb). main.js calls
+// land() once per item in `landed` from board.update() — only then does the
+// item count (a falling item is not yet edible / not yet a danger).
 // Coordinates x,y are BOARD CELLS (0-based). Cell -> pixel conversion uses the
 // layout main.js gives via init() (cellSize/origin/cols/rows); defaults match
 // the spec (20x20 board, 34px cells). If the board layout changes, call init()
@@ -162,6 +171,31 @@
         grav: 0, drag: 0, rot: 0, vr: 0 });
     },
 
+    // An apple/bomb JUST touched the ground at cell (x,y): dust + debris bounce
+    // + a small ring. type is 'apple' or 'bomb' (anything else behaves like
+    // 'apple'). Only dust/debris/ring here — board.js draws the item itself,
+    // its shadow and its own bounce, so nothing is drawn twice.
+    land: function (x, y, type) {
+      var c = cellCenter(x, y);
+      var s = cfg.cellSize;
+      var gy = c.y + s * 0.3; // ground line of the cell (dust stays low)
+      var accent = type === 'bomb' ? '#ff8a65' : '#aed581';
+      var i;
+      for (i = 0; i < 7; i++) {
+        add({ kind: 'dust', x: c.x + rand(-s * 0.35, s * 0.35), y: gy + rand(-s * 0.08, s * 0.08),
+          vx: rand(-s * 4.4, s * 4.4), vy: rand(-s * 1.8, -s * 0.3), life: 0, max: rand(0.5, 0.8),
+          size: rand(s * 0.12, s * 0.24), color: (Math.random() < 0.5 ? '#cbb59a' : '#b8a88f'),
+          grav: 260, drag: 2.0, rot: 0, vr: 0 });
+      }
+      ring(c.x, gy, s * 1.0, accent, 0.35);
+      for (i = 0; i < 2; i++) {
+        add({ kind: 'bounce', x: c.x + rand(-s * 0.2, s * 0.2), y: gy,
+          vx: rand(-s * 1.2, s * 1.2), vy: rand(-s * 6, -s * 4.2), life: 0, max: rand(0.4, 0.55),
+          size: rand(s * 0.07, s * 0.11), color: '#d7ccc8', grav: 520, drag: 0.3, rot: 0, vr: 0 });
+      }
+      burst(c.x, gy - s * 0.1, 2, [accent, '#ffffff'], s * 2.5, 0.4, s * 0.09, 'spark', 60);
+    },
+
     // dt: seconds since the last frame (clamped, so a hidden tab cannot jump FX).
     update: function (dt) {
       dt = clamp(dt || 0, 0, 0.05);
@@ -244,6 +278,16 @@
           ctx.fillStyle = p.color;
           ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, TAU); ctx.fill();
           ctx.globalCompositeOperation = 'source-over';
+        } else if (p.kind === 'dust') {
+          // Ground dust: soft tan puff, low alpha, grows a little as it settles.
+          ctx.globalAlpha = 0.35 * Math.sin(Math.min(1, p.life / p.max) * Math.PI);
+          ctx.fillStyle = p.color;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 + (p.life / p.max) * 0.9), 0, TAU); ctx.fill();
+        } else if (p.kind === 'bounce') {
+          // Debris that jumps up on impact and falls back down.
+          ctx.globalAlpha = f;
+          ctx.fillStyle = p.color;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, TAU); ctx.fill();
         } else if (p.kind === 'poof') {
           ctx.globalAlpha = 0.55 * f;
           ctx.fillStyle = p.color;
