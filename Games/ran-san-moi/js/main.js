@@ -1,15 +1,35 @@
-/* Rắn Săn Mồi — điều phối game (nv1, RAN-SHELL).
+/* Rắn Săn Mồi — điều phối game 3D (nv1, RAN3D-SHELL).
    TikTok LIVE -> LiveBridge (port 8787) -> WebSocket -> game này.
-   Spec: ~/workspace/multi-session/RAN-SAN-MOI-SPEC.md (§1 luật, §4 Snake,
-   §5 Board/quà, §6 FX, §7 config, §8 demo) + 3 lưu ý tích hợp của BOSS
-   (2026-11-11 16:42, đã ghi vào spec §4). Spec là hợp đồng — KHÔNG tự
-   đổi signature interface của Snake/Board/Effects.
+   Spec logic 2D: ~/workspace/multi-session/RAN-SAN-MOI-SPEC.md (§1 luật,
+   §4 Snake, §5 Board/quà, §6 FX, §7 config, §8 demo) + 3 lưu ý tích hợp
+   của BOSS (2026-11-11 16:42, đã ghi vào spec §4).
+   Spec 3D: ~/workspace/multi-session/RAN-SAN-MOI-3D.md (§0 nguyên tắc,
+   §1 khung Three.js, §5 khung + main.js). CHỈ thay phần VẼ — logic game
+   giữ nguyên 100% như bản 2D đã kiểm chứng (nhánh ran-san-moi @ c07d40e).
+   KHÔNG dùng CDN — Three.js r128 tự host (js/three.min.js).
 
-   HỢP ĐỒNG GIAO TIẾP (đối chiếu code thật nv2/nv3/nv4 ngày 2026-11-11):
+   HỢP ĐỒNG GIAO TIẾP 3D (spec 3D §1–§4):
+   - main.js tạo DUY NHẤT 1 lần: renderer (WebGLRenderer, antialias,
+     pixelRatio tối đa 2), scene, camera (Perspective, góc 3/4 từ trên
+     xuống ~55 độ, bàn nằm mặt XZ, Y là cao), đèn (Ambient + Directional
+     castShadow, shadow map 1024), nền trong suốt (gradient nâu của #stage
+     hiện qua). Giữ object dùng chung window.Ran3D = { THREE, scene,
+     camera, renderer }; truyền scene cho Snake/Board/Effects qua setScene
+     (nếu có) + render(scene, ...) mỗi frame. Các module KHÔNG tự tạo
+     renderer/camera/đèn — chỉ thêm/bớt mesh của mình vào scene chung.
+   - Tọa độ: ô (x, y) trên bàn 2D -> vị trí 3D
+     (gridX + (x+0.5)*cell, 0, gridY + (y+0.5)*cell) — dùng đúng board.cell /
+     board.gridX / board.gridY như bản 2D (đã có alias offsetX/Y).
+   - Vòng lặp: main gọi snake.render / board.render / effects.render (chúng
+     CHỈ cập nhật vị trí mesh, KHÔNG vẽ) rồi renderer.render(scene, camera)
+     mỗi frame. KHÔNG còn ctx 2D.
+   - Module 3D NÊN có dispose() để gỡ mesh của mình khỏi scene khi main
+     dựng lại bàn/rắn (đổi kichThuocBan) — main gọi dispose() nếu có
+     (guard typeof); không có thì mesh cũ còn sót trong scene.
    - Snake (nv2): new Snake({ board, config, isBlocked(x,y), getFood(),
      onEat, onDie }); snake.reset(); snake.tick() -> {type:'eat',apple} |
      {type:'die',cause} | {type:'move'} | null (đã chết); snake.grow(n);
-     snake.render(ctx, alpha); snake.segments/direction/alive/length.
+     snake.render(scene, alpha); snake.segments/direction/alive/length.
      tick() VỪA trả event VỪA gọi onEat/onDie (theo §4) — main.js CHỈ dùng
      event tick() (onEat/onDie truyền no-op) để tránh cộng điểm/grow 2 lần.
      tick() KHÔNG tự grow — main.js gọi snake.grow(1) khi nhận event eat.
@@ -29,29 +49,24 @@
      { expiredBombs: [...], landed: [...] } (landed = táo/bom VỪA chạm đất
      {type:'apple'|'bomb', x, y}); board.removeFood/removeBomb(x,y);
      board.isBomb/isFood/isFree(x,y); board.inBounds(x,y);
-     board.cellCenter(x,y); board.render(ctx, nowMs) (vẽ ở tọa độ TUYỆT ĐỐI
-     stage — canvas phải phủ toàn stage 720×1280; vẽ cả đồ ĐANG RƠI + bóng).
+     board.cellCenter(x,y); board.render(scene, nowMs) (3D: chỉ cập nhật vị
+     trí mesh — bàn nằm mặt XZ, Y là cao; vẽ cả đồ ĐANG RƠI + bóng đổ thật).
      CHỈ táo/bom ĐÃ CHẠM ĐẤT mới nằm trong foods/bombs — đồ đang rơi nằm
      trong mảng riêng board.falling {type, x, y, t0}, KHÔNG tính vào
      isFood/isBomb/isFree (rắn/AI không thấy chúng).
      isBlocked(x,y) = "ô rắn đang chiếm" — main.js PHẢI truyền khi thả
      (Board chỉ biết tường/táo/bom); main.js PHẢI gọi update() mỗi frame
      nếu không bom hết hạn không tự biến mất.
-     TƯƠNG THÍCH TẠM: board cũ (nv3 @ fa31f3f, chưa cập nhật API rơi) có
-     spawnFood(isBlocked)/spawnBomb(head, isBlocked)/update() trả mảng —
-     main.js có adapter (spawnApples/spawnBombs/boardUpdate) tự chọn API
-     theo board.falling có tồn tại hay không; khi nv3 cập nhật thì tự
-     chuyển sang API mới. Xóa adapter khi nv6 gộp xong.
    - Effects (nv4): window.effects.init({cellSize, cols, rows, originX,
      originY, applePoints}) — PHẢI gọi sau khi biết layout bàn (và gọi lại
      khi đổi bàn/điểm); effects.eat(x,y,points)/explode(x,y)/die()/spawn(x,y)
      /land(x,y,type) (tọa độ Ô LƯỚI; type 'apple'|'bomb'); effects.update(dt)
-     với dt tính bằng GIÂY (clamp 0..0.05); effects.render(ctx).
+     với dt tính bằng GIÂY (clamp 0..0.05); effects.render(scene).
      main.js gọi land() cho mỗi item trong landed sau mỗi board.update()
      (Board tự vẽ đồ rơi + bóng; main KHÔNG gọi effects.spawn cho quà nữa
      vì không biết vị trí từng trái trong cơn mưa — land khi chạm đất mới
-     là FX của quà). effects cũ (nv4 @ 7aa3b9d) chưa có land() — main guard
-     typeof FX.land === 'function' (không crash khi chưa gộp bản mới).
+     là FX của quà). Bom hết hạn cũng bắn land() 'bomb' (poof nhỏ, RAN-QA
+     gộp 2026-11-11).
    QUYẾT ĐỊNH NỐI TIẾP (để nv2/nv3/nv4/nv6 khỏi đoán):
    - NỐI HÌNH HỌC (lưu ý BOSS #2): Snake._geometry đọc b.cell + b.offsetX/
      b.offsetY (không đọc b.gridX/b.gridY). Board expose gridX/gridY —
@@ -97,10 +112,61 @@ const $ = id => document.getElementById(id);
 const q = new URLSearchParams(location.search);
 const isDemo = q.has('demo') && q.get('demo') !== '0';
 const canvas = $('board');
-const ctx = canvas.getContext('2d');
 function esc(s) { return String(s || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 function setText(id, s) { const e = $(id); if (e) e.textContent = s; }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+/* ---------- Khung Three.js (RAN3D-SHELL, spec 3D §1) ----------
+   Renderer/scene/camera/đèn do main.js tạo DUY NHẤT 1 lần; Snake/Board/
+   Effects KHÔNG tự tạo renderer/camera/đèn — chỉ thêm/bớt mesh của mình
+   vào scene chung. Bàn nằm mặt XZ (x = cột, z = hàng), Y là chiều cao.
+   Tọa độ 3D dùng đúng số 2D: ô (x,y) -> (gridX + (x+0.5)*cell, 0,
+   gridY + (y+0.5)*cell). */
+let renderer = null, scene = null, camera = null;
+function initThree() {
+  if (typeof window.THREE === 'undefined') {
+    setText('liveStatus', 'Không thấy three.min.js — kiểm tra js/three.min.js');
+    return false;
+  }
+  const T = window.THREE;
+  renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(720, 1280, false); // canvas đã 720×1280, false = không đổi style
+  renderer.setClearColor(0x000000, 0); // trong suốt — nền gradient nâu của #stage hiện qua
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = T.PCFSoftShadowMap;
+  scene = new T.Scene();
+  // Camera: góc 3/4 từ trên xuống (~52 độ), nhìn vào tâm bàn (340, 0, 500).
+  // Canvas dọc 720×1280 (aspect 0.5625) nên fov phải đủ rộng (60) để ôm hết
+  // chiều ngang bàn (640 + khung). lookAt z=620 (sau tâm bàn 1 chút) để bàn
+  // hiện cao hơn giữa khung — khớp vị trí bàn bản 2D (tâm y ~500/1280) và
+  // mép dưới bàn không bị thanh quà (y 844) che.
+  camera = new T.PerspectiveCamera(60, 720 / 1280, 1, 4000);
+  camera.position.set(340, 1050, 1450);
+  camera.lookAt(340, 0, 620);
+  // Đèn: Ambient sáng nền + Directional chính (castShadow, shadow map 1024).
+  scene.add(new T.AmbientLight(0xffffff, 0.55));
+  const sun = new T.DirectionalLight(0xfff2d9, 0.95);
+  sun.position.set(340 + 350, 900, 500 + 150);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.camera.left = -500; sun.shadow.camera.right = 500;
+  sun.shadow.camera.top = 500; sun.shadow.camera.bottom = -500;
+  sun.shadow.camera.near = 1; sun.shadow.camera.far = 3000;
+  sun.target.position.set(340, 0, 500);
+  scene.add(sun);
+  scene.add(sun.target);
+  window.Ran3D = { THREE: T, scene: scene, camera: camera, renderer: renderer };
+  return true;
+}
+/* Đưa scene chung cho các module 3D (chúng chỉ thêm/bớt mesh của mình vào
+   scene này; guard typeof để chạy được cả khi module chưa có setScene). */
+function passScene() {
+  if (!scene) return;
+  if (board && typeof board.setScene === 'function') { try { board.setScene(scene); } catch (e) { console.error('[ran-san-moi] board.setScene lỗi:', e); } }
+  if (snake && typeof snake.setScene === 'function') { try { snake.setScene(scene); } catch (e) { console.error('[ran-san-moi] snake.setScene lỗi:', e); } }
+  if (typeof FX.setScene === 'function') { try { FX.setScene(scene); } catch (e) { console.error('[ran-san-moi] effects.setScene lỗi:', e); } }
+}
 
 /* ---------- Cấu hình mặc định (spec §7) ---------- */
 const DEFAULT_CFG = {
@@ -212,6 +278,7 @@ function initEffects() {
     originX: board.gridX, originY: board.gridY,
     applePoints: cfg.diemTao,
   });
+  passScene(); // đưa scene chung cho Effects (cùng lúc với Board/Snake)
 }
 
 /* ---------- State ---------- */
@@ -383,10 +450,15 @@ function boardUpdate() {
   }
 }
 function createGame() {
+  // Dọn mesh của bàn/rắn cũ khỏi scene trước khi dựng lại (3D: mesh thêm vào
+  // scene không tự biến mất khi bỏ reference như canvas 2D — module 3D nên
+  // có dispose(); main gọi nếu có, không có thì mesh cũ còn sót trong scene).
+  if (board && typeof board.dispose === 'function') { try { board.dispose(); } catch (e) { console.error('[ran-san-moi] board.dispose lỗi:', e); } }
+  if (snake && typeof snake.dispose === 'function') { try { snake.dispose(); } catch (e) { console.error('[ran-san-moi] snake.dispose lỗi:', e); } }
   board = null;
   snake = null;
   if (typeof window.Board !== 'function' || typeof window.Snake !== 'function') {
-    setStatus('⏳ Đang chờ file snake.js / board.js (nv2/nv3 chưa gộp) — HUD vẫn chạy.');
+    setStatus('⏳ Đang chờ file snake.js / board.js 3D (nv2/nv3 chưa xong) — HUD vẫn chạy.');
     return false;
   }
   board = new Board(cfg); // Board(config) — Board chỉ lấy các key nó cần
@@ -400,6 +472,7 @@ function createGame() {
     onEat: function () {}, // noop có chủ ý — chỉ dùng event 'eat' từ tick() (tránh cộng 2 lần)
     onDie: function () {}, // noop có chủ ý — chỉ dùng event 'die' từ tick()
   });
+  passScene(); // đưa scene chung cho Board/Snake ngay sau khi tạo
   board.reset(isSnakeCell); // dọn táo/bom, thả 1 táo (không trùng rắn)
   // Thả thêm cho đủ soTaoToiDa táo tự nhiên lúc đầu — tính cả táo đang rơi
   // (foods chỉ đếm táo đã chạm đất; dùng while theo foods.length sẽ thả thừa).
@@ -454,16 +527,19 @@ function onDie(cause) {
 }
 function render(dtMs) {
   const alpha = (started && status === 'running') ? Math.min(1, acc / tickMs()) : 0;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (board) {
     try {
       boardUpdate(); // PHẢI gọi mỗi frame (lưu ý BOSS #3): tiến độ rơi + dọn bom hết hạn + bắn FX land khi chạm đất
-      board.render(ctx);
+      board.render(scene, Date.now()); // 3D: chỉ cập nhật vị trí mesh (không vẽ); Date.now() khớp đồng hồ rơi (t0 từ Date.now())
     } catch (e) { console.error('[ran-san-moi] board.render lỗi:', e); }
   }
-  if (snake) { try { snake.render(ctx, alpha); } catch (e) { console.error('[ran-san-moi] snake.render lỗi:', e); } }
+  if (snake) { try { snake.render(scene, alpha); } catch (e) { console.error('[ran-san-moi] snake.render lỗi:', e); } } // 3D: chỉ cập nhật vị trí mesh
   try { FX.update(dtMs / 1000); } catch (e) { console.error('[ran-san-moi] effects.update lỗi:', e); } // dt tính bằng GIÂY (effects.js clamp 0..0.05)
-  try { FX.render(ctx); } catch (e) { console.error('[ran-san-moi] effects.render lỗi:', e); }
+  try { FX.render(scene); } catch (e) { console.error('[ran-san-moi] effects.render lỗi:', e); } // 3D: chỉ cập nhật vị trí hạt
+  // Vẽ 1 khung hình 3D (renderer chung — các module chỉ cập nhật mesh).
+  if (renderer && scene && camera) {
+    try { renderer.render(scene, camera); } catch (e) { console.error('[ran-san-moi] renderer.render lỗi:', e); }
+  }
 }
 function frame(now) {
   requestAnimationFrame(frame);
@@ -635,9 +711,12 @@ function startGame() {
 }
 
 /* ---------- Khởi động ---------- */
-applyConfig(DEFAULT_CFG);
+initThree(); // khung Three.js TRƯỚC khi tạo game (createGame truyền scene cho các module)
+applyConfig(DEFAULT_CFG); // đã tạo game lần 1 (board null -> createGame)
 connect();
-createGame();
+if (!board) createGame(); // chỉ tạo khi applyConfig chưa tạo (vd Snake/Board chưa có) —
+// TRÁNH tạo game 2 lần như bản 2D: 3D dựng lại sẽ thêm mesh mới vào scene mà
+// mesh cũ chưa gỡ (chỉ gỡ được qua dispose() của module).
 updateHUD();
 renderGiftBar();
 renderTop();
@@ -655,12 +734,14 @@ window.RanSanMoi = {
   startGame: startGame,
   getBoard: function () { return board; },
   getSnake: function () { return snake; },
+  getThree: function () { return window.Ran3D || null; },
   getState: function () {
     return {
       score: score, record: record, likes: likes, status: status, started: started,
       length: snake ? snake.length : 0, alive: snake ? snake.alive : false,
       foods: board ? board.foods.length : 0, bombs: board ? board.bombs.length : 0,
       falling: board && Array.isArray(board.falling) ? board.falling.length : 0,
+      three: !!(renderer && scene && camera),
       board: board ? { n: board.n, cell: board.cell, gridX: board.gridX, gridY: board.gridY, offsetX: board.offsetX, offsetY: board.offsetY } : null,
       giftTable: giftTable, giftTiers: giftTiers, cfg: cfg,
     };

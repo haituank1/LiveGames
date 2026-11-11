@@ -5,8 +5,9 @@
 <title>Rắn Săn Mồi — Live TikTok</title>
 <style>
   /* Rắn Săn Mồi — khung 720×1280 dọc (TikTok live), nền nâu sẫm.
-     Bàn chơi + rắn + táo + bom do Board/Snake vẽ trên canvas (js/board.js,
-     js/snake.js); HUD còn lại là DOM. */
+     Bàn chơi + rắn + táo + bom do Board/Snake/Effects vẽ bằng Three.js
+     (js/three.min.js tự host, r128 — KHÔNG dùng CDN) lên canvas #board;
+     HUD còn lại là DOM. */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: #000; overflow: hidden; font-family: "Be Vietnam Pro", system-ui, sans-serif; }
   #stage {
@@ -29,9 +30,10 @@
   }
   .chip b { color: #ffd54f; }
   .chip .lbl { color: #d7ccc8; font-weight: 700; }
-  /* Bàn chơi — canvas PHỦ TOÀN STAGE (720×1280): Board/Snake/Effects vẽ ở
-     tọa độ tuyệt đối của stage (board.gridX/gridY, cell) nên canvas phải
-     trùng stage, không phải khung 680 riêng. HUD (z 5) nằm trên canvas (z 3). */
+  /* Bàn chơi — canvas WebGL PHỦ TOÀN STAGE (720×1280): main.js tạo renderer
+     trên canvas này; Board/Snake/Effects thêm mesh vào scene chung (tọa độ
+     3D dùng đúng số 2D: ô (x,y) -> (gridX + (x+0.5)*cell, 0,
+     gridY + (y+0.5)*cell)). HUD (z 5) nằm trên canvas (z 3). */
   #boardWrap { position: absolute; left: 0; top: 0; width: 720px; height: 1280px; z-index: 3; }
   #board { display: block; width: 720px; height: 1280px; }
   /* Nút Start — phủ giữa bàn, bấm để bắt đầu (như lớp học chữ) */
@@ -95,6 +97,7 @@
   <div id="liveStatus">Chưa nối LiveBridge</div>
 </div>
 <script src="../../LiveBridge/public/livebridge-client.js"></script>
+<script src="js/three.min.js"></script>
 <script src="js/snake.js"></script>
 <script src="js/board.js"></script>
 <script src="js/effects.js"></script>
