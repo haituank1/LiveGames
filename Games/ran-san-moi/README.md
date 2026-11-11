@@ -8,15 +8,25 @@ quà tặng và tim.
 
 - **Ăn táo:** rắn dài ra +1 đốt, **+điểm** (mặc định 10, config `diemTao`).
   Ăn xong bàn tự thả táo mới (bàn luôn có `soTaoToiDa` táo).
-- **Tặng quà** (theo bảng `quaTang`):
-  - Hoa hồng / GG / Táo / Bánh donut / Gà → rớt **1 quả táo** xuống bàn.
-  - Hộp quà → thả **1 quả bom** xuống bàn.
-  - Quà không có trong bảng → **+0 điểm, không hiệu ứng** (ghi log trong
-    console để user bổ sung vào bảng).
+- **Tặng quà** (theo bảng `quaTang` — **điểm = số xu của quà**, vd hồng 1 xu
+  → +1 điểm, hộp quà 100 xu → +100 điểm):
+  - Hoa hồng / GG / Táo / Bánh donut / Gà → rớt **táo** xuống bàn.
+  - Hộp quà → thả **bom** xuống bàn.
+  - **Số lượng theo xu** (`tangQuaTheoXu`): 1 quà rớt NHIỀU trái — xu ≤9 → 1,
+    ≤29 → 3, ≤99 → 5, ≤299 → 10, ≤999 → 20, còn lại → 30 (tối đa 30/lần).
+    Nhiều trái rơi nối tiếp thành cơn mưa (cách nhau `choRoi` ms).
+  - Quà không có trong bảng → **+điểm = số xu (nếu event kèm xu), không
+    rớt đồ** (ghi log trong console để user bổ sung vào bảng).
+- **RƠI từ trên cao:** táo/bom KHÔNG hiện ngay — rơi xuống ô đích trong
+  `thoiGianRoi` ms (mặc định 600ms), có bóng dưới đất lớn dần + nảy nhẹ +
+  bụi khi chạm đất. **CHỈ KHI CHẠM ĐẤT MỚI TÍNH:** táo đang rơi rắn chưa ăn
+  được, bom đang rơi chưa gây chết, đồ đang rơi không chặn đường rắn.
 - **Bom là bẫy:** rắn phải tránh. Đụng bom → CHẾT (nổ), tự chơi lại sau
   `thoiGianHoiSinh` giây (mặc định 3s): thân về độ dài ban đầu, điểm về 0,
   giữ Kỷ lục. Bom có thời hạn `thoiGianBom` giây (mặc định 30s, 0 = không
-  hết hạn) rồi tự biến mất; tối đa `soBomToiDa` bom cùng lúc (mặc định 5).
+  hết hạn) rồi tự biến mất; tối đa `soBomToiDa` bom cùng lúc (mặc định 30),
+  tối đa `soTaoToiDaTrenBan` táo cùng lúc (mặc định 30) — quà rớt vượt quá
+  thì chỉ rớt tới mức trần (phần thừa bỏ qua).
   Bom thả cách đầu rắn ít nhất 3 ô.
 - **Tim:** +1 điểm mỗi tim.
 - **Top 3 tặng quà:** xếp theo tổng điểm quà của từng người, cập nhật live.
@@ -39,8 +49,12 @@ quà tặng và tim.
 | `doDaiBanDau` | 5 | Độ dài rắn lúc bắt đầu / sau khi hồi sinh. |
 | `diemTao` | 10 | Điểm mỗi quả táo ăn được. |
 | `thoiGianBom` | 30 (giây, 0 = không hết hạn) | Bom tự biến mất sau từng này giây. |
-| `soBomToiDa` | 5 | Tối đa bom cùng lúc; quà thả bom khi đủ thì bỏ qua. |
-| `soTaoToiDa` | 3 | Số táo thường trực trên bàn. |
+| `soBomToiDa` | 30 | Tối đa bom cùng lúc trên bàn; quà thả bom khi đủ thì bỏ qua (phần thừa). |
+| `soTaoToiDa` | 3 | Số táo thường trực trên bàn (táo tự nhiên sau khi ăn). |
+| `soTaoToiDaTrenBan` | 30 | Tối đa táo cùng lúc trên bàn (kể cả táo quà). |
+| `tangQuaTheoXu` | `[[9,1],[29,3],[99,5],[299,10],[999,20],[999999,30]]` | Bảng bậc số lượng theo xu (JSON): [xu tối đa, số trái]. |
+| `thoiGianRoi` | 600 (ms, 100–2000) | Thời gian 1 trái rơi từ trên cao xuống đất. |
+| `choRoi` | 80 (ms, 0–500) | Khoảng cách giữa 2 trái rơi nối tiếp trong cùng 1 quà. |
 | `thoiGianHoiSinh` | 3 (giây) | Chết bao lâu thì chơi lại. |
 | `mauThanRan` | `#FF9F1C` | Màu thân rắn (cam, gradient tới vàng). |
 | `mauDauRan` | `#4CAF50` | Màu đầu rắn (xanh lá). |
@@ -58,9 +72,11 @@ Bảng quà mặc định (`quaTang`, JSON):
   `GG`/`Apple`/`Chicken`/`Gift Box` theo ảnh tham chiếu — nếu live thật
   thấy tên khác thì sửa key cho khớp, game cũng nhận cả nhãn tiếng Việt
   như "Hoa hồng").
-- `diem` = điểm quà (cộng vào Điểm game + Top tặng quà), `hieuUng` =
-  `"tao"` (rớt táo) hoặc `"bom"` (thả bom). Quà combo (count > 1): điểm
-  nhân theo count, hiệu ứng chỉ thả 1 lần.
+- `diem` = số xu mặc định của quà (điểm quà = số xu kèm event, fallback
+  diem này; cộng vào Điểm game + Top tặng quà), `hieuUng` = `"tao"` (rớt
+  táo) hoặc `"bom"` (thả bom). **Số trái không nằm trong bảng này** — tính
+  theo bậc xu `tangQuaTheoXu` (vd hộp quà 100 xu → 10 trái). Quà combo
+  (count > 1): điểm = xu × count, số trái tính theo xu đơn của 1 quà.
 
 ## Kiến trúc file (spec `RAN-SAN-MOI-SPEC.md`)
 
@@ -89,32 +105,52 @@ Bảng quà mặc định (`quaTang`, JSON):
     (không đọc `gridX`/`gridY`) — main gán alias
     `board.offsetX = board.gridX`, `board.offsetY = board.gridY` sau khi
     tạo Board để rắn vẽ đúng vị trí bàn.
-- `new Board(config)` (config plain — Board chỉ lấy 4 key
-  `kichThuocBan`/`soTaoToiDa`/`soBomToiDa`/`thoiGianBom`);
+- `new Board(config)` (config plain — Board chỉ lấy các key nó cần:
+  `kichThuocBan`/`soTaoToiDa`/`soBomToiDa`/`thoiGianBom`/`thoiGianRoi`/
+  `choRoi`/`soTaoToiDaTrenBan`);
   hình học `board.cell/gridX/gridY/gridSize/frame` (mặc định lưới 640px,
   khung 20px, grid (20,180) trên stage 720×1280);
   `board.setRect(x,y,cell)`; `board.reset(isBlocked)`;
-  `board.spawnFood(isBlocked)` / `board.ensureFood(isBlocked)`;
-  `board.spawnBomb(head, isBlocked, nowMs)` (cách đầu ≥3 ô Manhattan);
-  `board.update(nowMs)` — PHẢI gọi mỗi frame, dọn bom hết hạn, trả mảng
-  bom vừa hết hạn; `board.removeFood/removeBomb(x,y)`;
+  `board.spawnFood(count, isBlocked)` / `board.ensureFood(isBlocked)` —
+  count mặc định 1, rơi nối tiếp cách nhau `choRoi` ms, chỉ thả tới trần 30
+  trên bàn (`soTaoToiDaTrenBan`), TRẢ số trái thực tế đã thả;
+  `board.spawnBomb(count, head, isBlocked, nowMs)` (cách đầu ≥3 ô
+  Manhattan, trần 30 bom `soBomToiDa`);
+  `board.update(nowMs)` — PHẢI gọi mỗi frame: tiến độ rơi + dọn bom hết
+  hạn, TRẢ object `{ expiredBombs: [...], landed: [...] }` (landed = táo/
+  bom VỪA chạm đất `{type:'apple'|'bomb', x, y}`);
+  `board.removeFood/removeBomb(x,y)`;
   `board.isBomb/isFood/isFree/inBounds(x,y)`; `board.cellCenter(x,y)`;
   `board.render(ctx, nowMs)` (vẽ ở tọa độ tuyệt đối stage — canvas phủ
-  toàn stage 720×1280). `isBlocked` = "ô rắn đang chiếm", main PHẢI truyền
-  khi thả (Board chỉ biết tường/táo/bom). `isFree` không tính rắn.
+  toàn stage 720×1280; vẽ cả đồ ĐANG RƠI + bóng). `isBlocked` = "ô rắn
+  đang chiếm", main PHẢI truyền khi thả (Board chỉ biết tường/táo/bom).
+  `isFree` không tính rắn. CHỈ táo/bom ĐÃ CHẠM ĐẤT mới nằm trong
+  `foods`/`bombs` — đồ đang rơi nằm trong mảng riêng `board.falling`
+  `{type, x, y, t0}`, không tính vào `isFood`/`isBomb`/`isFree`.
+  - TƯƠNG THÍCH TẠM: board cũ (nv3 @ fa31f3f) chưa có spawn(count)/
+    falling/update-object — main.js có adapter (spawnApples/spawnBombs/
+    boardUpdate) tự chọn API theo `board.falling` có tồn tại hay không;
+    xóa adapter khi nv6 gộp xong.
   - Board snapshot config lúc new (copy) — main đẩy `thoiGianBom`/
-    `soBomToiDa`/`soTaoToiDa` mới vào `board.config` sau mỗi applyConfig.
+    `soBomToiDa`/`soTaoToiDa`/`soTaoToiDaTrenBan`/`thoiGianRoi`/`choRoi`
+    mới vào `board.config` sau mỗi applyConfig.
 - `window.effects.init({cellSize, cols, rows, originX, originY, applePoints})`
   — PHẢI gọi sau khi biết layout bàn (và gọi lại khi đổi bàn/điểm);
-  `effects.eat(x,y,points)/explode(x,y)/die()/spawn(x,y)` (tọa độ ô lưới),
-  `update(dt)` (dt tính bằng GIÂY), `render(ctx)`. Chưa có hàm poof riêng
-  cho bom hết hạn — main gọi `update()` và chưa bắn FX gì thêm.
+  `effects.eat(x,y,points)/explode(x,y)/die()/spawn(x,y)/land(x,y,type)`
+  (tọa độ ô lưới; type `'apple'`|`'bomb'`),
+  `update(dt)` (dt tính bằng GIÂY), `render(ctx)`. main gọi `land()` cho
+  mỗi item trong `landed` sau mỗi `board.update()` (Board tự vẽ đồ rơi +
+  bóng; main KHÔNG gọi `effects.spawn` cho quà nữa vì không biết vị trí
+  từng trái trong cơn mưa). effects cũ (nv4 @ 7aa3b9d) chưa có `land()` —
+  main guard `typeof FX.land === 'function'`.
 
 ## Lưu ý kiểm chứng
 
 - Demo 5 phút: rắn di chuyển mượt, ăn táo lớn lên, không đơ, không chết
   vô cớ, hồi sinh đúng sau 3s, bom hết hạn biến mất, quà giả lập rớt đúng
-  táo/bom. 0 console error.
+  táo/bom (rơi từ trên cao, chạm đất mới tính, số lượng theo xu). 0 console error.
+- Quà 100 xu → rớt đúng 5 trái (theo bậc); quà 5000 xu → đúng 30 trái
+  (chặn ở trần 30); quà không kèm xu → 1 trái.
 - Đổi màu/tốc độ qua admin ăn ngay (không cần load lại trang); đổi
   `kichThuocBan` thì dựng lại bàn + rắn.
 - Trường hợp biên (để nv6 kiểm): rắn hồi sinh ngay trên ô có bom (bom cũ

@@ -748,17 +748,23 @@ const GAME_SCHEMAS = {
       { k: 'diemTao', l: 'Điểm mỗi quả táo ăn được (1–100)', t: 'num', min: 1, max: 100, step: 1 },
       { k: 'thoiGianHoiSinh', l: 'Chết bao lâu thì chơi lại (giây, 1–10)', t: 'num', min: 1, max: 10, step: 1 },
     ] },
-    { title: '💣 Bom & táo', live: true, note: 'Bom là bẫy: rắn đụng bom thì chết. Bom thả cách đầu rắn ít nhất 3 ô; hết hạn thì tự biến mất; đủ số bom tối đa thì quà thả bom bị bỏ qua.', fields: [
+    { title: '💣 Bom & táo', live: true, note: 'Bom là bẫy: rắn đụng bom thì chết. Bom thả cách đầu rắn ít nhất 3 ô; hết hạn thì tự biến mất; đủ số tối đa thì quà thả bom bị bỏ qua (phần thừa không rớt). Táo tự nhiên duy trì soTaoToiDa quả; táo/bom quà rớt thêm tới trần 30 trên bàn.', fields: [
       { k: 'thoiGianBom', l: 'Bom tồn tại (giây, 0–300; 0 = không hết hạn)', t: 'num', min: 0, max: 300, step: 1 },
-      { k: 'soBomToiDa', l: 'Tối đa bom cùng lúc (1–20)', t: 'num', min: 1, max: 20, step: 1 },
+      { k: 'soBomToiDa', l: 'Tối đa bom cùng lúc trên bàn (1–30)', t: 'num', min: 1, max: 30, step: 1 },
       { k: 'soTaoToiDa', l: 'Số táo thường trực trên bàn (1–10)', t: 'num', min: 1, max: 10, step: 1 },
+      { k: 'soTaoToiDaTrenBan', l: 'Tối đa táo cùng lúc trên bàn (1–30)', t: 'num', min: 1, max: 30, step: 1 },
+    ] },
+    { title: '🌧️ Rơi & số lượng theo xu', live: true, note: 'Táo/bom không hiện ngay — RƠI từ trên cao xuống ô đích (có bóng dưới đất, nảy + bụi khi chạm đất). CHỈ KHI CHẠM ĐẤT MỚI TÍNH: táo đang rơi rắn chưa ăn được, bom đang rơi chưa gây chết. 1 quà rớt NHIỀU trái theo số xu: bảng bậc [[xu tối đa, số trái], ...] — xu ≤9 → 1, ≤29 → 3, ≤99 → 5, ≤299 → 10, ≤999 → 20, còn lại → 30 (tối đa 30/lần). Nhiều trái rơi nối tiếp thành cơn mưa, mỗi trái cách nhau choRoi ms.', fields: [
+      { k: 'thoiGianRoi', l: 'Thời gian 1 trái rơi (ms, 100–2000)', t: 'num', min: 100, max: 2000, step: 10 },
+      { k: 'choRoi', l: 'Khoảng cách giữa 2 trái rơi nối tiếp (ms, 0–500)', t: 'num', min: 0, max: 500, step: 10 },
+      { k: 'tangQuaTheoXu', l: 'Bảng bậc số lượng theo xu (JSON)', t: 'txt', full: true },
     ] },
     { title: '🎨 Màu rắn & tên game', live: true, note: 'Đổi màu ăn ngay (không cần load lại trang). Màu ghi dạng hex #RRGGBB, vd #FF9F1C (cam), #4CAF50 (xanh lá).', fields: [
       { k: 'mauThanRan', l: 'Màu thân rắn (hex)', t: 'txt' },
       { k: 'mauDauRan', l: 'Màu đầu rắn (hex)', t: 'txt' },
       { k: 'tenGame', l: 'Tên game', t: 'txt' },
     ] },
-    { title: '🎁 Bảng quà', live: true, note: 'Dán JSON {"Tên quà":{"diem":N,"hieuUng":"tao"|"bom"}} — key là TÊN QUÀ THẬT trên TikTok (Rose, Doughnut đã xác nhận; GG, Apple, Chicken, Gift Box theo ảnh tham chiếu — live thật thấy tên khác thì sửa key cho khớp). diem = điểm quà (cộng vào Điểm game + Top tặng quà); hieuUng "tao" = rớt 1 táo, "bom" = thả 1 bom. Quà không có trong bảng thì +0 điểm, không hiệu ứng. Quà combo: điểm nhân theo count, hiệu ứng chỉ thả 1 lần.', fields: [
+    { title: '🎁 Bảng quà', live: true, note: 'Dán JSON {"Tên quà":{"diem":N,"hieuUng":"tao"|"bom"}} — key là TÊN QUÀ THẬT trên TikTok (Rose, Doughnut đã xác nhận; GG, Apple, Chicken, Gift Box theo ảnh tham chiếu — live thật thấy tên khác thì sửa key cho khớp). diem = số xu mặc định của quà (điểm quà = số xu kèm event, fallback diem này; cộng vào Điểm game + Top tặng quà); hieuUng "tao" = rớt táo, "bom" = thả bom. SỐ TRÁI rớt theo bảng bậc tangQuaTheoXu (vd hộp quà 100 xu → 5 trái). Quà không có trong bảng thì +điểm = số xu (nếu event kèm xu), không rớt đồ. Quà combo: điểm = xu × count, số trái tính theo xu đơn của 1 quà.', fields: [
       { k: 'quaTang', l: 'Bảng quà (JSON)', t: 'txt', full: true },
     ] },
   ],
