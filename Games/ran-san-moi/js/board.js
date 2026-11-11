@@ -1,20 +1,36 @@
 /* Board — bàn chơi game Rắn Săn Mồi (RAN-BOARD, nv3).
-   Hợp đồng: RAN-SAN-MOI-SPEC.md §3 (bàn + layout) và §5 (Board + quà).
+   Hợp đồng: RAN-SAN-MOI-SPEC.md §3 (bàn + layout) và §5 (Board + quà), bản cập nhật
+   hiệu ứng RƠI (user bổ sung 2026-11-11 16:53).
    main.js (nv1) gọi đúng các hàm dưới đây; KHÔNG đổi tên/signature.
+
+   ĐỔI SO VỚI BẢN fa31f3f (BOSS giao bổ sung — nv1/nv6 lưu ý):
+   - spawnFood(count, isBlocked) / spawnBomb(count, head, isBlocked, nowMs):
+     tham số đầu giờ là SỐ TRÁI (mặc định 1), trả SỐ TRÁI thực tế đã thả (không
+     còn trả vị trí/null). Táo/bom KHÔNG hiện ra ngay — chúng RƠI từ trên cao
+     xuống ô đích (rơi thoiGianRoi ms, mỗi trái cách nhau choRoi ms).
+   - update(nowMs) giờ trả OBJECT { expiredBombs: [...], landed: [...] }
+     (không còn trả mảng bom hết hạn) — landed là táo/bom VỪA chạm đất
+     ({type:'apple'|'bomb', x, y}); main.js gọi effects.land() cho mỗi cái đó.
+   - Trần mới: tối đa 30 táo / 30 bom trên bàn (soTaoToiDaTrenBan=30,
+     soBomToiDa=30 — tính cả táo/bom đang rơi).
 
    Cách dùng (main.js):
      const board = new Board(config);              // config: xem DEFAULT_CONFIG
      board.setRect(x, y, cell);                    // dời/đổi cỡ bàn sau khi xếp HUD (không bắt buộc)
-     board.reset(isBlocked);                       // ván mới: dọn táo/bom, thả 1 táo
-     board.spawnFood(isBlocked);                   // quà rớt táo / ăn xong thả táo mới
-     board.spawnBomb(snake.segments[0], isBlocked); // quà thả bom
-     board.update();                               // mỗi frame/tick: dọn bom hết hạn, trả mảng bom vừa hết hạn (để main.js bắn poof)
+     board.reset(isBlocked);                       // ván mới: dọn táo/bom/rơi, thả 1 táo
+     board.spawnFood(1, isBlocked);                // ăn xong thả táo mới (CŨNG rơi)
+     board.spawnFood(n, isBlocked);                // quà rớt n táo (n theo bậc xu, main.js tính)
+     board.spawnBomb(n, snake.segments[0], isBlocked); // quà thả n bom
+     board.update();                               // mỗi frame/tick: rơi + chạm đất + dọn bom hết hạn
      board.removeFood(x, y);                       // rắn ăn táo xong
      board.render(ctx);                            // mỗi frame, vẽ dưới rắn + FX
    isBlocked(x, y): main.js PHẢI truyền hàm này (trả true nếu ô có thân rắn),
    nếu không táo/bom có thể rớt lên thân rắn — Board chỉ biết tường/táo/bom
-   (isFree theo đúng §5: không tường/táo/bom, rắn do Snake giữ).
+   (isFree theo đúng §5: không tường/táo/bom ĐÃ CHẠM ĐẤT, rắn do Snake giữ).
    Khoảng cách bom–đầu rắn ≥ 3 ô tính theo Manhattan (|dx|+|dy|).
+   CHỈ KHI CHẠM ĐẤT MỚI TÍNH: táo/bom đang rơi không có trong foods/bombs,
+   không tính vào isFood/isBomb/isFree (rắn chưa ăn được / chưa gây chết,
+   AI không tính là chướng ngại). Bom hết hạn tính từ lúc THẢ (không phải lúc chạm đất).
    Vẽ đúng ảnh tham chiếu (live DarkBossTv, user gửi 2026-11-11): bàn caro tối
    2 sắc, khung gỗ nâu + viền vàng, pháo ở giữa cạnh trên + giữa cạnh dưới
    khung (CHỈ trang trí, không bắn).
@@ -24,9 +40,12 @@
 
 var DEFAULT_CONFIG = {
   kichThuocBan: 20, // ô mỗi chiều, 16–24 (spec §7)
-  soTaoToiDa: 3,
-  soBomToiDa: 5,
+  soTaoToiDa: 3, // táo thường tối đa — main.js tự quyết khi thả táo tự nhiên
+  soTaoToiDaTrenBan: 30, // trần táo trên bàn (tính cả đang rơi)
+  soBomToiDa: 30, // trần bom trên bàn (tính cả đang rơi)
   thoiGianBom: 30, // giây, 0 = bom không hết hạn
+  thoiGianRoi: 600, // ms, thời gian 1 trái rơi từ trên cao xuống đất
+  choRoi: 80 // ms, khoảng cách giữa 2 trái rơi nối tiếp trong cùng 1 quà
 };
 
 // Màu đúng ảnh tham chiếu.
@@ -57,6 +76,9 @@ var COLOR = {
 var GRID_PX = 640; // cạnh lưới mặc định (khung 20px mỗi bên → tổng 680px, vừa khung 720)
 var FRAME = 20; // dày khung gỗ (px)
 var STAGE_W = 720; // khổ game dọc 720×1280 (spec §2); khác khổ thì main.js truyền rect
+var FALL_CELLS = 6; // táo/bom bắt đầu rơi từ cao hơn ô đích 6 ô
+var BOUNCE_MS = 200; // thời gian nảy sau khi chạm đất
+var BOUNCE_PX = 6; // cao độ nảy tối đa (px)
 
 function num(v, d) {
   return (typeof v === 'number' && Number.isFinite(v)) ? v : d;
@@ -68,8 +90,11 @@ function Board(config, rect) {
   this.config = {
     kichThuocBan: this.n,
     soTaoToiDa: Math.max(1, Math.round(num(cfg.soTaoToiDa, 3))),
-    soBomToiDa: Math.max(0, Math.round(num(cfg.soBomToiDa, 5))),
-    thoiGianBom: Math.max(0, num(cfg.thoiGianBom, 30))
+    soTaoToiDaTrenBan: Math.max(1, Math.round(num(cfg.soTaoToiDaTrenBan, 30))),
+    soBomToiDa: Math.max(0, Math.round(num(cfg.soBomToiDa, 30))),
+    thoiGianBom: Math.max(0, num(cfg.thoiGianBom, 30)),
+    thoiGianRoi: Math.max(1, num(cfg.thoiGianRoi, 600)),
+    choRoi: Math.max(0, num(cfg.choRoi, 80))
   };
   // Hình học: rect { x, y, cell } — góc trái-trên LƯỚI + cỡ 1 ô (px).
   this.cell = (rect && num(rect.cell, 0) > 0) ? rect.cell : GRID_PX / this.n;
@@ -78,8 +103,10 @@ function Board(config, rect) {
   this.gridX = (rect && typeof rect.x === 'number') ? rect.x
     : (STAGE_W - (this.gridSize + 2 * this.frame)) / 2;
   this.gridY = (rect && typeof rect.y === 'number') ? rect.y : 180;
-  this.foods = []; // táo {x, y}
-  this.bombs = []; // bom {x, y, expiresAt} — expiresAt = 0: không hết hạn
+  this.foods = []; // táo ĐÃ chạm đất {x, y}
+  this.bombs = []; // bom ĐÃ chạm đất {x, y, expiresAt} — expiresAt = 0: không hết hạn
+  this.falling = []; // táo/bom ĐANG rơi {type:'apple'|'bomb', x, y, t0} (+expiresAt nếu là bom)
+  this._lastLanded = []; // táo/bom vừa chạm đất ở update() gần nhất {type, x, y, at} — để vẽ nảy
 }
 
 // Dời/đổi cỡ bàn (main.js xếp HUD xong thì gọi; không bắt buộc).
@@ -105,8 +132,9 @@ Board.prototype.isBomb = function (x, y) {
   return this.bombs.some(function (b) { return b.x === x && b.y === y; });
 };
 
-// Ô trống theo §5: trong bàn + không táo/bom (rắn do Snake giữ —
-// main.js truyền isBlocked khi thả để tránh cả thân rắn).
+// Ô trống theo §5: trong bàn + không táo/bom ĐÃ CHẠM ĐẤT (rắn do Snake giữ —
+// main.js truyền isBlocked khi thả để tránh cả thân rắn). Táo/bom đang rơi
+// KHÔNG chặn ô (rắn đi xuyên qua được — chúng chưa tính).
 Board.prototype.isFree = function (x, y) {
   return this.inBounds(x, y) && !this.isFood(x, y) && !this.isBomb(x, y);
 };
@@ -116,14 +144,30 @@ Board.prototype.cellCenter = function (x, y) {
   return { x: this.gridX + (x + 0.5) * this.cell, y: this.gridY + (y + 0.5) * this.cell };
 };
 
+// Có trái nào đang rơi tới ô này không (để lúc thả không chọn trùng ô đích).
+Board.prototype._isFallingTarget = function (x, y) {
+  return this.falling.some(function (f) { return f.x === x && f.y === y; });
+};
+
+Board.prototype._countFalling = function (type) {
+  var c = 0;
+  for (var i = 0; i < this.falling.length; i++) {
+    if (this.falling[i].type === type) c++;
+  }
+  return c;
+};
+
 // Chọn đều 1 ô trống trong số các ô hợp lệ (liệt kê hết rồi chọn —
 // không lặp thử/sai, không bao giờ treo khi bàn gần đầy).
-Board.prototype._randomFreeCell = function (isBlocked, minHeadDist, head) {
+// reserved: các ô đã chọn trong cùng đợt thả (tránh 2 trái rơi về 1 ô).
+Board.prototype._randomFreeCell = function (isBlocked, minHeadDist, head, reserved) {
   var out = [];
   for (var y = 0; y < this.n; y++) {
     for (var x = 0; x < this.n; x++) {
       if (!this.isFree(x, y)) continue;
       if (isBlocked && isBlocked(x, y)) continue;
+      if (this._isFallingTarget(x, y)) continue;
+      if (reserved && reserved.some(function (c) { return c.x === x && c.y === y; })) continue;
       if (head && minHeadDist > 0) {
         if (Math.abs(x - head.x) + Math.abs(y - head.y) < minHeadDist) continue;
       }
@@ -134,54 +178,87 @@ Board.prototype._randomFreeCell = function (isBlocked, minHeadDist, head) {
   return out[(Math.random() * out.length) | 0];
 };
 
-// Thả 1 táo ở ô trống ngẫu nhiên; trả vị trí hoặc null (đã đủ soTaoToiDa / bàn đầy).
-Board.prototype.spawnFood = function (isBlocked) {
-  if (this.foods.length >= this.config.soTaoToiDa) return null;
-  var cell = this._randomFreeCell(isBlocked, 0, null);
-  if (!cell) return null;
-  this.foods.push(cell);
-  return cell;
-};
-
-// Đảm bảo luôn ≥ 1 táo trên bàn (ván mới / sau khi ăn); trả mảng vị trí vừa thả.
-Board.prototype.ensureFood = function (isBlocked) {
-  var spawned = [];
-  while (this.foods.length < 1) {
-    var c = this.spawnFood(isBlocked);
-    if (!c) break;
-    spawned.push(c);
+// Thả 1 đợt táo/bom (dùng chung cho spawnFood/spawnBomb).
+// type 'apple'|'bomb'; now: mốc thời gian bắt đầu đợt (ms).
+// Mỗi trái rơi nối tiếp nhau (trái thứ i bắt đầu lúc now + i*choRoi).
+// Chỉ thả tới mức trần trên bàn (tính cả trái đang rơi). Trả số trái thực tế đã thả.
+Board.prototype._spawnBurst = function (type, count, isBlocked, minHeadDist, head, now) {
+  var cap = (type === 'apple') ? this.config.soTaoToiDaTrenBan : this.config.soBomToiDa;
+  var inPlay = (type === 'apple')
+    ? this.foods.length + this._countFalling('apple')
+    : this.bombs.length + this._countFalling('bomb');
+  var room = cap - inPlay;
+  var want = Math.max(0, Math.floor(num(count, 1)));
+  var n = Math.min(want, room);
+  var reserved = [];
+  var queued = 0;
+  for (var i = 0; i < n; i++) {
+    var cell = this._randomFreeCell(isBlocked, minHeadDist, head, reserved);
+    if (!cell) break;
+    reserved.push(cell);
+    var entry = { type: type, x: cell.x, y: cell.y, t0: now + queued * this.config.choRoi };
+    if (type === 'bomb') {
+      // Hạn bom tính từ lúc THẢ (không phải lúc chạm đất).
+      entry.expiresAt = this.config.thoiGianBom > 0 ? now + this.config.thoiGianBom * 1000 : 0;
+    }
+    this.falling.push(entry);
+    queued++;
   }
-  return spawned;
+  return queued;
 };
 
-// Thả 1 bom ở ô trống ngẫu nhiên, cách đầu rắn ≥ 3 ô (Manhattan).
-// head: {x, y} vị trí đầu rắn (bỏ qua = không áp luật cách đầu).
-// Trả bom {x, y, expiresAt} hoặc null (đã đủ soBomToiDa / không còn ô hợp lệ).
-// expiresAt = 0 nghĩa là không hết hạn (thoiGianBom = 0).
-Board.prototype.spawnBomb = function (head, isBlocked, nowMs) {
-  if (this.bombs.length >= this.config.soBomToiDa) return null;
+// Thả count táo (mặc định 1), mỗi trái rơi nối tiếp nhau; chỉ thả tới trần
+// soTaoToiDaTrenBan. Trả số táo thực tế đã thả. nowMs: mốc bắt đầu (mặc định
+// Date.now(); chỉ dùng để test cho thời gian xác định).
+Board.prototype.spawnFood = function (count, isBlocked, nowMs) {
   var now = (typeof nowMs === 'number') ? nowMs : Date.now();
-  var cell = this._randomFreeCell(isBlocked, 3, head || null);
-  if (!cell) return null;
-  var bomb = {
-    x: cell.x,
-    y: cell.y,
-    expiresAt: this.config.thoiGianBom > 0 ? now + this.config.thoiGianBom * 1000 : 0
-  };
-  this.bombs.push(bomb);
-  return bomb;
+  return this._spawnBurst('apple', count, isBlocked, 0, null, now);
 };
 
-// Dọn bom hết hạn; trả mảng bom vừa hết hạn (main.js bắn hiệu ứng poof).
-// main.js gọi mỗi frame/tick — bom hết hạn chỉ biến mất khi update() chạy.
+// Đảm bảo luôn ≥ 1 táo trên bàn (tính cả táo đang rơi); trả số táo vừa thả (0/1).
+Board.prototype.ensureFood = function (isBlocked, nowMs) {
+  var have = this.foods.length + this._countFalling('apple');
+  if (have >= 1) return 0;
+  return this.spawnFood(1, isBlocked, nowMs);
+};
+
+// Thả count bom (mặc định 1), rơi nối tiếp; chỉ thả tới trần soBomToiDa;
+// bom cách đầu rắn ≥ 3 ô (Manhattan). head: {x, y} vị trí đầu rắn
+// (bỏ qua = không áp luật cách đầu). Trả số bom thực tế đã thả.
+Board.prototype.spawnBomb = function (count, head, isBlocked, nowMs) {
+  var now = (typeof nowMs === 'number') ? nowMs : Date.now();
+  return this._spawnBurst('bomb', count, isBlocked, 3, head || null, now);
+};
+
+// Mỗi frame/tick: (a) táo/bom nào rơi xong thì chuyển từ falling sang
+// foods/bombs (lúc đó mới tính); (b) dọn bom hết hạn.
+// Trả { expiredBombs: [...], landed: [...] } — landed là táo/bom VỪA chạm đất
+// ({type:'apple'|'bomb', x, y}) để main.js bắn hiệu ứng chạm đất (effects.land).
+// main.js gọi mỗi frame/tick — rơi/chạm đất/hết hạn chỉ tiến triển khi update() chạy.
 Board.prototype.update = function (nowMs) {
   var now = (typeof nowMs === 'number') ? nowMs : Date.now();
+  var landed = [];
+  var still = [];
+  for (var i = 0; i < this.falling.length; i++) {
+    var f = this.falling[i];
+    if (now - f.t0 >= this.config.thoiGianRoi) {
+      if (f.type === 'apple') this.foods.push({ x: f.x, y: f.y });
+      else this.bombs.push({ x: f.x, y: f.y, expiresAt: f.expiresAt });
+      landed.push({ type: f.type, x: f.x, y: f.y });
+    } else {
+      still.push(f);
+    }
+  }
+  this.falling = still;
+  this._lastLanded = landed.map(function (e) {
+    return { type: e.type, x: e.x, y: e.y, at: now };
+  });
   var gone = [];
   this.bombs = this.bombs.filter(function (b) {
     if (b.expiresAt > 0 && b.expiresAt <= now) { gone.push(b); return false; }
     return true;
   });
-  return gone;
+  return { expiredBombs: gone, landed: landed };
 };
 
 // Rắn ăn táo xong: gỡ táo khỏi bàn. Trả true nếu có táo ở ô đó.
@@ -200,11 +277,14 @@ Board.prototype.removeBomb = function (x, y) {
   return true;
 };
 
-// Ván mới: dọn táo/bom, thả lại 1 táo.
-Board.prototype.reset = function (isBlocked) {
+// Ván mới: dọn táo/bom/rơi, thả lại 1 táo. nowMs: mốc bắt đầu (mặc định
+// Date.now(); chỉ dùng để test cho thời gian xác định).
+Board.prototype.reset = function (isBlocked, nowMs) {
   this.foods = [];
   this.bombs = [];
-  this.ensureFood(isBlocked);
+  this.falling = [];
+  this._lastLanded = [];
+  this.ensureFood(isBlocked, nowMs);
 };
 
 /* ---------------- Vẽ ---------------- */
@@ -215,8 +295,52 @@ Board.prototype.render = function (ctx, nowMs) {
   this._renderFrame(ctx);
   this._renderGrid(ctx);
   this._renderCannons(ctx);
-  for (var i = 0; i < this.foods.length; i++) this._renderApple(ctx, this.foods[i].x, this.foods[i].y);
-  for (var j = 0; j < this.bombs.length; j++) this._renderBomb(ctx, this.bombs[j], now);
+  for (var i = 0; i < this.foods.length; i++) {
+    var f = this.foods[i];
+    this._renderApple(ctx, f.x, f.y, this._bounceOffset('apple', f.x, f.y, now));
+  }
+  for (var j = 0; j < this.bombs.length; j++) {
+    var b = this.bombs[j];
+    this._renderBomb(ctx, b, now, this._bounceOffset('bomb', b.x, b.y, now));
+  }
+  this._renderFalling(ctx, now);
+};
+
+// Độ nảy lên (px, âm = lên trên) của táo/bom vừa chạm đất trong 200ms gần nhất.
+Board.prototype._bounceOffset = function (type, x, y, now) {
+  var list = this._lastLanded;
+  for (var i = 0; i < list.length; i++) {
+    var e = list[i];
+    if (e.type === type && e.x === x && e.y === y) {
+      var q = (now - e.at) / BOUNCE_MS;
+      if (q >= 0 && q < 1) return -BOUNCE_PX * Math.sin(Math.PI * q);
+    }
+  }
+  return 0;
+};
+
+// Vẽ táo/bom đang rơi: ở vị trí nội suy (rơi nhanh dần) + bóng ellipse dưới ô
+// đích (lớn dần + đậm dần khi tới gần đất). Trái chưa tới lượt (p < 0) thì chưa vẽ.
+Board.prototype._renderFalling = function (ctx, now) {
+  var fallH = FALL_CELLS * this.cell;
+  var dur = Math.max(1, this.config.thoiGianRoi);
+  for (var i = 0; i < this.falling.length; i++) {
+    var f = this.falling[i];
+    var p = (now - f.t0) / dur;
+    if (p < 0) continue;
+    if (p > 1) p = 1; // render gọi mà chưa update: vẽ ở đất
+    var s = p * p; // rơi nhanh dần (trọng lực)
+    var c = this.cellCenter(f.x, f.y);
+    var py = c.y - fallH * (1 - s);
+    var scale = 0.85 + 0.15 * s;
+    var rx = this.cell * 0.30 * (0.4 + 0.6 * s);
+    ctx.fillStyle = 'rgba(0,0,0,' + (0.08 + 0.22 * s).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.ellipse(c.x, c.y, rx, rx * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (f.type === 'apple') this._drawApple(ctx, c.x, py, scale);
+    else this._drawBomb(ctx, c.x, py, now, scale);
+  }
 };
 
 // Khung gỗ: nền gỗ gradient + vân ván + viền ngoài tối + viền vàng sát lưới
@@ -322,16 +446,22 @@ Board.prototype._renderCannon = function (ctx, cx, cy, angle) {
   ctx.restore();
 };
 
-// Táo: tròn đỏ + cuống + lá xanh + bóng sáng.
-Board.prototype._renderApple = function (ctx, x, y) {
+// Táo đã chạm đất ở ô (x, y); dy: độ nảy lên (px, âm = lên trên).
+Board.prototype._renderApple = function (ctx, x, y, dy) {
   var c = this.cellCenter(x, y);
-  var r = this.cell * 0.32;
-  var g = ctx.createRadialGradient(c.x - r * 0.35, c.y - r * 0.4, r * 0.1, c.x, c.y, r);
+  this._drawApple(ctx, c.x, c.y + (dy || 0), 1);
+};
+
+// Vẽ táo tại điểm (px, py) với tỉ lệ scale — dùng chung cho táo đã chạm đất
+// (scale=1) và táo đang rơi (scale nhỏ dần khi còn cao).
+Board.prototype._drawApple = function (ctx, px, py, scale) {
+  var r = this.cell * 0.32 * scale;
+  var g = ctx.createRadialGradient(px - r * 0.35, py - r * 0.4, r * 0.1, px, py, r);
   g.addColorStop(0, COLOR.appleRedA);
   g.addColorStop(1, COLOR.appleRedB);
   ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+  ctx.arc(px, py, r, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,0.25)';
   ctx.lineWidth = 1;
@@ -339,34 +469,40 @@ Board.prototype._renderApple = function (ctx, x, y) {
   // Bóng sáng.
   ctx.fillStyle = 'rgba(255,255,255,0.35)';
   ctx.beginPath();
-  ctx.ellipse(c.x - r * 0.35, c.y - r * 0.4, r * 0.28, r * 0.16, -0.6, 0, Math.PI * 2);
+  ctx.ellipse(px - r * 0.35, py - r * 0.4, r * 0.28, r * 0.16, -0.6, 0, Math.PI * 2);
   ctx.fill();
   // Cuống + lá.
   ctx.strokeStyle = '#6D4C41';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(c.x, c.y - r * 0.9);
-  ctx.lineTo(c.x + 1, c.y - r * 1.25);
+  ctx.moveTo(px, py - r * 0.9);
+  ctx.lineTo(px + 1, py - r * 1.25);
   ctx.stroke();
   ctx.fillStyle = COLOR.appleLeaf;
   ctx.beginPath();
-  ctx.ellipse(c.x + r * 0.42, c.y - r * 1.05, r * 0.42, r * 0.2, -0.6, 0, Math.PI * 2);
+  ctx.ellipse(px + r * 0.42, py - r * 1.05, r * 0.42, r * 0.2, -0.6, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = COLOR.appleLeafDark;
   ctx.lineWidth = 1;
   ctx.stroke();
 };
 
-// Bom: tròn đen + ngòi + tia lửa nhấp nháy (phase theo nowMs).
-Board.prototype._renderBomb = function (ctx, bomb, now) {
+// Bom đã chạm đất; dy: độ nảy lên (px).
+Board.prototype._renderBomb = function (ctx, bomb, now, dy) {
   var c = this.cellCenter(bomb.x, bomb.y);
-  var r = this.cell * 0.34;
-  var g = ctx.createRadialGradient(c.x - r * 0.35, c.y - r * 0.4, r * 0.1, c.x, c.y, r);
+  this._drawBomb(ctx, c.x, c.y + (dy || 0), now, 1);
+};
+
+// Vẽ bom tại điểm (px, py) — dùng chung cho bom đã chạm đất và bom đang rơi.
+// Tia lửa nhấp nháy theo now.
+Board.prototype._drawBomb = function (ctx, px, py, now, scale) {
+  var r = this.cell * 0.34 * scale;
+  var g = ctx.createRadialGradient(px - r * 0.35, py - r * 0.4, r * 0.1, px, py, r);
   g.addColorStop(0, COLOR.bombBodyA);
   g.addColorStop(1, COLOR.bombBodyB);
   ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+  ctx.arc(px, py, r, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = 'rgba(255,255,255,0.18)';
   ctx.lineWidth = 1;
@@ -374,15 +510,15 @@ Board.prototype._renderBomb = function (ctx, bomb, now) {
   // Bóng sáng nhỏ.
   ctx.fillStyle = 'rgba(255,255,255,0.28)';
   ctx.beginPath();
-  ctx.ellipse(c.x - r * 0.35, c.y - r * 0.4, r * 0.22, r * 0.13, -0.6, 0, Math.PI * 2);
+  ctx.ellipse(px - r * 0.35, py - r * 0.4, r * 0.22, r * 0.13, -0.6, 0, Math.PI * 2);
   ctx.fill();
   // Ngòi: cong lên-phải từ đỉnh bom.
-  var fx = c.x + r * 0.55, fy = c.y - r * 1.05;
+  var fx = px + r * 0.55, fy = py - r * 1.05;
   ctx.strokeStyle = COLOR.fuse;
   ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.moveTo(c.x + r * 0.1, c.y - r * 0.85);
-  ctx.quadraticCurveTo(c.x + r * 0.45, c.y - r * 1.25, fx, fy);
+  ctx.moveTo(px + r * 0.1, py - r * 0.85);
+  ctx.quadraticCurveTo(px + r * 0.45, py - r * 1.25, fx, fy);
   ctx.stroke();
   // Tia lửa nhấp nháy: alpha + cỡ pulsing theo thời gian.
   var phase = 0.5 + 0.5 * Math.sin(now / 130);
