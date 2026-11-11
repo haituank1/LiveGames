@@ -29,8 +29,9 @@
    AI không tính là chướng ngại). Bom hết hạn tính từ lúc THẢ (không phải lúc chạm đất).
    Tọa độ 3D (§1): ô (x, y) → (gridX + (x+0.5)*cell, 0, gridY + (y+0.5)*cell) —
    mặt bàn nằm ngang (mặt XZ), Y là chiều cao, mặt bàn y=0. Xem cellTo3D().
-   Vẽ đúng ảnh tham chiếu (live DarkBossTv, user gửi 2026-11-11): bàn caro tối
-   2 sắc, khung gỗ nâu + viền vàng, pháo ở giữa cạnh trên + giữa cạnh dưới
+   Vẽ đúng ảnh tham chiếu (live DarkBossTv, user gửi 2026-11-11): bàn caro nâu
+   đậm ấm 2 sắc (#3A2A1A/#2A1E12 — KHÔNG dùng xám như bản 2D, sửa 2026-11-11),
+   khung gỗ nâu + viền vàng, pháo ở giữa cạnh trên + giữa cạnh dưới
    khung (CHỈ trang trí, không bắn).
 */
 (function () {
@@ -48,8 +49,8 @@ var DEFAULT_CONFIG = {
 
 // Màu đúng ảnh tham chiếu (dùng cho cả texture caro lẫn material 3D).
 var COLOR = {
-  cellA: '#3A3A3A',
-  cellB: '#2E2E2E',
+  cellA: '#3A2A1A',
+  cellB: '#2A1E12',
   gridLine: 'rgba(0,0,0,0.20)',
   frameWoodA: '#A06A35',
   frameWoodB: '#7A4A21',
@@ -360,7 +361,7 @@ Board.prototype._ensureSharedAssets = function (THREE) {
     darkMat: new THREE.MeshStandardMaterial({ color: 0x2E2E2E, roughness: 0.9 }),
     tableTopMat: checker
       ? new THREE.MeshStandardMaterial({ map: checker, roughness: 0.85 })
-      : new THREE.MeshStandardMaterial({ color: 0x3A3A3A, roughness: 0.85 }),
+      : new THREE.MeshStandardMaterial({ color: 0x3A2A1A, roughness: 0.85 }),
     cannonMat: new THREE.MeshStandardMaterial({ color: 0x2B2B2B, roughness: 0.4, metalness: 0.5 }),
     cannonLightMat: new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.4, metalness: 0.5 })
   };
@@ -393,7 +394,12 @@ Board.prototype._makeCheckerTexture = function (THREE) {
   }
   g.stroke();
   var tex = new THREE.CanvasTexture(cv);
-  if ('sRGBEncoding' in THREE) tex.encoding = THREE.sRGBEncoding;
+  // KHÔNG đặt tex.encoding = sRGBEncoding: renderer mặc định của main.js
+  // (nv1) output linear — texture sRGB sẽ bị decode về linear rồi hiển thị
+  // thẳng, làm bàn tối gấp ~4 lần (đo được RGB ~15 thay vì ~58). Để texture
+  // ở linear thì màu render ra đúng mã hex × ánh sáng, nhất quán với các
+  // material màu trơn. Nếu main.js bật outputEncoding sRGB thì mới cần
+  // đặt encoding ở đây.
   tex.anisotropy = 4;
   return tex;
 };
