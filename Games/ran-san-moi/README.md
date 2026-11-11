@@ -87,14 +87,41 @@ Bảng quà mặc định (`quaTang`, JSON):
 - `js/snake.js` (nv2) — Snake AI (BFS tới táo + flood-fill sinh tồn) + vẽ rắn.
 - `js/board.js` (nv3) — Board: lưới, táo/bom, vẽ bàn + khung gỗ.
 - `js/effects.js` (nv4) — FX: hạt ăn táo, nổ bom, chết, chữ điểm bay.
-- Không dùng CDN / thư viện ngoài. Canvas 2D thuần.
+- Không dùng CDN. Three.js r128 tự host (`js/three.min.js`, copy từ game chùa)
+  vẽ WebGL lên canvas `#board` — xem mục "Khung Three.js" dưới đây.
+
+## Khung Three.js (RAN3D-SHELL, spec RAN-SAN-MOI-3D.md §1/§5)
+
+- `main.js` tạo DUY NHẤT 1 lần: `renderer` (WebGLRenderer, antialias, pixelRatio
+  tối đa 2), `scene`, `camera` (Perspective fov 60, góc 3/4 từ trên xuống ~52 độ,
+  bàn nằm mặt XZ, Y là cao), đèn (Ambient 0.75 + Directional 1.0 từ
+  trước-phải-trên, castShadow, shadow map 1024 — theo ảnh test nv3, đèn yếu
+  hơn sẽ làm ô caro tối bị tối quá), nền trong suốt (gradient nâu của `#stage`
+  hiện qua). Object dùng chung `window.Ran3D = { THREE, scene, camera, renderer }`.
+- Tọa độ 3D dùng đúng số 2D: ô (x,y) → `(gridX + (x+0.5)*cell, 0,
+  gridY + (y+0.5)*cell)`. Camera (340, 1082, 1475) nhìn (340, 0, 620) —
+  cả bàn (kể cả khung gỗ dưới) hiện đủ trên thanh quà. BIÊN: táo/bom rơi từ
+  cao 6 ô (board 3D nv3: FALL_CELLS = 6) nên ở cột biên lúc cao nhất bị phóng
+  đại ra ngoài thêm ~40px — camera đã kéo xa để chừa biên ~47px quanh bàn
+  (đo bằng phép chiếu, xem `workspace/multi-session/ran-test/ran-measure-cam.py`).
+- `main.js` truyền `scene` cho Snake/Board/Effects qua `setScene(scene)` (nếu
+  có) ngay sau khi tạo, rồi mỗi frame gọi `snake.render(scene, alpha)` /
+  `board.render(scene, Date.now())` / `effects.render(scene)` (chúng CHỈ cập
+  nhật vị trí mesh, KHÔNG vẽ) rồi `renderer.render(scene, camera)`.
+  Các module KHÔNG tự tạo renderer/camera/đèn.
+- Module 3D NÊN có `dispose()` để gỡ mesh của mình khỏi scene khi main dựng
+  lại bàn/rắn (đổi `kichThuocBan`) — main gọi `dispose()` nếu có (guard
+  `typeof`); không có thì mesh cũ còn sót trong scene. Khởi động chỉ tạo
+  game 1 lần (bản 2D tạo 2 lần — 3D không được, sẽ thêm mesh trùng).
 
 ## Hợp đồng interface (không tự đổi signature — đối chiếu code thật nv2/nv3/nv4)
 
 - `new Snake({ board, config, isBlocked(x,y), getFood(), onEat, onDie })`;
   `snake.reset()`; `snake.tick()` → `{type:'eat',apple}` /
   `{type:'die',cause}` / `{type:'move'}` / `null` (đã chết); `snake.grow(n)`;
-  `snake.render(ctx, alpha)`; `snake.segments/direction/alive/length`.
+  `snake.render(scene, alpha)` (3D: chỉ cập nhật vị trí mesh);
+  `snake.segments/direction/alive/length`. `setScene(scene)` + `dispose()`
+  (gỡ mesh khỏi scene khi dựng lại — xem mục "Khung Three.js").
   - main.js CHỈ dùng event trả về từ `tick()`; callback `onEat`/`onDie`
     truyền no-op (tick vừa trả event vừa gọi callback — dùng cả 2 sẽ cộng
     điểm/grow 2 lần). `tick()` chỉ BÁO ăn/chết — main gọi `snake.grow(1)`
@@ -123,12 +150,13 @@ Bảng quà mặc định (`quaTang`, JSON):
   bom VỪA chạm đất `{type:'apple'|'bomb', x, y}`);
   `board.removeFood/removeBomb(x,y)`;
   `board.isBomb/isFood/isFree/inBounds(x,y)`; `board.cellCenter(x,y)`;
-  `board.render(ctx, nowMs)` (vẽ ở tọa độ tuyệt đối stage — canvas phủ
-  toàn stage 720×1280; vẽ cả đồ ĐANG RƠI + bóng). `isBlocked` = "ô rắn
+  `board.render(scene, nowMs)` (3D: chỉ cập nhật vị trí mesh — bàn nằm mặt
+  XZ, Y là cao; vẽ cả đồ ĐANG RƠI + bóng đổ thật). `isBlocked` = "ô rắn
   đang chiếm", main PHẢI truyền khi thả (Board chỉ biết tường/táo/bom).
   `isFree` không tính rắn. CHỈ táo/bom ĐÃ CHẠM ĐẤT mới nằm trong
   `foods`/`bombs` — đồ đang rơi nằm trong mảng riêng `board.falling`
   `{type, x, y, t0}`, không tính vào `isFood`/`isBomb`/`isFree`.
+  `setScene(scene)` + `dispose()` (xem mục "Khung Three.js").
   - TƯƠNG THÍCH TẠM: board cũ (nv3 @ fa31f3f) chưa có spawn(count)/
     falling/update-object — main.js có adapter (spawnApples/spawnBombs/
     boardUpdate) tự chọn API theo `board.falling` có tồn tại hay không;
@@ -140,18 +168,19 @@ Bảng quà mặc định (`quaTang`, JSON):
   — PHẢI gọi sau khi biết layout bàn (và gọi lại khi đổi bàn/điểm);
   `effects.eat(x,y,points)/explode(x,y)/die()/spawn(x,y)/land(x,y,type)`
   (tọa độ ô lưới; type `'apple'`|`'bomb'`),
-  `update(dt)` (dt tính bằng GIÂY), `render(ctx)`. main gọi `land()` cho
+  `update(dt)` (dt tính bằng GIÂY), `render(scene)` (3D: chỉ cập nhật vị trí
+  hạt). `setScene(scene)` (nếu có). main gọi `land()` cho
   mỗi item trong `landed` sau mỗi `board.update()` (Board tự vẽ đồ rơi +
   bóng; main KHÔNG gọi `effects.spawn` cho quà nữa vì không biết vị trí
-  từng trái trong cơn mưa). effects cũ (nv4 @ 7aa3b9d) chưa có `land()` —
-  main guard `typeof FX.land === 'function'`.
+  từng trái trong cơn mưa). Bom hết hạn cũng bắn `land()` `'bomb'` (poof
+  nhỏ, RAN-QA gộp 2026-11-11).
 
 ## Lưu ý kiểm chứng
 
 - Demo 5 phút: rắn di chuyển mượt, ăn táo lớn lên, không đơ, không chết
   vô cớ, hồi sinh đúng sau 3s, bom hết hạn biến mất, quà giả lập rớt đúng
   táo/bom (rơi từ trên cao, chạm đất mới tính, số lượng theo xu). 0 console error.
-- Quà 100 xu → rớt đúng 5 trái (theo bậc); quà 5000 xu → đúng 30 trái
+- Quà 100 xu → rớt đúng 10 trái (theo bậc); quà 5000 xu → đúng 30 trái
   (chặn ở trần 30); quà không kèm xu → 1 trái.
 - Đổi màu/tốc độ qua admin ăn ngay (không cần load lại trang); đổi
   `kichThuocBan` thì dựng lại bàn + rắn.
