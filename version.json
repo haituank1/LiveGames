@@ -1,7 +1,7 @@
 {
-  "commit": "0a4c1954c76264856f0ab128cf0c98a3aa4201e4",
-  "short": "0a4c195",
-  "date": "2026-11-12T03:52:10Z",
-  "message": "Ran San Moi: co khung 720x1280 vua cua so (scale theo ti le 9:16) — khong con bi cat duoi o cua so khac ti le",
-  "generatedAt": "2026-11-12T03:52:27.136Z"
+  "commit": "53f3d97836df4404bbdda1eb121dce6c272e5197",
+  "short": "53f3d97",
+  "date": "2026-11-12T04:01:33Z",
+  "message": "Ran San Moi: config theo admin (tu roi tao 20s / bom 30s, tao thuong truc 1) + tim du 100 roi 1 tao, delay tim 5s moi nguoi",
+  "generatedAt": "2026-11-12T04:01:47.450Z"
 }

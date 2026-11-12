@@ -1,7 +1,7 @@
 {
-  "commit": "0a4c1954c76264856f0ab128cf0c98a3aa4201e4",
-  "short": "0a4c195",
-  "generatedAt": "2026-11-12T03:52:27.136Z",
+  "commit": "53f3d97836df4404bbdda1eb121dce6c272e5197",
+  "short": "53f3d97",
+  "generatedAt": "2026-11-12T04:01:47.450Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -735,8 +735,8 @@
     },
     {
       "path": "Games/ran-san-moi/README.md",
-      "sha": "45917b07fd321badaab26d55f8661f3e81da90fa",
-      "size": 15637
+      "sha": "33579b767717d81ba2aba7f7bf8691bd808f7aaa",
+      "size": 16093
     },
     {
       "path": "Games/ran-san-moi/index.html",
@@ -755,8 +755,8 @@
     },
     {
       "path": "Games/ran-san-moi/js/main.js",
-      "sha": "debbc393793fcb732ac8d6f7482538bf02a0592d",
-      "size": 51005
+      "sha": "24fff0dc53ac3c2482f5b04b9fe3970ee03b0e42",
+      "size": 52670
     },
     {
       "path": "Games/ran-san-moi/js/snake.js",
@@ -1725,8 +1725,8 @@
     },
     {
       "path": "LiveBridge/config/mappings/ran-san-moi.json",
-      "sha": "f11c7409d1d176ca9e2d37a5edec88de13d06e5b",
-      "size": 2647
+      "sha": "93ac678136da6db97e488921cbd1fa70a924c892",
+      "size": 2890
     },
     {
       "path": "LiveBridge/config/mappings/san-nhay.json",
@@ -1750,8 +1750,8 @@
     },
     {
       "path": "LiveBridge/public/admin.html",
-      "sha": "3652bf9ef2b202855134a2c0043d3ecebd2b078e",
-      "size": 81331
+      "sha": "d7d97f2792c6fa56547becc474b92c92162b7f76",
+      "size": 81588
     },
     {
       "path": "LiveBridge/public/livebridge-client.js",
@@ -1785,8 +1785,8 @@
     },
     {
       "path": "LiveBridge/src/settings.js",
-      "sha": "1e7bae4248bc50d503e6563852dbd9afac051b57",
-      "size": 25962
+      "sha": "1e098ad4dffd340aa708d8cc085eaa7a4ce98b3e",
+      "size": 26044
     },
     {
       "path": "LiveBridge/src/static.js",
@@ -4925,7 +4925,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "348d0d9918fbe7313941d6c0350076ab13b3c9c3",
+      "sha": "08fbcc97e2739096fbb3a04deb2077f93940588e",
       "size": 158789
     },
     {
@@ -4965,8 +4965,8 @@
     },
     {
       "path": "version.json",
-      "sha": "f0dd2579b02891e82a5769d8c34d94660dfa3e0c",
-      "size": 288
+      "sha": "72395627296b41ba15d48f7987801a0190ecc35c",
+      "size": 300
     }
   ]
 }
