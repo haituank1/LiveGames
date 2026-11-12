@@ -1,7 +1,7 @@
 {
-  "commit": "53f3d97836df4404bbdda1eb121dce6c272e5197",
-  "short": "53f3d97",
-  "generatedAt": "2026-11-12T04:01:47.450Z",
+  "commit": "1ca4fc547b641346e90e1c15caba862f94263e00",
+  "short": "1ca4fc5",
+  "generatedAt": "2026-11-12T04:04:19.049Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -735,8 +735,8 @@
     },
     {
       "path": "Games/ran-san-moi/README.md",
-      "sha": "33579b767717d81ba2aba7f7bf8691bd808f7aaa",
-      "size": 16093
+      "sha": "c16d0020edee9956b4e025fe226f3270fff1131c",
+      "size": 16091
     },
     {
       "path": "Games/ran-san-moi/index.html",
@@ -755,8 +755,8 @@
     },
     {
       "path": "Games/ran-san-moi/js/main.js",
-      "sha": "24fff0dc53ac3c2482f5b04b9fe3970ee03b0e42",
-      "size": 52670
+      "sha": "3b2aeab814de46f50dc049367598c398934ae02b",
+      "size": 54221
     },
     {
       "path": "Games/ran-san-moi/js/snake.js",
@@ -1725,8 +1725,8 @@
     },
     {
       "path": "LiveBridge/config/mappings/ran-san-moi.json",
-      "sha": "93ac678136da6db97e488921cbd1fa70a924c892",
-      "size": 2890
+      "sha": "15759e350b67d170d073bff4790eab02ae75f8da",
+      "size": 2886
     },
     {
       "path": "LiveBridge/config/mappings/san-nhay.json",
@@ -4925,7 +4925,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "08fbcc97e2739096fbb3a04deb2077f93940588e",
+      "sha": "1eaec6b9510c123946a4a07c5d3724d6afd23d2c",
       "size": 158789
     },
     {
@@ -4965,8 +4965,8 @@
     },
     {
       "path": "version.json",
-      "sha": "72395627296b41ba15d48f7987801a0190ecc35c",
-      "size": 300
+      "sha": "bae578039f1a2887713616ad9cee61863c88e037",
+      "size": 264
     }
   ]
 }
