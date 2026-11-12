@@ -11,7 +11,8 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: #000; overflow: hidden; font-family: "Be Vietnam Pro", system-ui, sans-serif; }
   #stage {
-    position: relative; width: 720px; height: 1280px; margin: 0 auto; overflow: hidden;
+    position: absolute; left: 50%; top: 50%; width: 720px; height: 1280px; overflow: hidden;
+    transform: translate(-50%, -50%) scale(1);
     background: linear-gradient(#2b1d12, #1a120a 60%, #120c06);
     color: #fff;
   }
@@ -97,6 +98,19 @@
   <div id="feedLine"></div>
   <div id="liveStatus">Chưa nối LiveBridge</div>
 </div>
+<script>
+  // Co khung 720x1280 vua cua so (giu ti le 9:16, can giua) — cua so khong
+  // dung ti le TikTok van thay du khung, khong bi cat tren/duoi nhu truoc.
+  (function () {
+    var stage = document.getElementById('stage');
+    function fit() {
+      var s = Math.min(window.innerWidth / 720, window.innerHeight / 1280);
+      stage.style.transform = 'translate(-50%, -50%) scale(' + s + ')';
+    }
+    window.addEventListener('resize', fit);
+    fit();
+  })();
+</script>
 <script src="../../LiveBridge/public/livebridge-client.js"></script>
 <script src="../../LiveBridge/public/npc-voice.js"></script>
 <script src="js/three.min.js"></script>
