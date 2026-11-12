@@ -45,19 +45,20 @@
     box-shadow: 0 6px 20px rgba(0,0,0,.55);
   }
   #btnStart:disabled { opacity: .75; cursor: default; }
-  /* Thanh quà dưới màn hình */
+  /* Thanh quà dưới màn hình — 9 thẻ (5 táo + 4 bom): thẻ co đều (flex 1),
+     chữ nhỏ lại cho vừa (tên dài nhất "Bánh donut" vẫn đủ, không cắt …). */
   #giftBar {
     position: absolute; left: 20px; right: 20px; top: 844px; z-index: 5;
-    display: flex; gap: 6px; justify-content: space-between;
+    display: flex; gap: 5px; justify-content: space-between;
   }
   .gift-card {
     flex: 1 1 0; background: rgba(0,0,0,.45); border: 2px solid #6d4c41; border-radius: 10px;
     padding: 6px 2px 5px; text-align: center; min-width: 0;
   }
   .gift-card .ic { font-size: 24px; line-height: 1.1; }
-  .gift-card .nm { font-size: 12px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .gift-card .pt { font-size: 12px; font-weight: 800; color: #ffd54f; }
-  .gift-card .fx { font-size: 11px; color: #d7ccc8; }
+  .gift-card .nm { font-size: 10px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gift-card .pt { font-size: 11px; font-weight: 800; color: #ffd54f; }
+  .gift-card .fx { font-size: 10px; color: #d7ccc8; }
   /* Top tặng quà */
   #topPanel {
     position: absolute; left: 20px; right: 20px; top: 952px; z-index: 5;
@@ -97,6 +98,7 @@
   <div id="liveStatus">Chưa nối LiveBridge</div>
 </div>
 <script src="../../LiveBridge/public/livebridge-client.js"></script>
+<script src="../../LiveBridge/public/npc-voice.js"></script>
 <script src="js/three.min.js"></script>
 <script src="js/snake.js"></script>
 <script src="js/board.js"></script>

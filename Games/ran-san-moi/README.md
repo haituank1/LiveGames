@@ -56,6 +56,10 @@ quà tặng và tim.
 | `thoiGianRoi` | 600 (ms, 100–2000) | Thời gian 1 trái rơi từ trên cao xuống đất. |
 | `choRoi` | 80 (ms, 0–500) | Khoảng cách giữa 2 trái rơi nối tiếp trong cùng 1 quà. |
 | `thoiGianHoiSinh` | 3 (giây) | Chết bao lâu thì chơi lại. |
+| `tuRoiTaoGiay` | 12 (giây, 0–60; 0 = tắt) | Không có quà từng này giây thì tự rơi 1 táo (đếm từ quà gần nhất). |
+| `tuRoiBomGiay` | 20 (giây, 0–120; 0 = tắt) | Không có quà từng này giây thì tự rơi 1 bom (đếm riêng với táo). |
+| `voiceOn` | true | Bật/tắt voice MC (NpcVoice). |
+| `voiceGiong` | `HoaiMy` | Giọng MC: `HoaiMy` (nữ) / `NamMinh` (nam). |
 | `mauThanRan` | `#FF9F1C` | Màu thân rắn (cam, gradient tới vàng). |
 | `mauDauRan` | `#4CAF50` | Màu đầu rắn (xanh lá). |
 | `quaTang` | (xem dưới) | Bảng quà JSON: tên quà → {diem, hieuUng}. |
@@ -64,14 +68,16 @@ quà tặng và tim.
 Bảng quà mặc định (`quaTang`, JSON):
 
 ```json
-{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":100,"hieuUng":"bom"}}
+{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":100,"hieuUng":"bom"},"Perfume":{"diem":20,"hieuUng":"bom"},"Fire":{"diem":100,"hieuUng":"bom"},"Rocket":{"diem":1000,"hieuUng":"bom"}}
 ```
 
 - Key = **tên quà thật trên TikTok** (khớp không phân biệt hoa/thường;
   `Rose`/`Doughnut` đã xác nhận có trong catalog LiveBridge;
-  `GG`/`Apple`/`Chicken`/`Gift Box` theo ảnh tham chiếu — nếu live thật
-  thấy tên khác thì sửa key cho khớp, game cũng nhận cả nhãn tiếng Việt
-  như "Hoa hồng").
+  `GG`/`Apple`/`Chicken`/`Gift Box` theo ảnh tham chiếu;
+  `Perfume`/`Fire`/`Rocket` là quà bom BOSS chọn 2026-11-11 (tên thường
+  gặp trên TikTok — nếu live thật thấy tên khác thì sửa key cho khớp, user
+  sửa lại trong config sau nếu cần), game cũng nhận cả nhãn tiếng Việt
+  như "Hoa hồng"/"Nước hoa".
 - `diem` = số xu mặc định của quà (điểm quà = số xu kèm event, fallback
   diem này; cộng vào Điểm game + Top tặng quà), `hieuUng` = `"tao"` (rớt
   táo) hoặc `"bom"` (thả bom). **Số trái không nằm trong bảng này** — tính
@@ -113,6 +119,30 @@ Bảng quà mặc định (`quaTang`, JSON):
   lại bàn/rắn (đổi `kichThuocBan`) — main gọi `dispose()` nếu có (guard
   `typeof`); không có thì mesh cũ còn sót trong scene. Khởi động chỉ tạo
   game 1 lần (bản 2D tạo 2 lần — 3D không được, sẽ thêm mesh trùng).
+
+## Tự rơi + Voice MC (RAN-TUROI-VOICE, spec §7 mới)
+
+- **Tự rơi khi không ai tặng quà:** đếm từ lúc nhận quà gần nhất
+  (`lastGiftAt` — quà thật + quà giả demo đều tính, nên demo có quà giả 8s
+  thì tự rơi ít khi kích hoạt — đó là đúng). Táo (`tuRoiTaoGiay` 12s) và bom
+  (`tuRoiBomGiay` 20s) đếm RIÊNG; quà tới đặt lại cả 2 đếm; rơi xong cũng đặt
+  lại đếm của món đó. Rơi qua board như quà (rơi từ trên cao, chạm đất mới
+  tính, trần 30 board tự chặn). KHÔNG cộng điểm, KHÔNG tính vào Top tặng quà.
+  0 = tắt món đó. Kiểm chứng: `window.RanSanMoi.getState()` có `autoTao`/
+  `autoBom` (số táo/bom tự rơi).
+- **Voice MC (NpcVoice của LiveBridge):** `index.html` nạp
+  `LiveBridge/public/npc-voice.js` (như đám cưới/QH); `main.js` gọi
+  `NpcVoice.speak(text, { kind, voice })`, giọng `vi-VN-HoaiMyNeural` /
+  `vi-VN-NamMinhNeural` theo config `voiceGiong` (`HoaiMy`/`NamMinh`) —
+  KHÔNG dùng GV01/GV02 cho game live. Các lúc nói: cảm ơn quà
+  (`Cảm ơn [tên] tặng [quà]!`), rắn chết, mốc điểm mỗi 500 (số đọc ra chữ,
+  vd "năm nghìn"), bom TỰ RƠI (`Cẩn thận, bom rơi kìa!`), mồi khi yên ắng
+  25s không tương tác THẬT (quà giả demo không tính — luân phiên 4 câu),
+  rắn dài mốc 20/40/60... đốt. Không nói khi ăn táo thường. Mốc điểm/dài chỉ
+  nói mốc cao nhất đã vượt (1 câu/lần tăng điểm). NpcVoice tự nối tiếp +
+  giới hạn tần suất (event gap 2s, random tối đa 6/phút) nên quà dồn dập thì
+  câu sau bị bỏ qua, không chồng tiếng. Không có LiveBridge thì game vẫn
+  chạy, chỉ không có tiếng (guard `typeof NpcVoice`).
 
 ## Hợp đồng interface (không tự đổi signature — đối chiếu code thật nv2/nv3/nv4)
 
