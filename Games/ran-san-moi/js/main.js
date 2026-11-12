@@ -209,9 +209,10 @@ const DEFAULT_CFG = {
   // catalog LiveBridge — "Rose"/"Doughnut" đã xác nhận có trong mapping các
   // game khác; "GG"/"Apple"/"Chicken"/"Gift Box" theo ảnh tham chiếu, nếu
   // live thật thấy tên khác thì sửa key cho khớp). diem = số xu mặc định của
-  // quà (dùng làm điểm khi event không kèm xu), hieuUng: "tao" = rớt táo,
-  // "bom" = thả bom. SỐ TRÁI không nằm trong bảng này — tính theo bậc xu.
-  quaTang: '{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":1,"hieuUng":"bom"},"Perfume":{"diem":20,"hieuUng":"bom"},"Fire":{"diem":100,"hieuUng":"bom"},"Rocket":{"diem":1000,"hieuUng":"bom"}}',
+  // quà = ĐIỂM cộng cho người tặng (đúng số in trên thẻ quà), hieuUng:
+  // "tao" = rớt táo, "bom" = thả bom. SỐ TRÁI tính theo bậc xu của event,
+  // trừ quà có soTrai thì cố định từng đó trái (vd Hộp quà 10 điểm, 1 bom).
+  quaTang: '{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":10,"hieuUng":"bom","soTrai":1},"Perfume":{"diem":20,"hieuUng":"bom"},"Fire":{"diem":100,"hieuUng":"bom"},"Rocket":{"diem":1000,"hieuUng":"bom"}}',
 };
 let cfg = Object.assign({}, DEFAULT_CFG);
 
@@ -232,7 +233,8 @@ function parseGiftTable(v) {
     if (!name || !val || typeof val !== 'object') continue;
     const diem = Math.max(0, Math.min(10000, Math.round(Number(val.diem) || 0)));
     const hieuUng = val.hieuUng === 'bom' ? 'bom' : 'tao';
-    out[name] = { diem, hieuUng };
+    const soTrai = Math.max(0, Math.min(30, Math.round(Number(val.soTrai) || 0))); // 0 = số trái theo bậc xu
+    out[name] = { diem, hieuUng, soTrai };
   }
   return Object.keys(out).length ? out : null;
 }
@@ -242,10 +244,10 @@ function lookupGift(rawName) {
   const norm = String(rawName || '').trim().toLowerCase();
   if (!norm) return null;
   for (const k of Object.keys(giftTable)) {
-    if (k.toLowerCase() === norm) return { key: k, diem: giftTable[k].diem, hieuUng: giftTable[k].hieuUng };
+    if (k.toLowerCase() === norm) return { key: k, diem: giftTable[k].diem, hieuUng: giftTable[k].hieuUng, soTrai: giftTable[k].soTrai || 0 };
   }
   for (const k of Object.keys(giftTable)) {
-    if ((GIFT_LABELS[k.toLowerCase()] || '').toLowerCase() === norm) return { key: k, diem: giftTable[k].diem, hieuUng: giftTable[k].hieuUng };
+    if ((GIFT_LABELS[k.toLowerCase()] || '').toLowerCase() === norm) return { key: k, diem: giftTable[k].diem, hieuUng: giftTable[k].hieuUng, soTrai: giftTable[k].soTrai || 0 };
   }
   return null;
 }
@@ -355,8 +357,22 @@ function renderGiftBar() {
     pt.textContent = '+' + e.diem + ' điểm';
     const fx = document.createElement('div');
     fx.className = 'fx';
-    const n = giftCountFor(e.diem); // số trái theo bậc xu (vd hộp quà 100 xu → 10)
+    const n = e.soTrai > 0 ? e.soTrai : giftCountFor(e.diem); // soTrai cố định, else theo bậc xu
     fx.textContent = e.hieuUng === 'bom' ? '💣 +' + n + ' bom' : '🍎 +' + n + ' táo';
+    card.append(ic, nm, pt, fx);
+    bar.appendChild(card);
+  }
+  // Thẻ TIM (user 2026-11-12): hiện phần thưởng thả tim ngay trên khung quà
+  // để người xem biết — đủ timMoiTao tim được tính thì rơi 1 táo (con táo đó
+  // rắn ăn được +diemTao điểm). Số lấy từ config, admin đổi là thẻ đổi theo.
+  const timCan = Math.max(0, Math.floor(Number(cfg.timMoiTao) || 0));
+  if (timCan > 0) {
+    const card = document.createElement('div');
+    card.className = 'gift-card';
+    const ic = document.createElement('div'); ic.className = 'ic'; ic.textContent = '❤️';
+    const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = timCan + ' tim';
+    const pt = document.createElement('div'); pt.className = 'pt'; pt.textContent = '+' + (Number(cfg.diemTao) || 0) + ' điểm';
+    const fx = document.createElement('div'); fx.className = 'fx'; fx.textContent = '🍎 +1 táo';
     card.append(ic, nm, pt, fx);
     bar.appendChild(card);
   }
@@ -760,11 +776,12 @@ function onGiftEvent(ev, isSim) {
   const xu = xuEvent > 0 ? xuEvent : (entry ? entry.diem : 0);
   let pts = 0;
   if (entry) {
-    pts = xu * count; // điểm = xu × số quà combo
-    // Số trái theo bậc xu kèm event (không kèm xu → 1 trái); Board tự thả
-    // rơi nối tiếp + chặn ở trần 30. Board tự vẽ rơi + bóng — main KHÔNG gọi
-    // effects.spawn nữa, chỉ gọi effects.land khi chạm đất (trong boardUpdate()).
-    const n = xuEvent > 0 ? giftCountFor(xuEvent) : 1;
+    pts = entry.diem * count; // điểm theo BẢNG (đúng số in trên thẻ quà) × combo
+    // Số trái: quà có soTrai thì cố định; còn lại theo bậc xu kèm event
+    // (không kèm xu → 1 trái). Board tự thả rơi nối tiếp + chặn ở trần 30.
+    // Board tự vẽ rơi + bóng — main KHÔNG gọi effects.spawn nữa, chỉ gọi
+    // effects.land khi chạm đất (trong boardUpdate()).
+    const n = entry.soTrai > 0 ? entry.soTrai : (xuEvent > 0 ? giftCountFor(xuEvent) : 1);
     if (entry.hieuUng === 'bom') spawnBombs(n);
     else spawnApples(n);
   } else {
