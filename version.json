@@ -1,7 +1,7 @@
 {
-  "commit": "78ada0c649f16490a5eb55d31d0cb78084ae2b70",
-  "short": "78ada0c",
-  "date": "2026-11-10T09:32:24Z",
-  "message": "Cap nhat version.json + manifest.json",
-  "generatedAt": "2026-11-10T09:32:41.571Z"
+  "commit": "799157718546b03e4651bfdd620c0329e3c48486",
+  "short": "7991577",
+  "date": "2026-11-12T03:42:26Z",
+  "message": "Merge ran-san-moi vào main: game Rắn Săn Mồi (2D logic + 3D Three.js + AI tối đa + tự rơi/voice/quà bom theo mốc)",
+  "generatedAt": "2026-11-12T03:42:52.555Z"
 }

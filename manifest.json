@@ -1,7 +1,7 @@
 {
-  "commit": "78ada0c649f16490a5eb55d31d0cb78084ae2b70",
-  "short": "78ada0c",
-  "generatedAt": "2026-11-10T09:32:41.571Z",
+  "commit": "799157718546b03e4651bfdd620c0329e3c48486",
+  "short": "7991577",
+  "generatedAt": "2026-11-12T03:42:52.555Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -732,6 +732,41 @@
       "path": "Games/dam-cuoi/js/people.js",
       "sha": "61b1a7d6543b75b175846fcc23b7aa64046ae1d0",
       "size": 96319
+    },
+    {
+      "path": "Games/ran-san-moi/README.md",
+      "sha": "45917b07fd321badaab26d55f8661f3e81da90fa",
+      "size": 15637
+    },
+    {
+      "path": "Games/ran-san-moi/index.html",
+      "sha": "1bb20ae89ee00a50976ce5d55374825fc694b265",
+      "size": 5631
+    },
+    {
+      "path": "Games/ran-san-moi/js/board.js",
+      "sha": "c2d0bcc7fddfbf688b5a750dbf2466673fadab4e",
+      "size": 32202
+    },
+    {
+      "path": "Games/ran-san-moi/js/effects.js",
+      "sha": "4f64feb866278c07dfed8678acab6f460a34fd37",
+      "size": 23923
+    },
+    {
+      "path": "Games/ran-san-moi/js/main.js",
+      "sha": "debbc393793fcb732ac8d6f7482538bf02a0592d",
+      "size": 51005
+    },
+    {
+      "path": "Games/ran-san-moi/js/snake.js",
+      "sha": "aed2f42995b66ba5e608b575fb8beec8d81af710",
+      "size": 35699
+    },
+    {
+      "path": "Games/ran-san-moi/js/three.min.js",
+      "sha": "b14f47c0908bab15e890b468d53bb07db0be3a18",
+      "size": 603445
     },
     {
       "path": "Games/san-nhay/BAR-LAYOUT.md",
@@ -1689,6 +1724,11 @@
       "size": 28718
     },
     {
+      "path": "LiveBridge/config/mappings/ran-san-moi.json",
+      "sha": "f11c7409d1d176ca9e2d37a5edec88de13d06e5b",
+      "size": 2647
+    },
+    {
       "path": "LiveBridge/config/mappings/san-nhay.json",
       "sha": "159353e6247a68271dc319ee3ae2cd91eeb88353",
       "size": 5785
@@ -1710,8 +1750,8 @@
     },
     {
       "path": "LiveBridge/public/admin.html",
-      "sha": "c58eb7fa906ce50a0ab1566bbc3938999d70fdb1",
-      "size": 76106
+      "sha": "3652bf9ef2b202855134a2c0043d3ecebd2b078e",
+      "size": 81331
     },
     {
       "path": "LiveBridge/public/livebridge-client.js",
@@ -1745,8 +1785,8 @@
     },
     {
       "path": "LiveBridge/src/settings.js",
-      "sha": "23404018dda2a7ad33b5741c3004b786d9f8da6a",
-      "size": 22482
+      "sha": "1e7bae4248bc50d503e6563852dbd9afac051b57",
+      "size": 25962
     },
     {
       "path": "LiveBridge/src/static.js",
@@ -4885,7 +4925,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "58a8cf4b98447d521beb4f1e1560b50f06094e6d",
+      "sha": "dd9adc15ffdf6e53f75cb870c37ae2d2b01b44eb",
       "size": 157678
     },
     {
@@ -4925,8 +4965,8 @@
     },
     {
       "path": "version.json",
-      "sha": "5c8c3f40c572212f76ded7986ce07c58f785d70e",
-      "size": 214
+      "sha": "f56d373586d42c5b173b220c1c28909f190c280b",
+      "size": 305
     }
   ]
 }
