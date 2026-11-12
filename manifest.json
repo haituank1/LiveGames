@@ -1,7 +1,7 @@
 {
-  "commit": "840849c09f34380aab805f87d85dabc8533a2268",
-  "short": "840849c",
-  "generatedAt": "2026-11-12T03:44:45.604Z",
+  "commit": "0a4c1954c76264856f0ab128cf0c98a3aa4201e4",
+  "short": "0a4c195",
+  "generatedAt": "2026-11-12T03:52:27.136Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -740,8 +740,8 @@
     },
     {
       "path": "Games/ran-san-moi/index.html",
-      "sha": "20de716c676a208337bc2652060d44aacb66747c",
-      "size": 5632
+      "sha": "75f644764d1f75934c0fb466c98ec8d3a97fa937",
+      "size": 6162
     },
     {
       "path": "Games/ran-san-moi/js/board.js",
@@ -4925,7 +4925,7 @@
     },
     {
       "path": "manifest.json",
-      "sha": "517bb7fac822d0b49ce38f6c33825e212777cc68",
+      "sha": "348d0d9918fbe7313941d6c0350076ab13b3c9c3",
       "size": 158789
     },
     {
@@ -4965,8 +4965,8 @@
     },
     {
       "path": "version.json",
-      "sha": "a89a8fde1728b961589c0cc1f41108c640cab215",
-      "size": 266
+      "sha": "f0dd2579b02891e82a5769d8c34d94660dfa3e0c",
+      "size": 288
     }
   ]
 }

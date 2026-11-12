@@ -1,7 +1,7 @@
 {
-  "commit": "840849c09f34380aab805f87d85dabc8533a2268",
-  "short": "840849c",
-  "date": "2026-11-12T03:44:28Z",
-  "message": "Ran San Moi: day khung tieu de + hang chip diem xuong gan ban, bot khoang trong phia tren",
-  "generatedAt": "2026-11-12T03:44:45.604Z"
+  "commit": "0a4c1954c76264856f0ab128cf0c98a3aa4201e4",
+  "short": "0a4c195",
+  "date": "2026-11-12T03:52:10Z",
+  "message": "Ran San Moi: co khung 720x1280 vua cua so (scale theo ti le 9:16) — khong con bi cat duoi o cua so khac ti le",
+  "generatedAt": "2026-11-12T03:52:27.136Z"
 }
