@@ -211,7 +211,7 @@ const DEFAULT_CFG = {
   // live thật thấy tên khác thì sửa key cho khớp). diem = số xu mặc định của
   // quà (dùng làm điểm khi event không kèm xu), hieuUng: "tao" = rớt táo,
   // "bom" = thả bom. SỐ TRÁI không nằm trong bảng này — tính theo bậc xu.
-  quaTang: '{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":100,"hieuUng":"bom"},"Perfume":{"diem":20,"hieuUng":"bom"},"Fire":{"diem":100,"hieuUng":"bom"},"Rocket":{"diem":1000,"hieuUng":"bom"}}',
+  quaTang: '{"Rose":{"diem":1,"hieuUng":"tao"},"GG":{"diem":5,"hieuUng":"tao"},"Apple":{"diem":25,"hieuUng":"tao"},"Doughnut":{"diem":30,"hieuUng":"tao"},"Chicken":{"diem":60,"hieuUng":"tao"},"Gift Box":{"diem":1,"hieuUng":"bom"},"Perfume":{"diem":20,"hieuUng":"bom"},"Fire":{"diem":100,"hieuUng":"bom"},"Rocket":{"diem":1000,"hieuUng":"bom"}}',
 };
 let cfg = Object.assign({}, DEFAULT_CFG);
 
@@ -638,11 +638,28 @@ function numToWords(n) {
    (cảm ơn quà, chết, mốc — ưu tiên, gap 2s) / 'random' (mồi — gap 8s, tối đa
    6/phút). NpcVoice tự nối tiếp (không chồng tiếng); main không gọi speak
    dồn dập — mốc điểm/dài chỉ nói mốc cao nhất đã vượt (1 câu/lần tăng điểm). */
+// Câu mồi khi yên ắng — viết kiểu bình luận tự nhiên, KHÔNG xin quà lộ liễu
+// (user 2026-11-12): phần lớn là nhận xét/dự đoán kéo bình luận, quà và tim
+// chỉ nhắc khéo như một khả năng. Nhiều câu để random đỡ lặp.
 const LURE_LINES = [
-  'Tặng quà để thả táo hoặc bom nào, rắn đang đói!',
-  'Ai tặng hoa hồng là rắn có táo ăn liền!',
-  'Tặng hộp quà đi, bom rơi vui lắm!',
-  'Rắn đang chờ quà của bạn đó!',
+  'Rắn vẫn đang chạy ngon lành, chưa có dấu hiệu mệt luôn đó.',
+  'Càng dài là càng khó, không biết rắn trụ tới đâu đây.',
+  'Trên bàn lúc nào cũng có bom rình rập, sơ hở một cái là xong.',
+  'Rắn đang lượn tìm táo, nhìn nó bò mà hồi hộp ghê.',
+  'Kỷ lục đang chờ bị phá, mà phá được hay không thì chưa biết.',
+  'Mọi người đoán thử, rắn sống thêm được mấy phút nữa nè?',
+  'Ai đoán rắn dài được bao nhiêu đốt thì bình luận cho vui nha.',
+  'Theo mọi người, quả táo tiếp theo rắn có ăn được không?',
+  'Đoán xem lần này rắn phá kỷ lục nổi không mọi người?',
+  'Ai đang xem thì thả nhẹ cái tim, đủ một trăm tim là có táo rơi cho rắn liền.',
+  'Thả tim đều tay nha cả nhà, táo từ tim là táo miễn phí đó.',
+  'Mấy bạn thả tim nãy giờ là đang nuôi rắn lớn đó nha.',
+  'Chỉ cần một quả bom rơi xuống thôi là bàn cờ náo loạn liền.',
+  'Không biết ai sẽ là người làm rắn giật mình đầu tiên đây.',
+  'Có táo rơi là rắn mừng lắm, nó đang ngóng từng quả một.',
+  'Một bông hoa hồng thôi cũng đủ làm rắn vui cả buổi.',
+  'Ai mới vào thì ở lại xem một chút, rắn đang vào đoạn gay cấn nè.',
+  'Xem rắn tự chơi mà cuốn ghê, nó né bom khéo lắm đó mọi người.',
 ];
 let lureIdx = 0;
 function voiceName() {
