@@ -185,7 +185,7 @@ const DEFAULT_CFG = {
   diemTao: 10,
   thoiGianBom: 30, // giây, 0 = không hết hạn
   soBomToiDa: 30, // tối đa bom trên bàn (đổi từ 5 → 30 theo spec §7 mới)
-  soTaoToiDa: 3, // táo thường duy trì (táo tự nhiên sau khi ăn)
+  soTaoToiDa: 1, // táo thường duy trì (táo tự nhiên sau khi ăn)
   soTaoToiDaTrenBan: 30, // tối đa táo trên bàn (kể cả táo quà)
   thoiGianHoiSinh: 3, // giây
   mauThanRan: '#FF9F1C', // cam (gradient tới vàng, nv2 vẽ)
@@ -196,9 +196,13 @@ const DEFAULT_CFG = {
   thoiGianRoi: 600, // ms, thời gian 1 trái rơi từ trên cao xuống đất
   choRoi: 80, // ms, khoảng cách giữa 2 trái rơi nối tiếp trong cùng 1 quà
   // Tự rơi khi không ai tặng quà (spec §7 mới, user 2026-11-11 22:36):
-  // tuRoiTaoGiay 12 (5–60, 0 = tắt), tuRoiBomGiay 20 (5–120, 0 = tắt).
-  tuRoiTaoGiay: 12, // giây KHÔNG CÓ QUÀ thì tự rơi 1 táo
-  tuRoiBomGiay: 20, // giây KHÔNG CÓ QUÀ thì tự rơi 1 bom
+  // tuRoiTaoGiay 20 (0–60, 0 = tắt), tuRoiBomGiay 30 (0–120, 0 = tắt).
+  tuRoiTaoGiay: 20, // giây KHÔNG CÓ QUÀ thì tự rơi 1 táo
+  tuRoiBomGiay: 30, // giây KHÔNG CÓ QUÀ thì tự rơi 1 bom
+  // Tim -> táo (user 2026-11-12): đủ timMoiTao tim ĐƯỢC TÍNH thì rơi 1 táo;
+  // mỗi người chỉ được tính tim 1 lần mỗi timDelayGiay giây (chống spam bấm).
+  timMoiTao: 100, // số tim được tính để rơi 1 táo (0 = tắt)
+  timDelayGiay: 5, // giây delay tính tim theo từng người (0 = không delay)
   voiceOn: true, // bật/tắt voice MC (NpcVoice)
   voiceGiong: 'HoaiMy', // 'HoaiMy' nữ / 'NamMinh' nam (map sang vi-VN-*Neural)
   // Bảng quà mặc định (spec §5): key = TÊN QUÀ THẬT trên TikTok (đối chiếu
@@ -298,6 +302,8 @@ function initEffects() {
 /* ---------- State ---------- */
 let board = null, snake = null;
 let score = 0, record = 0, likes = 0;
+let likePool = 0; // tim đã tính, chờ đủ timMoiTao thì rơi 1 táo
+const lastLikeAtByUser = new Map(); // id người -> mốc tim được tính gần nhất
 let status = 'idle'; // idle | running | dead
 let started = false;
 /* Tự rơi + voice MC (spec §7 mới, user 2026-11-11 22:36). */
@@ -763,11 +769,33 @@ function onGiftEvent(ev, isSim) {
 function onLikeEvent(m, isSim) {
   const n = Math.max(0, Math.floor(m.likeCount || m.count || 1));
   if (!n) return;
+  if (!isSim) lastInteractAt = Date.now(); // tim thật = tương tác thật (đếm mồi voice) — kể cả tim bị delay chặn, người vẫn đang xem
+  // Delay theo người (user 2026-11-12): mỗi người chỉ được TÍNH tim 1 lần
+  // mỗi timDelayGiay giây — bấm dồn trong lúc countdown thì bỏ qua (không
+  // điểm, không vào hũ tim). Không rõ id (khách lạ) thì tính luôn.
+  const e = normUser(m.user);
+  const delayMs = Math.max(0, Number(cfg.timDelayGiay) || 0) * 1000;
+  if (delayMs > 0 && e.id) {
+    const now = Date.now();
+    if (now - (lastLikeAtByUser.get(e.id) || 0) < delayMs) return;
+    lastLikeAtByUser.set(e.id, now);
+    if (lastLikeAtByUser.size > 500) { // dọn người cũ, tránh phình bộ nhớ
+      for (const [k, t] of lastLikeAtByUser) if (now - t > 3600000) lastLikeAtByUser.delete(k);
+    }
+  }
   likes += n;
   score += n; // tim +1 điểm mỗi tim (§1)
   if (score > record) record = score;
-  if (!isSim) lastInteractAt = Date.now(); // tim thật = tương tác thật (đếm mồi voice)
   checkScoreMilestone(); // tim cũng lên điểm
+  // Hũ tim: đủ timMoiTao tim được tính -> rơi 1 táo (qua board, rơi từ cao)
+  const need = Math.max(0, Math.floor(Number(cfg.timMoiTao) || 0));
+  if (need > 0) {
+    likePool += n;
+    while (likePool >= need) {
+      likePool -= need;
+      if (spawnApples(1) >= 1) setFeed('❤️ Đủ ' + need + ' tim — rơi 1 táo!');
+    }
+  }
   updateHUD();
 }
 function handle(ev) {
@@ -915,7 +943,7 @@ window.RanSanMoi = {
       length: snake ? snake.length : 0, alive: snake ? snake.alive : false,
       foods: board ? board.foods.length : 0, bombs: board ? board.bombs.length : 0,
       falling: board && Array.isArray(board.falling) ? board.falling.length : 0,
-      autoTao: autoTaoCount, autoBom: autoBomCount,
+      autoTao: autoTaoCount, autoBom: autoBomCount, likePool: likePool,
       voice: { on: !!cfg.voiceOn, giong: cfg.voiceGiong, lastGiftAt: lastGiftAt, lastInteractAt: lastInteractAt, nextScoreMilestone: nextScoreMilestone, nextLengthMilestone: nextLengthMilestone },
       three: !!(renderer && scene && camera),
       board: board ? { n: board.n, cell: board.cell, gridX: board.gridX, gridY: board.gridY, offsetX: board.offsetX, offsetY: board.offsetY } : null,

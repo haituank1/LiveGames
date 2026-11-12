@@ -28,7 +28,7 @@ quà tặng và tim.
   tối đa `soTaoToiDaTrenBan` táo cùng lúc (mặc định 30) — quà rớt vượt quá
   thì chỉ rớt tới mức trần (phần thừa bỏ qua).
   Bom thả cách đầu rắn ít nhất 3 ô.
-- **Tim:** +1 điểm mỗi tim.
+- **Tim:** +1 điểm mỗi tim ĐƯỢC TÍNH; mỗi người chỉ được tính tim 1 lần mỗi `timDelayGiay` giây (mặc định 5s — bấm dồn trong lúc countdown thì bỏ qua); đủ `timMoiTao` tim được tính (mặc định 100) thì rơi 1 táo.
 - **Top 3 tặng quà:** xếp theo tổng điểm quà của từng người, cập nhật live.
 - **Điểm game** = điểm táo + điểm tim + điểm quà. Kỷ lục = điểm cao nhất phiên.
 
@@ -50,14 +50,16 @@ quà tặng và tim.
 | `diemTao` | 10 | Điểm mỗi quả táo ăn được. |
 | `thoiGianBom` | 30 (giây, 0 = không hết hạn) | Bom tự biến mất sau từng này giây. |
 | `soBomToiDa` | 30 | Tối đa bom cùng lúc trên bàn; quà thả bom khi đủ thì bỏ qua (phần thừa). |
-| `soTaoToiDa` | 3 | Số táo thường trực trên bàn (táo tự nhiên sau khi ăn). |
+| `soTaoToiDa` | 1 | Số táo thường trực trên bàn (táo tự nhiên sau khi ăn). |
 | `soTaoToiDaTrenBan` | 30 | Tối đa táo cùng lúc trên bàn (kể cả táo quà). |
 | `tangQuaTheoXu` | `[[9,1],[29,3],[99,5],[299,10],[999,20],[999999,30]]` | Bảng bậc số lượng theo xu (JSON): [xu tối đa, số trái]. |
 | `thoiGianRoi` | 600 (ms, 100–2000) | Thời gian 1 trái rơi từ trên cao xuống đất. |
 | `choRoi` | 80 (ms, 0–500) | Khoảng cách giữa 2 trái rơi nối tiếp trong cùng 1 quà. |
 | `thoiGianHoiSinh` | 3 (giây) | Chết bao lâu thì chơi lại. |
-| `tuRoiTaoGiay` | 12 (giây, 0–60; 0 = tắt) | Không có quà từng này giây thì tự rơi 1 táo (đếm từ quà gần nhất). |
-| `tuRoiBomGiay` | 20 (giây, 0–120; 0 = tắt) | Không có quà từng này giây thì tự rơi 1 bom (đếm riêng với táo). |
+| `tuRoiTaoGiay` | 20 (giây, 0–60; 0 = tắt) | Không có quà từng này giây thì tự rơi 1 táo (đếm từ quà gần nhất). |
+| `tuRoiBomGiay` | 30 (giây, 0–120; 0 = tắt) | Không có quà từng này giây thì tự rơi 1 bom (đếm riêng với táo). |
+| `timMoiTao` | 100 (tim, 0 = tắt) | Đủ từng này tim ĐƯỢC TÍNH thì rơi 1 táo. |
+| `timDelayGiay` | 5 (giây, 0 = không delay) | Mỗi người chỉ được tính tim 1 lần trong từng này giây. |
 | `voiceOn` | true | Bật/tắt voice MC (NpcVoice). |
 | `voiceGiong` | `HoaiMy` | Giọng MC: `HoaiMy` (nữ) / `NamMinh` (nam). |
 | `mauThanRan` | `#FF9F1C` | Màu thân rắn (cam, gradient tới vàng). |
@@ -124,8 +126,8 @@ Bảng quà mặc định (`quaTang`, JSON):
 
 - **Tự rơi khi không ai tặng quà:** đếm từ lúc nhận quà gần nhất
   (`lastGiftAt` — quà thật + quà giả demo đều tính, nên demo có quà giả 8s
-  thì tự rơi ít khi kích hoạt — đó là đúng). Táo (`tuRoiTaoGiay` 12s) và bom
-  (`tuRoiBomGiay` 20s) đếm RIÊNG; quà tới đặt lại cả 2 đếm; rơi xong cũng đặt
+  thì tự rơi ít khi kích hoạt — đó là đúng). Táo (`tuRoiTaoGiay` 20s) và bom
+  (`tuRoiBomGiay` 30s) đếm RIÊNG; quà tới đặt lại cả 2 đếm; rơi xong cũng đặt
   lại đếm của món đó. Rơi qua board như quà (rơi từ trên cao, chạm đất mới
   tính, trần 30 board tự chặn). KHÔNG cộng điểm, KHÔNG tính vào Top tặng quà.
   0 = tắt món đó. Kiểm chứng: `window.RanSanMoi.getState()` có `autoTao`/

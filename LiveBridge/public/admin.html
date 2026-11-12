@@ -762,6 +762,8 @@ const GAME_SCHEMAS = {
     { title: '🔄 Tự rơi & 🎙️ Voice MC', live: true, note: 'Không ai tặng quà thì game tự rơi để bàn không trống: táo tự rơi sau tuRoiTaoGiay, bom tự rơi sau tuRoiBomGiay (đếm từ lúc nhận quà gần nhất, táo/bom đếm riêng; quà tới đặt lại cả 2; 0 = tắt). Tự rơi vẫn qua board (rơi từ trên cao, chạm đất mới tính, trần 30). Voice MC nói bằng giọng HoaiMy/NamMinh qua LiveBridge (KHÔNG dùng GV01/GV02 cho game live): cảm ơn quà, rắn chết, mốc điểm 500, bom tự rơi, mồi khi yên ắng 25s, rắn dài mốc 20 đốt.', fields: [
       { k: 'tuRoiTaoGiay', l: 'Tự rơi táo sau (giây không quà, 0–60; 0 = tắt)', t: 'num', min: 0, max: 60, step: 1 },
       { k: 'tuRoiBomGiay', l: 'Tự rơi bom sau (giây không quà, 0–120; 0 = tắt)', t: 'num', min: 0, max: 120, step: 1 },
+      { k: 'timMoiTao', l: 'Đủ bao nhiêu tim được tính thì rơi 1 táo (0 = tắt)', t: 'num', min: 0, max: 1000, step: 1 },
+      { k: 'timDelayGiay', l: 'Delay tim mỗi người (giây, 0 = không delay)', t: 'num', min: 0, max: 60, step: 1 },
       { k: 'voiceOn', l: 'Bật voice MC', t: 'chk', defTrue: true },
       { k: 'voiceGiong', l: 'Giọng MC', t: 'sel', opts: [['HoaiMy', 'Nữ — HoaiMy'], ['NamMinh', 'Nam — NamMinh']] },
     ] },
