@@ -1,7 +1,7 @@
 {
-  "commit": "799157718546b03e4651bfdd620c0329e3c48486",
-  "short": "7991577",
-  "generatedAt": "2026-11-12T03:42:52.555Z",
+  "commit": "840849c09f34380aab805f87d85dabc8533a2268",
+  "short": "840849c",
+  "generatedAt": "2026-11-12T03:44:45.604Z",
   "files": [
     {
       "path": ".gitattributes",
@@ -740,8 +740,8 @@
     },
     {
       "path": "Games/ran-san-moi/index.html",
-      "sha": "1bb20ae89ee00a50976ce5d55374825fc694b265",
-      "size": 5631
+      "sha": "20de716c676a208337bc2652060d44aacb66747c",
+      "size": 5632
     },
     {
       "path": "Games/ran-san-moi/js/board.js",
@@ -4925,8 +4925,8 @@
     },
     {
       "path": "manifest.json",
-      "sha": "dd9adc15ffdf6e53f75cb870c37ae2d2b01b44eb",
-      "size": 157678
+      "sha": "517bb7fac822d0b49ce38f6c33825e212777cc68",
+      "size": 158789
     },
     {
       "path": "start-livebridge.bat",
@@ -4965,8 +4965,8 @@
     },
     {
       "path": "version.json",
-      "sha": "f56d373586d42c5b173b220c1c28909f190c280b",
-      "size": 305
+      "sha": "a89a8fde1728b961589c0cc1f41108c640cab215",
+      "size": 266
     }
   ]
 }

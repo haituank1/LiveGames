@@ -1,7 +1,7 @@
 {
-  "commit": "799157718546b03e4651bfdd620c0329e3c48486",
-  "short": "7991577",
-  "date": "2026-11-12T03:42:26Z",
-  "message": "Merge ran-san-moi vào main: game Rắn Săn Mồi (2D logic + 3D Three.js + AI tối đa + tự rơi/voice/quà bom theo mốc)",
-  "generatedAt": "2026-11-12T03:42:52.555Z"
+  "commit": "840849c09f34380aab805f87d85dabc8533a2268",
+  "short": "840849c",
+  "date": "2026-11-12T03:44:28Z",
+  "message": "Ran San Moi: day khung tieu de + hang chip diem xuong gan ban, bot khoang trong phia tren",
+  "generatedAt": "2026-11-12T03:44:45.604Z"
 }
