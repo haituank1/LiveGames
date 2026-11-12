@@ -1,11 +1,13 @@
 // Games/ran-san-moi/js/snake.js — Snake: state, AI, movement, 3D drawing.
 // Spec: RAN-SAN-MOI-SPEC.md §4 (AI/logic) + RAN-SAN-MOI-3D.md §2 (3D render).
 // The interface below is the contract with main.js — do NOT rename functions
-// or change signatures. AI/logic are unchanged from the 2D version.
-// Rendering (§2, updated 2026-11-11 after the DarkBossTv reference): the body
-// is ONE seamless striped tube (TubeGeometry along a CatmullRomCurve3 through
-// the interpolated segment positions) — NOT a chain of separate balls. The
-// head (green ball + eyes + tongue) is unchanged from the approved version.
+// or change signatures.
+// AI (§4, MAX-INTELLIGENCE version, user request 2026-11-11 22:36 — OVERRIDES
+// the old decision not to add a safety check): BFS to an apple + virtual-snake
+// safety check, tail-chase, flood-fill survival, surrounded fallback.
+// Rendering (§2): the body is ONE seamless striped tube (TubeGeometry along
+// a CatmullRomCurve3 through the interpolated segment positions). The head
+// (green ball + eyes + tongue) is unchanged from the approved version.
 // main.js loads this file with a plain <script> tag and calls `new Snake(opts)`.
 // 3D setup: main.js creates the renderer/scene/camera/lights (§1) and hands
 // the shared scene to the snake via setScene(scene, THREE) or init({scene}).
@@ -336,37 +338,63 @@ class Snake {
     }
   }
 
-  // --- AI: pick a direction each tick (spec §4, exactly this priority) ---
+  // --- AI: pick a direction each tick (spec §4, MAX-INTELLIGENCE version) ---
+  // Priority: 1. safe apple (BFS + virtual-snake check) 2. chase the tail
+  // 3. flood-fill survival 4. any non-lethal direction, else straight.
+  // (User request 2026-11-11 22:36 — this OVERRIDES the old BOSS decision not
+  // to add a safety check. The snake must live as long as possible and never
+  // walk itself into a dead end.)
   _chooseDirection() {
     const head = this.segments[0];
     const cur = this.direction;
     // Candidate directions: all except the 180-degree turn.
     const cands = this._orderedDirs().filter((d) => !(d.x === -cur.x && d.y === -cur.y));
-    // 1. BFS to the nearest apple (shortest path, first step).
+    // 1. BFS to an apple, accepted only if the virtual-snake check proves the
+    // snake can still escape after eating it. Tries the nearest apples first.
     const foods = this._foods();
     if (foods.length) {
-      const step = this._bfsToFood();
+      const step = this._safeAppleStep(foods);
       if (step) return step;
     }
-    // 2. Survival: among immediately-safe directions, pick the one with the
-    // most reachable empty cells; tie -> keep the snake closest to an apple.
+    // 2. Chase the tail: follow it and stay alive until a new apple lands
+    // somewhere safe.
+    const tailStep = this._tailChaseStep();
+    if (tailStep) return tailStep;
+    // 3. Survival: prefer a direction that KEEPS an escape route to the tail
+    // (simulate one step, then check the tail is still reachable — the same
+    // virtual-snake principle as step 1, so the head never walks into a
+    // pocket it cannot leave). Among those, pick the one with the most
+    // reachable empty cells; tie -> keep the snake closest to an apple.
+    // If NO direction keeps the escape, fall back to plain flood-fill
+    // (biggest space) — a trapped snake's best remaining chance.
     let best = null;
     let bestSpace = -1;
     let bestDist = Infinity;
+    let fallback = null;
+    let fallbackSpace = -1;
+    let fallbackDist = Infinity;
     for (const d of cands) {
       const nx = head.x + d.x;
       const ny = head.y + d.y;
       if (this._wouldDie(nx, ny)) continue;
       const space = this._floodCount(nx, ny);
       const dist = this._nearestAppleDist(nx, ny, foods);
-      if (space > bestSpace || (space === bestSpace && dist < bestDist)) {
-        best = d;
-        bestSpace = space;
-        bestDist = dist;
+      if (space > fallbackSpace || (space === fallbackSpace && dist < fallbackDist)) {
+        fallback = d;
+        fallbackSpace = space;
+        fallbackDist = dist;
+      }
+      if (this._stepKeepsEscape(nx, ny, d)) {
+        if (space > bestSpace || (space === bestSpace && dist < bestDist)) {
+          best = d;
+          bestSpace = space;
+          bestDist = dist;
+        }
       }
     }
     if (best) return best;
-    // 3. Surrounded: any direction that does not kill immediately; if every
+    if (fallback) return fallback;
+    // 4. Surrounded: any direction that does not kill immediately; if every
     // direction kills, go straight (dying is correct per the rules).
     for (const d of cands) {
       if (!this._wouldDie(head.x + d.x, head.y + d.y)) return d;
@@ -374,51 +402,267 @@ class Snake {
     return cur;
   }
 
-  // BFS from the head to the nearest apple. Walls, bombs and the body
-  // (except the tail, which will move away) are obstacles.
-  // IMPORTANT (§4): eating an apple means the tail does NOT move — so if a
-  // step onto an apple would land on the tail cell, the tail counts as an
-  // obstacle for that step. Apples never spawn on the snake (board spawns on
-  // free cells), so this case cannot occur in real play; the guard below
-  // keeps the rule explicit and safe anyway.
-  // Returns the first-step direction of the shortest path, or null.
-  _bfsToFood() {
+  // Step 1: try the nearest apples (up to 5) in turn. For each, find a SAFE
+  // route to it (Yen's k-shortest paths + the virtual-snake check) and take
+  // its first step. Only when every route to an apple fails is it discarded.
+  _safeAppleStep(foods) {
+    const tried = new Set(); // 'x,y' of apples already proven unsafe (every route)
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const found = this._bfsToNearestFood(tried);
+      if (!found) return null;
+      const step = this._tryAppleRoutes(found.apple, tried, found.path);
+      if (step) return step;
+      tried.add(found.apple.x + ',' + found.apple.y);
+    }
+    return null;
+  }
+
+  // Yen's k-shortest simple paths to one apple (k <= 4), each tested with
+  // the virtual-snake check. Returns the first step of the first SAFE route,
+  // or null when every distinct route to the apple is unsafe (or none exists).
+  // Why enumerate routes at all: a route can be unsafe even when the apple
+  // is fine — e.g. two parallel 1-wide corridors, where walking up one seals
+  // the escape and the other leaves it open (seed 37, t=8534: plain BFS
+  // returns the x=7 route first, which is unsafe, while the x=6 route is
+  // safe — giving up on the apple there killed the snake 25 ticks later).
+  // Yen's spur rule: for each spur cell along the previous path, keep the
+  // prefix, ban the edge the previous path took out of that cell (for every
+  // earlier path sharing the prefix), and BFS from the spur cell — so each
+  // new candidate diverges from all earlier ones at some point. Candidates
+  // are tested in length order; the first safe one wins. (Earlier attempts
+  // banned a single fixed edge of the rejected route — the entry, the
+  // approach, or the second edge — but the safe route shared that edge with
+  // the unsafe one in each case, so those bans killed it too.)
+  _tryAppleRoutes(apple, tried, firstPath) {
     const head = this.segments[0];
     const foods = this._foods();
-    if (!foods.length) return null;
+    const foodSet = new Set();
+    for (const f of foods) {
+      if (f && Number.isFinite(f.x) && Number.isFinite(f.y)) foodSet.add(f.x + ',' + f.y);
+    }
+    const isGoal = (x, y) => x === apple.x && y === apple.y;
+    const paths = [firstPath];
+    if (this._pathIsSafe(firstPath, apple)) return firstPath[0];
+    for (let k = 1; k < 4; k++) {
+      let best = null;
+      const prev = paths[paths.length - 1];
+      for (let i = 0; i < prev.length; i++) {
+        const root = prev.slice(0, i);
+        // Spur cell = head + root; root cells are blocked in the spur BFS
+        // (the snake will occupy them — the spur route must not revisit them).
+        const rootCells = new Set([head.x + ',' + head.y]);
+        let sx = head.x, sy = head.y;
+        for (const d of root) { sx += d.x; sy += d.y; rootCells.add(sx + ',' + sy); }
+        // Ban the edge out of the spur cell for every earlier path that
+        // shares this root prefix — the new route must diverge here.
+        const banned = new Set();
+        for (const p of paths) {
+          if (p.length > i && this._sameDirPrefix(p, root)) {
+            banned.add(this._edgeKey({ x: sx, y: sy }, p[i]));
+          }
+        }
+        const facing = root.length ? root[root.length - 1] : this.direction;
+        const spur = this._bfs(sx, sy, this.segments, isGoal, foodSet, facing, rootCells, banned);
+        if (!spur) continue;
+        const cand = root.concat(spur);
+        if (paths.some((p) => this._samePath(p, cand))) continue;
+        if (!best || cand.length < best.length) best = cand;
+      }
+      if (!best) return null;
+      if (this._pathIsSafe(best, apple)) return best[0];
+      paths.push(best);
+    }
+    return null;
+  }
+
+  // True when the first `prefix.length` directions of `path` equal `prefix`.
+  _sameDirPrefix(path, prefix) {
+    for (let i = 0; i < prefix.length; i++) {
+      if (path[i].x !== prefix[i].x || path[i].y !== prefix[i].y) return false;
+    }
+    return true;
+  }
+
+  // True when two direction arrays are identical.
+  _samePath(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i].x !== b[i].x || a[i].y !== b[i].y) return false;
+    }
+    return true;
+  }
+
+  // Directed edge key for the route-diversity bans: the step from cell
+  // `from` in direction `dir`.
+  _edgeKey(from, dir) {
+    return from.x + ',' + from.y + '>' + dir.x + ',' + dir.y;
+  }
+
+  // BFS from the head to a specific cell (tx, ty). extraBlocked: Set of 'x,y'
+  // cells to treat as obstacles (apples already proven unsafe). bannedEdges:
+  // Set of directed-edge keys the route must not use (Yen's spur bans in
+  // _tryAppleRoutes). Returns the path ([dir...]) or null.
+  _bfsPathTo(tx, ty, extraBlocked, bannedEdges) {
+    const head = this.segments[0];
+    const foods = this._foods();
+    const foodSet = new Set();
+    for (const f of foods) {
+      if (f && Number.isFinite(f.x) && Number.isFinite(f.y)) foodSet.add(f.x + ',' + f.y);
+    }
+    const isGoal = (x, y) => x === tx && y === ty;
+    return this._bfs(head.x, head.y, this.segments, isGoal, foodSet, this.direction, extraBlocked, bannedEdges);
+  }
+
+  // BFS from the head to the nearest food cell not in `excluded`.
+  // Returns { path: [dir...], apple: {x, y} } or null. Excluded apples are
+  // treated as obstacles, so the path never crosses another apple (eating it
+  // mid-path would grow the snake and invalidate the simulation).
+  _bfsToNearestFood(excluded) {
+    const head = this.segments[0];
+    const foods = this._foods();
     const foodSet = new Set();
     for (const f of foods) {
       if (f && Number.isFinite(f.x) && Number.isFinite(f.y)) foodSet.add(f.x + ',' + f.y);
     }
     if (!foodSet.size) return null;
+    const isGoal = (x, y) => foodSet.has(x + ',' + y) && !excluded.has(x + ',' + y);
+    const path = this._bfs(head.x, head.y, this.segments, isGoal, foodSet, this.direction, excluded);
+    if (!path) return null;
+    // The endpoint is the apple reached (the path's only food cell).
+    let x = head.x, y = head.y;
+    for (const d of path) { x += d.x; y += d.y; }
+    return { path, apple: { x, y } };
+  }
+
+  // Step 2: BFS from the head to the tail (body except the tail is an
+  // obstacle). Returns the first step, or null when the tail is unreachable.
+  _tailChaseStep() {
+    const head = this.segments[0];
     const tail = this.segments[this.segments.length - 1];
-    const startKey = head.x + ',' + head.y;
+    if (head.x === tail.x && head.y === tail.y) return null;
+    const isGoal = (x, y) => x === tail.x && y === tail.y;
+    const path = this._bfs(head.x, head.y, this.segments, isGoal, null, this.direction, null);
+    if (!path) return null;
+    // One lethal edge: if the path is a single step onto the tail cell AND
+    // the tail is duplicated right now (grow(1) after eating), the tail does
+    // NOT vacate this tick — stepping onto it would be suicide.
+    if (path.length === 1 && this._hasDuplicateTail()) return null;
+    return path[0];
+  }
+
+  // True when the last two segments sit on the same cell — grow(1) after
+  // eating appends a copy of the tail, so for one tick the tail does NOT
+  // vacate (the pop only removes the duplicate).
+  _hasDuplicateTail() {
+    const s = this.segments;
+    return s.length >= 2
+      && s[s.length - 1].x === s[s.length - 2].x
+      && s[s.length - 1].y === s[s.length - 2].y;
+  }
+
+  // Simulate one step to (nx, ny) and check the head can still reach the
+  // tail afterwards. Eating an apple on that step grows the snake (no pop),
+  // otherwise the tail vacates (which also clears a duplicated tail left by
+  // the previous eat). Used by step 3 so the snake never walks into a pocket
+  // it cannot leave while an escape-preserving direction exists.
+  _stepKeepsEscape(nx, ny, dir) {
+    const sim = this.segments.map((s) => ({ x: s.x, y: s.y }));
+    sim.unshift({ x: nx, y: ny });
+    if (!this._foodAt(nx, ny)) sim.pop();
+    const head = sim[0];
+    const tail = sim[sim.length - 1];
+    if (head.x === tail.x && head.y === tail.y) return true;
+    const isGoal = (x, y) => x === tail.x && y === tail.y;
+    return this._bfs(head.x, head.y, sim, isGoal, null, dir, null) !== null;
+  }
+
+  // Virtual-snake safety check: simulate the snake following `path` (it eats
+  // the apple at the end, growing by 1 so the tail does not move that tick),
+  // then check there is still a BFS path from the new head to the new tail.
+  // If yes, the snake can escape after eating — the path is safe.
+  _pathIsSafe(path, apple) {
+    const sim = this.segments.map((s) => ({ x: s.x, y: s.y }));
+    let ate = false;
+    for (const d of path) {
+      const h = sim[0];
+      const nh = { x: h.x + d.x, y: h.y + d.y };
+      sim.unshift(nh);
+      if (!ate && nh.x === apple.x && nh.y === apple.y) ate = true; // tail stays
+      else sim.pop();
+    }
+    const head = sim[0];
+    const tail = sim[sim.length - 1];
+    const facing = path[path.length - 1];
+    const isGoal = (x, y) => x === tail.x && y === tail.y;
+    return this._bfs(head.x, head.y, sim, isGoal, null, facing, null) !== null;
+  }
+
+  // General BFS on the grid with a given body.
+  // - segments: body (head first). All body cells except the last (tail)
+  //   are obstacles — the tail will move away (except when eating, see below).
+  // - isGoal(x, y): true for the destination cell.
+  // - foodSet: Set of 'x,y' food cells, or null. When set, a step onto the
+  //   tail cell is forbidden if that cell holds food (eating means the tail
+  //   does NOT move — §4). Apples never spawn on the snake, so this guard is
+  //   theoretical; it keeps the rule explicit and safe.
+  // - facing: the direction the snake faces at the start (its reverse is
+  //   banned on the first step — no 180-degree turns).
+  // - extraBlocked: Set of 'x,y' cells to treat as obstacles, or null
+  //   (used for apples already proven unsafe — the path must not cross them).
+  // - bannedEdges: Set of directed-edge keys the route must not use, or null
+  //   (Yen's spur bans in _tryAppleRoutes: the edge an earlier path took out
+  //   of a spur cell it shares with the candidate's root prefix).
+  // Returns the path as an array of direction vectors, or null.
+  _bfs(sx, sy, segments, isGoal, foodSet, facing, extraBlocked, bannedEdges) {
+    const tail = segments[segments.length - 1];
+    const blocked = new Set();
+    for (let i = 0; i < segments.length - 1; i++) blocked.add(segments[i].x + ',' + segments[i].y);
+    const dirs = facing
+      ? [facing].concat(DIRS.filter((d) => !(d.x === facing.x && d.y === facing.y)))
+      : DIRS;
+    const startKey = sx + ',' + sy;
     const seen = new Set([startKey]);
     const prev = new Map(); // cell key -> { from: key, dir }
-    const queue = [{ x: head.x, y: head.y }];
+    const queue = [{ x: sx, y: sy }];
     let qi = 0;
     while (qi < queue.length) {
       const cur = queue[qi++];
-      for (const d of this._orderedDirs()) {
+      for (const d of dirs) {
         const nx = cur.x + d.x;
         const ny = cur.y + d.y;
         // Never turn 180 degrees on the first step (the neck already blocks
         // it, but forbid it explicitly so the rule holds in every edge case).
-        if (cur.x === head.x && cur.y === head.y && d.x === -this.direction.x && d.y === -this.direction.y) continue;
+        if (cur.x === sx && cur.y === sy && facing && d.x === -facing.x && d.y === -facing.y) continue;
+        // Banned directed edge (route-diversity retry in _safeAppleStep).
+        if (bannedEdges && bannedEdges.has(cur.x + ',' + cur.y + '>' + d.x + ',' + d.y)) continue;
         const key = nx + ',' + ny;
         if (seen.has(key) || !this._inBounds(nx, ny)) continue;
         if (this._isBomb(nx, ny)) continue;
-        if (this._isBody(nx, ny, false)) continue; // body except the tail
+        const isGoalCell = isGoal(nx, ny);
         const isTailCell = nx === tail.x && ny === tail.y;
-        const isFoodCell = foodSet.has(key);
-        if (isTailCell && isFoodCell) continue; // eating onto the tail: tail stays -> blocked
+        // Eating onto the tail cell is always blocked (eating means the tail
+        // does NOT move — §4), even when that cell is the goal.
+        if (isTailCell && foodSet && foodSet.has(key)) continue;
+        // The goal cell is reachable even if it is in the blocked set. That
+        // only ever happens for the tail cell: grow(1) duplicates the tail
+        // for one tick, so the tail cell sits in the blocked set right after
+        // eating — but the tail-chase / escape route is a multi-tick plan and
+        // the duplicate clears on the next tick, so the goal stays reachable.
+        // (The single lethal case — stepping onto the duplicated tail cell
+        // THIS tick — is guarded by the caller, see _tailChaseStep.)
+        if (!isGoalCell) {
+          if (blocked.has(key)) continue;
+          if (extraBlocked && extraBlocked.has(key)) continue;
+        }
         seen.add(key);
         prev.set(key, { from: cur.x + ',' + cur.y, dir: d });
-        if (isFoodCell) {
-          // Walk back to the head to recover the first step.
+        if (isGoalCell) {
+          // Walk back to the start to recover the full path.
+          const path = [];
           let k = key;
-          while (prev.get(k).from !== startKey) k = prev.get(k).from;
-          return prev.get(k).dir;
+          while (prev.get(k).from !== startKey) { path.unshift(prev.get(k).dir); k = prev.get(k).from; }
+          path.unshift(prev.get(k).dir);
+          return path;
         }
         queue.push({ x: nx, y: ny });
       }
